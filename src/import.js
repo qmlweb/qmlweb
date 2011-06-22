@@ -75,8 +75,8 @@ getUrlContents = function (url) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", url, false);
     xhr.send(null);
-    if (xhr.status != 200) {
-        console.log("Retrieving " + filename + " failed: " + xhr.responseText);
+    if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
+        console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
         return false;
     }
     return xhr.responseText;
