@@ -1,0 +1,136 @@
+<html><head><title>QML Viewer</title>
+<script src="../../src/parser.js"></script>
+<script src="../../src/import.js"></script>
+<script src="../../src/qtcore.js"></script>
+<style>
+html, body { margin: 0; padding: 0; height: 100% }
+button { margin: 0; padding: 1px; padding-top: 0; padding-bottom: 0 }
+a { text-decoration: none; color: blue }
+#canvas {
+    position: absolute;
+    border: 1px solid white;
+    }
+#btm {
+    position: absolute;
+    bottom: 0px;
+    background-color: white;
+    width: 100%
+}
+#progtxt {
+    float: left;
+    vertical-align: bottom;
+    z-index: 1;
+}
+#browsSupport {
+    z-index: 1;
+    vertical-align: bottom;
+    color: red;
+}
+#status {
+    float: right;
+    z-index: 1;
+}
+.icon {
+    width: 24px;
+    height: 24px;
+}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="btm">
+    <span id="progtxt">QML viewer by <a href="http://lauri.paimen.info">Lauri Paimen</a>.</span>
+    <span id="status">
+    <span id="browsSupport">Unsupported browser detected. Results may vary.</span>
+        <span id="filename"></span>
+        <span id=stat></span>
+        <img src="../images/zoom_out.svg" class="icon" onclick="scale*=0.9;update()">
+        <img src="../images/zoom_normal.svg" class="icon" onclick="scale=1;update()">
+        <img src="../images/zoom_in.svg" class="icon" onclick="scale*=1.1111111;update()">
+        <img src="../images/zoom_fit.svg" class="icon" onclick="update(true)">
+        <button onclick="(function() { var c = document.getElementById('canvas').style; c.border = /black|00/.exec(c.border) !== null ? '1px solid white' : '1px solid black';  })()">Border</button>
+    </span>
+</div>
+<script>
+var curFile = "",
+    canvasEl = document.getElementById("canvas"),
+    statEl = document.getElementById("stat"),
+    eng,
+    engOpts = {},
+    // Scaling options
+    scale = 1;
+
+function resize(fitToScreen) {
+    // Scale
+    var size = eng.size();
+    var height = window.innerHeight - 30; // Leave 30px for viewer controls
+    var width = window.innerWidth - 2; // Leave 2px for borders
+    if (fitToScreen) {
+        // Retain aspect ratio
+        scale = Math.min(width / size.width,
+            height / size.height);
+    }
+    var xsize = size.width * scale;
+    var ysize = size.height * scale;
+
+    canvasEl.style.width = xsize + "px";
+    canvasEl.style.height = ysize + "px";
+
+    // Centerize
+    canvasEl.style.left = (width - xsize)/2|0 + "px";
+    canvasEl.style.top = (height - ysize)/2|0 + "px";
+    
+    statEl.innerText = size.width + "x" + size.height;
+    if (scale != 1) {
+        
+        statEl.innerText += " (" + (scale * 100|0) + "% "
+            + (xsize|0) + "x" + (ysize|0) + ")";
+    }
+}    
+
+if (navigator.userAgent.match(/(opera|firefox|chrome)/i)) {
+    document.getElementById("browsSupport").style.display = 'none';
+}
+
+// Replaces element click handler with one understanding the scaling
+function scalerClick() {
+    var original = canvasEl.onclick;
+    canvasEl.onclick = function(e) {
+        var a = {layerX: (e.offsetX || e.layerX) / scale,
+            layerY: (e.offsetY || e.layerY) / scale,
+            button: e.button};
+        original(a);
+    }
+}
+
+function update(fit) {
+    resize(fit);
+}
+
+
+window.onhashchange = function() {
+    if (window.location.hash) {
+        curFile = window.location.hash.substr(1);
+        if (eng && eng.running) {
+            eng.stop();
+        }
+        
+        eng = QMLEngine(canvasEl, engOpts);
+        eng.loadFile(curFile);
+        eng.start();
+        // Fit to screen if bigger than it
+        var fit = eng.size();
+        update(fit.width > window.innerWidth || fit.height > window.innerHeight);
+        scalerClick();
+        // Update filename link
+        document.getElementById("filename").innerHTML = 
+            "<a href='" + curFile + "'>" + curFile + "</a>";
+        var filename = curFile.split("/");
+        filename = filename[filename.length - 1];
+        document.title = filename + " - QML Viewer"
+
+    }
+}
+window.onhashchange();
+</script>
+</body></html>

@@ -1,0 +1,8 @@
+<html>
+<script src="../../src/import.js"></script>
+<body>
+Test src/import.js:<br/>
+<button onclick="console.log('importFile result:',importJs('calculator.js'))">import("calculator.js")</button>
+<button onclick="console.log(importJs('calculator.js').noop())">import("calculator.js").noop()</button>
+<button onclick="console.log(readQmlDir('.'))">readQmlDir('.')</button>
+</body></html>

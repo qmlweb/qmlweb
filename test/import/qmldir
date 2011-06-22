@@ -1,0 +1,14 @@
+# Test qmldir file
+# Spec: http://doc.qt.nokia.com/4.7-snapshot/qdeclarativemodules.html#writing-a-qmldir-file
+
+# <TypeName> [<InitialVersion>] <File>
+Button ButtonFile.qml
+BetterButton 2.00 BetterButton.qml
+
+# internal <TypeName> <File>
+internal ButtonI ButtonI.qml
+
+# plugin <Name> [<Path>]
+plugin CppPlugin.so
+plugin CppPlugin2.so /
+

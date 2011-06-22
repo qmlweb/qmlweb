@@ -1,0 +1,39 @@
+[ {
+    "file": "../presentation.qml",
+    "title": "Project introduction"
+}, {
+    "file": "helloworld.qml",
+    "title": "Helloworld"
+}, {
+    "file": "example1.qml",
+    "title": "Example1 used in paper"
+}, {
+    "ptree": "hellotimer.qml.js",
+    "title": "Timer test"
+}, {
+    "file": "anchoring.qml",
+    "ptree": "anchoring.qml.js",
+    "title": "Anchoring test"
+}, {
+    "file": "image.qml",
+    "title": "Image test"
+}, {
+    "file": "imageview.qml",
+    "title": "Image View"
+}, {
+    "file": "mousearea.qml",
+    "title": "MouseArea test"
+}, {
+    "file": "animation.qml",
+    "ptree": "animation.qml.js",
+    "title": "Animation test"
+}, {
+    "ptree": "sequentialanimation.qml.js",
+    "title": "SequentialAnimation test"
+}, {
+    "file": "parse_dummy.qml",
+    "title": "Parsing test"
+}, {
+    "file": "parsingdev.qml",
+    "title": "Parser development QML"
+} ]

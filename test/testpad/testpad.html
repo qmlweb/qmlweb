@@ -1,0 +1,195 @@
+<html><head><title>Testpad</title>
+<script src="../../src/parser.js"></script>
+<script src="../../src/import.js"></script>
+<script src="../../src/qtcore.js"></script>
+</head>
+<body>
+<canvas id="canvas" style="border: 1px solid black"></canvas><br/>
+<b>Currently supported browsers: Opera, Firefox, Chrome</b> -- behavior on other browsers may vary.<br/>
+Your browser: <span id="browserId">Unknown</span><br/>
+<table><tr><td style="vertical-align: bottom;width: 50%">
+Select file to run:<br/>
+<span id="qmlList"></span>
+
+Or write QML to textbox and
+<input type="button" onclick="loadFromSrcEl()" value="Run"/>
+
+<td>
+<button onclick="document.location.href = 'viewer.html' + document.location.hash">View current file in QML viewer</button><br/>
+Application control:<br/>
+<input type="button" onclick="eng.$draw()" value="Redraw"/>
+<input type="button" onclick="eng.stop()" value="Stop application"/><br/>
+Performance (draw 1000 frames):<br/>
+<input type="button" onclick="dummyDraw()" value="Draw to dummy canvas">
+<input type="button" onclick="basicDraw()" value="Draw to real canvas">
+<br/>
+General statistics (trust or don't):<br/>
+average <span id="statAvgFps">N</span> fps, <span id="statFrames">N</span> frames, last frame: <span id="statElapsed">N</span> ms/<span id="statFps">N</span> fps
+<br/>
+Debugging and development:<br/>
+<input type="button" onclick="loadFromSrcEl(true)" value="Run source as parse tree"/>
+<input type="button" onclick="ugparse()" value="Parser output"/>
+<input type="button" onclick="parsetree()" value="Converted parser output"/>
+</table>
+<textarea id="src" rows=24 style="width: 100%"></textarea>
+<br/>
+QML console.log:
+<br/>
+<textarea id="log" rows=10 style="width: 100%" disabled></textarea>
+Debug parse tree:
+<br/>
+<textarea id="tree" rows=24 style="width: 100%" disabled></textarea>
+<script>
+// Build QML global object
+// http://doc.qt.nokia.com/4.7-snapshot/qdeclarativeglobalobject.html
+var curFile = "",
+    logEl = document.getElementById("log"),
+    srcEl = document.getElementById("src"),
+    treeEl = document.getElementById("tree"),
+    statFpsEl = document.getElementById("statFps"),
+    statElapsedEl = document.getElementById("statElapsed"),
+    statAvgFpsEl = document.getElementById("statAvgFps"),
+    statFramesEl = document.getElementById("statFrames"),
+    canvasEl = document.getElementById("canvas"),
+    drawTimes = [],
+    eng,
+    engOpts = {
+        debugConsole: function() {
+            var args = Array.prototype.slice.call(arguments),
+                str = "",
+                i;
+            console.log.apply(console, args);
+            for (i = 0; i < args.length; i++) {
+                str += args[i] + " ";
+            }
+            logEl.value += str + "\n";
+
+        },
+        debugSrc: function(src) { 
+            srcEl.value = src;
+            srcEl.rows = src.split("\n").length;
+        },
+        debugTree: function(tree) {
+            var js = JSON.stringify(tree, null, "  ");
+            treeEl.value = js;
+            treeEl.rows = Math.min(24, js.split("\n").length);
+        },
+        drawStat: function(elapsed) {
+            var avg = 0,
+                i = 0;
+            drawTimes.push(elapsed);
+            statElapsedEl.innerHTML = elapsed;
+            statFpsEl.innerHTML = Math.round(1000 / elapsed);
+            for (; i < drawTimes.length; i++) {
+                avg += drawTimes[i];
+            }
+            statAvgFpsEl.innerHTML = Math.round(
+                1000 / (avg / drawTimes.length) );
+            statFramesEl.innerHTML = drawTimes.length;
+        }
+        };
+
+document.getElementById("browserId").innerHTML = navigator.userAgent;
+
+function ugparse() {
+    treeEl.value = JSON.stringify(qmlparse(srcEl.value), null, "  ");
+}
+
+function parsetree() {
+    treeEl.value = JSON.stringify(parseQML(srcEl.value), null, "  ");
+}
+
+function populateQmlList() {
+    var list = JSON.parse(getUrlContents("files.json"));
+    var qmlList = document.getElementById("qmlList");
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (item.file) {
+            var link = document.createElement("a");
+            link.href = "#" + item.file;
+            link.innerHTML = item.title;
+            qmlList.appendChild(link);
+        }
+        if (item.ptree) {
+            if (item.file) {
+                var space = document.createElement("span");
+                space.innerHTML = " ";
+                qmlList.appendChild(space);
+            }
+            var link = document.createElement("a");
+            link.href = "#" + item.ptree;
+            link.innerHTML = item.file ? '(PT)' : "PT: " + item.title;
+            qmlList.appendChild(link);
+        }
+        qmlList.appendChild(document.createElement("br"));
+        
+    }
+}
+populateQmlList();
+
+function dummyDraw() {
+    function noop(){};
+    var canvas = {
+        canvas: { 
+            // The canvas element
+            width: 1000,
+            height: 1000,
+            },
+        drawImage: noop,
+        translate: noop,
+        rotate: noop,
+        fillRect: noop,
+        strokeRect: noop,
+        fillText: noop,
+        restore: noop,
+        save: noop,
+    };
+    var started = new Date().getTime();
+    for (var i = 0; i < 1000; i++) {
+        eng.$perfDraw(canvas);
+    }
+    var elapsed = (new Date()).getTime() - started;
+    alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
+}
+
+function basicDraw() {
+    var started = new Date().getTime();
+    for (var i = 0; i < 1000; i++) {
+        eng.$draw(canvas);
+    }
+    var elapsed = (new Date()).getTime() - started;
+    alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
+}
+
+function loadFromSrcEl(tree) {
+    logEl.value = "";
+    if (eng && eng.running) {
+        eng.stop();
+    }
+    eng = QMLEngine(canvasEl, engOpts);
+    eng.$setBasePath("./");
+    if (tree) {
+        eng.$parseTreeSrc(srcEl.value);
+    } else {
+        eng.loadQML(srcEl.value);
+    }
+    eng.start();
+}
+
+window.onhashchange = function() {
+    if (window.location.hash) {
+        drawTimes = [];
+        curFile = window.location.hash.substr(1);
+        logEl.value = "";
+        if (eng && eng.running) {
+            eng.stop();
+        }
+        eng = QMLEngine(canvasEl, engOpts);
+        eng.loadFile(curFile);
+        eng.start();
+        
+    }
+}
+window.onhashchange();
+</script>
+</body></html>
