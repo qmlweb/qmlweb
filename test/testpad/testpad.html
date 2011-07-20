@@ -17,14 +17,18 @@ Or write QML to textbox and
 <td>
 <button onclick="document.location.href = 'viewer.html' + document.location.hash">View current file in QML viewer</button><br/>
 Application control:<br/>
-<input type="button" onclick="eng.$draw()" value="Redraw"/>
+<input type="button" onclick="eng.$draw()" value="Redraw" title="Force application to redraw"/>
 <input type="button" onclick="eng.stop()" value="Stop application"/><br/>
 Performance (draw 1000 frames):<br/>
-<input type="button" onclick="dummyDraw()" value="Draw to dummy canvas">
-<input type="button" onclick="basicDraw()" value="Draw to real canvas">
+Synchronic: <input type="button" onclick="dummyDraw()" value="Draw to dummy canvas" title="Forces N draws to dummy canvas, synchronic">
+<input type="button" onclick="basicDraw()" value="Draw to real canvas" title="Forces N draws to real canvas, synchronic"><br/>
+Asynchronic: <input type="button" onclick="asyncDraw()" value="Maximum" title="Measures maximum amount of asynchronic Javascript calls per second">
+<input type="button" onclick="asyncDraw(true)" value="Draw asynchronically to real canvas" title="Forces N draws to real canvas, asynchronic so will allow browser to do its stuff (like updating the screen) between the draws">
+
 <br/>
 General statistics (trust or don't):<br/>
-average <span id="statAvgFps">N</span> fps, <span id="statFrames">N</span> frames, last frame: <span id="statElapsed">N</span> ms/<span id="statFps">N</span> fps
+average <span id="statAvgFps">N</span> fps, <span id="statFrames">N</span> frames, last frame: <span id="statElapsed">N</span> ms/<span id="statFps">N</span> fps<br/>
+<input type="button" onclick="drawTimes = []" value="Reset average" title="Resets the history of frame draw times">
 <br/>
 Debugging and development:<br/>
 <input type="button" onclick="loadFromSrcEl(true)" value="Run source as parse tree"/>
@@ -40,8 +44,7 @@ Debug parse tree:
 <br/>
 <textarea id="tree" rows=24 style="width: 100%" disabled></textarea>
 <script>
-// Build QML global object
-// http://doc.qt.nokia.com/4.7-snapshot/qdeclarativeglobalobject.html
+
 var curFile = "",
     logEl = document.getElementById("log"),
     srcEl = document.getElementById("src"),
@@ -160,6 +163,28 @@ function basicDraw() {
     var elapsed = (new Date()).getTime() - started;
     alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
 }
+
+function asyncDraw(noDraw) {
+    var started = new Date().getTime();
+    var i = 0;
+    
+    function doIt() {
+        if (i < 1000) {
+            i++;
+            noDraw && eng.$draw(canvas);
+            setTimeout(doIt, 0);
+        } else {
+            end();
+        }
+    }
+    doIt();
+    
+    function end() {
+        var elapsed = (new Date()).getTime() - started;
+        alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
+    }
+}
+
 
 function loadFromSrcEl(tree) {
     logEl.value = "";
