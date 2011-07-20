@@ -118,7 +118,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Text {
-            text: "Lauri Paimen 2011"
+            // text: "" /* Inject presenter information here */
             font.pointSize: 24
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
@@ -147,7 +147,7 @@ Rectangle {
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
                 Text {
-                text: "- Current code by Lauri Paimen (me)"
+                text: "- Current code by Lauri Paimen"
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
 
@@ -192,7 +192,7 @@ Rectangle {
                     anchors.top: parent.bottom; anchors.left: parent.left
 
                     Text {
-                    text: "- \"Closed\" source (to be revisited)"
+                    text: "- Source at https://gitorious.org/qmlweb"
                     font.pointSize: 32
                     anchors.top: parent.bottom; anchors.left: parent.left
 
@@ -344,6 +344,12 @@ Rectangle {
                 color: "blue"
                 anchors.top: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
+                Text {
+                text: "https://gitorious.org/qmlweb"
+                font.pointSize: 24
+                anchors.top: parent.bottom;
+                anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
     }
