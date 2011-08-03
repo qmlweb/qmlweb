@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function usage {
+    echo "Usage: $0 TARGET"
+    echo "Copies files to TARGET directory and updates buildinfo.js."
+    echo "TARGET should exist."
+}
+
+if [ -z "$1" ]; then
+    usage
+    exit
+fi
+
+if [ ! -d "$1" ]; then
+    echo "$1 must be a directory."
+    exit;
+fi
+
+UTIL_DIR=`dirname $0`
+BASE=`readlink -f "$UTIL_DIR/.."`
+TARGET=$1
+
+# Copy files
+echo "Copying files to $TARGET"
+cp --recursive "$BASE/src" "$TARGET"
+cp --recursive "$BASE/test" "$TARGET"
+
+echo "Updating build info to $TARGET/src/buildinfo.js"
+$UTIL_DIR/gen_buildinfo > "$TARGET/src/buildinfo.js"
+

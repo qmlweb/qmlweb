@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# See src/buildinfo.js for details
+
+
+HASH=`git log -n 1 --format=tformat:%H`
+DATE=`date +%s`
+
+echo "QMLWEB_BUILDINFO = { hash: '$HASH', date: $DATE };"
