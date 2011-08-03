@@ -1446,13 +1446,90 @@ function QMLBinding(src, tree) {
 }
 
 
-// Function to parse qml and output tree expected by engine
-function parseQML(src) {
-    var parsetree = qmlparse(src);
-    
+// Convert parser tree to the format understood by engine
+function convertToEngine(tree) {
+
+    // Help logger
     function amIn(str, tree) {
-        console.log(str); if (tree) console.log(JSON.stringify(tree, null, "  "));
+        console.log(str);
+        if (tree) console.log(JSON.stringify(tree, null, "  "));
     }
+    
+    var walkers = {
+        "toplevel": function(statements) {
+            var item = { $class: "QMLDocument" };
+            // todo: imports etc
+            item.$children = [ walk(statements[0]) ];
+            return item;
+        },
+        "qmlelem": function(elem, statements) {
+            var item = { $class: elem,
+                $children: [],
+                $functions: {},
+                $properties: {} };
+            
+            for (var i in statements) {
+                var statement = statements[i],
+                    name = statement[1],
+                    val = walk(statement);
+                switch (statement[0]) {
+                    case "qmlprop":
+                        item[name] = val;
+                        break;
+                    case "qmlelem":
+                        item.$children.push(val);
+                        break;
+                    case "qmlmethod":
+                        item.$functions[name] = val;
+                        break;
+                    case "qmlobjdef":
+                        // Create object to item
+                        item[name] = item[name] || {};
+                        item[name][statement[2]] = val;
+                        break;
+                    case "qmlpropdef":
+                        item.$properties[statement[2]] = val;
+                        break;
+                    default:
+                        console.log("Unknown statement", statement);
+
+                }
+            }
+            
+            return item;
+        },
+        "qmlprop": function(name, tree, src) {
+            if (name == "id") {
+                // id property
+                return tree[1][1];
+            }
+            return bindout(tree, src);
+        },
+        "qmlobjdef": function(name, property, tree, src) {
+            return bindout(tree, src);
+        },
+        "qmlmethod": function(name, tree, src) {
+            return src;
+        },
+        "qmlpropdef": function(name, type, tree) {
+            // todo: bindings are not detected
+            return { type: name,
+                value: tree[1] };
+        }
+    };
+
+    function walk(tree) {
+        var type = tree[0];
+        var walker = walkers[type];
+        if (!walker) {
+            console.log("No walker for " + type);
+            return;
+        } else {
+            return walker.apply(type, tree.slice(1));
+        }
+    }    
+    
+    return walk(tree);
     
     function process(tree) {
         var objs = {
@@ -1490,72 +1567,12 @@ function parseQML(src) {
         }
     }
     
-    function qmlobjdef(tree) {
-        return bindout(tree[3], tree[4]);
-    }
-    
-    function qmlprop(tree) {
-        // Special massage for id
-        if (tree[1] == "id") {
-            return tree[2][1][1];
-        }
-        return bindout(tree[2], tree[3]);
-    }
+}
 
-    function qmlmethod(tree) {
-        return tree[3];
-    }
-    
-    function qmlpropdef(tree) {
-        // TODO: bindings
-        return { type: tree[1],
-                value: tree[3][1] };
-    }
-    
-    function qmlelem(tree, parent) {
-        var item = {
-            $class: tree[1],
-            $children: [],
-            $functions: {},
-            $properties: {} };
-
-        for (var i in tree[2]) {
-            var t = tree[2][i];
-            switch(t[0]) {
-                case "qmlprop":
-                    item[t[1]] = process(t);
-                    break;
-                case "qmlelem":
-                    item.$children.push(process(t));
-                    break;
-                case "qmlmethod":
-                    item.$functions[t[1]] = process(t);
-                    break;
-                case "qmlobjdef":
-                    // Create object to item
-                    item[t[1]] = item[t[1]] || {};
-                    item[t[1]][t[2]] = process(t);
-                    break;
-                case "qmlpropdef":
-                    // Property definition
-                    item.$properties[t[2]] = qmlpropdef(t);
-                    break;
-                default:
-                    console.log("Unknown element", t[0]);
-            }
-        }
-
-        return item;
-    }
-    
-    function toplevel(tree, parent) {
-        var item = { $class: "QMLDocument" };
-        // only parse first element
-        item.$children = [ process(tree[1][0]) ];
-        return item;
-    }
-    
-    return process(parsetree);
+// Function to parse qml and output tree expected by engine
+function parseQML(src) {
+    var parsetree = qmlparse(src);
+    return convertToEngine(parsetree);
 }
 
 

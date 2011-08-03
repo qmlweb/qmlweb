@@ -2,6 +2,11 @@
 <script src="../../src/parser.js"></script>
 <script src="../../src/import.js"></script>
 <script src="../../src/qtcore.js"></script>
+<style>
+.hidden {
+    display: none;
+}
+</style>
 </head>
 <body>
 <canvas id="canvas" style="border: 1px solid black"></canvas><br/>
@@ -13,6 +18,7 @@ Select file to run:<br/>
 
 Or write QML to textbox and
 <input type="button" onclick="loadFromSrcEl()" value="Run"/>
+<input type="button" onclick="toggleClass(srcEl, 'hidden')" value="Toggle source"/>
 
 <td>
 <button onclick="document.location.href = 'viewer.html' + document.location.hash">View current file in QML viewer</button><br/>
@@ -37,10 +43,14 @@ Debugging and development:<br/>
 </table>
 <textarea id="src" rows=24 style="width: 100%"></textarea>
 <br/>
+
 QML console.log:
+<input type="button" onclick="toggleClass(logEl, 'hidden')" value="Toggle log"/>
 <br/>
 <textarea id="log" rows=10 style="width: 100%" disabled></textarea>
+
 Debug parse tree:
+<input type="button" onclick="toggleClass(treeEl, 'hidden')" value="Toggle tree"/>
 <br/>
 <textarea id="tree" rows=24 style="width: 100%" disabled></textarea>
 <script>
@@ -94,14 +104,49 @@ var curFile = "",
 
 document.getElementById("browserId").innerHTML = navigator.userAgent;
 
+// CSS class helpers
+function addClass(el, name) {
+    var classes = el.className.split(" "),
+        at = classes.indexOf(name);
+    if (at == -1) {
+        classes.push(name);
+        el.className = classes.join(" ");
+    }
+}
+function remClass(el, name) {
+    var classes = el.className.split(" "),
+        at = classes.indexOf(name);
+    if (at != -1) {
+        classes.splice(at, 1);
+        el.className = classes.join(" ");
+    }
+}
+function toggleClass(el, name) {
+    (el.className.split(" ").indexOf(name) == -1
+        ? addClass
+        : remClass)(el, name);
+}
+
+
+// Shows parser output in debug parse tree
 function ugparse() {
-    treeEl.value = JSON.stringify(qmlparse(srcEl.value), null, "  ");
+    var out = qmlparse(srcEl.value),
+        json = JSON.stringify(out, null, "  ");
+    console.log("Parse tree", out);
+    console.log(json);
+    treeEl.value = json;
 }
 
+// Shows source tree in debug parse tree
 function parsetree() {
-    treeEl.value = JSON.stringify(parseQML(srcEl.value), null, "  ");
+    var out = parseQML(srcEl.value),
+        json = JSON.stringify(out, null, "  ");
+    console.log("Engine tree", out);
+    console.log(json);
+    treeEl.value = json;
 }
 
+// Populates list of qml examples from files.json
 function populateQmlList() {
     var list = JSON.parse(getUrlContents("files.json"));
     var qmlList = document.getElementById("qmlList");
@@ -130,6 +175,7 @@ function populateQmlList() {
 }
 populateQmlList();
 
+// Performance: draw to dummy canvas
 function dummyDraw() {
     function noop(){};
     var canvas = {
@@ -155,6 +201,7 @@ function dummyDraw() {
     alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
 }
 
+// Performance: Draw to real canvas
 function basicDraw() {
     var started = new Date().getTime();
     for (var i = 0; i < 1000; i++) {
@@ -164,6 +211,8 @@ function basicDraw() {
     alert("Elapsed: " + elapsed + " ms (" + (1000/(elapsed/1000)) + " fps)");
 }
 
+// Performance: asynchronic draw
+// noDraw: true to measure asynchronic call rate only, false to draw, too.
 function asyncDraw(noDraw) {
     var started = new Date().getTime();
     var i = 0;
