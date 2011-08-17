@@ -117,8 +117,8 @@ function descr(msg, obj, vals) {
  * @param {any} val Value to be passed.
  * @return {QMLTransientValue} special value for 
  */
-QMLTransientValue = function(val) {
-    return {$val: val};
+function QMLTransientValue(val) {
+    this.$val = val;
 }
 
 /**
@@ -212,7 +212,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
     obj[SETTER](propName, function(newVal) {
         var i;
         //console.log("set", obj.id || obj, propName, newVal);
-        if (newVal && newVal.$val) {
+        if (newVal instanceof QMLTransientValue) {
             // TransientValue, don't fire signal handlers
             defVal = newVal.$val;
             binding = false;
@@ -1230,7 +1230,7 @@ function QMLNumberAnimation(meta, parent, engine) {
             } else {
                 var at = (now - tickStart) / item.duration,
                     value = curve(at) * (item.to - item.from) + item.from;
-                item.target[item.property] = QMLTransientValue(value);
+                item.target[item.property] = new QMLTransientValue(value);
                 engine.$requestDraw();
             }
 

@@ -1439,7 +1439,11 @@ function QMLBinding(src, tree) {
 }
 
 QMLBinding.prototype.toJSON = function() {
-    return "QMLBinding(" + this.src + ")";
+    return "QMLBinding( "
+        + this.src
+        + ", "
+        + JSON.stringify(this.tree)
+        + ")";
 }
 
 
