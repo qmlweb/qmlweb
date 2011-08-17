@@ -39,7 +39,6 @@ average <span id="statAvgFps">N</span> fps, <span id="statFrames">N</span> frame
 <input type="button" onclick="drawTimes = []" value="Reset average" title="Resets the history of frame draw times">
 <br/>
 Debugging and development:<br/>
-<input type="button" onclick="loadFromSrcEl(true)" value="Run source as parse tree"/>
 <input type="button" onclick="ugparse()" value="Parser output"/>
 <input type="button" onclick="parsetree()" value="Converted parser output"/>
 </table>
@@ -153,25 +152,15 @@ function parsetree() {
 function populateQmlList() {
     var list = JSON.parse(getUrlContents("files.json"));
     var qmlList = document.getElementById("qmlList");
+
     for (var i = 0; i < list.length; i++) {
         var item = list[i];
-        if (item.file) {
-            var link = document.createElement("a");
-            link.href = "#" + item.file;
-            link.innerHTML = item.title;
-            qmlList.appendChild(link);
-        }
-        if (item.ptree) {
-            if (item.file) {
-                var space = document.createElement("span");
-                space.innerHTML = " ";
-                qmlList.appendChild(space);
-            }
-            var link = document.createElement("a");
-            link.href = "#" + item.ptree;
-            link.innerHTML = item.file ? '(PT)' : "PT: " + item.title;
-            qmlList.appendChild(link);
-        }
+
+        var link = document.createElement("a");
+        link.href = "#" + item.file;
+        link.innerHTML = item.title;
+        qmlList.appendChild(link);
+
         qmlList.appendChild(document.createElement("br"));
         
     }
@@ -245,11 +234,7 @@ function loadFromSrcEl(tree) {
     }
     eng = QMLEngine(canvasEl, engOpts);
     eng.$setBasePath("./");
-    if (tree) {
-        eng.$parseTreeSrc(srcEl.value);
-    } else {
-        eng.loadQML(srcEl.value);
-    }
+    eng.loadQML(srcEl.value);
     eng.start();
 }
 

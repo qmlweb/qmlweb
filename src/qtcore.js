@@ -366,23 +366,11 @@ QMLEngine = function (element, options) {
         if (options.debugSrc) {
             options.debugSrc(src);
         }
-        if (/\.js$/.test(file)) {
-            this.$parseTreeSrc(src);
-        } else {
-            this.loadQML(src);
-        }
+        this.loadQML(src);
     }
     // parse and construct qml
     eng.loadQML = function(src) {
         var tree = parseQML(src);
-        if (options.debugTree) {
-            options.debugTree(tree);
-        }
-        doc = construct(tree, {}, this);
-    }
-    // parse and construct tree source
-    eng.$parseTreeSrc = function(src) {
-        var tree = eval("(function(){return "+src+"})();");
         if (options.debugTree) {
             options.debugTree(tree);
         }
