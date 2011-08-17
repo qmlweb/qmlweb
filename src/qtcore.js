@@ -198,7 +198,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
         if (binding) {
             return binding();
         }
-        if (defVal && defVal.src) { // todo: fix check; check for qmlbinding
+        if (defVal instanceof QMLBinding) {
             var scope = altParent || obj;
 
             // todo: enable thisobj
@@ -216,7 +216,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
             // TransientValue, don't fire signal handlers
             defVal = newVal.$val;
             binding = false;
-        } else if(newVal && newVal.src) {
+        } else if(newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
             var scope = altParent || obj;
@@ -269,9 +269,7 @@ function applyProperties(meta, item, skip) {
         }
         // Handle objects which are already defined in item differently
         if (Object.prototype.toString.call(meta[i]) == '[object Object]') {
-            // todo: fix bindings check, should not be an object type in final
-            // implementation
-            if (item[i] && !meta[i].src) {
+            if (item[i] && !(meta[i] instanceof QMLBinding)) {
                 // Apply properties one by one, otherwise apply at once
                 // skip nothing
                 applyProperties(meta[i], item[i]);
@@ -522,7 +520,7 @@ function QMLBaseObject(meta, parent, engine) {
             prop = meta.$properties[i];
             if (prop.type == "alias") {
                 // alias is reverse property, reverse getters and setters needed
-                if (!prop.value.src) {
+                if (!(prop.value instanceof QMLBinding)) {
                     console.log("Assumption failed: alias was not binding");
                 }
                 item[GETTER](i, function() {
@@ -1125,6 +1123,8 @@ function QMLSequentialAnimation(meta, parent, engine) {
             curIndex++;
             if (curIndex < item.$children.length) {
                 anim = item.$children[curIndex];
+                console.log("nextAnimation", item, curIndex, anim);
+                descr("", anim, ["target"]);
                 anim.from = anim.target[anim.property];
                 anim.start();
             } else {

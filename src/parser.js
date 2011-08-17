@@ -1434,15 +1434,12 @@ var warn = function() {};
  * @return {Object} Object representing the binding
  */
 function QMLBinding(src, tree) {
-    function f(){};
-    var o = new f();
-    o.src = src;
-    o.tree = tree;
-    o.toJSON = function() {
-        return "QMLBinding(" + src + ")";
-    }
-    
-    return o;
+    this.src = src;
+    this.tree = tree;
+}
+
+QMLBinding.prototype.toJSON = function() {
+    return "QMLBinding(" + this.src + ")";
 }
 
 
@@ -1563,7 +1560,7 @@ function convertToEngine(tree) {
             case "string":
                 return String(tree[1][1]);
             default:
-                return QMLBinding(binding, tree);
+                return new QMLBinding(binding, tree);
         }
     }
     
