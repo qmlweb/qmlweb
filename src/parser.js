@@ -1436,14 +1436,42 @@ var warn = function() {};
 function QMLBinding(src, tree) {
     this.src = src;
     this.tree = tree;
+    
+    this.deps = {};
+    
+    var w = ast_walker(),
+        walk = w.walk,
+        that = this,
+        depchain = [];
+        
+    w.with_walkers(
+        {
+            "dot": function(expr, name) {
+                depchain.push(name);
+                return [this[0], walk(expr)].concat(slice(arguments, 1));
+            },
+            "name": function(name) {
+                var deps,
+                    i;
+
+                deps = that.deps[name] = that.deps[name] || {};
+                for (i = depchain.length - 1; i >= 0; i-- ) {
+                    var d = depchain[i];
+                    deps[d] = deps[d] || {};
+                    deps = deps[d];
+                }
+                depchain = [];
+                
+            }
+        }, function() {
+            walk(tree);
+        })
 }
 
 QMLBinding.prototype.toJSON = function() {
-    return "QMLBinding( "
-        + this.src
-        + ", "
-        + JSON.stringify(this.tree)
-        + ")";
+    return {src: this.src,
+        deps: JSON.stringify(this.deps),
+        tree: JSON.stringify(this.tree) };
 }
 
 
