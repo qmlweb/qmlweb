@@ -1560,25 +1560,6 @@ function convertToEngine(tree) {
     
     return walk(tree);
     
-    function process(tree) {
-        var objs = {
-            toplevel: toplevel,
-            qmlelem: qmlelem,
-            qmlprop: qmlprop,
-            qmlobjdef: qmlobjdef,
-            qmlmethod: qmlmethod,
-            qmlpropdef: qmlpropdef,
-            };
-            
-        if (objs[tree[0]]) {
-            //console.log("->", tree[0]);
-            return objs[tree[0]](tree);
-        } else {
-            //console.log("Tree unparsed", tree);
-            return {};
-        }
-    }
-    
     // Try to bind out tree and return static variable instead of binding
     function bindout(tree, binding) {
         // Detect booleans
