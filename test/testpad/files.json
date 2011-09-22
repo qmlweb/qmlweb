@@ -19,6 +19,14 @@
     "title": "Image View"
 },
 {
+    "file": "anchoring.qml",
+    "title": "Anchoring test"
+},
+{
+    "file": "animation.qml",
+    "title": "Animation test"
+},
+{
     "file": "mousearea.qml",
     "title": "MouseArea test"
 },
