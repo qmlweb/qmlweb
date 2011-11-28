@@ -194,7 +194,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
     obj["$" + changeFuncName] = [];
 
     // Define getter
-    obj[GETTER](propName, function() {
+    function getter() {
         if (binding) {
             return binding();
         }
@@ -206,10 +206,10 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
         } else {
             return defVal;
         }
-    });
+    };
     
     // Define setter
-    obj[SETTER](propName, function(newVal) {
+    function setter(newVal) {
         var i;
         //console.log("set", obj.id || obj, propName, newVal);
         if (newVal instanceof QMLTransientValue) {
@@ -240,7 +240,10 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
                 obj["$" + changeFuncName][i](obj[propName], obj, propName);
             }
         }
-    } );
+    };
+    Object.defineProperty(obj, propName,
+        { get: getter, set: setter, configurable: true, enumerable: true });
+    
 }
 
 /**
