@@ -1,3 +1,4 @@
+<!doctype html> 
 <html><head><title>Testpad</title>
 <script src="../../src/parser.js"></script>
 <script src="../../src/process.js"></script>
@@ -73,7 +74,8 @@ var curFile = "",
             var args = Array.prototype.slice.call(arguments),
                 str = "",
                 i;
-            console.log.apply(console, args);
+            var log = Function.prototype.bind.call(console.log, console);
+            log.apply(console, args);
             for (i = 0; i < args.length; i++) {
                 str += args[i] + " ";
             }

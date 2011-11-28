@@ -46,7 +46,6 @@
  *   For further reference, see testpad and qml viewer applications.
  */
 
-
 (function() {
 
 var QMLGlobalObject = {
@@ -76,7 +75,8 @@ var QMLGlobalObject = {
     GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
     Undefined = undefined;
-    
+
+//Object.prototype[GETTER] = function(){};    
 
 /**
  * Inheritance helper
@@ -241,9 +241,39 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
             }
         }
     };
-    Object.defineProperty(obj, propName,
-        { get: getter, set: setter, configurable: true, enumerable: true });
     
+    setupGetterSetter(obj, propName, getter, setter);
+}
+
+/**
+ * Set up simple getter function for property
+ */
+function setupGetter(obj, propName, func) {
+    if (Object.defineProperty) {
+        Object.defineProperty(obj, propName,
+            { get: func, configurable: true, enumerable: true } );
+    } else {
+        obj[GETTER](propName, func);
+    }
+}
+
+function setupSetter(obj, propName, func) {
+    if (Object.defineProperty) {
+        Object.defineProperty(obj, propName,
+            { set: func, configurable: true, enumerable: false });
+    } else {
+        obj[SETTER](propName, func);
+    }
+}
+
+function setupGetterSetter(obj, propName, getter, setter) {
+    if (Object.defineProperty) {
+        Object.defineProperty(obj, propName,
+            {get: getter, set: setter, configurable: true, enumerable: false });
+    } else {
+        obj[GETTER](propName, getter);
+        obj[SETTER](propName, setter);
+    }
 }
 
 /**
@@ -399,8 +429,8 @@ QMLEngine = function (element, options) {
             tickers[i](now, elapsed);
         }
         if (isDirty) {
-            eng.$draw();
             isDirty = false;
+            eng.$draw();
         }
     }
     
@@ -514,6 +544,11 @@ function QMLBaseObject(meta, parent, engine) {
                 if (!(prop.value instanceof QMLBinding)) {
                     console.log("Assumption failed: alias was not binding");
                 }
+                console.log("Aliases not yet supported");
+                /* Aliases are not yet supported.
+                Following code has never been executed.
+                Left here for reference.
+                            
                 item[GETTER](i, function() {
                     return evalBinding(this, null, prop.value.src);
                 });
@@ -534,12 +569,14 @@ function QMLBaseObject(meta, parent, engine) {
                     // Evaluate binding to get the target object, then simply
                     // assign. Didn't choose this as I'm afraid it wont work for
                     // primitives.
-                    /* var a = evalBinding(this, null,
-                     *                      prop.value.src);
-                     * a = val;
-                     */
+                    // var a = evalBinding(this, null,
+                    //                      prop.value.src);
+                    // a = val;
+                    //
 
-                });
+                    });
+                }
+                */
             } else {
                 createSimpleProperty(item, i, prop.value);
             }
@@ -593,12 +630,15 @@ function QMLItem(meta, parent, engine) {
     // Anchors. Gah!
     // Create anchors object
     item.anchors = {};
-    item.anchors[SETTER]("margins", function(val) {
+
+    function marginsSetter(val) {
         this.topMargin = val;
         this.bottomMargin = val;
         this.leftMargin = val;
         this.rightMargin = val;
-    });
+    }
+    setupSetter(item, 'margins', marginsSetter);
+
     // Assign values from meta
     if (meta.anchors) {
         for (i in meta.anchors) {
@@ -609,7 +649,7 @@ function QMLItem(meta, parent, engine) {
     // Define anchor getters, returning absolute position
     // left, right, top, bottom, horizontalCenter, verticalCenter, baseline
     // todo: margins
-    item[GETTER]("left", function() {
+    function leftGetter() {
         var t;
         if ((t = this.anchors.left) !== Undefined) {
             return t;
@@ -627,11 +667,17 @@ function QMLItem(meta, parent, engine) {
             return t.horizontalCenter - this.$width / 2;
         }
         return this.x + parent.left;
-    });
-    item[GETTER]("right", function() {
+    }
+    //item[GETTER]("left", leftGetter);
+    setupGetter(item, "left", leftGetter);
+        
+    function rightGetter() {
         return this.left + this.$width;
-    });
-    item[GETTER]("top", function() {
+    }
+    //item[GETTER]("right", rightGetter);
+    setupGetter(item, "right", rightGetter);
+    
+    function topGetter() {
         var t;
         if ((t = this.anchors.top) !== Undefined) {
             return t;
@@ -649,35 +695,53 @@ function QMLItem(meta, parent, engine) {
             return t.verticalCenter - this.$height / 2;
         }
         return this.y + parent.top;
-    });
-    item[GETTER]("bottom", function() {
+    }
+    //item[GETTER]("top", topGetter);
+    setupGetter(item, "top", topGetter);
+    
+    function bottomGetter() {
         return this.top + this.$height;
-    });
-    item[GETTER]("horizontalCenter", function() {
+    }
+    //item[GETTER]("bottom", bottomGetter);
+    setupGetter(item, "bottom", bottomGetter);
+    
+    function hzGetter() {
         return this.left + this.$width / 2;
-    });
-    item[GETTER]("verticalCenter", function() {
+    }
+    //item[GETTER]("horizontalCenter", hzGetter);
+    setupGetter(item, "horizontalCenter", hzGetter);
+    
+    function vzGetter() {
         return this.top + this.$height / 2;
-    });
-    item[GETTER]("baseline", function() {
+    }
+    //item[GETTER]("verticalCenter", vzGetter);
+    setupGetter(item, "verticalCenter", vzGetter);
+    
+    function blGetter() {
         return this.top;
-    });
+    }
+    //item[GETTER]("baseline", blGetter);
+    setupGetter(item, "baseline", blGetter);
     
     // Anchoring helpers; $width + $height => Object draw width + height
-    item[GETTER]("$width", function() {
+    function _widthGetter() {
         var t;
         if ((t = this.anchors.fill) !== Undefined) {
             return t.$width;
         };
         return this.implicitWidth || this.width;
-    });
-    item[GETTER]("$height", function() {
-        var t;
-        if ((t = this.anchors.fill) !== Undefined) {
-            return t.$height;
-        };
-        return this.implicitHeight || this.height;
-    });
+    }
+    //item[GETTER]("$width", _widthGetter);
+    setupGetter(item, "$width", _widthGetter);
+    function _heightGetter() {
+            var t;
+            if ((t = this.anchors.fill) !== Undefined) {
+                return t.$height;
+            };
+            return this.implicitHeight || this.height;
+    }
+    //item[GETTER]("$height", _heightGetter);
+    setupGetter(item, "$height", _heightGetter);
     
     createSimpleProperty(item, "height", 0);
     createSimpleProperty(item, "implicitWidth", 0);
@@ -747,7 +811,7 @@ function QMLText(meta, parent, engine) {
     createSimpleProperty(item, "text", "");
 
     // Define implicitHeight & implicitWidth
-    item[GETTER]("implicitHeight", function(){
+    function ihGetter(){
         // There is no height available in canvas element, figure out
         // other way
         var el = document.createElement("span"),
@@ -767,16 +831,27 @@ function QMLText(meta, parent, engine) {
         
         }
         return height;
-    });
-    item[GETTER]("implicitWidth", function() {
+    }
+    //item[GETTER]("implicitHeight", ihGetter);
+    setupGetter(item, "implicitHeight", ihGetter);
+    
+    function iwGetter() {
         return engine.$getTextMetrics(this.text, fontCss(this.font)).width;
-    });
-    item[GETTER]("width", function() {
+    }
+    //item[GETTER]("implicitWidth", iwGetter);
+    setupGetter(item, "implicitWidth", iwGetter);
+    
+    function widthGetter() {
         return this.implicitWidth;
-    });
-    item[GETTER]("height", function() {
+    }
+    //item[GETTER]("width", widthGetter);
+    setupGetter(item, "width", widthGetter);
+    
+    function heightGetter() {
         return this.implicitHeight;
-    });
+    }
+    //item[GETTER]("height", heightGetter);
+    setupGetter(item, "height", heightGetter);
 
     applyProperties(meta, item);
 
@@ -856,12 +931,17 @@ function QMLImage(meta, parent, engine) {
 
     // Actual size of image.
     // todo: bug; implicitWidth|height is not defined this way in docs
-    item[GETTER]("implicitWidth", function() {
-        return item.width || img.naturalWidth;
-    });
-    item[GETTER]("implicitHeight", function() {
+    function iwGetter() {
+            return item.width || img.naturalWidth;
+    }
+    //item[GETTER]("implicitWidth", iwGetter);
+    setupGetter(item, "implicitWidth", iwGetter);
+    
+    function ihGetter() {
         return item.height || img.naturalHeight;
-    });
+    }
+    //item[GETTER]("implicitHeight", ihGetter);
+    setupGetter(item, "implicitHeight", ihGetter);
 
     // Bind status to img element
     img.onload = function() {
@@ -984,12 +1064,19 @@ function QMLDocument(meta, parent, engine) {
 
     doc = QMLItem(meta, parent, engine);
     item = doc.$children[0];
-    doc[GETTER]("height", function() {
+
+    function heightGetter() {
         return item.height; 
-    });
-    doc[GETTER]("width", function() {
+    }
+    //doc[GETTER]("height", heightGetter);
+    setupGetter(doc, "height", heightGetter);
+    
+    function widthGetter() {
         return item.width;
-    });
+    }
+    //doc[GETTER]("width", widthGetter);
+    setupGetter(doc, "width", widthGetter);
+    
 
     doc.$draw = function(c) {
         c.save();
