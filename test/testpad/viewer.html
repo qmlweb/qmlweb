@@ -10,7 +10,7 @@ button { margin: 0; padding: 1px; padding-top: 0; padding-bottom: 0 }
 a { text-decoration: none; color: blue }
 #canvas {
     position: absolute;
-    border: 1px solid white;
+    border: 1px solid lightgray;
     }
 #btm {
     position: absolute;
@@ -21,16 +21,16 @@ a { text-decoration: none; color: blue }
 #progtxt {
     float: left;
     vertical-align: bottom;
-    z-index: 1;
+    z-index: 10;
 }
 #browsSupport {
-    z-index: 1;
+    z-index: 10;
     vertical-align: bottom;
     color: red;
 }
 #status {
     float: right;
-    z-index: 1;
+    z-index: 10;
 }
 .icon {
     width: 24px;
@@ -44,13 +44,12 @@ a { text-decoration: none; color: blue }
     <span id="progtxt">QML viewer by <a href="http://lauri.paimen.info">Lauri Paimen</a>.</span>
     <span id="status">
     <span id="browsSupport">Unsupported browser detected. Results may vary.</span>
-        <span id="filename"></span>
+        <select id="fileSelector"></select>
+        <img src="../images/zoom_out.png" class="icon" onclick="scale*=0.9;update()">
+        <img src="../images/zoom_normal.png" class="icon" onclick="scale=1;update()">
+        <img src="../images/zoom_in.png" class="icon" onclick="scale*=1.1111111;update()">
+        <img src="../images/zoom_fit.png" class="icon" onclick="update(true)">
         <span id=stat></span>
-        <img src="../images/zoom_out.svg" class="icon" onclick="scale*=0.9;update()">
-        <img src="../images/zoom_normal.svg" class="icon" onclick="scale=1;update()">
-        <img src="../images/zoom_in.svg" class="icon" onclick="scale*=1.1111111;update()">
-        <img src="../images/zoom_fit.svg" class="icon" onclick="update(true)">
-        <button onclick="(function() { var c = document.getElementById('canvas').style; c.border = /black|00/.exec(c.border) !== null ? '1px solid white' : '1px solid black';  })()">Border</button>
     </span>
 </div>
 <script>
@@ -62,6 +61,8 @@ var curFile = "",
     // Scaling options
     scale = 1;
 
+// Resizes drawable canvas
+// fitToScreen: true -> fit to screen, false -> Do scaling
 function resize(fitToScreen) {
     // Scale
     var size = eng.size();
@@ -79,10 +80,12 @@ function resize(fitToScreen) {
     canvasEl.style.height = ysize + "px";
 
     // Centerize
-    canvasEl.style.left = (width - xsize)/2|0 + "px";
-    canvasEl.style.top = (height - ysize)/2|0 + "px";
+    canvasEl.style.left = (width - xsize)/2 + "px";
+    canvasEl.style.top = (height - ysize)/2 + "px";
     
     statEl.innerText = size.width + "x" + size.height;
+    
+    // If scaled, show details
     if (scale != 1) {
         
         statEl.innerText += " (" + (scale * 100|0) + "% "
@@ -90,7 +93,8 @@ function resize(fitToScreen) {
     }
 }    
 
-if (navigator.userAgent.match(/(opera|firefox|chrome)/i)) {
+// Hide browser support warning if supported browser detected
+if (navigator.userAgent.match(/(opera|firefox|chrome|msie 9\.0)/i)) {
     document.getElementById("browsSupport").style.display = 'none';
 }
 
@@ -109,7 +113,6 @@ function update(fit) {
     resize(fit);
 }
 
-
 window.onhashchange = function() {
     if (window.location.hash) {
         curFile = window.location.hash.substr(1);
@@ -120,13 +123,12 @@ window.onhashchange = function() {
         eng = QMLEngine(canvasEl, engOpts);
         eng.loadFile(curFile);
         eng.start();
+
         // Fit to screen if bigger than it
         var fit = eng.size();
         update(fit.width > window.innerWidth || fit.height > window.innerHeight);
         scalerClick();
-        // Update filename link
-        document.getElementById("filename").innerHTML = 
-            "<a href='" + curFile + "'>" + curFile + "</a>";
+
         var filename = curFile.split("/");
         filename = filename[filename.length - 1];
         document.title = filename + " - QML Viewer"
@@ -134,5 +136,30 @@ window.onhashchange = function() {
     }
 }
 window.onhashchange();
+
+// File selector
+(function() {
+var selEl = document.getElementById("fileSelector");
+selEl.onchange = function() {
+    window.location.href = '#' + selEl.value;
+}
+
+var list = JSON.parse(getUrlContents("files.json")),
+    hash = window.location.hash.substr(1);
+    
+for (var i = 0; i < list.length; i++) {
+    var optEl = document.createElement("option");
+    optEl.value = list[i].file;
+    optEl.textContent = list[i].title + " (" + list[i].file + ")";
+    optEl.selected = (hash == list[i].file);
+    selEl.appendChild(optEl);
+    
+    // Update title if possible
+    if (hash == list[i].file) {
+        document.title = optEl.textContent + ' - QML Viewer';
+    }
+}
+})();
+
 </script>
 </body></html>

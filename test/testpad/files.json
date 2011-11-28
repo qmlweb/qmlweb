@@ -3,6 +3,10 @@
     "title": "Project introduction"
 },
 {
+    "file": "imageview.qml",
+    "title": "Image View"
+},
+{
     "file": "helloworld.qml",
     "title": "Helloworld"
 },
@@ -12,29 +16,25 @@
 },
 {
     "file": "image.qml",
-    "title": "Image test"
-},
-{
-    "file": "imageview.qml",
-    "title": "Image View"
+    "title": "* Image test"
 },
 {
     "file": "anchoring.qml",
-    "title": "Anchoring test"
+    "title": "* Anchoring test"
 },
 {
     "file": "animation.qml",
-    "title": "Animation test"
+    "title": "* Animation test"
 },
 {
     "file": "mousearea.qml",
-    "title": "MouseArea test"
+    "title": "* MouseArea test"
 },
 {
     "file": "parse_dummy.qml",
-    "title": "Parsing test"
+    "title": "* Parsing test"
 },
 {
     "file": "parsingdev.qml",
-    "title": "Parser development QML"
+    "title": "* Parser development QML"
 } ]
