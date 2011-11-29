@@ -375,7 +375,7 @@ QMLEngine = function (element, options) {
     eng.$getGlobalObj = function() { return globalObj; }
 
     eng.fps = 25;
-    eng.$interval = (1000 / eng.fps) |0; // Math.floor, causes bugs?
+    eng.$interval = Math.floor(1000 / eng.fps); // Math.floor, causes bugs to timing?
 
     eng.$getTextMetrics = function(text, fontCss) {
         canvas.save();
