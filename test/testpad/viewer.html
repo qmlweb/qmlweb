@@ -133,6 +133,8 @@ window.onhashchange = function() {
         filename = filename[filename.length - 1];
         document.title = filename + " - QML Viewer"
 
+    } else {
+        window.location.href = "#../presentation.qml";
     }
 }
 window.onhashchange();
