@@ -208,7 +208,7 @@ Rectangle {
                     anchors.top: parent.bottom; anchors.left: parent.left
 
                     Text {
-                    text: "   > Firefox, Chrome, Opera \"officially supported\""
+                    text: "   > All major browsers supported"
                     font.pointSize: 24
                     anchors.top: parent.bottom; anchors.left: parent.left
                     Text {
@@ -243,7 +243,22 @@ Rectangle {
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
                 Text {
-                    text: "- Testpad for writing QML and viewing it:"
+                    text: "   > Start up your favorite browser and go to:"
+                    font.pointSize: 24;
+                    anchors.top: parent.bottom; anchors.left: parent.left
+
+                    Text {
+                    text: "        tinyurl.com/qmlslides"
+                    font.pointSize: 24; color: "blue"
+                    anchors.top: parent.bottom; anchors.left: parent.left
+
+                    Text {
+                    text: "   > Also check other demos from drop-down box"
+                    font.pointSize: 24
+                    anchors.top: parent.bottom; anchors.left: parent.left
+
+                    Text {
+                    text: "- Write your own web-ran QML at"
                     font.pointSize: 32
                     anchors.top: parent.bottom; anchors.left: parent.left
 
@@ -252,26 +267,6 @@ Rectangle {
                     font.pointSize: 24; color: "blue"
                     anchors.top: parent.bottom; anchors.left: parent.left
 
-                    Text {
-                    text: "   > also contains development test files"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
-                    text: "- QML viewer for viewing QML files:"
-                    font.pointSize: 32
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
-                    text: "   http://lauri.paimen.info/qmlweb/test/testpad/viewer.html"
-                    font.pointSize: 24; color: "blue"
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
-                    text: "   > reads file from URL hash (similar to testpad)"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
-                    }
                     }
                     }
                     }
@@ -311,15 +306,9 @@ Rectangle {
                     anchors.top: parent.bottom; anchors.left: parent.left
 
                     Text {
-                    text: "- Support for IE, android, symbian, wp7, ..."
-                    font.pointSize: 32
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
                     text: "- QML minifier (for networked QML apps)"
                     font.pointSize: 32
                     anchors.top: parent.bottom; anchors.left: parent.left
-                    }
                     }
                     }
                     }
