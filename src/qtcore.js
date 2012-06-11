@@ -465,8 +465,8 @@ QMLEngine = function (element, options) {
     eng.$draw = function() {
         var time = new Date();
 
-        canvasEl.height = doc.height;
-        canvasEl.width = doc.width;
+        element.height = doc.height;
+        element.width = doc.width;
 
         // Pixel-perfect size
 //        canvasEl.style.height = canvasEl.height + "px";

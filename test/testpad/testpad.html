@@ -73,8 +73,13 @@ var curFile = "",
             var args = Array.prototype.slice.call(arguments),
                 str = "",
                 i;
-            var log = Function.prototype.bind.call(console.log, console);
-            log.apply(console, args);
+            // No bind on iPad
+            if (typeof Function.prototype.bind == "function") {
+                var log = Function.prototype.bind.call(console.log, console);
+                log.apply(console, args);
+            } else {
+                console.log.apply(console, args);
+            }
             for (i = 0; i < args.length; i++) {
                 str += args[i] + " ";
             }
