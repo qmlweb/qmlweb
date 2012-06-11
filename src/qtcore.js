@@ -248,8 +248,11 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
 /**
  * Set up simple getter function for property
  */
+// Object.defineProperty doesn't work on ios 5.1.1 (pad) and 4.2.1 (phone)
+var useDefineProperty = Object.defineProperty && !(/iPad|iPhone/.exec(navigator.userAgent));
+
 function setupGetter(obj, propName, func) {
-    if (Object.defineProperty) {
+    if (useDefineProperty) {
         Object.defineProperty(obj, propName,
             { get: func, configurable: true, enumerable: true } );
     } else {
@@ -258,7 +261,7 @@ function setupGetter(obj, propName, func) {
 }
 
 function setupSetter(obj, propName, func) {
-    if (Object.defineProperty) {
+    if (useDefineProperty) {
         Object.defineProperty(obj, propName,
             { set: func, configurable: true, enumerable: false });
     } else {
@@ -267,7 +270,7 @@ function setupSetter(obj, propName, func) {
 }
 
 function setupGetterSetter(obj, propName, getter, setter) {
-    if (Object.defineProperty) {
+    if (useDefineProperty) {
         Object.defineProperty(obj, propName,
             {get: getter, set: setter, configurable: true, enumerable: false });
     } else {
