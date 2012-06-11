@@ -248,8 +248,11 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
 /**
  * Set up simple getter function for property
  */
-// Object.defineProperty doesn't work on ios 5.1.1 (pad) and 4.2.1 (phone)
-var useDefineProperty = Object.defineProperty && !(/iPad|iPhone/.exec(navigator.userAgent));
+// todo: What's wrong with Object.defineProperty on these browsers?
+// Works on Chrome, FF, Opera, but not on the mobile ones...
+// Fallback to less-standard __defineGetter__
+var useDefineProperty = Object.defineProperty &&
+                        !(/iPad|iPhone|NokiaN9/.exec(navigator.userAgent));
 
 function setupGetter(obj, propName, func) {
     if (useDefineProperty) {
@@ -814,9 +817,17 @@ function QMLText(meta, parent, engine) {
     createSimpleProperty(item, "text", "");
 
     // Define implicitHeight & implicitWidth
+
+    // Optimization: Remember last text
+    // todo: Check for font size, family also
+    var lastHText,
+        lastH;
     function ihGetter(){
         // There is no height available in canvas element, figure out
         // other way
+        if (lastHText == this.text) {
+            return lastH;
+        }
         var el = document.createElement("span"),
             height;
         el.style.font = fontCss(this.font);
@@ -828,18 +839,33 @@ function QMLText(meta, parent, engine) {
             // Firefox doesn't support getting the height this way,
             // approximate from point size (full of win) :P
             if (this.font && this.font.pointSize) {
-                return this.font.pointSize * 96 / 72;
+                height = this.font.pointSize * 96 / 72;
+            } else {
+                height = 10 * 96 / 72;
             }
-            return 10 * 96 / 72;
         
         }
+        lastHText = this.text;
+        lastH = height;
         return height;
     }
     //item[GETTER]("implicitHeight", ihGetter);
     setupGetter(item, "implicitHeight", ihGetter);
     
+    // Optimization: Remember last text
+    // todo: Check for font size, family also
+    var lastWText,
+        lastW;
     function iwGetter() {
-        return engine.$getTextMetrics(this.text, fontCss(this.font)).width;
+        if (lastWText == this.text) {
+            return lastW;
+        }
+        
+        var width;
+        width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
+        lastWText = this.text;
+        lastW = width;
+        return width;
     }
     //item[GETTER]("implicitWidth", iwGetter);
     setupGetter(item, "implicitWidth", iwGetter);
