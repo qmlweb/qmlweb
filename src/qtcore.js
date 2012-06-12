@@ -248,40 +248,54 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
 /**
  * Set up simple getter function for property
  */
-// todo: What's wrong with Object.defineProperty on these browsers?
-// Works on Chrome, FF, Opera, but not on the mobile ones...
-// Fallback to less-standard __defineGetter__
-var useDefineProperty = Object.defineProperty &&
-                        !(/iPad|iPhone|NokiaN9/.exec(navigator.userAgent));
+var setupGetter,
+    setupSetter,
+    setupGetterSetter;
+(function() {
 
-function setupGetter(obj, propName, func) {
+// todo: What's wrong with Object.defineProperty on some browsers?
+// Object.defineProperty is the standard way to setup getters and setters.
+// However, the following way to use Object.defineProperty don't work on some
+// webkit-based browsers, namely Safari, iPad, iPhone and Nokia N9 browser.
+// Chrome, firefox and opera still digest them fine.
+
+// So, if the deprecated __defineGetter__ is available, use those, and if not
+// use the standard Object.defineProperty (IE for example).
+
+    var useDefineProperty = !(Object[GETTER] && Object[SETTER]);
+
     if (useDefineProperty) {
-        Object.defineProperty(obj, propName,
-            { get: func, configurable: true, enumerable: true } );
-    } else {
-        obj[GETTER](propName, func);
-    }
-}
 
-function setupSetter(obj, propName, func) {
-    if (useDefineProperty) {
-        Object.defineProperty(obj, propName,
-            { set: func, configurable: true, enumerable: false });
-    } else {
-        obj[SETTER](propName, func);
-    }
-}
+        if (!Object.defineProperty) {
+            console.log("No __defineGetter__ or defineProperty available!");
+        }
 
-function setupGetterSetter(obj, propName, getter, setter) {
-    if (useDefineProperty) {
-        Object.defineProperty(obj, propName,
-            {get: getter, set: setter, configurable: true, enumerable: false });
+        setupGetter = function(obj, propName, func) {
+            Object.defineProperty(obj, propName,
+                { get: func, configurable: true, enumerable: true } );
+        }
+        setupSetter = function(obj, propName, func) {
+            Object.defineProperty(obj, propName,
+                { set: func, configurable: true, enumerable: false });
+        }
+        setupGetterSetter = function(obj, propName, getter, setter) {
+            Object.defineProperty(obj, propName,
+                {get: getter, set: setter, configurable: true, enumerable: false });
+        }
     } else {
-        obj[GETTER](propName, getter);
-        obj[SETTER](propName, setter);
+        setupGetter = function(obj, propName, func) {
+            obj[GETTER](propName, func);
+        }
+        setupSetter = function(obj, propName, func) {
+            obj[SETTER](propName, func);
+        }
+        setupGetterSetter = function(obj, propName, getter, setter) {
+            obj[GETTER](propName, getter);
+            obj[SETTER](propName, setter);
+        }
     }
-}
 
+})();
 /**
  * Apply properties from meta to item. Skip values in skip.
  * @param {Object} meta Source of properties
