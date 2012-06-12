@@ -390,6 +390,21 @@ QMLEngine = function (element, options) {
         }
     }
     
+    // Listen also to touchstart events on supporting devices
+    // Makes clicks more responsive (do not wait for click event anymore)
+    element.addEventListener("touchstart", function(e) {
+        // preventDefault also disables pinching and scrolling while touching
+        // on qml application
+        e.preventDefault();
+        var at = {
+            layerX: e.touches[0].pageX - element.offsetLeft,
+            layerY: e.touches[0].pageY - element.offsetTop,
+            button: 1
+        }
+        element.onclick(at);
+
+    });
+    
     eng.running = false;
 
     eng.$getGlobalObj = function() { return globalObj; }
