@@ -392,7 +392,7 @@ QMLEngine = function (element, options) {
     
     // Listen also to touchstart events on supporting devices
     // Makes clicks more responsive (do not wait for click event anymore)
-    element.addEventListener("touchstart", function(e) {
+    function touchHandler(e) {
         // preventDefault also disables pinching and scrolling while touching
         // on qml application
         e.preventDefault();
@@ -403,7 +403,7 @@ QMLEngine = function (element, options) {
         }
         element.onclick(at);
 
-    });
+    };
     
     eng.running = false;
 
@@ -518,6 +518,7 @@ QMLEngine = function (element, options) {
     eng.start = function() {
         var i;
         if (!this.running) {
+            element.addEventListener("touchstart", touchHandler);
             this.running = true;
             tickerId = setInterval(tick, this.$interval);
             for (i = 0; i < whenStart.length; i++) {
@@ -529,6 +530,7 @@ QMLEngine = function (element, options) {
     eng.stop = function() {
         var i;
         if (this.running) {
+            element.removeEventListener("touchstart", touchHandler);
             this.running = false;
             clearInterval(tickerId);
             for (i = 0; i < whenStop.length; i++) {
