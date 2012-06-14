@@ -8,7 +8,7 @@ Rectangle {
 
     // Changes slide
     function changeSlide(forward) {
-        var slides = [welcome, intro, status, demos, future, conclusion];
+        var slides = [welcome, intro, status, demos, conclusion];
 
         // Change slide number
         var prevSlide = slide;
@@ -168,62 +168,64 @@ Rectangle {
             color: "green"
             x: 20
             Text {
+                text: "- Source at https://gitorious.org/qmlweb"
+                font.pointSize: 32
+                anchors.top: parent.bottom; anchors.left: parent.left
+
+                Text {
+                text: "- 3200 lines of code (1350 from UglifyJS)"
+                font.pointSize: 32
+                anchors.top: parent.bottom; anchors.left: parent.left
+
+
+                Text {
+                text: "- Uses HTML5 (no plugins required)"
+                font.pointSize: 32
+                anchors.top: parent.bottom; anchors.left: parent.left
+
+                Text {
+                text: "   > All major browsers supported"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
+                
+                Text {
+                text: "   > Windows, Mac, Linux, N9(00), iPhone, Android, PS3"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
+/*
+                Text {
                 text: "- Basics of"
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
+
                 Text {
-                    text: "   > QML parser"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
+                text: "   > QML parser"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
 
-                    Text {
-                    text: "   > QML binding, scoping and anchoring"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
+                Text {
+                text: "   > QML binding, scoping and anchoring"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
 
-                    Text {
-                    text: "   > Text, Rectangle, Image, MouseArea, Item"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
+                Text {
+                text: "   > Text, Rectangle, Image, MouseArea, Item"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
 
-                    Text {
-                    text: "      Timer, [Number|Sequential]Animation"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
+                Text {
+                text: "      Timer, [Number|Sequential]Animation"
+                font.pointSize: 24
+                anchors.top: parent.bottom; anchors.left: parent.left
 
-                    Text {
-                    text: "- Source at https://gitorious.org/qmlweb"
-                    font.pointSize: 32
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
-                    text: "- 3200 lines of code (1350 from UglifyJS)"
-                    font.pointSize: 32
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-
-                    Text {
-                    text: "- Uses HTML5 (no plugins required)"
-                    font.pointSize: 32
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    Text {
-                    text: "   > All major browsers supported"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
-                    Text {
-                    text: "   > Runs on Windows, Mac, Linux, N900, iPhone, iPad"
-                    font.pointSize: 24
-                    anchors.top: parent.bottom; anchors.left: parent.left
-
-                    }
-                    }
-                    }
-                    }
-                    }
-                    }
-                    }
-                    }
+                }
+                }
+                }
+                }
+                }*/
+                }
+                }
+                }
                 }                
             }
         }
@@ -276,7 +278,7 @@ Rectangle {
         }
     }
     
-    // Future slide
+    // Future slide (unused)
     Item {
         id: future
         visible: false
