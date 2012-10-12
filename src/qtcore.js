@@ -382,27 +382,27 @@ JSItemModel = function() {
     }
 
     this.emitDataChanged = function(startIndex, endIndex) {
-        for (i in this.dataChangedCallbacks) {
+        for (var i in this.dataChangedCallbacks) {
             this.dataChangedCallbacks[i](startIndex, endIndex);
         }
     }
     this.emitRowsInserted = function(startIndex, endIndex) {
-        for (i in this.rowsInsertedCallbacks) {
+        for (var i in this.rowsInsertedCallbacks) {
             this.rowsInsertedCallbacks[i](startIndex, endIndex);
         }
     };
     this.emitRowsMoved = function(sourceStartIndex, sourceEndIndex, destinationIndex) {
-        for (i in this.rowsMovedCallbacks) {
+        for (var i in this.rowsMovedCallbacks) {
             this.rowsMovedCallbacks[i](sourceStartIndex, sourceEndIndex, destinationIndex);
         }
     };
     this.emitRowsRemoved = function(startIndex, endIndex) {
-        for (i in this.rowsRemovedCallbacks) {
+        for (var i in this.rowsRemovedCallbacks) {
             this.rowsRemovedCallbacks[i](startIndex, endIndex);
         }
     };
     this.emitModelReset = function() {
-        for (i in this.modelResetCallbacks) {
+        for (var i in this.modelResetCallbacks) {
             this.modelResetCallbacks[i]();
         }
     };
