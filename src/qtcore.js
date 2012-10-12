@@ -93,6 +93,22 @@ function noop(){};
 // Helper to prevent some minimization cases. Ought to do "nothing".
 function tilt() {arguments.length = 0};
 
+// Helper to clone meta-objects for dynamic element creation
+function cloneObject(obj) {
+    if (null == obj || typeof obj != "object")
+        return obj;
+    var copy = new obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+            if (typeof obj[attr] == "object")
+                copy[attr] = cloneObject(obj[attr]);
+            else
+                copy[attr] = obj[attr];
+        }
+    }
+    return copy;
+}
+
 /**
  * Helper function.
  * Prints msg and values of object. Workaround when using getter functions as
@@ -158,6 +174,7 @@ function construct(meta, parent, engine) {
             Display: QMLItem, // todo
             Text: QMLText,
             Rectangle: QMLRectangle,
+            Repeater: QMLRepeater,
             QMLDocument: QMLDocument,
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
@@ -331,6 +348,48 @@ function applyProperties(meta, item, skip) {
         }
         item[i] = meta[i];
     }
+}
+
+// ItemModel. EXPORTED.
+JSItemModel = function() {
+    this.dataChangedCallbacks = [];
+    this.rowsInsertedCallbacks = [];
+    this.rowsMovedCallbacks = [];
+    this.rowsRemovedCallbacks = [];
+    this.modelResetCallbacks = [];
+    this.roleNames = [];
+
+    this.setRoleNames = function(names) {
+        this.roleNames = names;
+    }
+
+    this.emitDataChanged = function(startIndex, endIndex) {
+        for (i in this.dataChangedCallbacks) {
+            this.dataChangedCallbacks[i](startIndex, endIndex);
+        }
+    }
+    this.emitRowsInserted = function(startIndex, endIndex) {
+        for (i in this.rowsInsertedCallbacks) {
+            this.rowsInsertedCallbacks[i](startIndex, endIndex);
+        }
+    };
+    this.emitRowsMoved = function(sourceStartIndex, sourceEndIndex, destinationIndex) {
+        for (i in this.rowsMovedCallbacks) {
+            this.rowsMovedCallbacks[i](sourceStartIndex, sourceEndIndex, destinationIndex);
+        }
+    };
+    this.emitRowsRemoved = function(startIndex, endIndex) {
+        for (i in this.rowsRemovedCallbacks) {
+            this.rowsRemovedCallbacks[i](startIndex, endIndex);
+        }
+    };
+    this.emitModelReset = function() {
+        for (i in this.modelResetCallbacks) {
+            this.modelResetCallbacks[i]();
+        }
+    };
+
+    return this;
 }
 
 // -----------------------------------------------------------------------------
@@ -997,7 +1056,91 @@ function QMLRectangle(meta, parent, engine) {
         c.strokeRect(this.left, this.top, this.$width, this.$height);
         c.restore();
     }
-    
+
+    return item;
+}
+
+function QMLRepeater(meta, parent, engine) {
+    var item = QMLItem(meta, parent, engine);
+
+    createSimpleProperty(item, "model", 0);
+    createSimpleProperty(item, "delegate", {});
+
+    applyProperties(meta, item);
+
+    function applyChildProperties(child, index) {
+        child.index = index;
+        for (i in item.model.roleNames) {
+            var func = eval("var func = function() {\
+                return item.model.data(child.index, \""+item.model.roleNames[i]+"\");\
+            }; func"); // eval needed in order to evaluate item.model.roleNames[i] now and not on function call
+            Object.defineProperty(child, item.model.roleNames[i], {get: func, enumerable: true});
+        }
+        for (i in child.$children)
+            applyChildProperties(child.$children[i], index);
+    }
+    function insertChildren(startIndex, endIndex) {
+        for (index=startIndex; index<endIndex; index++) {
+            var newMeta = cloneObject(item.delegate.$$meta);
+            newMeta.id = newMeta.id+index;
+            var newItem = construct(newMeta, item, engine);
+            applyChildProperties(newItem, index);
+            item.$children.splice(index, 0, newItem);
+        }
+    }
+
+    if (item.model instanceof JSItemModel) {
+
+        item.model.dataChangedCallbacks.push(engine.$requestDraw);
+        item.model.rowsInsertedCallbacks.push(insertChildren);
+        item.model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
+            var vals = item.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
+            for (i=0; i<vals; i++) {
+                item.$children.splice(destinationIndex + i, 0, vals[i]);
+            }
+            engine.$requestDraw();
+        });
+        item.model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
+            var removed = item.$children.splice(startIndex, endIndex - startIndex);
+            for (index in removed)
+                removeMouseHandlers(removed[index]);
+            engine.$requestDraw();
+        });
+        item.model.modelResetCallbacks.push(function() {
+            var removed = item.$children.splice(0, item.$children.length);
+            for (index in removed)
+                removeMouseHandlers(removed[index]);
+            insertChildren(0, item.model.rowCount());
+            engine.$requestDraw();
+        });
+
+        insertChildren(0, item.model.rowCount());
+    } else if (typeof item.model=="number") {
+        insertChildren(0, item.model);
+    }
+
+    item.$drawItem = function(c) {
+        if (typeof item.model=="number") {
+            var removed = item.$children.splice(0, item.$children.length);
+            for (index in removed)
+                removeMouseHandlers(removed[index]);
+            insertChildren(0, item.model);
+        }
+    }
+
+    item.delegate.parent.$children.splice( item.delegate.parent.$children.indexOf(item.delegate), 1); //Remove delegate-prototype
+
+    function removeMouseHandlers(item) {
+        for (i in item.$children) {
+            if ((index = engine.mouseAreas.indexOf(item.$children[i])) != -1) {
+                engine.mouseAreas.splice(index,1);
+            }
+
+            removeMouseHandlers(item.$children[i]);
+        }
+    }
+    removeMouseHandlers(item.delegate);
+
     return item;
 }
 
