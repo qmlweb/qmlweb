@@ -355,8 +355,6 @@ QMLEngine = function (element, options) {
         // Callbacks for stopping or starting the engine
         whenStop = [],
         whenStart = [],
-        // Callbacks for mouse movements
-        mouseHandlers = [],
         // Ticker resource id and ticker callbacks
         tickerId,
         tickers = [],
@@ -377,19 +375,44 @@ QMLEngine = function (element, options) {
             options.debugConsole.apply(Undefined, args);
         };
     }
-    
+
+    eng.mouseAreas = [];
     // Register mousehandler for element
     element.onclick = function(e) {
         if (eng.running) {
             var i;
-            for (i = 0; i < mouseHandlers.length; i++) {
-                if (mouseHandlers[i](e)) {
+            for (i in eng.mouseAreas) {
+                var l = eng.mouseAreas[i];
+                var mouse = {
+                    accepted: true,
+                    button: e.button == 0 ? l.Qt.LeftButton :
+                            e.button == 1 ? l.Qt.RightButton :
+                            e.button == 2 ? l.Qt.MiddleButton :
+                            0,
+                    modifiers: (e.ctrlKey * l.Qt.CtrlModifier)
+                            | (e.altKey * l.Qt.AltModifier)
+                            | (e.shiftKey * l.Qt.ShiftModifier)
+                            | (e.metaKey * l.Qt.MetaModifier),
+                    x: (e.offsetX || e.layerX) - l.left,
+                    y: (e.offsetY || e.layerY) - l.top
+                };
+
+                if (l.enabled
+                && mouse.x >= 0 // equals: e.offsetX >= l.left
+                && (e.offsetX || e.layerX) <= l.right
+                && mouse.y >= 0 // equals: e.offsetY >= l.top
+                && (e.offsetY || e.layerY) <= l.bottom) {
+                    // Dispatch mouse event
+                    l.mouse = mouse;
+                    tilt(l.onClicked); // use tilt to prevent minimization
+                    l.mouse = Undefined;
+                    eng.$requestDraw();
                     break;
                 }
             }
         }
     }
-    
+
     // Listen also to touchstart events on supporting devices
     // Makes clicks more responsive (do not wait for click event anymore)
     function touchHandler(e) {
@@ -405,7 +428,6 @@ QMLEngine = function (element, options) {
 
     };
 
-    eng.mouseAreas = [];
     eng.oldMousePos= {x:0, y:0};
     function mousemoveHandler(e) {
         for (i in eng.mouseAreas) {
@@ -499,10 +521,7 @@ QMLEngine = function (element, options) {
     eng.$registerStop = function(f) {
         whenStop.push(f);
     }
-    eng.$registerMouseHandler = function(f) {
-        mouseHandlers.push(f);
-    }
-    
+
     eng.$addTicker = function(t) {
         tickers.push(t);
     }
@@ -1079,35 +1098,6 @@ function QMLMouseArea(meta, parent, engine) {
     createSimpleProperty(item, "onEntered", Undefined);
     createSimpleProperty(item, "onExited", Undefined);
     createSimpleProperty(item, "hoverEnabled", false);
-    engine.$registerMouseHandler(function(e) {
-        var mouse = {
-            accepted: true,
-            button: e.button == 0 ? item.Qt.LeftButton :
-                    e.button == 1 ? item.Qt.RightButton :
-                    e.button == 2 ? item.Qt.MiddleButton :
-                    0,
-            modifiers: (e.ctrlKey * item.Qt.CtrlModifier)
-                    | (e.altKey * item.Qt.AltModifier)
-                    | (e.shiftKey * item.Qt.ShiftModifier)
-                    | (e.metaKey * item.Qt.MetaModifier),
-            x: (e.offsetX || e.layerX) - item.left,
-            y: (e.offsetY || e.layerY) - item.top
-        };
-
-        if (item.enabled
-          && mouse.x >= 0 // equals: e.offsetX >= item.left
-          && (e.offsetX || e.layerX) <= item.right
-          && mouse.y >= 0 // equals: e.offsetY >= item.top
-          && (e.offsetY || e.layerY) <= item.bottom) {
-            // Dispatch mouse event
-            item.mouse = mouse;
-            tilt(item.onClicked); // use tilt to prevent minimization
-            item.mouse = Undefined;
-            engine.$requestDraw();
-            return mouse.accepted;
-            }
-        return false;
-    });
 
     applyProperties(meta, item);
 
