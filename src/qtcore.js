@@ -404,7 +404,31 @@ QMLEngine = function (element, options) {
         element.onclick(at);
 
     };
-    
+
+    eng.mouseAreas = [];
+    eng.oldMousePos= {x:0, y:0};
+    function mousemoveHandler(e) {
+        for (i in eng.mouseAreas) {
+            var l = eng.mouseAreas[i];
+            if (l && l.onExited && l.hoverEnabled
+                &&(eng.oldMousePos.x >= l.left && eng.oldMousePos.x <= l.right
+                && eng.oldMousePos.y >= l.top && eng.oldMousePos.y <= l.bottom)
+                && !(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right
+                && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom)) //We were hovering the Element before but aren't anymore
+                tilt(l.onExited); // Method will be invoked from within the getter, tilt to prevent minimization
+        }
+        for (i in eng.mouseAreas) {
+            var l = eng.mouseAreas[i];
+            if (l && l.onEntered && l.hoverEnabled
+                &&(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right
+                && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom)
+                && !(eng.oldMousePos.x >= l.left && eng.oldMousePos.x <= l.right
+                && eng.oldMousePos.y >= l.top && eng.oldMousePos.y <= l.bottom)) //We are now hovering the Element and weren't before
+                tilt(l.onEntered); // Method will be invoked from within the getter, tilt to prevent minimization
+        }
+        eng.oldMousePos = { x: e.pageX - element.offsetLeft, y: e.pageY - element.offsetTop };
+    }
+
     eng.running = false;
 
     eng.$getGlobalObj = function() { return globalObj; }
@@ -519,6 +543,7 @@ QMLEngine = function (element, options) {
         var i;
         if (!this.running) {
             element.addEventListener("touchstart", touchHandler);
+            element.addEventListener("mousemove", mousemoveHandler);
             this.running = true;
             tickerId = setInterval(tick, this.$interval);
             for (i = 0; i < whenStart.length; i++) {
@@ -531,6 +556,7 @@ QMLEngine = function (element, options) {
         var i;
         if (this.running) {
             element.removeEventListener("touchstart", touchHandler);
+            element.addEventListener("mousemove", mousemoveHandler);
             this.running = false;
             clearInterval(tickerId);
             for (i = 0; i < whenStop.length; i++) {
@@ -1046,10 +1072,13 @@ function QMLImage(meta, parent, engine) {
 
 function QMLMouseArea(meta, parent, engine) {
     var item = QMLItem(meta, parent, engine);
-        
+
     createSimpleProperty(item, "acceptedButtons", item.Qt.LeftButton);
     createSimpleProperty(item, "enabled", true);
     createSimpleProperty(item, "onClicked", Undefined);
+    createSimpleProperty(item, "onEntered", Undefined);
+    createSimpleProperty(item, "onExited", Undefined);
+    createSimpleProperty(item, "hoverEnabled", false);
     engine.$registerMouseHandler(function(e) {
         var mouse = {
             accepted: true,
@@ -1079,9 +1108,11 @@ function QMLMouseArea(meta, parent, engine) {
             }
         return false;
     });
-    
+
     applyProperties(meta, item);
-    
+
+    engine.mouseAreas.push(item);
+
     return item;
 }
 
