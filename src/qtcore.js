@@ -510,22 +510,37 @@ QMLEngine = function (element, options) {
         for (i in eng.mouseAreas) {
             var l = eng.mouseAreas[i];
             if (l && l.onExited && l.hoverEnabled
-                &&(eng.oldMousePos.x >= l.left && eng.oldMousePos.x <= l.right
-                && eng.oldMousePos.y >= l.top && eng.oldMousePos.y <= l.bottom)
-                && !(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right
-                && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom)) //We were hovering the Element before but aren't anymore
-                tilt(l.onExited); // Method will be invoked from within the getter, tilt to prevent minimization
+                  && (eng.oldMousePos.x >= l.left
+                      && eng.oldMousePos.x <= l.right
+                      && eng.oldMousePos.y >= l.top
+                      && eng.oldMousePos.y <= l.bottom)
+                  && !(e.pageX - element.offsetLeft >= l.left
+                       && e.pageX - element.offsetLeft <= l.right
+                       && e.pageY - element.offsetTop >= l.top
+                       && e.pageY - element.offsetTop <= l.bottom) ) 
+                // We were hovering the Element before but aren't anymore
+                // Method will be invoked from within the getter
+                // tilt to prevent minimization
+                tilt(l.onExited); 
         }
         for (i in eng.mouseAreas) {
             var l = eng.mouseAreas[i];
             if (l && l.onEntered && l.hoverEnabled
-                &&(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right
-                && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom)
-                && !(eng.oldMousePos.x >= l.left && eng.oldMousePos.x <= l.right
-                && eng.oldMousePos.y >= l.top && eng.oldMousePos.y <= l.bottom)) //We are now hovering the Element and weren't before
-                tilt(l.onEntered); // Method will be invoked from within the getter, tilt to prevent minimization
+                  && (e.pageX - element.offsetLeft >= l.left
+                      && e.pageX - element.offsetLeft <= l.right
+                      && e.pageY - element.offsetTop >= l.top
+                      && e.pageY - element.offsetTop <= l.bottom)
+                  && !(eng.oldMousePos.x >= l.left
+                       && eng.oldMousePos.x <= l.right
+                       && eng.oldMousePos.y >= l.top
+                       && eng.oldMousePos.y <= l.bottom))
+                // We are now hovering the Element and weren't before
+                // Method will be invoked from within the getter
+                // tilt to prevent minimization
+                tilt(l.onEntered); 
         }
-        eng.oldMousePos = { x: e.pageX - element.offsetLeft, y: e.pageY - element.offsetTop };
+        eng.oldMousePos = { x: e.pageX - element.offsetLeft,
+                            y: e.pageY - element.offsetTop };
     }
 
     eng.running = false;
@@ -678,7 +693,7 @@ QMLEngine = function (element, options) {
         var i;
         if (this.running) {
             element.removeEventListener("touchstart", touchHandler);
-            element.addEventListener("mousemove", mousemoveHandler);
+            element.removeEventListener("mousemove", mousemoveHandler);
             this.running = false;
             clearInterval(tickerId);
             for (i = 0; i < whenStop.length; i++) {
@@ -770,7 +785,10 @@ function QMLBaseObject(meta, parent, engine) {
         // function that can then be applied with arguments
         // given to this function to do the job (and get the return
         // values).
-        var func = evalBinding(null, method + ";"+name, item, item.Component.$scope.getIdScope());
+        var func = evalBinding(null,
+                               method + ";" + name,
+                               item,
+                               item.Component.$scope.getIdScope());
         return function() {
             return func.apply(null, arguments);
         };
@@ -1118,20 +1136,20 @@ function QMLRepeater(meta, parent, engine) {
 
     function applyChildProperties(child, index) {
         child.index = index;
-        for (i in item.model.roleNames) {
+        for (var i in item.model.roleNames) {
             var func = eval("var func = function() {\
-                return item.model.data(child.index, \""+item.model.roleNames[i]+"\");\
+                return item.model.data(child.index, \"" + item.model.roleNames[i] + "\");\
             }; func"); // eval needed in order to evaluate item.model.roleNames[i] now and not on function call
             Object.defineProperty(child, item.model.roleNames[i], {get: func, enumerable: true});
         }
-        for (i in child.$children)
+        for (var i in child.$children)
             applyChildProperties(child.$children[i], index);
     }
     function insertChildren(startIndex, endIndex) {
         engine.workingContext.push(item.Component);
-        for (index=startIndex; index<endIndex; index++) {
+        for (var index = startIndex; index < endIndex; index++) {
             var newMeta = cloneObject(item.delegate.$$meta);
-            newMeta.id = newMeta.id+index;
+            newMeta.id = newMeta.id + index;
             var newItem = construct(newMeta, item, engine);
             applyChildProperties(newItem, index);
             item.$children.splice(index, 0, newItem);
@@ -1145,34 +1163,34 @@ function QMLRepeater(meta, parent, engine) {
         item.model.rowsInsertedCallbacks.push(insertChildren);
         item.model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
             var vals = item.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
-            for (i=0; i<vals; i++) {
+            for (var i = 0; i < vals; i++) {
                 item.$children.splice(destinationIndex + i, 0, vals[i]);
             }
             engine.$requestDraw();
         });
         item.model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
             var removed = item.$children.splice(startIndex, endIndex - startIndex);
-            for (index in removed)
+            for (var index in removed)
                 removeMouseHandlers(removed[index]);
             engine.$requestDraw();
         });
         item.model.modelResetCallbacks.push(function() {
             var removed = item.$children.splice(0, item.$children.length);
-            for (index in removed)
+            for (var index in removed)
                 removeMouseHandlers(removed[index]);
             insertChildren(0, item.model.rowCount());
             engine.$requestDraw();
         });
 
         insertChildren(0, item.model.rowCount());
-    } else if (typeof item.model=="number") {
+    } else if (typeof item.model == "number") {
         insertChildren(0, item.model);
     }
 
     item.$drawItem = function(c) {
-        if (typeof item.model=="number") {
+        if (typeof item.model == "number") {
             var removed = item.$children.splice(0, item.$children.length);
-            for (index in removed)
+            for (var index in removed)
                 removeMouseHandlers(removed[index]);
             insertChildren(0, item.model);
         }
@@ -1181,7 +1199,8 @@ function QMLRepeater(meta, parent, engine) {
     item.delegate.parent.$children.splice( item.delegate.parent.$children.indexOf(item.delegate), 1); //Remove delegate-prototype
 
     function removeMouseHandlers(item) {
-        for (i in item.$children) {
+        for (var i in item.$children) {
+            var index;
             if ((index = engine.mouseAreas.indexOf(item.$children[i])) != -1) {
                 engine.mouseAreas.splice(index,1);
             }
