@@ -1302,7 +1302,22 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             return as("qmlpropdef", type, name, qmlproperty());
 
         }
-        
+
+        function qmldefaultprop() {
+            next(); //We trust that the next is "property"
+            next();
+            var type = S.token.value;
+            next();
+            var name = S.token.value;
+            next();
+            expect(":");
+            var from = S.token.pos,
+                stat = statement(),
+                to = S.token.pos;
+            return as("qmldefaultprop", name, stat,
+                    $TEXT.substr(from, to - from));
+        }
+
         function qmlstatement() {
             if (is("keyword", "function")) {
                 var from = S.token.pos;
@@ -1346,6 +1361,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                             $TEXT.substr(from, to - from));
                     }
                 }
+            } else if (is("keyword", "default")) {
+                return qmldefaultprop();
             } else {
                 todo();
             }
@@ -1519,6 +1536,10 @@ function convertToEngine(tree) {
                     case "qmlpropdef":
                         item.$properties[statement[2]] = val;
                         break;
+                    case "qmldefaultprop":
+                        item.$properties[statement[2]] = val;
+                        item.$defaultProperty = val;
+                        break;
                     default:
                         console.log("Unknown statement", statement);
 
@@ -1544,6 +1565,9 @@ function convertToEngine(tree) {
             // todo: bindings are not detected
             return { type: name,
                 value: tree[1] };
+        },
+        "qmldefaultprop": function(name, tree, src) {
+            return bindout(tree, src);
         }
     };
 

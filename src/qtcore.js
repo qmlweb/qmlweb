@@ -139,21 +139,30 @@ function QMLTransientValue(val) {
 
 /**
  * Evaluate binding.
- * @param {Object} scope Scope for evaluation
  * @param {Object} thisObj Object to be this
  * @param {String} src Source code
+ * @param {Object} objectScope Scope for evaluation
+ * @param {Object} [globalScope] A second Scope for evaluation (both scopes properties will be directly accessible)
  * @return {any} Resulting object.
  */
-function evalBinding(scope, thisObj, src) {
+function evalBinding(thisObj, src, objectScope, globalScope) {
     var val;
     // If "with" operator gets deprecated, you just have to create var of
-    // every property in scope, assign the values, and run. That'll be quite
+    // every property in objectScope and globalScope, assign the values, and run. That'll be quite
     // slow :P
     // todo: use thisObj.
-    //console.log("evalBinding scope, this, src: ", scope, thisObj, src);
-    (function() { with(scope) {
-        val = eval(src);
-        } })();
+    //console.log("evalBinding objectScope, this, src: ", objectScope, thisObj, src);
+    (function() {
+        with(objectScope) {
+            if (globalScope) {
+                with (globalScope) {
+                    val = eval(src);
+                }
+            } else {
+                val = eval(src);
+            }
+        }
+    })();
     //console.log("    ->", val);
     return val;
 }
@@ -187,6 +196,16 @@ function construct(meta, parent, engine) {
         item.$$type = meta.$class; // Some debug info, don't depend on existence
         item.$$meta = meta; // Some debug info, don't depend on existence
         return item;
+    } else if (cTree = engine.loadComponent(meta.$class)) {
+        var component = construct(cTree, {}, engine);
+        component.$children[0].$internChildren = component.$children[0].$children;
+        if (component.$children[0].$defaultProperty)
+            createSimpleProperty(component.$children[0], "$children", component.$children[0].$defaultProperty)
+        meta.$component=component.$children[0];
+        item = constructors[component.$children[0].$$type](meta, parent, engine);
+        item.$$type = meta.$class; // Some debug info, don't depend on existence
+        item.$$meta = meta; // Some debug info, don't depend on existence
+        return item;
     } else {
         console.log("No constructor found for " + meta.$class);
     }
@@ -205,7 +224,9 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
                         + propName[0].toUpperCase()
                         + propName.substr(1)
                         + 'Changed',
-        binding;
+        binding,
+        objectScope = altParent || obj,
+        componentScope = objectScope.Component.$scope.getIdScope();
 
     // Extended changesignal capabilities
     obj["$" + changeFuncName] = [];
@@ -216,10 +237,8 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
             return binding();
         }
         if (defVal instanceof QMLBinding) {
-            var scope = altParent || obj;
-
             // todo: enable thisobj
-            return evalBinding(scope, null, defVal.src);
+            return evalBinding(null, defVal.src, objectScope, componentScope);
         } else {
             return defVal;
         }
@@ -236,8 +255,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
         } else if(newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
-            var scope = altParent || obj;
-            binding = evalBinding(scope, null, bindSrc);
+            binding = evalBinding(null, bindSrc, objectScope, componentScope);
 
         } else {
             binding = false;
@@ -247,9 +265,9 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
             if (obj[changeFuncName]) {
                 // Launch onPropertyChanged signal handler
                 // (reading it is enough)
-                evalBinding( altParent || obj,
-                            null,
-                            obj[changeFuncName].src );
+                evalBinding( null,
+                            obj[changeFuncName].src,
+                            objectScope, componentScope );
             }
             
             // Trigger extended changesignal capabilities
@@ -529,12 +547,38 @@ QMLEngine = function (element, options) {
         basePath = path;
     }
 
+
+    // List of available Components
+    eng.components = {};
+    // Load file, parse and construct as Component (.qml or .qml.js)
+    eng.loadComponent = function(name) {
+        if (name in eng.components)
+            return eng.components[name];
+
+        var file = name + ".qml";
+        basePath = file.split("/");
+        basePath[basePath.length - 1] = "";
+        basePath = basePath.join("/");
+
+        var src = getUrlContents(file);
+        if (src=="")
+            return undefined;
+        var tree = parseQML(src);
+        eng.components[name] = tree;
+        return tree;
+    }
+
+    // Stack of Components/Files in whose context elements are being created.
+    // Used to distribute the Component to all it's children without needing
+    // to pass it through all constructors.
+    // The last element in the Stack is the currently relevant context.
+    eng.workingContext = [];
     // Load file, parse and construct (.qml or .qml.js)
     eng.loadFile = function(file) {
         basePath = file.split("/");
         basePath[basePath.length - 1] = "";
         basePath = basePath.join("/");
-        
+
         var src = getUrlContents(file);
         if (options.debugSrc) {
             options.debugSrc(src);
@@ -653,19 +697,13 @@ QMLEngine = function (element, options) {
 
 // Base object for all qml thingies
 function QMLBaseObject(meta, parent, engine) {
-    var item = Object.create(parent.$scope.getIdScope()),
+    var item = meta.$component || Object.create(engine.$getGlobalObj()),
         i,
         prop;
 
     item.$draw = noop;
-
-    item.$scope = {
-        getIdScope: function() {
-            return parent.$scope.getIdScope();
-        },
-        defId: function(id, obj) {
-            parent.$scope.defId(id, obj)
-        } };
+    item.Component = engine.workingContext[engine.workingContext.length-1];
+    item.$defaultProperty = meta.$defaultProperty;
 
     // parent
     item.parent = parent;
@@ -673,7 +711,7 @@ function QMLBaseObject(meta, parent, engine) {
     // id
     if (meta.id) {
         item.id = meta.id;
-        item.$scope.defId(meta.id, item);
+        item.Component.$scope.defId(meta.id, item);
     }
 
     // properties
@@ -691,7 +729,7 @@ function QMLBaseObject(meta, parent, engine) {
                 Left here for reference.
                             
                 item[GETTER](i, function() {
-                    return evalBinding(this, null, prop.value.src);
+                    return evalBinding(null, prop.value.src, this);
                 });
                 item[SETTER](i, function(val) {
                     // val needs to be assigned to property/object/thingie
@@ -704,14 +742,14 @@ function QMLBaseObject(meta, parent, engine) {
                     var scope = this,
                         assignment = "(" + prop.value.src  + ") = $$$val";
                     scope.$$$val = val;
-                    evalBinding(scope, null, assignment);
+                    evalBinding(null, assignment, scope);
 
                     // Way 2:
                     // Evaluate binding to get the target object, then simply
                     // assign. Didn't choose this as I'm afraid it wont work for
                     // primitives.
-                    // var a = evalBinding(this, null,
-                    //                      prop.value.src);
+                    // var a = evalBinding(null,
+                    //                      prop.value.src, scope);
                     // a = val;
                     //
 
@@ -732,7 +770,7 @@ function QMLBaseObject(meta, parent, engine) {
         // function that can then be applied with arguments
         // given to this function to do the job (and get the return
         // values).
-        var func = evalBinding(item, null, method + ";"+name);
+        var func = evalBinding(null, method + ";"+name, item, item.Component.$scope.getIdScope());
         return function() {
             return func.apply(null, arguments);
         };
@@ -751,7 +789,8 @@ function QMLBaseObject(meta, parent, engine) {
     }
 
     // Construct from meta, not from this!
-    item.$children = [];
+    if (!item.$children)
+        item.$children = [];
     if (meta.$children) {
         for (i = 0; i < meta.$children.length; i++) {
             child = construct(meta.$children[i], item, engine);
@@ -914,10 +953,19 @@ function QMLItem(meta, parent, engine) {
                 c.translate(-rotOffsetX, -rotOffsetY);
                 c.restore();
             }
-            for (i = 0; i < this.$children.length; i++) {
-                if (this.$children[i]
-                    && this.$children[i].$draw) {
-                    this.$children[i].$draw(c);
+            if (this.$internChildren != undefined) {
+                for (i = 0; i < this.$internChildren.length; i++) {
+                    if (this.$internChildren[i]
+                        && this.$internChildren[i].$draw) {
+                        this.$internChildren[i].$draw(c);
+                    }
+                }
+            } else {
+                for (i = 0; i < this.$children.length; i++) {
+                    if (this.$children[i]
+                        && this.$children[i].$draw) {
+                        this.$children[i].$draw(c);
+                    }
                 }
             }
         }
@@ -1080,6 +1128,7 @@ function QMLRepeater(meta, parent, engine) {
             applyChildProperties(child.$children[i], index);
     }
     function insertChildren(startIndex, endIndex) {
+        engine.workingContext.push(item.Component);
         for (index=startIndex; index<endIndex; index++) {
             var newMeta = cloneObject(item.delegate.$$meta);
             newMeta.id = newMeta.id+index;
@@ -1087,6 +1136,7 @@ function QMLRepeater(meta, parent, engine) {
             applyChildProperties(newItem, index);
             item.$children.splice(index, 0, newItem);
         }
+        engine.workingContext.pop();
     }
 
     if (item.model instanceof JSItemModel) {
@@ -1267,27 +1317,32 @@ function QMLDocument(meta, parent, engine) {
     parent = {};
     parent.left = 0;
     parent.top = 0;
-    parent.$scope = {
-            // Get scope
-            get: function() {
-                return ids;
-            },
-            // Get base/id scope
-            getIdScope: function() {
-                return ids;
-            },            
-            // Define id
-            defId: function(name, obj) {
-                if (ids[name]) {
-                    console.log("QMLDocument: overriding " + name
-                                + " with object", obj);
-                }
-                ids[name] = obj;
+
+    Component = {};
+    Component.$scope = {
+        // Get scope
+        get: function() {
+            return ids;
+        },
+        // Get base/id scope
+        getIdScope: function() {
+            return ids;
+        },
+        // Define id
+        defId: function(name, obj) {
+            if (ids[name]) {
+                console.log("QMLDocument: overriding " + name
+                            + " with object", obj);
             }
-        };
+            ids[name] = obj;
+        }
+    };
+    engine.workingContext.push(Component);
 
     doc = QMLItem(meta, parent, engine);
     item = doc.$children[0];
+
+    engine.workingContext.pop();
 
     function heightGetter() {
         return item.height; 
