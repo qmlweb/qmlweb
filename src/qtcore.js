@@ -1389,7 +1389,7 @@ function QMLImage(meta, parent, engine) {
     item.$onSourceChanged.push(function(val) {
         item.progress = 0;
         item.status = item.Image.Loading;
-        img.src = eng.$resolvePath(val);
+        img.src = engine.$resolvePath(val);
     });
 
 
