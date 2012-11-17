@@ -184,6 +184,8 @@ function construct(meta, parent, engine) {
             Text: QMLText,
             Rectangle: QMLRectangle,
             Repeater: QMLRepeater,
+            ListModel: QMLListModel,
+            ListElement: QMLListElement,
             QMLDocument: QMLDocument,
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
@@ -711,7 +713,9 @@ QMLEngine = function (element, options) {
 }
 
 // Base object for all qml thingies
-function QMLBaseObject(meta, parent, engine) {
+function QMLBaseObject(meta, parent, engine, options) {
+    if (options == Undefined)
+        options = {};
     var item = meta.$component || Object.create(engine.$getGlobalObj()),
         i,
         prop;
@@ -806,13 +810,15 @@ function QMLBaseObject(meta, parent, engine) {
         }
     }
 
-    // Construct from meta, not from this!
-    if (!item.$children)
-        item.$children = [];
-    if (meta.$children) {
-        for (i = 0; i < meta.$children.length; i++) {
-            child = construct(meta.$children[i], item, engine);
-            item.$children.push( child );
+    if (!options.manualChildHandling) {
+        // Construct from meta, not from this!
+        if (!item.$children)
+            item.$children = [];
+        if (meta.$children) {
+            for (i = 0; i < meta.$children.length; i++) {
+                child = construct(meta.$children[i], item, engine);
+                item.$children.push( child );
+            }
         }
     }
 
@@ -820,8 +826,8 @@ function QMLBaseObject(meta, parent, engine) {
 }
 
 // Item qml object
-function QMLItem(meta, parent, engine) {
-    var item = QMLBaseObject(meta, parent, engine),
+function QMLItem(meta, parent, engine, options) {
+    var item = QMLBaseObject(meta, parent, engine, options),
         child,
         o, i;
     
@@ -1127,7 +1133,7 @@ function QMLRectangle(meta, parent, engine) {
 }
 
 function QMLRepeater(meta, parent, engine) {
-    var item = QMLItem(meta, parent, engine);
+    var item = QMLItem(meta, parent, engine, { manualChildHandling: true });
 
     createSimpleProperty(item, "model", 0);
     createSimpleProperty(item, "count", 0);
@@ -1141,14 +1147,19 @@ function QMLRepeater(meta, parent, engine) {
                     Delegate property is not supported yet, use children.");
 
     applyProperties(meta, item);
+    
+    var model = item.model.$$type == "ListModel" ? item.model.$model : item.model;
 
     function applyChildProperties(child, index) {
-        child.index = index;
-        for (var i in item.model.roleNames) {
+        var indexGetter = function() {
+            return child.parent.index === undefined ? item.$children.indexOf(child) : child.parent.index;
+        }
+        setupGetter(child, "index", indexGetter);
+        for (var i in model.roleNames) {
             var func = eval("var func = function() {\
-                return item.model.data(child.index, \"" + item.model.roleNames[i] + "\");\
-            }; func"); // eval needed in order to evaluate item.model.roleNames[i] now and not on function call
-            Object.defineProperty(child, item.model.roleNames[i], {get: func, enumerable: true});
+                return model.data(child.index, \"" + model.roleNames[i] + "\");\
+            }; func"); // eval needed in order to evaluate model.roleNames[i] now and not on function call
+            setupGetter(child, model.roleNames[i], func);
         }
         for (var i in child.$children)
             applyChildProperties(child.$children[i], index);
@@ -1166,40 +1177,112 @@ function QMLRepeater(meta, parent, engine) {
         item.count = item.$children.length;
     }
 
-    if (item.model instanceof JSItemModel) {
+    if (model instanceof JSItemModel) {
 
-        item.model.dataChangedCallbacks.push(engine.$requestDraw);
-        item.model.rowsInsertedCallbacks.push(insertChildren);
-        item.model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
+        model.dataChangedCallbacks.push(engine.$requestDraw);
+        model.rowsInsertedCallbacks.push(insertChildren);
+        model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
             var vals = item.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
-            for (var i = 0; i < vals; i++) {
+            for (var i = 0; i < vals.length; i++) {
                 item.$children.splice(destinationIndex + i, 0, vals[i]);
             }
             engine.$requestDraw();
         });
-        item.model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
+        model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
             item.$children.splice(startIndex, endIndex - startIndex);
             item.count = item.$children.length;
             engine.$requestDraw();
         });
-        item.model.modelResetCallbacks.push(function() {
+        model.modelResetCallbacks.push(function() {
             item.$children.splice(0, item.$children.length);
-            insertChildren(0, item.model.rowCount());
+            insertChildren(0, model.rowCount());
             engine.$requestDraw();
         });
 
-        insertChildren(0, item.model.rowCount());
-    } else if (typeof item.model == "number") {
-        insertChildren(0, item.model);
+        insertChildren(0, model.rowCount());
+    } else if (typeof model == "number") {
+        insertChildren(0, model);
     }
 
     item.$drawItem = function(c) {
-        if (typeof item.model == "number") {
+        model = item.model.$$type == "ListModel" ? item.model.$model : item.model;
+        if (typeof model == "number") {
             item.$children.splice(0, item.$children.length);
-            insertChildren(0, item.model);
+            insertChildren(0, model);
         }
     }
 
+    return item;
+}
+
+function QMLListModel(meta, parent, engine) {
+    var item = QMLBaseObject(meta, parent, engine);
+
+    item.$model = new JSItemModel();
+
+    item.$model.data = function(index, role) {
+        return item.$children[index][role];
+    }
+    item.$model.rowCount = function() {
+        return item.$children.length;
+    }
+    var roleNames = [];
+    for (i in meta.$children[0]) {
+        if (i != "id" && i != "index" && i[0] != "$")
+            roleNames.push(i);
+    }
+    item.$model.setRoleNames(roleNames);
+    
+    item.append = function(dict) {
+        item.$children.push(dict);
+        item.$model.emitRowsInserted(item.$children.length-1, item.$children.length);
+    }
+    item.clear = function() {
+        item.$children = [];
+        item.$model.emitModelReset();
+    }
+    item.get = function(index) {
+        return item.$children[index];
+    }
+    item.insert = function(index, dict) {
+        item.$children.splice(index, 0, dict);
+        item.$model.emitRowsInserted(index, index+1);
+    }
+    item.move = function(from, to, n) {
+        var vals = item.$children.splice(from, n);
+        for (var i = 0; i < vals.length; i++) {
+            item.$children.splice(to + i, 0, vals[i]);
+        }
+        item.$model.emitRowsMoved(from, from+n, to);
+    }
+    item.remove = function(index) {
+        item.$children.splice(index, 1);
+        item.$model.emitRowsRemoved(index, index+1);
+    }
+    item.set = function(index, dict) {
+        item.$children[index] = dict;
+        engine.$requestDraw();
+    }
+    item.setProperty = function(index, property, value) {
+        item.$children[index][property] = value;
+        engine.$requestDraw();
+    }
+    
+    applyProperties(meta, item);
+    
+    return item;
+}
+
+function QMLListElement(meta, parent, engine) {
+    // QMLListElement can't have children and needs special handling of properties
+    // thus we don't use QMLBaseObject for it
+    var item = {};
+
+    for (i in meta) {
+        if (i[0] != "$")
+            item[i] = meta[i];
+    }
+    
     return item;
 }
 
