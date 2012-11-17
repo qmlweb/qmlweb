@@ -423,9 +423,265 @@ function unboundMethod() {
 
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
-    var // Engine itself
-        eng = {},
-        // Target canvas
+//----------Public Members----------
+    this.fps = 25;
+    this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
+    this.running = false;
+
+    // Mouse Handling
+    this.mouseAreas = [];
+    this.oldMousePos = {x:0, y:0};
+
+    // List of available Components
+    this.components = {};
+
+    // Stack of Components/Files in whose context elements are being created.
+    // Used to distribute the Component to all it's children without needing
+    // to pass it through all constructors.
+    // The last element in the Stack is the currently relevant context.
+    this.workingContext = [];
+
+
+
+//----------Public Methods----------
+    // Start the engine
+    this.start = function()
+    {
+        var i;
+        if (!this.running) {
+            element.addEventListener("touchstart", touchHandler);
+            element.addEventListener("mousemove", mousemoveHandler);
+            this.running = true;
+            tickerId = setInterval(tick, this.$interval);
+            for (i = 0; i < whenStart.length; i++) {
+                whenStart[i]();
+            }
+            this.$draw();
+        }
+    }
+
+    // Stop the engine
+    this.stop = function()
+    {
+        var i;
+        if (this.running) {
+            element.removeEventListener("touchstart", touchHandler);
+            element.removeEventListener("mousemove", mousemoveHandler);
+            this.running = false;
+            clearInterval(tickerId);
+            for (i = 0; i < whenStop.length; i++) {
+                whenStop[i]();
+            }
+        }
+    }
+
+    // Load file, parse and construct (.qml or .qml.js)
+    this.loadFile = function(file) {
+        basePath = file.split("/");
+        basePath[basePath.length - 1] = "";
+        basePath = basePath.join("/");
+        var src = getUrlContents(file);
+        if (options.debugSrc) {
+            options.debugSrc(src);
+        }
+        this.loadQML(src);
+    }
+    // parse and construct qml
+    this.loadQML = function(src) {
+        var tree = parseQML(src);
+        if (options.debugTree) {
+            options.debugTree(tree);
+        }
+        doc = construct(tree, {}, this);
+    }
+
+//Intern
+
+    // Load file, parse and construct as Component (.qml or .qml.js)
+    this.loadComponent = function(name)
+    {
+        if (name in this.components)
+            return this.components[name];
+
+        var file = name + ".qml";
+        basePath = file.split("/");
+        basePath[basePath.length - 1] = "";
+        basePath = basePath.join("/");
+
+        var src = getUrlContents(file);
+        if (src=="")
+            return undefined;
+        var tree = parseQML(src);
+        this.components[name] = tree;
+        return tree;
+    }
+
+    this.$getGlobalObj = function()
+    {
+        return globalObj;
+    }
+
+    this.$getTextMetrics = function(text, fontCss)
+    {
+        canvas.save();
+        canvas.font = fontCss;
+        var metrics = canvas.measureText(text);
+        canvas.restore();
+        return metrics;
+    }
+
+    this.$setBasePath = function(path)
+    {
+        basePath = path;
+    }
+
+    // Return a path to load the file
+    this.$resolvePath = function(file)
+    {
+        if (file.indexOf("://") != -1) {
+            return file;
+        } else if (file.indexOf("/") == 0) {
+            return file;
+        }
+        return basePath + file;
+    }
+
+    this.$registerStart = function(f)
+    {
+        whenStart.push(f);
+    }
+
+    this.$registerStop = function(f)
+    {
+        whenStop.push(f);
+    }
+
+    this.$addTicker = function(t)
+    {
+        tickers.push(t);
+    }
+
+    this.$removeTicker = function(t)
+    {
+        var index = tickers.indexOf(t);
+        if (index != -1) {
+            tickers.splice(index, 1);
+        }
+    }
+
+    this.size = function()
+    {
+        return { width: doc.getWidth(), height: doc.getHeight() };
+    }
+
+    // Requests draw in case something has probably changed.
+    this.$requestDraw = function()
+    {
+        isDirty = true;
+    }
+
+    // Performance measurements
+    this.$perfDraw = function(canvas)
+    {
+        doc.$draw(canvas);
+    }
+
+    this.$draw = function()
+    {
+        var time = new Date();
+
+        element.height = doc.height;
+        element.width = doc.width;
+
+        // Pixel-perfect size
+//         canvasEl.style.height = canvasEl.height + "px";
+//         canvasEl.style.width = canvasEl.width + "px";
+
+        doc.$draw(canvas);
+
+        if (options.drawStat) {
+            options.drawStat((new Date()).getTime() - time.getTime());
+        }
+    }
+
+
+//----------Private Methods----------
+    // In JS we cannot easily access public members from
+    // private members so self acts as a bridge
+    var self = this;
+    
+    // Listen also to touchstart events on supporting devices
+    // Makes clicks more responsive (do not wait for click event anymore)
+    function touchHandler(e)
+    {
+        // preventDefault also disables pinching and scrolling while touching
+        // on qml application
+        e.preventDefault();
+        var at = {
+            layerX: e.touches[0].pageX - element.offsetLeft,
+            layerY: e.touches[0].pageY - element.offsetTop,
+            button: 1
+        }
+        element.onclick(at);
+
+    }
+
+    function mousemoveHandler(e)
+    {
+        for (i in self.mouseAreas) {
+            var l = self.mouseAreas[i];
+            if (l && l.onExited && l.hoverEnabled
+                  && (self.oldMousePos.x >= l.left
+                      && self.oldMousePos.x <= l.right
+                      && self.oldMousePos.y >= l.top
+                      && self.oldMousePos.y <= l.bottom)
+                  && !(e.pageX - element.offsetLeft >= l.left
+                       && e.pageX - element.offsetLeft <= l.right
+                       && e.pageY - element.offsetTop >= l.top
+                       && e.pageY - element.offsetTop <= l.bottom) )
+                // We were hovering the Element before but aren't anymore
+                // Method will be invoked from within the getter
+                // tilt to prevent minimization
+                tilt(l.onExited);
+        }
+        for (i in self.mouseAreas) {
+            var l = self.mouseAreas[i];
+            if (l && l.onEntered && l.hoverEnabled
+                  && (e.pageX - element.offsetLeft >= l.left
+                      && e.pageX - element.offsetLeft <= l.right
+                      && e.pageY - element.offsetTop >= l.top
+                      && e.pageY - element.offsetTop <= l.bottom)
+                  && !(self.oldMousePos.x >= l.left
+                       && self.oldMousePos.x <= l.right
+                       && self.oldMousePos.y >= l.top
+                       && self.oldMousePos.y <= l.bottom))
+                // We are now hovering the Element and weren't before
+                // Method will be invoked from within the getter
+                // tilt to prevent minimization
+                tilt(l.onEntered);
+        }
+        self.oldMousePos = { x: e.pageX - element.offsetLeft,
+                            y: e.pageY - element.offsetTop };
+    }
+
+    function tick()
+    {
+        var i,
+            now = (new Date).getTime(),
+            elapsed = now - lastTick;
+        lastTick = now;
+        for (i = 0; i < tickers.length; i++) {
+            tickers[i](now, elapsed);
+        }
+        if (isDirty) {
+            isDirty = false;
+            self.$draw();
+        }
+    }
+
+
+//----------Private Members----------
+    var // Target canvas
         canvas = element.getContext('2d'),
         // Global Qt object
         globalObj = Object.create(QMLGlobalObject),
@@ -443,7 +699,10 @@ QMLEngine = function (element, options) {
         // Base path of qml engine (used for resource loading)
         basePath,
         i;
-    
+
+
+//----------Construct----------
+
     options = options || {};
 
     if (options.debugConsole) {
@@ -455,13 +714,12 @@ QMLEngine = function (element, options) {
         };
     }
 
-    eng.mouseAreas = [];
     // Register mousehandler for element
     element.onclick = function(e) {
-        if (eng.running) {
+        if (self.running) {
             var i;
-            for (i in eng.mouseAreas) {
-                var l = eng.mouseAreas[i];
+            for (i in self.mouseAreas) {
+                var l = self.mouseAreas[i];
                 var mouse = {
                     accepted: true,
                     button: e.button == 0 ? l.Qt.LeftButton :
@@ -485,231 +743,12 @@ QMLEngine = function (element, options) {
                     l.mouse = mouse;
                     tilt(l.onClicked); // use tilt to prevent minimization
                     l.mouse = Undefined;
-                    eng.$requestDraw();
+                    self.$requestDraw();
                     break;
                 }
             }
         }
     }
-
-    // Listen also to touchstart events on supporting devices
-    // Makes clicks more responsive (do not wait for click event anymore)
-    function touchHandler(e) {
-        // preventDefault also disables pinching and scrolling while touching
-        // on qml application
-        e.preventDefault();
-        var at = {
-            layerX: e.touches[0].pageX - element.offsetLeft,
-            layerY: e.touches[0].pageY - element.offsetTop,
-            button: 1
-        }
-        element.onclick(at);
-
-    };
-
-    eng.oldMousePos= {x:0, y:0};
-    function mousemoveHandler(e) {
-        for (i in eng.mouseAreas) {
-            var l = eng.mouseAreas[i];
-            if (l && l.onExited && l.hoverEnabled
-                  && (eng.oldMousePos.x >= l.left
-                      && eng.oldMousePos.x <= l.right
-                      && eng.oldMousePos.y >= l.top
-                      && eng.oldMousePos.y <= l.bottom)
-                  && !(e.pageX - element.offsetLeft >= l.left
-                       && e.pageX - element.offsetLeft <= l.right
-                       && e.pageY - element.offsetTop >= l.top
-                       && e.pageY - element.offsetTop <= l.bottom) ) 
-                // We were hovering the Element before but aren't anymore
-                // Method will be invoked from within the getter
-                // tilt to prevent minimization
-                tilt(l.onExited); 
-        }
-        for (i in eng.mouseAreas) {
-            var l = eng.mouseAreas[i];
-            if (l && l.onEntered && l.hoverEnabled
-                  && (e.pageX - element.offsetLeft >= l.left
-                      && e.pageX - element.offsetLeft <= l.right
-                      && e.pageY - element.offsetTop >= l.top
-                      && e.pageY - element.offsetTop <= l.bottom)
-                  && !(eng.oldMousePos.x >= l.left
-                       && eng.oldMousePos.x <= l.right
-                       && eng.oldMousePos.y >= l.top
-                       && eng.oldMousePos.y <= l.bottom))
-                // We are now hovering the Element and weren't before
-                // Method will be invoked from within the getter
-                // tilt to prevent minimization
-                tilt(l.onEntered); 
-        }
-        eng.oldMousePos = { x: e.pageX - element.offsetLeft,
-                            y: e.pageY - element.offsetTop };
-    }
-
-    eng.running = false;
-
-    eng.$getGlobalObj = function() { return globalObj; }
-
-    eng.fps = 25;
-    eng.$interval = Math.floor(1000 / eng.fps); // Math.floor, causes bugs to timing?
-
-    eng.$getTextMetrics = function(text, fontCss) {
-        canvas.save();
-        canvas.font = fontCss;
-        var metrics = canvas.measureText(text);
-        canvas.restore();
-        return metrics;
-    }
-
-    eng.$setBasePath = function(path) {
-        basePath = path;
-    }
-
-
-    // List of available Components
-    eng.components = {};
-    // Load file, parse and construct as Component (.qml or .qml.js)
-    eng.loadComponent = function(name) {
-        if (name in eng.components)
-            return eng.components[name];
-
-        var file = name + ".qml";
-        basePath = file.split("/");
-        basePath[basePath.length - 1] = "";
-        basePath = basePath.join("/");
-
-        var src = getUrlContents(file);
-        if (src=="")
-            return undefined;
-        var tree = parseQML(src);
-        eng.components[name] = tree;
-        return tree;
-    }
-
-    // Stack of Components/Files in whose context elements are being created.
-    // Used to distribute the Component to all it's children without needing
-    // to pass it through all constructors.
-    // The last element in the Stack is the currently relevant context.
-    eng.workingContext = [];
-    // Load file, parse and construct (.qml or .qml.js)
-    eng.loadFile = function(file) {
-        basePath = file.split("/");
-        basePath[basePath.length - 1] = "";
-        basePath = basePath.join("/");
-
-        var src = getUrlContents(file);
-        if (options.debugSrc) {
-            options.debugSrc(src);
-        }
-        this.loadQML(src);
-    }
-    // parse and construct qml
-    eng.loadQML = function(src) {
-        var tree = parseQML(src);
-        if (options.debugTree) {
-            options.debugTree(tree);
-        }
-        doc = construct(tree, {}, this);
-    }
-    
-    // Return a path to load the file
-    eng.$resolvePath = function(file) {
-        if (file.indexOf("://") != -1) {
-            return file;
-        } else if (file.indexOf("/") == 0) {
-            return file;
-        }
-        return basePath + file;
-    }
-    
-    function tick() {
-        var i,
-            now = (new Date).getTime(),
-            elapsed = now - lastTick;
-        lastTick = now;
-        for (i = 0; i < tickers.length; i++) {
-            tickers[i](now, elapsed);
-        }
-        if (isDirty) {
-            isDirty = false;
-            eng.$draw();
-        }
-    }
-    
-    eng.$registerStart = function(f) {
-        whenStart.push(f);
-    }
-    eng.$registerStop = function(f) {
-        whenStop.push(f);
-    }
-
-    eng.$addTicker = function(t) {
-        tickers.push(t);
-    }
-    eng.$removeTicker = function(t) {
-        var index = tickers.indexOf(t);
-        if (index != -1) {
-            tickers.splice(index, 1);
-        }
-    }
-    
-    // Requests draw in case something has probably changed.
-    eng.$requestDraw = function() {
-        isDirty = true;
-    }
-    
-    eng.$draw = function() {
-        var time = new Date();
-
-        element.height = doc.height;
-        element.width = doc.width;
-
-        // Pixel-perfect size
-//        canvasEl.style.height = canvasEl.height + "px";
-//        canvasEl.style.width = canvasEl.width + "px";
-
-        doc.$draw(canvas);
-
-        if (options.drawStat) {
-            options.drawStat((new Date()).getTime() - time.getTime());
-        }
-    }
-
-    eng.size = function() {
-        return {width: doc.getWidth(), height: doc.getHeight()};
-    }
-
-    eng.start = function() {
-        var i;
-        if (!this.running) {
-            element.addEventListener("touchstart", touchHandler);
-            element.addEventListener("mousemove", mousemoveHandler);
-            this.running = true;
-            tickerId = setInterval(tick, this.$interval);
-            for (i = 0; i < whenStart.length; i++) {
-                whenStart[i]();
-            }
-            this.$draw();
-        }
-    }
-    eng.stop = function() {
-        var i;
-        if (this.running) {
-            element.removeEventListener("touchstart", touchHandler);
-            element.removeEventListener("mousemove", mousemoveHandler);
-            this.running = false;
-            clearInterval(tickerId);
-            for (i = 0; i < whenStop.length; i++) {
-                whenStop[i]();
-            }
-        }
-    }
-    
-    // Performance measurements
-    eng.$perfDraw = function(canvas) {
-        doc.$draw(canvas);
-    }
-    
-    return eng;
 }
 
 // Base object for all qml thingies

@@ -239,7 +239,7 @@ function loadFromSrcEl(tree) {
     if (eng && eng.running) {
         eng.stop();
     }
-    eng = QMLEngine(canvasEl, engOpts);
+    eng = new QMLEngine(canvasEl, engOpts);
     eng.$setBasePath("./");
     eng.loadQML(srcEl.value);
     eng.start();
@@ -253,7 +253,7 @@ window.onhashchange = function() {
         if (eng && eng.running) {
             eng.stop();
         }
-        eng = QMLEngine(canvasEl, engOpts);
+        eng = new QMLEngine(canvasEl, engOpts);
         eng.loadFile(curFile);
         eng.start();
         

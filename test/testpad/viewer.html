@@ -119,7 +119,7 @@ window.onhashchange = function() {
             eng.stop();
         }
         
-        eng = QMLEngine(canvasEl, engOpts);
+        eng = new QMLEngine(canvasEl, engOpts);
         eng.loadFile(curFile);
         eng.start();
 
