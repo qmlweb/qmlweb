@@ -202,9 +202,12 @@ function construct(meta, parent, engine) {
         var component = construct(cTree, {}, engine);
         item = component.$children[0];
         item.$internChildren = component.$children[0].$children;
-        if (item.$defaultProperty)
-            createSimpleProperty(item, "$children", component.$children[0].$defaultProperty);
         meta.$componentMeta = cTree.$children[0];
+        if (cTree.$children[0].$defaultProperty) {
+            var bindSrc = "function $Qbc(newVal) {" + cTree.$children[0].$defaultProperty.src
+                            + " = newVal; };$Qbc";
+            item.$applyChild = evalBinding(item, bindSrc, item, item.Component.$scope.getIdScope());
+        }
         QMLBaseObject.call(item, meta, parent, engine);
         applyProperties(meta, item);
         item.$$type = meta.$class; // Some debug info, don't depend on existence
@@ -773,24 +776,40 @@ QMLEngine = function (element, options) {
 }
 
 // Base object for all qml thingies
-function QMLBaseObject(meta, parent, engine, options) {
-    if (options == Undefined)
-        options = {};
+function QMLBaseObject(meta, parent, engine) {
     var i,
-        prop;
+        prop,
+        self = this;
 
     if (!this.$draw)
         this.$draw = noop;
     this.Component = engine.workingContext[engine.workingContext.length-1];
-    this.$defaultProperty = meta.$defaultProperty;
 
     // parent
     this.parent = parent;
-        
+
     // id
     if (meta.id) {
         this.id = meta.id;
         this.Component.$scope.defId(meta.id, this);
+    }
+
+    // children
+    this.$children = [];
+    function setChildren(childMeta) {
+        child = construct(childMeta, this, engine);
+        this.$children.push( child );
+    }
+    function getChildren() {
+        return this.$children;
+    }
+    setupGetterSetter(this, "children", getChildren, setChildren);
+
+    //defaultProperty
+    if (!this.$applyChild) {
+        this.$applyChild = function(newVal) {
+            this.children = newVal;
+        };
     }
 
     // properties
@@ -806,7 +825,7 @@ function QMLBaseObject(meta, parent, engine, options) {
                 /* Aliases are not yet supported.
                 Following code has never been executed.
                 Left here for reference.
-                            
+
                 this[GETTER](i, function() {
                     return evalBinding(null, prop.value.src, this);
                 });
@@ -840,9 +859,9 @@ function QMLBaseObject(meta, parent, engine, options) {
             }
         }
     }
-    
+
     // todo: handle alias property assignments here?
-    
+
     // methods
     function createMethod(item, name, method) {
         // Trick: evaluate method with bindings to get pointer to
@@ -862,7 +881,7 @@ function QMLBaseObject(meta, parent, engine, options) {
             this[i] = createMethod(this, i, meta.$functions[i]);
         }
     }
-    
+
     // signals
     if (meta.$signals) {
         for (i in meta.$signals) {
@@ -870,22 +889,20 @@ function QMLBaseObject(meta, parent, engine, options) {
         }
     }
 
-    if (!options.manualChildHandling) {
-        // Construct from meta, not from this!
-        if (!this.$children)
-            this.$children = [];
-        if (meta.$children) {
-            for (i = 0; i < meta.$children.length; i++) {
-                child = construct(meta.$children[i], this, engine);
-                this.$children.push( child );
-            }
+    // Construct from meta, not from this!
+    if (meta.$children) {
+        for (i = 0; i < meta.$children.length; i++) {
+            // This will call the setter of the defaultProperty
+            // In case of the default property being children
+            // (normal case) it will add a new child
+            this.$applyChild(meta.$children[i]);
         }
     }
 }
 
 // Item qml object
-function QMLItem(meta, parent, engine, options) {
-    QMLBaseObject.call(this, meta, parent, engine, options);
+function QMLItem(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
     var child,
         o, i;
     
@@ -1184,19 +1201,23 @@ function QMLRectangle(meta, parent, engine) {
 }
 
 function QMLRepeater(meta, parent, engine) {
-    QMLItem.call(this, meta, parent, engine, { manualChildHandling: true });
+    this.$applyChild = function(newVal) {
+        this.delegate = newVal;
+    }
+
+    QMLItem.call(this, meta, parent, engine);
     var self = this;
 
     createSimpleProperty(this, "model", 0);
     createSimpleProperty(this, "count", 0);
     
-    if (!this.$children)
-        this.$children = [];
-    if (meta.$children)
-        var delegateMeta = meta.$children[0];
-    else
-        console.log("Can't create Repeater without delegate. \
-                    Delegate property is not supported yet, use children.");
+//     if (!this.$children)
+//         this.$children = [];
+//     if (meta.$children)
+//         var delegateMeta = meta.$children[0];
+//     else
+//         console.log("Can't create Repeater without delegate. \
+//                     Delegate property is not supported yet, use children.");
 
     applyProperties(meta, this);
     
@@ -1213,13 +1234,15 @@ function QMLRepeater(meta, parent, engine) {
             }; func"); // eval needed in order to evaluate model.roleNames[i] now and not on function call
             setupGetter(child, model.roleNames[i], func);
         }
+        for (var i in child.$internChildren)
+            applyChildProperties(child.$internChildren[i], index);
         for (var i in child.$children)
             applyChildProperties(child.$children[i], index);
     }
     function insertChildren(startIndex, endIndex) {
         engine.workingContext.push(self.Component);
         for (var index = startIndex; index < endIndex; index++) {
-            var newMeta = cloneObject(delegateMeta);
+            var newMeta = cloneObject(self.delegate);
             newMeta.id = newMeta.id + index;
             var newItem = construct(newMeta, self, engine);
             applyChildProperties(newItem, index);
