@@ -215,6 +215,34 @@ function construct(meta, parent, engine) {
     }
 }
 
+function createFunction(obj, funcName) {
+    var func;
+
+    function getter() {
+        return func;
+    }
+
+    function setter(newVal) {
+        if (!(newVal instanceof QMLBinding))
+            return;
+        var src;
+        if (newVal.src.search("function") == 0) {
+            // The src begins already with "function", so no need to put "function" around it
+            src = newVal.src + "; " + funcName;
+        } else {
+            // The src contains only the function body, so we need to put "function" around it
+            src = "var func = function() {"
+                    + newVal.src
+                    + "}; func";
+        }
+        var componentScope = obj.Component.$scope.getIdScope();
+
+        func = evalBinding(null, src, obj, componentScope);
+    }
+
+    setupGetterSetter(obj, funcName, getter, setter);
+}
+
 /**
  * Create property getters and setters for object.
  * @param {Object} obj Object for which gsetters will be set
@@ -638,10 +666,7 @@ QMLEngine = function (element, options) {
                        && e.pageX - element.offsetLeft <= l.right
                        && e.pageY - element.offsetTop >= l.top
                        && e.pageY - element.offsetTop <= l.bottom) )
-                // We were hovering the Element before but aren't anymore
-                // Method will be invoked from within the getter
-                // tilt to prevent minimization
-                tilt(l.onExited);
+                l.onExited();
         }
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
@@ -654,10 +679,7 @@ QMLEngine = function (element, options) {
                        && self.oldMousePos.x <= l.right
                        && self.oldMousePos.y >= l.top
                        && self.oldMousePos.y <= l.bottom))
-                // We are now hovering the Element and weren't before
-                // Method will be invoked from within the getter
-                // tilt to prevent minimization
-                tilt(l.onEntered);
+                l.onEntered();
         }
         self.oldMousePos = { x: e.pageX - element.offsetLeft,
                             y: e.pageY - element.offsetTop };
@@ -740,7 +762,7 @@ QMLEngine = function (element, options) {
                 && (e.offsetY || e.layerY) <= l.bottom) {
                     // Dispatch mouse event
                     l.mouse = mouse;
-                    tilt(l.onClicked); // use tilt to prevent minimization
+                    l.onClicked();
                     l.mouse = Undefined;
                     self.$requestDraw();
                     break;
@@ -1401,9 +1423,9 @@ function QMLMouseArea(meta, parent, engine) {
 
     createSimpleProperty(this, "acceptedButtons", QMLGlobalObject.Qt.LeftButton);
     createSimpleProperty(this, "enabled", true);
-    createSimpleProperty(this, "onClicked", Undefined);
-    createSimpleProperty(this, "onEntered", Undefined);
-    createSimpleProperty(this, "onExited", Undefined);
+    createFunction(this, "onClicked");
+    createFunction(this, "onEntered");
+    createFunction(this, "onExited");
     createSimpleProperty(this, "hoverEnabled", false);
 
     applyProperties(meta, this);
@@ -1497,7 +1519,7 @@ function QMLTimer(meta, parent, engine) {
                          
     // Create trigger as simple property. Reading the property triggers
     // the function!
-    createSimpleProperty(this, "onTriggered", Undefined);
+    createFunction(this, "onTriggered");
                      
     applyProperties(meta, this);
 
@@ -1532,8 +1554,7 @@ function QMLTimer(meta, parent, engine) {
     
     function trigger() {
         // Trigger this.
-        // Use tilt to prevent minimization
-        tilt(self.onTriggered);
+        self.onTriggered();
 
         engine.$requestDraw();
     }
