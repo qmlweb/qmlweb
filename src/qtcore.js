@@ -1130,6 +1130,7 @@ function QMLRepeater(meta, parent, engine) {
     var item = QMLItem(meta, parent, engine);
 
     createSimpleProperty(item, "model", 0);
+    createSimpleProperty(item, "count", 0);
     
     if (!item.$children)
         item.$children = [];
@@ -1162,6 +1163,7 @@ function QMLRepeater(meta, parent, engine) {
             item.$children.splice(index, 0, newItem);
         }
         engine.workingContext.pop();
+        item.count = item.$children.length;
     }
 
     if (item.model instanceof JSItemModel) {
@@ -1177,6 +1179,7 @@ function QMLRepeater(meta, parent, engine) {
         });
         item.model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
             item.$children.splice(startIndex, endIndex - startIndex);
+            item.count = item.$children.length;
             engine.$requestDraw();
         });
         item.model.modelResetCallbacks.push(function() {
