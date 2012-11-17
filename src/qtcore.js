@@ -1130,7 +1130,14 @@ function QMLRepeater(meta, parent, engine) {
     var item = QMLItem(meta, parent, engine);
 
     createSimpleProperty(item, "model", 0);
-    createSimpleProperty(item, "delegate", {});
+    
+    if (!item.$children)
+        item.$children = [];
+    if (meta.$children)
+        var delegateMeta = meta.$children[0];
+    else
+        console.log("Can't create Repeater without delegate. \
+                    Delegate property is not supported yet, use children.");
 
     applyProperties(meta, item);
 
@@ -1148,7 +1155,7 @@ function QMLRepeater(meta, parent, engine) {
     function insertChildren(startIndex, endIndex) {
         engine.workingContext.push(item.Component);
         for (var index = startIndex; index < endIndex; index++) {
-            var newMeta = cloneObject(item.delegate.$$meta);
+            var newMeta = cloneObject(delegateMeta);
             newMeta.id = newMeta.id + index;
             var newItem = construct(newMeta, item, engine);
             applyChildProperties(newItem, index);
@@ -1169,15 +1176,11 @@ function QMLRepeater(meta, parent, engine) {
             engine.$requestDraw();
         });
         item.model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
-            var removed = item.$children.splice(startIndex, endIndex - startIndex);
-            for (var index in removed)
-                removeMouseHandlers(removed[index]);
+            item.$children.splice(startIndex, endIndex - startIndex);
             engine.$requestDraw();
         });
         item.model.modelResetCallbacks.push(function() {
-            var removed = item.$children.splice(0, item.$children.length);
-            for (var index in removed)
-                removeMouseHandlers(removed[index]);
+            item.$children.splice(0, item.$children.length);
             insertChildren(0, item.model.rowCount());
             engine.$requestDraw();
         });
@@ -1189,26 +1192,10 @@ function QMLRepeater(meta, parent, engine) {
 
     item.$drawItem = function(c) {
         if (typeof item.model == "number") {
-            var removed = item.$children.splice(0, item.$children.length);
-            for (var index in removed)
-                removeMouseHandlers(removed[index]);
+            item.$children.splice(0, item.$children.length);
             insertChildren(0, item.model);
         }
     }
-
-    item.delegate.parent.$children.splice( item.delegate.parent.$children.indexOf(item.delegate), 1); //Remove delegate-prototype
-
-    function removeMouseHandlers(item) {
-        for (var i in item.$children) {
-            var index;
-            if ((index = engine.mouseAreas.indexOf(item.$children[i])) != -1) {
-                engine.mouseAreas.splice(index,1);
-            }
-
-            removeMouseHandlers(item.$children[i]);
-        }
-    }
-    removeMouseHandlers(item.delegate);
 
     return item;
 }
