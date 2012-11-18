@@ -37,4 +37,8 @@
 {
     "file": "parsingdev.qml",
     "title": "* Parser development QML"
+},
+{
+    "file": "repeater.qml",
+    "title": "* Repeater test"
 } ]
