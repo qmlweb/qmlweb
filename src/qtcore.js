@@ -1257,19 +1257,19 @@ function QMLRepeater(meta, parent, engine) {
         model.dataChangedCallbacks.push(engine.$requestDraw);
         model.rowsInsertedCallbacks.push(insertChildren);
         model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
-            var vals = this.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
+            var vals = self.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
             for (var i = 0; i < vals.length; i++) {
-                this.$children.splice(destinationIndex + i, 0, vals[i]);
+                self.$children.splice(destinationIndex + i, 0, vals[i]);
             }
             engine.$requestDraw();
         });
         model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
-            this.$children.splice(startIndex, endIndex - startIndex);
-            this.count = this.$children.length;
+            self.$children.splice(startIndex, endIndex - startIndex);
+            self.count = self.$children.length;
             engine.$requestDraw();
         });
         model.modelResetCallbacks.push(function() {
-            this.$children.splice(0, this.$children.length);
+            self.$children.splice(0, self.$children.length);
             insertChildren(0, model.rowCount());
             engine.$requestDraw();
         });
