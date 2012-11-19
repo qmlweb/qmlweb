@@ -1221,8 +1221,7 @@ function QMLRepeater(meta, parent, engine) {
         setupGetter(child, "index", indexGetter);
         for (var i in model.roleNames) {
             var func = (function(i) { return function() {
-                    return model.data(child.index,
-                                      '"' + model.roleNames[i] + '"');
+                    return model.data(child.index, model.roleNames[i]);
                     }
                 })(i);
             setupGetter(child, model.roleNames[i], func);
