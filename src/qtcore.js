@@ -946,7 +946,7 @@ function QMLItem(meta, parent, engine) {
         if ((t = this.anchors.centerIn) !== Undefined) {
             return t.horizontalCenter - this.$width / 2;
         }
-        return this.x + parent.left;
+        return this.x + this.parent.left;
     }
     //this[GETTER]("left", leftGetter);
     setupGetter(this, "left", leftGetter);
@@ -974,7 +974,7 @@ function QMLItem(meta, parent, engine) {
         if ((t = this.anchors.centerIn) !== Undefined) {
             return t.verticalCenter - this.$height / 2;
         }
-        return this.y + parent.top;
+        return this.y + this.parent.top;
     }
     //this[GETTER]("top", topGetter);
     setupGetter(this, "top", topGetter);
