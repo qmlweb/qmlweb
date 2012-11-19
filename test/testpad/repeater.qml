@@ -39,9 +39,9 @@ Rectangle {
         model: tModel
         
         TestComponent {
-            x: 5 + 200 * (index %2)
+            x: 5 + (width + 10) * (index %2)
             y: 5 + 100 * Math.floor(index /2)
-            width: 190
+            width: page.width / 2 - 10
             height: 90
 
             Text {

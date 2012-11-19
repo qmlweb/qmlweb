@@ -259,8 +259,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
                         + propName.substr(1)
                         + 'Changed',
         binding,
-        objectScope = altParent || obj,
-        componentScope = objectScope.Component.$scope.getIdScope();
+        objectScope = altParent || obj;
 
     // Extended changesignal capabilities
     obj["$" + changeFuncName] = [];
@@ -272,7 +271,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
         }
         if (defVal instanceof QMLBinding) {
             // todo: enable thisobj
-            return evalBinding(null, defVal.src, objectScope, componentScope);
+            return evalBinding(null, defVal.src, objectScope, objectScope.Component.$scope.getIdScope());
         } else {
             return defVal;
         }
@@ -289,7 +288,7 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
         } else if(newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
-            binding = evalBinding(null, bindSrc, objectScope, componentScope);
+            binding = evalBinding(null, bindSrc, objectScope, objectScope.Component.$scope.getIdScope());
 
         } else {
             binding = false;
@@ -299,9 +298,11 @@ function createSimpleProperty(obj, propName, defVal, altParent) {
             if (obj[changeFuncName]) {
                 // Launch onPropertyChanged signal handler
                 // (reading it is enough)
+                //TODO: The id scope for the signal-handler is now the one of the property,
+                // which is not necessarily the right one for the signal handler
                 evalBinding( null,
                             obj[changeFuncName].src,
-                            objectScope, componentScope );
+                            objectScope, objectScope.Component.$scope.getIdScope() );
             }
             
             // Trigger extended changesignal capabilities
