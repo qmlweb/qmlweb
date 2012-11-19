@@ -659,6 +659,7 @@ QMLEngine = function (element, options) {
 
     function mousemoveHandler(e)
     {
+        var i;
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
             if (l && l.onExited && l.hoverEnabled
@@ -1305,7 +1306,7 @@ function QMLListModel(meta, parent, engine) {
         return self.$children.length;
     }
     var roleNames = [];
-    for (i in meta.$children[0]) {
+    for (var i in meta.$children[0]) {
         if (i != "id" && i != "index" && i[0] != "$")
             roleNames.push(i);
     }
@@ -1352,7 +1353,7 @@ function QMLListModel(meta, parent, engine) {
 function QMLListElement(meta, parent, engine) {
     // QMLListElement can't have children and needs special handling of properties
     // thus we don't use QMLBaseObject for it
-    for (i in meta) {
+    for (var i in meta) {
         if (i[0] != "$")
             this[i] = meta[i];
     }
