@@ -1222,7 +1222,7 @@ function QMLRepeater(meta, parent, engine) {
 
     applyProperties(meta, this);
     
-    var model = this.model.$$type == "ListModel" ? this.model.$model : this.model;
+    var model = this.model instanceof QMLListModel ? this.model.$model : this.model;
 
     function applyChildProperties(child, index) {
         var indexGetter = function() {
@@ -1281,7 +1281,7 @@ function QMLRepeater(meta, parent, engine) {
     }
 
     this.$drawItem = function(c) {
-        model = this.model.$$type == "ListModel" ? this.model.$model : this.model;
+        model = this.model instanceof QMLListModel ? this.model.$model : this.model;
         if (typeof model == "number") {
             this.$children.splice(0, this.$children.length);
             insertChildren(0, model);
