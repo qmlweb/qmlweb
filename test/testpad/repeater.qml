@@ -46,7 +46,7 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                text: label
+                text: label + " (Element " + index + "/" + rep.count + ")"
             }
         }
     }
