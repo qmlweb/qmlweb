@@ -381,7 +381,7 @@ function applyProperties(meta, item, skip) {
             continue;
         }
         // skip global id's and internal values
-        if (i == "id" || i == "anchors" || i[0] == "$") {
+        if (i == "id" || i[0] == "$") {
             continue;
         }
         // no property should begin with uppercase letter -- those indicate
@@ -920,11 +920,14 @@ function QMLItem(meta, parent, engine) {
     setupSetter(this, 'margins', marginsSetter);
 
     // Assign values from meta
-    if (meta.anchors) {
-        for (i in meta.anchors) {
-            createSimpleProperty(this.anchors, i, meta.anchors[i], this);
-        }
-    }
+    createSimpleProperty(this.anchors, "top", Undefined, this);
+    createSimpleProperty(this.anchors, "bottom", Undefined, this);
+    createSimpleProperty(this.anchors, "left", Undefined, this);
+    createSimpleProperty(this.anchors, "right", Undefined, this);
+    createSimpleProperty(this.anchors, "fill", Undefined, this);
+    createSimpleProperty(this.anchors, "centerIn", Undefined, this);
+    createSimpleProperty(this.anchors, "horizontalCenter", Undefined, this);
+    createSimpleProperty(this.anchors, "verticalCenter", Undefined, this);
 
     // Define anchor getters, returning absolute position
     // left, right, top, bottom, horizontalCenter, verticalCenter, baseline
