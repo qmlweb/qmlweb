@@ -76,8 +76,6 @@ var QMLGlobalObject = {
     SETTER = "__defineSetter__",
     Undefined = undefined;
 
-//Object.prototype[GETTER] = function(){};    
-
 /**
  * Inheritance helper
  */
@@ -191,7 +189,8 @@ function construct(meta, parent, engine) {
             SequentialAnimation: QMLSequentialAnimation,
             NumberAnimation: QMLNumberAnimation
         },
-        item;
+        item,
+        cTree;
         
     if (meta.$class in constructors) {
         item = new constructors[meta.$class](meta, parent, engine);
@@ -952,13 +951,11 @@ function QMLItem(meta, parent, engine) {
         }
         return this.x + this.parent.left;
     }
-    //this[GETTER]("left", leftGetter);
     setupGetter(this, "left", leftGetter);
         
     function rightGetter() {
         return this.left + this.$width;
     }
-    //this[GETTER]("right", rightGetter);
     setupGetter(this, "right", rightGetter);
     
     function topGetter() {
@@ -980,31 +977,26 @@ function QMLItem(meta, parent, engine) {
         }
         return this.y + this.parent.top;
     }
-    //this[GETTER]("top", topGetter);
     setupGetter(this, "top", topGetter);
     
     function bottomGetter() {
         return this.top + this.$height;
     }
-    //this[GETTER]("bottom", bottomGetter);
     setupGetter(this, "bottom", bottomGetter);
     
     function hzGetter() {
         return this.left + this.$width / 2;
     }
-    //this[GETTER]("horizontalCenter", hzGetter);
     setupGetter(this, "horizontalCenter", hzGetter);
     
     function vzGetter() {
         return this.top + this.$height / 2;
     }
-    //this[GETTER]("verticalCenter", vzGetter);
     setupGetter(this, "verticalCenter", vzGetter);
     
     function blGetter() {
         return this.top;
     }
-    //this[GETTER]("baseline", blGetter);
     setupGetter(this, "baseline", blGetter);
     
     // Anchoring helpers; $width + $height => Object draw width + height
@@ -1015,7 +1007,6 @@ function QMLItem(meta, parent, engine) {
         };
         return this.implicitWidth || this.width;
     }
-    //this[GETTER]("$width", _widthGetter);
     setupGetter(this, "$width", _widthGetter);
     function _heightGetter() {
             var t;
@@ -1024,7 +1015,6 @@ function QMLItem(meta, parent, engine) {
             };
             return this.implicitHeight || this.height;
     }
-    //this[GETTER]("$height", _heightGetter);
     setupGetter(this, "$height", _heightGetter);
     
     createSimpleProperty(this, "height", 0);
@@ -1133,7 +1123,6 @@ function QMLText(meta, parent, engine) {
         lastH = height;
         return height;
     }
-    //this[GETTER]("implicitHeight", ihGetter);
     setupGetter(this, "implicitHeight", ihGetter);
     
     // Optimization: Remember last text
@@ -1151,19 +1140,16 @@ function QMLText(meta, parent, engine) {
         lastW = width;
         return width;
     }
-    //this[GETTER]("implicitWidth", iwGetter);
     setupGetter(this, "implicitWidth", iwGetter);
     
     function widthGetter() {
         return this.implicitWidth;
     }
-    //this[GETTER]("width", widthGetter);
     setupGetter(this, "width", widthGetter);
     
     function heightGetter() {
         return this.implicitHeight;
     }
-    //this[GETTER]("height", heightGetter);
     setupGetter(this, "height", heightGetter);
 
     applyProperties(meta, this);
@@ -1234,9 +1220,11 @@ function QMLRepeater(meta, parent, engine) {
         }
         setupGetter(child, "index", indexGetter);
         for (var i in model.roleNames) {
-            var func = eval("var func = function() {\
-                return model.data(child.index, \"" + model.roleNames[i] + "\");\
-            }; func"); // eval needed in order to evaluate model.roleNames[i] now and not on function call
+            var func = (function(i) { return function() {
+                    return model.data(child.index,
+                                      '"' + model.roleNames[i] + '"');
+                    }
+                })(i);
             setupGetter(child, model.roleNames[i], func);
         }
         for (var i in child.$internChildren)
@@ -1398,13 +1386,11 @@ function QMLImage(meta, parent, engine) {
     function iwGetter() {
             return this.width || img.naturalWidth;
     }
-    //this[GETTER]("implicitWidth", iwGetter);
     setupGetter(this, "implicitWidth", iwGetter);
     
     function ihGetter() {
         return this.height || img.naturalHeight;
     }
-    //this[GETTER]("implicitHeight", ihGetter);
     setupGetter(this, "implicitHeight", ihGetter);
 
     // Bind status to img element
@@ -1509,13 +1495,11 @@ function QMLDocument(meta, parent, engine) {
     function heightGetter() {
         return item.height; 
     }
-    //doc[GETTER]("height", heightGetter);
     setupGetter(doc, "height", heightGetter);
     
     function widthGetter() {
         return item.width;
     }
-    //doc[GETTER]("width", widthGetter);
     setupGetter(doc, "width", widthGetter);
     
 
