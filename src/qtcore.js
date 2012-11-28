@@ -1519,25 +1519,25 @@ function QMLDocument(meta, parent, engine) {
 }
 
 function QMLTimer(meta, parent, engine) {
-    QMLBaseObject.call(this, meta, parent, engine),
-        prevTrigger,
+    QMLBaseObject.call(this, meta, parent, engine);
+    var prevTrigger,
         self = this;
-    
+
     createSimpleProperty(this, "interval", 1000);
     createSimpleProperty(this, "repeat", false);
     createSimpleProperty(this, "running", false);
     createSimpleProperty(this, "triggeredOnStart", false);
-                         
+
     // Create trigger as simple property. Reading the property triggers
     // the function!
     createFunction(this, "onTriggered");
-                     
+
     applyProperties(meta, this);
 
     engine.$addTicker(ticker);
     function ticker(now, elapsed) {
         if (self.running) {
-            if (now - prevTrigger >= this.interval) {
+            if (now - prevTrigger >= self.interval) {
                 prevTrigger = now;
                 trigger();
             }
@@ -1562,23 +1562,23 @@ function QMLTimer(meta, parent, engine) {
         this.stop();
         this.start();
     }
-    
+
     function trigger() {
         // Trigger this.
         self.onTriggered();
 
         engine.$requestDraw();
     }
-    
+
     engine.$registerStart(function() {
-        if (this.running) {
-            this.running = false; // toggled back by this.start();
-            this.start();
+        if (self.running) {
+            self.running = false; // toggled back by self.start();
+            self.start();
         }
     });
 
     engine.$registerStop(function() {
-        this.stop();
+        self.stop();
     });
 }
 
@@ -1609,8 +1609,8 @@ function QMLAnimation(meta, parent, engine) {
 }
 
 function QMLSequentialAnimation(meta, parent, engine) {
-    QMLAnimation.call(this, meta, parent, engine),
-        curIndex,
+    QMLAnimation.call(this, meta, parent, engine);
+    var curIndex,
         passedLoops,
         i,
         self = this;
@@ -1674,13 +1674,13 @@ function QMLSequentialAnimation(meta, parent, engine) {
     }
     
     engine.$registerStart(function() {
-        if (this.running) {
-            this.running = false; // toggled back by start();
-            this.start();
+        if (self.running) {
+            self.running = false; // toggled back by start();
+            self.start();
         }
     });
     engine.$registerStop(function() {
-        this.stop();
+        self.stop();
     });
 };
 
