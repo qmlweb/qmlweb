@@ -542,12 +542,6 @@ QMLEngine = function (element, options) {
     // List of available Components
     this.components = {};
 
-    // Stack of Components/Files in whose context elements are being created.
-    // Used to distribute the Component to all it's children without needing
-    // to pass it through all constructors.
-    // The last element in the Stack is the currently relevant context.
-    this.workingContext = [];
-
 
 
 //----------Public Methods----------
