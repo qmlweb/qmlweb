@@ -528,6 +528,11 @@ function unboundMethod() {
     console.log("Unbound method for", this.$$type, this);
 }
 
+QMLRenderMode = {
+    Canvas: 0,
+    DOM: 1
+}
+
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
 //----------Public Members----------
@@ -542,6 +547,8 @@ QMLEngine = function (element, options) {
     // List of available Components
     this.components = {};
 
+    this.rootElement = element;
+    this.renderMode = element.nodeName == "CANVAS" ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
 
 
 //----------Public Methods----------
@@ -716,6 +723,8 @@ QMLEngine = function (element, options) {
 
     this.$draw = function()
     {
+        if (this.renderMode == QMLRenderMode.DOM)
+            return;
         var time = new Date();
 
         element.height = doc.height;
@@ -804,9 +813,11 @@ QMLEngine = function (element, options) {
 
 
 //----------Private Members----------
-    var // Target canvas
-        canvas = element.getContext('2d'),
-        // Global Qt object
+    // Target canvas
+    if (this.renderMode == QMLRenderMode.Canvas)
+        var canvas = element.getContext('2d');
+
+    var // Global Qt object
         globalObj = Object.create(QMLGlobalObject),
         // Root document of the engine
         doc,
@@ -1004,6 +1015,11 @@ function QMLBaseObject(meta, parent, engine) {
     if (!this.$init)
         this.$init = [];
     this.$init[0] = function() {
+        if (engine.renderMode == QMLRenderMode.DOM
+            && self.$domElement !== Undefined && parent.$domElement) {
+            parent.$domElement.appendChild(self.$domElement);
+        }
+
         // Apply property-values which are set inside the Component-definition
         if (meta.$componentMeta) {
             workingContext.push(self.$internComponent);
@@ -1036,6 +1052,13 @@ function QMLItem(meta, parent, engine) {
     var child,
         o, i,
         self = this;
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$domElement = document.createElement("div");
+        this.$domElement.style.position = "absolute";
+        this.$domElement.style.pointerEvents = "none";
+        this.$domElement.className = meta.$class + (this.id ? " " + this.id : "");
+    }
 
     this.$geometry = {
         dependantProperties: [],
@@ -1102,6 +1125,11 @@ function QMLItem(meta, parent, engine) {
                     if (self.parent.$geometry.dependantProperties.indexOf(updaterIndex) == -1)
                         self.parent.$geometry.dependantProperties.push(updaterIndex);
             }
+
+            if (self.$geometry.geometryChanged) {
+                self.$geometry.geometryChanged.call(self);
+            }
+
             for (i in self.$geometry.dependantProperties) {
                 if (propertyUpdaters[self.$geometry.dependantProperties[i]] !== Undefined)
                     propertyUpdaters[self.$geometry.dependantProperties[i]]();
@@ -1286,6 +1314,27 @@ function QMLItem(meta, parent, engine) {
         this.$geometry.update();
     });
 
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$onRotationChanged.push(function(newVal) {
+            this.$domElement.style.transform = "rotate(" + newVal + "deg)";
+            this.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
+            this.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
+            this.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
+            this.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
+        });
+        this.$onVisibleChanged.push(function(newVal) {
+            this.$domElement.style.visibility = newVal ? "visible" : "hidden";
+        });
+        this.$geometry.geometryChanged = function() {
+            var w = this.$width,
+                h = this.$height;
+            this.$domElement.style.width = w ? w + "px" : "auto";
+            this.$domElement.style.height = h ? h + "px" : "auto";
+            this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
+            this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+        }
+    }
+
     this.$init.push(function() {
         self.implicitHeight = 0;
         self.implicitWidth = 0;
@@ -1293,7 +1342,7 @@ function QMLItem(meta, parent, engine) {
         self.width = 0;
         self.rotation = 0;
         self.spacing = 0;
-        self.visible = true;
+        self.visible = new QMLBinding("parent.visible !== false");
         self.x = 0;
         self.y = 0;
         self.z = 0;
@@ -1341,6 +1390,14 @@ function QMLText(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        // We create another span inside the text to distinguish the actual
+        // (possibly html-formatted) text from child elements
+        this.$domElement.innerHTML = "<span></span>";
+        this.$domElement.style.pointerEvents = "auto";
+        this.$domElement.style.whiteSpace = "nowrap";
+    }
+
     // Creates font css description
     function fontCss(font) {
         var css = "";
@@ -1358,9 +1415,33 @@ function QMLText(meta, parent, engine) {
 
     createSimpleProperty(this, "text");
 
-    this.$onTextChanged.push(this.$geometry.update);
-    this.font.$onFamilyChanged.push(this.$geometry.update);
-    this.font.$onPointSizeChanged.push(this.$geometry.update);
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$onColorChanged.push(function(newVal) {
+            this.$domElement.style.color = newVal;
+        });
+        this.$onTextChanged.push(function(newVal) {
+            this.$domElement.firstChild.innerHTML = newVal;
+            this.$geometry.update();
+        });
+        this.font.$onPointSizeChanged.push(function(newVal) {
+            this.$domElement.style.fontSize = newVal + "pt";
+            this.$geometry.update();
+        });
+        this.font.$onFamilyChanged.push(function(newVal) {
+            this.$domElement.style.fontFamily = newVal;
+            this.$geometry.update();
+        });
+        this.$geometry.geometryChanged = function() {
+            this.$domElement.style.width = "auto";
+            this.$domElement.style.height = "auto";
+            this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
+            this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+        }
+    } else {
+        this.$onTextChanged.push(this.$geometry.update);
+        this.font.$onFamilyChanged.push(this.$geometry.update);
+        this.font.$onPointSizeChanged.push(this.$geometry.update);
+    }
 
     this.$init.push(function() {
         self.font.family = "sans-serif";
@@ -1382,6 +1463,13 @@ function QMLText(meta, parent, engine) {
             if (this.$geometry.dependantProperties.indexOf(updater) == -1)
                 this.$geometry.dependantProperties.push(updater);
         }
+
+        // DOM
+        if (engine.renderMode == QMLRenderMode.DOM) {
+            return this.$domElement.offsetHeight;
+        }
+
+        // Canvas
         // There is no height available in canvas element, figure out
         // other way
         var font = fontCss(this.font);
@@ -1423,11 +1511,18 @@ function QMLText(meta, parent, engine) {
             if (this.$geometry.dependantProperties.indexOf(updater) == -1)
                 this.$geometry.dependantProperties.push(updater);
         }
+
         var font = fontCss(this.font);
         if (lastWText == this.text && lastWFont == font) {
             return lastW;
         }
 
+        // DOM
+        if (engine.renderMode == QMLRenderMode.DOM) {
+            return this.$domElement.offsetWidth;
+        }
+
+        // Canvas
         var width;
         width = engine.$getTextMetrics(this.text, font).width;
         lastWText = this.text;
@@ -1468,6 +1563,20 @@ function QMLRectangle(meta, parent, engine) {
     this.border = {};
     createSimpleProperty(this.border, "color", { altParent: this });
     createSimpleProperty(this.border, "width", { altParent: this });
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$onColorChanged.push(function(newVal) {
+            this.$domElement.style.backgroundColor = newVal;
+        });
+        this.border.$onColorChanged.push(function(newVal) {
+            this.$domElement.style.borderColor = newVal;
+        });
+        this.border.$onWidthChanged.push(function(newVal) {
+            this.$domElement.style.borderWidth = newVal + "px";
+            this.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
+            this.$geometry.update();
+        });
+    }
 
     this.$init.push(function() {
         self.color = "white";
@@ -1531,6 +1640,10 @@ function QMLRepeater(meta, parent, engine) {
             var newMeta = cloneObject(self.delegate);
             newMeta.id = newMeta.id + index;
             var newItem = construct(newMeta, self, engine);
+
+            if (engine.renderMode == QMLRenderMode.DOM)
+                newItem.$domElement.className += " " + self.delegate.id;
+
             applyChildProperties(newItem);
             newItem.index = index;
             //TODO: Use parent's children, in order to make it completely transparent
@@ -1588,6 +1701,8 @@ function QMLRepeater(meta, parent, engine) {
     function removeChildren(startIndex, endIndex) {
         var removed = self.$children.splice(startIndex, endIndex - startIndex);
         for (var index in removed) {
+            if (engine.renderMode == QMLRenderMode.DOM)
+                removed[index].parent.$domElement.removeChild(removed[index].$domElement);
             removeChildProperties(removed[index]);
         }
     }
@@ -1684,6 +1799,13 @@ function QMLImage(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var img = new Image(),
         self = this;
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        img.style.width = "100%";
+        img.style.height = "100%";
+        this.$domElement.appendChild(img);
+    }
+
     // Exports.
     this.Image = {
         // fillMode 
@@ -1704,7 +1826,7 @@ function QMLImage(meta, parent, engine) {
     createSimpleProperty(this, "asynchronous");
     createSimpleProperty(this, "cache");
     createSimpleProperty(this, "smooth");
-    
+
     createSimpleProperty(this, "fillMode");
     createSimpleProperty(this, "mirror");
     createSimpleProperty(this, "progress");
@@ -1781,6 +1903,9 @@ function QMLMouseArea(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.$domElement.style.pointerEvents = "all";
+
     createSimpleProperty(this, "acceptedButtons");
     createSimpleProperty(this, "enabled");
     createSimpleProperty(this, "hoverEnabled");
@@ -1794,7 +1919,47 @@ function QMLMouseArea(meta, parent, engine) {
         self.hoverEnabled = false;
     });
 
-    engine.mouseAreas.push(this);
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$domElement.onclick = function(e) {
+            var mouse = {
+                accepted: true,
+                button: e.button == 0 ? QMLGlobalObject.Qt.LeftButton :
+                        e.button == 1 ? QMLGlobalObject.Qt.RightButton :
+                        e.button == 2 ? QMLGlobalObject.Qt.MiddleButton :
+                        0,
+                modifiers: (e.ctrlKey * QMLGlobalObject.Qt.CtrlModifier)
+                        | (e.altKey * QMLGlobalObject.Qt.AltModifier)
+                        | (e.shiftKey * QMLGlobalObject.Qt.ShiftModifier)
+                        | (e.metaKey * QMLGlobalObject.Qt.MetaModifier),
+                x: (e.offsetX || e.layerX),
+                y: (e.offsetY || e.layerY)
+            };
+
+            if (self.enabled) {
+                // Dispatch mouse event
+                self.mouse = mouse;
+                self.onClicked();
+                self.mouse = Undefined;
+                engine.$requestDraw();
+            }
+        }
+        this.$domElement.onmouseover = function(e) {
+            if (self.hoverEnabled) {
+                self.hovered = true;
+                if (self.onEntered)
+                    self.onEntered();
+            }
+        }
+        this.$domElement.onmouseout = function(e) {
+            if (self.hoverEnabled) {
+                self.hovered = false;
+                if (self.onExited)
+                self.onExited();
+            }
+        }
+    } else {
+        engine.mouseAreas.push(this);
+    }
 }
 
 function QMLDocument(meta, parent, engine) {
@@ -1815,6 +1980,7 @@ function QMLDocument(meta, parent, engine) {
     parent = {};
     parent.left = 0;
     parent.top = 0;
+    parent.$domElement = engine.rootElement;
 
     var Component = {};
     Component.$scope = {
@@ -1865,6 +2031,10 @@ function QMLDocument(meta, parent, engine) {
         item.$draw(c);
     }
     doc.$init = function() {
+        if (engine.renderMode == QMLRenderMode.DOM) {
+            engine.rootElement.innerHTML = "";
+            engine.rootElement.appendChild(doc.$domElement);
+        }
         workingContext.push(Component);
         // The init-methods are called in reverse order for the $init
         // from QMLBaseObject, where explicitly-set-properties are applied,
@@ -1872,6 +2042,15 @@ function QMLDocument(meta, parent, engine) {
         for (var i = item.$init.length - 1; i>=0; i--)
             item.$init[i]();
         workingContext.pop();
+
+        if (engine.renderMode == QMLRenderMode.DOM) {
+            doc.$domElement.style.position = "relative";
+            doc.$domElement.style.top = "0";
+            doc.$domElement.style.left = "0";
+            doc.$domElement.style.overflow = "hidden";
+            doc.$domElement.style.width = item.width + "px";
+            doc.$domElement.style.height = item.height + "px";
+        }
     }
     // todo: legacy. remove
     doc.draw = doc.$draw;
@@ -2076,7 +2255,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
     createSimpleProperty(this.easing, "amplitude", { altParent: this });
     createSimpleProperty(this.easing, "overshoot", { altParent: this });
     createSimpleProperty(this.easing, "period", { altParent: this });
-    createSimpleProperty(this, "from", 0);
+    createSimpleProperty(this, "from");
     createSimpleProperty(this, "properties");
     createSimpleProperty(this, "property");
     createSimpleProperty(this, "target");

@@ -38,11 +38,17 @@ a { text-decoration: none; color: blue }
 </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+<div id="main">
+    <canvas id="canvas"></canvas>
+</div>
 <div id="btm">
     <span id="progtxt">QML viewer by <a href="http://lauri.paimen.info">Lauri Paimen</a>.</span>
     <span id="status">
     <span id="browsSupport">Unsupported browser detected. Results may vary.</span>
+        <select id="backendSelector">
+            <option value="canvas">Canvas-Backend</option>
+            <option value="dom">DOM-Backend</option>
+        </select>
         <select id="fileSelector"></select>
         <img src="../images/zoom_out.png" class="icon" onclick="scale*=0.9;update()">
         <img src="../images/zoom_normal.png" class="icon" onclick="scale=1;update()">
@@ -143,6 +149,18 @@ window.onhashchange();
 var selEl = document.getElementById("fileSelector");
 selEl.onchange = function() {
     window.location.href = '#' + selEl.value;
+}
+
+var backendSel = document.getElementById("backendSelector");
+var mainView = document.getElementById("main");
+backendSel.onchange = function() {
+    if (backendSel.value == "canvas") {
+        mainView.innerHTML = '<canvas id="canvas">Your Browser doesn\'t support Canvas.</canvas>';
+    } else {
+        mainView.innerHTML = '<div id="canvas"></div>';
+    }
+    canvasEl = document.getElementById("canvas");
+    window.onhashchange(); // Reload file
 }
 
 var list = JSON.parse(getUrlContents("files.json")),
