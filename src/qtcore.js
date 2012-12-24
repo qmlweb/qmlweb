@@ -56,7 +56,7 @@ var QMLGlobalObject = {
                 + Math.round(r * 255) + ","
                 + Math.round(g * 255) + ","
                 + Math.round(b * 255) + ","
-                + Math.round(a * 255) + ")"
+                + a + ")"
             return rgba },
         // Buttons masks
         LeftButton: 1,
