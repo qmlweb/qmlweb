@@ -41,4 +41,8 @@
 {
     "file": "repeater.qml",
     "title": "* Repeater test"
+},
+{
+    "file": "borderimage.qml",
+    "title": "* BorderImage test"
 } ]

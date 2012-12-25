@@ -188,6 +188,7 @@ function construct(meta, parent, engine) {
     var constructors = {
             MouseArea: QMLMouseArea,
             Image: QMLImage,
+            BorderImage: QMLBorderImage,
             Item: QMLItem,
             Column: QMLItem, // todo
             Row: QMLItem, // todo
@@ -1946,6 +1947,166 @@ function QMLImage(meta, parent, engine) {
         if (this.status == this.Image.Ready) {
             c.save();
             c.drawImage(img, this.left, this.top, this.width, this.height);
+            c.restore();
+        } else {
+            console.log("Waiting for image to load");
+        }
+    }
+}
+
+function QMLBorderImage(meta, parent, engine) {
+    QMLItem.call(this, meta, parent, engine);
+    var self = this;
+
+    if (engine.renderMode == QMLRenderMode.Canvas)
+        var img = new Image();
+
+    this.BorderImage = {
+        // tileMode
+        Stretch: "stretch",
+        Repeat: "repeat",
+        Round: "round",
+        // status
+        Null: 1,
+        Ready: 2,
+        Loading: 3,
+        Error: 4
+    }
+
+    createSimpleProperty(this, "source");
+    createSimpleProperty(this, "status");
+    this.border = {};
+    createSimpleProperty(this.border, "left", { altParent: this });
+    createSimpleProperty(this.border, "right", { altParent: this });
+    createSimpleProperty(this.border, "top", { altParent: this });
+    createSimpleProperty(this.border, "bottom", { altParent: this });
+    createSimpleProperty(this, "horizontalTileMode");
+    createSimpleProperty(this, "verticalTileMode");
+
+    this.$init.push(function() {
+        self.source = "";
+        self.status = self.BorderImage.Null
+        self.border.left = 0;
+        self.border.right = 0;
+        self.border.top = 0;
+        self.border.bottom = 0;
+        self.horizontalTileMode = self.BorderImage.Stretch;
+        self.verticalTileMode = self.BorderImage.Stretch;
+    });
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.$onSourceChanged.push(function() {
+            this.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        });
+        this.border.$onLeftChanged.push(updateBorder);
+        this.border.$onRightChanged.push(updateBorder);
+        this.border.$onTopChanged.push(updateBorder);
+        this.border.$onBottomChanged.push(updateBorder);
+        this.$onHorizontalTileModeChanged.push(updateBorder);
+        this.$onVerticalTileModeChanged.push(updateBorder);
+    } else {
+        this.$onSourceChanged.push(function(val) {
+            self.progress = 0;
+            self.status = self.BorderImage.Loading;
+            img.src = engine.$resolvePath(val);
+        });
+        img.onload = function() {
+            self.progress = 1;
+            self.status = self.BorderImage.Ready;
+            engine.$requestDraw();
+        }
+        img.onerror = function() {
+            self.status = self.BorderImage.Error;
+        }
+    }
+
+    function updateBorder() {
+        this.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.MozBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.MozBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.MozBorderImageWidth = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+
+        this.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.webkitBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.webkitBorderImageWidth = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+
+        this.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.OBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.OBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.OBorderImageWidth = this.border.top + "px "
+                                                + this.border.right + "px "
+                                                + this.border.bottom + "px "
+                                                + this.border.left + "px";
+
+        this.$domElement.style.borderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.borderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.borderImageWidth = this.border.top + "px "
+                                                + this.border.right + "px "
+                                                + this.border.bottom + "px "
+                                                + this.border.left + "px";
+    }
+
+    this.$drawItem = function(c) {
+        if (this.horizontalTileMode != this.BorderImage.Stretch || this.verticalTileMode != this.BorderImage.Stretch) {
+            console.log("BorderImages support only BorderImage.Stretch tileMode currently with the canvas-backend.");
+        }
+        if (this.status == this.BorderImage.Ready) {
+            c.save();
+            c.drawImage(img, 0, 0, this.border.left, this.border.top,
+                        this.left, this.top, this.border.left, this.border.top);
+            c.drawImage(img, img.naturalWidth - this.border.right, 0,
+                        this.border.right, this.border.top,
+                        this.left + this.width - this.border.right, this.top,
+                        this.border.right, this.border.top);
+            c.drawImage(img, 0, img.naturalHeight - this.border.bottom,
+                        this.border.left, this.border.bottom,
+                        this.left, this.top + this.height - this.border.bottom,
+                        this.border.left, this.border.bottom);
+            c.drawImage(img, img.naturalWidth - this.border.right, img.naturalHeight - this.border.bottom,
+                        this.border.right, this.border.bottom,
+                        this.left + this.width - this.border.right,
+                        this.top + this.height - this.border.bottom,
+                        this.border.right, this.border.bottom);
+
+            c.drawImage(img, 0, this.border.top,
+                        this.border.left, img.naturalHeight - this.border.bottom - this.border.top,
+                        this.left, this.top + this.border.top,
+                        this.border.left, this.height - this.border.bottom - this.border.top);
+            c.drawImage(img, this.border.left, 0,
+                        img.naturalWidth - this.border.right - this.border.left, this.border.top,
+                        this.left + this.border.left, this.top,
+                        this.width - this.border.right - this.border.left, this.border.top);
+            c.drawImage(img, img.naturalWidth - this.border.right, this.border.top,
+                        this.border.right, img.naturalHeight - this.border.bottom - this.border.top,
+                        this.right - this.border.right, this.top + this.border.top,
+                        this.border.right, this.height - this.border.bottom - this.border.top);
+            c.drawImage(img, this.border.left, img.naturalHeight - this.border.bottom,
+                        img.naturalWidth - this.border.right - this.border.left, this.border.bottom,
+                        this.left + this.border.left, this.bottom - this.border.bottom,
+                        this.width - this.border.right - this.border.left, this.border.bottom);
             c.restore();
         } else {
             console.log("Waiting for image to load");
