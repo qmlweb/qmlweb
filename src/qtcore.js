@@ -1064,67 +1064,24 @@ function QMLItem(meta, parent, engine) {
         dependantProperties: [],
         left: 0,
         top: 0,
-        hPos: "",
-        vPos: "",
         update: function() {
-            var w=self.$width,
-                h=self.$height;
-            switch (self.$geometry.hPos) {
-                case "left":
-                    self.$geometry.left = self.anchors.left;
-                    break;
-                case "right":
-                    self.$geometry.left = self.anchors.right - w;
-                    break;
-                case "horizontalCenter":
-                    self.$geometry.left = self.anchors.horizontalCenter - w / 2;
-                    break;
-                case "fill":
-                    self.$geometry.left = self.anchors.fill.left;
-                    break;
-                case "centerIn":
-                    self.$geometry.left = self.anchors.centerIn.horizontalCenter - w / 2;
-                    break;
-                default:
-                    self.$geometry.left = self.x + self.parent.left;
-                    //TODO: Use real normal dependency-system
-                    var updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-                    if (updaterIndex == -1) {
-                        propertyUpdaters.push(self.$geometry.update);
-                        updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-                        self.$ownPropertyUpdaters.push(updaterIndex);
-                    }
-                    if (self.parent.$geometry.dependantProperties.indexOf(updaterIndex) == -1)
-                        self.parent.$geometry.dependantProperties.push(updaterIndex);
+            var updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
+            if (updaterIndex == -1) {
+                propertyUpdaters.push(self.$geometry.update);
+                updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
+                self.$ownPropertyUpdaters.push(updaterIndex);
             }
-            switch (self.$geometry.vPos) {
-                case "top":
-                    self.$geometry.top = self.anchors.top;
-                    break;
-                case "bottom":
-                    self.$geometry.top = self.anchors.bottom - h;
-                    break;
-                case "verticalCenter":
-                    self.$geometry.top = self.anchors.verticalCenter - h / 2;
-                    break;
-                case "fill":
-                    self.$geometry.top = self.anchors.fill.top;
-                    break;
-                case "centerIn":
-                    self.$geometry.top = self.anchors.centerIn.verticalCenter - h / 2;
-                    break;
-                default:
-                    self.$geometry.top = self.y + self.parent.top;
-                    //TODO: Use real normal dependency-system
-                    var updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-                    if (updaterIndex == -1) {
-                        propertyUpdaters.push(self.$geometry.update);
-                        updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-                        self.$ownPropertyUpdaters.push(updaterIndex);
-                    }
-                    if (self.parent.$geometry.dependantProperties.indexOf(updaterIndex) == -1)
-                        self.parent.$geometry.dependantProperties.push(updaterIndex);
-            }
+
+            evaluatingProperties.push(updaterIndex);
+            if (self.$geometry.widthVal)
+                self.$geometry.width = self.$geometry.widthVal();
+            if (self.$geometry.heightVal)
+                self.$geometry.height = self.$geometry.heightVal();
+            if (self.$geometry.hVal)
+                self.$geometry.left = self.$geometry.hVal();
+            if (self.$geometry.vVal)
+                self.$geometry.top = self.$geometry.vVal();
+            evaluatingProperties.pop();
 
             if (self.$geometry.geometryChanged) {
                 self.$geometry.geometryChanged.call(self);
@@ -1155,15 +1112,7 @@ function QMLItem(meta, parent, engine) {
         propDepList: this.$geometry.dependantProperties,
         dontCallUpdaters: true
     };
-    // Assign values from meta
-    createSimpleProperty(this.anchors, "top", geometryOptions);
-    createSimpleProperty(this.anchors, "bottom", geometryOptions);
-    createSimpleProperty(this.anchors, "left", geometryOptions);
-    createSimpleProperty(this.anchors, "right", geometryOptions);
-    createSimpleProperty(this.anchors, "fill", geometryOptions);
-    createSimpleProperty(this.anchors, "centerIn", geometryOptions);
-    createSimpleProperty(this.anchors, "horizontalCenter", geometryOptions);
-    createSimpleProperty(this.anchors, "verticalCenter", geometryOptions);
+
 
     // Define anchor getters, returning absolute position
     // left, right, top, bottom, horizontalCenter, verticalCenter, baseline
@@ -1171,148 +1120,253 @@ function QMLItem(meta, parent, engine) {
     function leftGetter() {
         if (evaluatingProperties.length !== 0) {
             var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (this.$geometry.dependantProperties.indexOf(updater) == -1)
-                this.$geometry.dependantProperties.push(updater);
+            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
+                && self.$geometry.dependantProperties.indexOf(updater) == -1)
+                self.$geometry.dependantProperties.push(updater);
         }
-        return this.$geometry.left;
+        return self.$geometry.left;
     }
     setupGetter(this, "left", leftGetter);
 
     function rightGetter() {
-        return this.left + this.$width;
+        return self.left + self.width;
     }
     setupGetter(this, "right", rightGetter);
 
     function topGetter() {
         if (evaluatingProperties.length !== 0) {
             var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (this.$geometry.dependantProperties.indexOf(updater) == -1)
-                this.$geometry.dependantProperties.push(updater);
+            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
+                && self.$geometry.dependantProperties.indexOf(updater) == -1)
+                self.$geometry.dependantProperties.push(updater);
         }
-        return this.$geometry.top;
+        return self.$geometry.top;
     }
     setupGetter(this, "top", topGetter);
 
     function bottomGetter() {
-        return this.top + this.$height;
+        return self.top + self.height;
     }
-    setupGetter(this, "bottom", bottomGetter);
+    setupGetter(self, "bottom", bottomGetter);
 
     function hzGetter() {
-        return this.left + this.$width / 2;
+        return self.left + self.width / 2;
     }
     setupGetter(this, "horizontalCenter", hzGetter);
 
     function vzGetter() {
-        return this.top + this.$height / 2;
+        return self.top + self.height / 2;
     }
     setupGetter(this, "verticalCenter", vzGetter);
 
     function blGetter() {
-        return this.top;
+        return self.top;
     }
     setupGetter(this, "baseline", blGetter);
 
-    // Anchoring helpers; $width + $height => Object draw width + height
-    function _widthGetter() {
-        var t;
-        if ((t = this.anchors.fill) !== Undefined) {
-            return t.$width;
-        };
-        return this.implicitWidth || this.width;
+    // Assign values from meta
+    function topSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv;};$Qbc";
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.vVal = (function(val) { return function() {
+                    return val;
+                }
+            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
     }
-    setupGetter(this, "$width", _widthGetter);
-    function _heightGetter() {
-            var t;
-            if ((t = this.anchors.fill) !== Undefined) {
-                return t.$height;
-            };
-            return this.implicitHeight || this.height;
+    setupGetterSetter(this.anchors, "top", topGetter, topSetter, topSetter);
+    function bottomSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv - height;};$Qbc";
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.vVal = (function(obj, val) { return function() {
+                    return val - obj.height;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
     }
-    setupGetter(this, "$height", _heightGetter);
+    setupGetterSetter(this.anchors, "bottom", bottomGetter, bottomSetter);
+    function leftSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv;};$Qbc";
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.hVal = (function(val) { return function() {
+                    return val;
+                }
+            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this.anchors, "left", leftGetter, leftSetter);
+    function rightSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv - width;};$Qbc";
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.hVal = (function(obj, val) { return function() {
+                    return val - obj.width;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this.anchors, "right", rightGetter, rightSetter);
+    function hzSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv - width / 2;};$Qbc";
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.hVal = (function(obj, val) { return function() {
+                    return val - obj.width / 2;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this.anchors, "horizontalCenter", hzGetter, hzSetter);
+    function vzSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv - height / 2;};$Qbc";
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.vVal = (function(obj, val) { return function() {
+                    return val - obj.height / 2;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this.anchors, "verticalCenter", vzGetter, vzSetter);
+    function fillSetter(newVal) {
+        var val = newVal.src;
+        var hBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.left;};$Qbc";
+        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        var vBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.top;};$Qbc";
+        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        var widthBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.width;};$Qbc";
+        self.$geometry.widthVal = evalBinding(null, widthBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        var heightBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.height;};$Qbc";
+        self.$geometry.heightVal = evalBinding(null, heightBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.update();
+    }
+    setupSetter(this.anchors, "fill", fillSetter);
+    function centerInSetter(newVal) {
+        var val = newVal.src;
+        var hBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.horizontalCenter - width / 2;};$Qbc";
+        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        var vBindSrc = "function $Qbc() { var $Qbv = " + val
+                + "; return $Qbv.verticalCenter - height / 2;};$Qbc";
+        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.update();
+    }
+    setupSetter(this.anchors, "centerIn", centerInSetter);
 
-    createSimpleProperty(this, "height");
+    function xGetter() {
+        return self.left - self.parent.left;
+    }
+    function xSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv + parent.left;};$Qbc";
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.hVal = (function(obj, val) { return function() {
+                    return val + obj.parent.left;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this, "x", xGetter, xSetter);
+    function yGetter() {
+        return self.top - self.parent.top;
+    }
+    function ySetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv + parent.top;};$Qbc";
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.vVal = (function(obj, val) { return function() {
+                    return val + obj.parent.top;
+                }
+            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this, "y", yGetter, ySetter);
+
+    function widthGetter() {
+        if (evaluatingProperties.length !== 0) {
+            var updater = evaluatingProperties[evaluatingProperties.length - 1];
+            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
+                && self.$geometry.dependantProperties.indexOf(updater) == -1)
+                self.$geometry.dependantProperties.push(updater);
+        }
+        return self.$geometry.width !== Undefined ? self.$geometry.width : self.implicitWidth;
+    }
+    function widthSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv;};$Qbc";
+            self.$geometry.widthVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.widthVal = (function(val) { return function() {
+                    return val;
+                }
+            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this, "width", widthGetter, widthSetter);
+
+    function heightGetter() {
+        if (evaluatingProperties.length !== 0) {
+            var updater = evaluatingProperties[evaluatingProperties.length - 1];
+            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
+                && self.$geometry.dependantProperties.indexOf(updater) == -1)
+                self.$geometry.dependantProperties.push(updater);
+        }
+        return self.$geometry.height !== Undefined ? self.$geometry.height : self.implicitHeight;
+    }
+    function heightSetter(newVal) {
+        if (newVal instanceof QMLBinding) {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                    + "; return $Qbv;};$Qbc";
+            self.$geometry.heightVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        } else {
+            self.$geometry.heightVal = (function(val) { return function() {
+                    return val;
+                }
+            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+        }
+        self.$geometry.update();
+    }
+    setupGetterSetter(this, "height", heightGetter, heightSetter);
+
     createSimpleProperty(this, "implicitWidth");
     createSimpleProperty(this, "implicitHeight");
     createSimpleProperty(this, "rotation");
     createSimpleProperty(this, "spacing");
     createSimpleProperty(this, "visible");
-    createSimpleProperty(this, "width");
-    createSimpleProperty(this, "x", {
-        propDepList: this.$geometry.dependantProperties,
-        dontCallUpdaters: true
-    });
-    createSimpleProperty(this, "y", {
-        propDepList: this.$geometry.dependantProperties,
-        dontCallUpdaters: true
-    });
     createSimpleProperty(this, "z");
-
-    this.$onWidthChanged.push(function() {
-        this.$geometry.update();
-    });
-    this.$onHeightChanged.push(function() {
-        this.$geometry.update();
-    });
-    this.$onXChanged.push(function() {
-        this.$geometry.hPos = "x";
-        this.$geometry.update();
-    });
-    this.$onYChanged.push(function() {
-        this.$geometry.vPos = "y";
-        this.$geometry.update();
-    });
-
-    this.anchors.$onTopChanged.push(function() {
-        this.$geometry.vPos = "top";
-        this.$geometry.update();
-    });
-    this.anchors.$onBottomChanged.push(function() {
-        this.$geometry.vPos = "bottom";
-        this.$geometry.update();
-    });
-    this.anchors.$onLeftChanged.push(function() {
-        this.$geometry.hPos = "left";
-        this.$geometry.update();
-    });
-    this.anchors.$onRightChanged.push(function() {
-        this.$geometry.hPos = "right";
-        this.$geometry.update();
-    });
-    this.anchors.$onFillChanged.push(function(newVal) {
-        //TODO: Use real normal dependency-system
-        var updaterIndex = propertyUpdaters.indexOf(this.$geometry.update);
-        if (updaterIndex == -1) {
-            propertyUpdaters.push(this.$geometry.update);
-            updaterIndex = propertyUpdaters.indexOf(this.$geometry.update);
-            this.$ownPropertyUpdaters.push(updaterIndex);
-        }
-        newVal.$geometry.dependantProperties.push(updaterIndex);
-        this.$geometry.hPos = "fill";
-        this.$geometry.vPos = "fill";
-        this.$geometry.update();
-    });
-    this.anchors.$onCenterInChanged.push(function(newVal) {
-        //TODO: Use real normal dependency-system
-        var updaterIndex = propertyUpdaters.indexOf(this.$geometry.update);
-        if (updaterIndex == -1) {
-            propertyUpdaters.push(this.$geometry.update);
-            updaterIndex = propertyUpdaters.indexOf(this.$geometry.update);
-            this.$ownPropertyUpdaters.push(updaterIndex);
-        }
-        newVal.$geometry.dependantProperties.push(updaterIndex);
-        this.$geometry.hPos = "centerIn";
-        this.$geometry.vPos = "centerIn";
-        this.$geometry.update();
-    });
-    this.anchors.$onHorizontalCenterChanged.push(function() {
-        this.$geometry.hPos = "horizontalCenter";
-        this.$geometry.update();
-    });
-    this.anchors.$onVerticalCenterChanged.push(function() {
-        this.$geometry.vPos = "verticalCenter";
-        this.$geometry.update();
-    });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.$onRotationChanged.push(function(newVal) {
@@ -1326,8 +1380,8 @@ function QMLItem(meta, parent, engine) {
             this.$domElement.style.visibility = newVal ? "visible" : "hidden";
         });
         this.$geometry.geometryChanged = function() {
-            var w = this.$width,
-                h = this.$height;
+            var w = this.width,
+                h = this.height;
             this.$domElement.style.width = w ? w + "px" : "auto";
             this.$domElement.style.height = h ? h + "px" : "auto";
             this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
@@ -1338,8 +1392,6 @@ function QMLItem(meta, parent, engine) {
     this.$init.push(function() {
         self.implicitHeight = 0;
         self.implicitWidth = 0;
-        self.height = 0;
-        self.width = 0;
         self.rotation = 0;
         self.spacing = 0;
         self.visible = new QMLBinding("parent.visible !== false");
@@ -1353,8 +1405,8 @@ function QMLItem(meta, parent, engine) {
         if (this.visible) {
             if (this.$drawItem ) {
                 var rotRad = (this.rotation || 0) / 180 * Math.PI,
-                    rotOffsetX = Math.sin(rotRad) * this.$width,
-                    rotOffsetY = Math.sin(rotRad) * this.$height;
+                    rotOffsetX = Math.sin(rotRad) * this.width,
+                    rotOffsetY = Math.sin(rotRad) * this.height;
                 c.save();
 
                 // Handle rotation
@@ -1460,7 +1512,8 @@ function QMLText(meta, parent, engine) {
     function ihGetter(){
         if (evaluatingProperties.length !== 0) {
             var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (this.$geometry.dependantProperties.indexOf(updater) == -1)
+            if (updater !== propertyUpdaters.indexOf(this.$geometry.update)
+                && this.$geometry.dependantProperties.indexOf(updater) == -1)
                 this.$geometry.dependantProperties.push(updater);
         }
 
@@ -1508,7 +1561,8 @@ function QMLText(meta, parent, engine) {
     function iwGetter() {
         if (evaluatingProperties.length !== 0) {
             var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (this.$geometry.dependantProperties.indexOf(updater) == -1)
+            if (updater !== propertyUpdaters.indexOf(this.$geometry.update)
+                && this.$geometry.dependantProperties.indexOf(updater) == -1)
                 this.$geometry.dependantProperties.push(updater);
         }
 
@@ -1590,10 +1644,10 @@ function QMLRectangle(meta, parent, engine) {
 
         c.save();
         c.fillStyle = this.color;
-        c.fillRect(this.left, this.top, this.$width, this.$height);
+        c.fillRect(this.left, this.top, this.width, this.height);
         c.strokeStyle = this.border.color;
         c.lineWidth = this.border.width;
-        c.strokeRect(this.left, this.top, this.$width, this.$height);
+        c.strokeRect(this.left, this.top, this.width, this.height);
         c.restore();
     }
 }
@@ -1854,12 +1908,12 @@ function QMLImage(meta, parent, engine) {
     // Actual size of image.
     // todo: bug; implicitWidth|height is not defined this way in docs
     function iwGetter() {
-            return this.width || img.naturalWidth;
+            return img.naturalWidth;
     }
     setupGetter(this, "implicitWidth", iwGetter);
 
     function ihGetter() {
-        return this.height || img.naturalHeight;
+        return img.naturalHeight;
     }
     setupGetter(this, "implicitHeight", ihGetter);
 
@@ -1884,14 +1938,14 @@ function QMLImage(meta, parent, engine) {
     });
 
     this.$drawItem = function(c) {
-        //descr("draw image", this, ["left", "top", "$width", "$height", "source"]);
+        //descr("draw image", this, ["left", "top", "width", "height", "source"]);
 
         if (this.fillMode != this.Image.Stretch) {
             console.log("Images support only Image.Stretch fillMode currently");
         }
         if (this.status == this.Image.Ready) {
             c.save();
-            c.drawImage(img, this.left, this.top, this.$width, this.$height);
+            c.drawImage(img, this.left, this.top, this.width, this.height);
             c.restore();
         } else {
             console.log("Waiting for image to load");
