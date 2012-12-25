@@ -1382,6 +1382,9 @@ function QMLItem(meta, parent, engine) {
         this.$onVisibleChanged.push(function(newVal) {
             this.$domElement.style.visibility = newVal ? "visible" : "hidden";
         });
+        this.$onZChanged.push(function(newVal) {
+            this.$domElement.style.zIndex = newVal;
+        });
         this.$geometry.geometryChanged = function() {
             var w = this.width,
                 h = this.height;
@@ -1395,17 +1398,14 @@ function QMLItem(meta, parent, engine) {
     this.$init.push(function() {
         self.implicitHeight = 0;
         self.implicitWidth = 0;
-        self.rotation = 0;
         self.spacing = 0;
-        self.visible = new QMLBinding("parent.visible !== false");
         self.x = 0;
         self.y = 0;
-        self.z = 0;
     });
 
     this.$draw = function(c) {
         var i;
-        if (this.visible) {
+        if (this.visible !== false) { // Undefined means inherit, means true
             if (this.$drawItem ) {
                 var rotRad = (this.rotation || 0) / 180 * Math.PI,
                     rotOffsetX = Math.sin(rotRad) * this.width,
@@ -2129,11 +2129,13 @@ function QMLMouseArea(meta, parent, engine) {
     createFunction(this, "onClicked");
     createFunction(this, "onEntered");
     createFunction(this, "onExited");
+    createSimpleProperty(this, "hovered");
 
     this.$init.push(function() {
         self.acceptedButtons = QMLGlobalObject.Qt.LeftButton;
         self.enabled = true;
         self.hoverEnabled = false;
+        self.hovered = false;
     });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
@@ -2607,7 +2609,7 @@ function QMLButton(meta, parent, engine) {
         this.$domElement.firstChild.innerHTML = newVal;
     });
 
-    this.$domElement.firstChild.onclick = function(e) {
+    this.$domElement.onclick = function(e) {
         self.onClicked();
     }
 }
