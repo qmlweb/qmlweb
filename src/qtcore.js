@@ -201,7 +201,9 @@ function construct(meta, parent, engine) {
             QMLDocument: QMLDocument,
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
-            NumberAnimation: QMLNumberAnimation
+            NumberAnimation: QMLNumberAnimation,
+            TextInput: QMLTextInput,
+            Button: QMLButton
         },
         item,
         cTree;
@@ -252,9 +254,8 @@ function createFunction(obj, funcName) {
                     + newVal.src
                     + "}; func";
         }
-        var componentScope = obj.Component.$scope.getIdScope();
 
-        func = evalBinding(null, src, obj, componentScope);
+        func = evalBinding(null, src, obj, workingContext[workingContext.length-1].$scope.getIdScope());
     }
 
     setupGetterSetter(obj, funcName, getter, setter);
@@ -1055,7 +1056,8 @@ function QMLItem(meta, parent, engine) {
         self = this;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$domElement = document.createElement("div");
+        if (!this.$domElement)
+            this.$domElement = document.createElement("div");
         this.$domElement.style.position = "absolute";
         this.$domElement.style.pointerEvents = "none";
         this.$domElement.className = meta.$class + (this.id ? " " + this.id : "");
@@ -2541,6 +2543,72 @@ function QMLNumberAnimation(meta, parent, engine) {
             this.stop();
             engine.$requestDraw();
         }
+    }
+}
+
+
+//------------DOM-only-Elements------------
+
+function QMLTextInput(meta, parent, engine) {
+    QMLItem.call(this, meta, parent, engine);
+
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        console.log("TextInput-type is only supported within the DOM-backend.");
+        return;
+    }
+
+    var self = this;
+
+    this.$domElement.innerHTML = "<input type=\"text\"/>"
+    this.$domElement.firstChild.style.pointerEvents = "auto";
+    this.$domElement.firstChild.style.width = "100%";
+    this.$domElement.firstChild.style.height = "100%";
+
+    createSimpleProperty(this, "text", "");
+    createFunction(this, "onAccepted");
+
+    this.$onTextChanged.push(function() {
+        this.$domElement.firstChild.value = this.text;
+    });
+
+    this.$domElement.firstChild.onkeydown = function(e) {
+        if (e.keyCode == 13) //Enter pressed
+            self.onAccepted();
+    }
+
+    function updateValue(e) {
+        if (self.text != self.$domElement.firstChild.value) {
+            self.text = self.$domElement.firstChild.value;
+        }
+    }
+
+    this.$domElement.firstChild.oninput = updateValue;
+    this.$domElement.firstChild.onpropertychanged = updateValue;
+}
+
+function QMLButton(meta, parent, engine) {
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        console.log("Button-type is only supported within the DOM-backend. Use Rectangle + MouseArea instead.");
+        QMLItem.call(this, meta, parent, engine);
+        return;
+    }
+
+    this.$domElement = document.createElement("button");
+    QMLItem.call(this, meta, parent, engine);
+    var self = this;
+
+    this.$domElement.style.pointerEvents = "auto";
+    this.$domElement.innerHTML = "<span></span>";
+
+    createSimpleProperty(this, "text", "");
+    createFunction(this, "onClicked");
+
+    this.$onTextChanged.push(function(newVal) {
+        this.$domElement.firstChild.innerHTML = newVal;
+    });
+
+    this.$domElement.firstChild.onclick = function(e) {
+        self.onClicked();
     }
 }
 

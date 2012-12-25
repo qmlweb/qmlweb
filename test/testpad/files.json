@@ -45,4 +45,8 @@
 {
     "file": "borderimage.qml",
     "title": "* BorderImage test"
+},
+{
+    "file": "widgetgallery.qml",
+    "title": "* Widget Gallery"
 } ]
