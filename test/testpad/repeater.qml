@@ -11,7 +11,7 @@ Rectangle {
         onClicked: if (Math.random() < 0.5) {
             tModel.append({ label: "Hallo!" });
         } else {
-            tModel.remove(rep.count * Math.random());
+            tModel.remove(Math.floor(rep.count * Math.random()));
         }
     }
     
