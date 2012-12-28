@@ -2563,11 +2563,40 @@ function QMLTextInput(meta, parent, engine) {
 
     this.$domElement.innerHTML = "<input type=\"text\"/>"
     this.$domElement.firstChild.style.pointerEvents = "auto";
-    this.$domElement.firstChild.style.width = "100%";
-    this.$domElement.firstChild.style.height = "100%";
+    // In some browsers text-inputs have a margin by default, which distorts
+    // the positioning, so we need to manually set it to 0.
+    this.$domElement.firstChild.style.margin = "0";
 
     createSimpleProperty(this, "text", "");
     createFunction(this, "onAccepted");
+
+    function iwGetter() {
+        return this.$domElement.firstChild.offsetWidth;
+    }
+    setupGetter(this, "implicitWidth", iwGetter);
+
+    function ihGetter() {
+        return this.$domElement.firstChild.offsetHeight;
+    }
+    setupGetter(this, "implicitHeight", ihGetter);
+
+    this.$geometry.geometryChanged = function() {
+        var w = this.width,
+            h = this.height,
+            d = this.$domElement.firstChild.offsetHeight
+                - window.getComputedStyle(this.$domElement.firstChild).height.slice(0,-2);
+        console.log(this.id + ":  " + d + ", " + w + "x" + h);
+        this.$domElement.style.width = w + "px";
+        this.$domElement.style.height = h + "px";
+        this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
+        this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+        // we need to subtract the width of the border and the padding so that
+        // the text-input has the width we want
+        if (this.$geometry.width !== Undefined)
+            this.$domElement.firstChild.style.width = this.$geometry.width - d + "px";
+        if (this.$geometry.height !== Undefined)
+            this.$domElement.firstChild.style.height = this.$geometry.height - d + "px";
+    }
 
     this.$onTextChanged.push(function() {
         this.$domElement.firstChild.value = this.text;
