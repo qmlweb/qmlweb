@@ -1472,18 +1472,18 @@ function QMLText(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.$onColorChanged.push(function(newVal) {
-            this.$domElement.style.color = newVal;
+            this.$domElement.firstChild.style.color = newVal;
         });
         this.$onTextChanged.push(function(newVal) {
             this.$domElement.firstChild.innerHTML = newVal;
             this.$geometry.update();
         });
         this.font.$onPointSizeChanged.push(function(newVal) {
-            this.$domElement.style.fontSize = newVal + "pt";
+            this.$domElement.firstChild.style.fontSize = newVal + "pt";
             this.$geometry.update();
         });
         this.font.$onFamilyChanged.push(function(newVal) {
-            this.$domElement.style.fontFamily = newVal;
+            this.$domElement.firstChild.style.fontFamily = newVal;
             this.$geometry.update();
         });
         this.$geometry.geometryChanged = function() {
