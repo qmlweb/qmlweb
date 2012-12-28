@@ -1589,16 +1589,6 @@ function QMLText(meta, parent, engine) {
     }
     setupGetter(this, "implicitWidth", iwGetter);
 
-    function widthGetter() {
-        return this.implicitWidth;
-    }
-    setupGetter(this, "width", widthGetter);
-
-    function heightGetter() {
-        return this.implicitHeight;
-    }
-    setupGetter(this, "height", heightGetter);
-
     this.$drawItem = function(c) {
         //descr("draw text", this, ["x", "y", "text",
         //                          "implicitWidth", "implicitHeight"]);
