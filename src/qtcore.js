@@ -2585,7 +2585,6 @@ function QMLTextInput(meta, parent, engine) {
             h = this.height,
             d = this.$domElement.firstChild.offsetHeight
                 - window.getComputedStyle(this.$domElement.firstChild).height.slice(0,-2);
-        console.log(this.id + ":  " + d + ", " + w + "x" + h);
         this.$domElement.style.width = w + "px";
         this.$domElement.style.height = h + "px";
         this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
