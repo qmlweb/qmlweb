@@ -1823,17 +1823,24 @@ function QMLListModel(meta, parent, engine) {
 function QMLListElement(meta, parent, engine) {
     // QMLListElement can't have children and needs special handling of properties
     // thus we don't use QMLBaseObject for it
-    var val;
+    var values = [];
 
     for (i in meta) {
         if (i[0] != "$") {
-            val = meta[i];
-            setupGetterSetter(this, i, function() {
-                return val;
-            }, function(newVal) {
-                val = newVal;
-                parent.$model.emitDataChanged(this.index, this.index);
-            });
+            values[i] = meta[i];
+            setupGetterSetter(this, i,
+                (function(name){
+                    return function() {
+                        return values[name];
+                    }
+                })(i),
+                (function(name) {
+                    return function(newVal) {
+                        val = newVal;
+                        parent.$model.emitDataChanged(this.index, this.index);
+                    }
+                })(name)
+            );
         }
     }
 
