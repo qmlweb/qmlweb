@@ -1448,27 +1448,83 @@ function QMLText(meta, parent, engine) {
     if (engine.renderMode == QMLRenderMode.DOM) {
         // We create another span inside the text to distinguish the actual
         // (possibly html-formatted) text from child elements
-        this.$domElement.innerHTML = "<span></span>";
+        this.$domElement.innerHTML = "<div></div>";
         this.$domElement.style.pointerEvents = "auto";
-        this.$domElement.style.whiteSpace = "nowrap";
+        this.$domElement.firstChild.style.width = "100%";
+        this.$domElement.firstChild.style.height = "100%";
     }
 
     // Creates font css description
     function fontCss(font) {
         var css = "";
-        font = font || {};
-        css += (font.pointSize || 10) + "pt ";
+        css += font.italic ? "italic " : "normal ";
+        css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
+        // Canvas seems to only support bold yes or no
+        css += (font.weight == self.Font.Bold
+            || font.weight == self.Font.DemiBold
+            || font.weight == self.Font.Black
+            || font.bold) ? "bold " : "normal ";
+        css += font.pixelSize !== Undefined
+            ? font.pixelSize + "px "
+            : (font.pointSize || 10) + "pt ";
+        css += self.lineHeight !== Undefined ? self.lineHeight + "px " : " ";
         css += (font.family || "sans-serif") + " ";
         return css;
     }
 
+    this.Font = {
+        // Capitalization
+        MixedCase: "none",
+        AllUppercase: "uppercase",
+        AllLowercase: "lowercase",
+        SmallCaps: "smallcaps",
+        Capitalize: "capitalize",
+        // Weight
+        Light: "lighter",
+        Normal: "normal",
+        DemiBold: "600",
+        Bold: "bold",
+        Black: "bolder",
+    }
+
+    this.Text = {
+        // Wrap Mode
+        NoWrap: 0,
+        WordWrap: 1,
+        WrapAnywhere: 2,
+        Wrap: 3,
+        // Horizontal-Alignment
+        AlignLeft: "left",
+        AlignRight: "right",
+        AlignHCenter: "center",
+        AlignJustify: "justify",
+        // Style
+        Normal: 0,
+        Outline: 1,
+        Raised: 2,
+        Sunken: 3
+    }
+
     this.font = {};
+    createSimpleProperty(this.font, "bold", { altParent: this });
+    createSimpleProperty(this.font, "capitalization", { altParent: this });
     createSimpleProperty(this.font, "family", { altParent: this });
+    createSimpleProperty(this.font, "italic", { altParent: this });
+    createSimpleProperty(this.font, "letterSpacing", { altParent: this });
+    createSimpleProperty(this.font, "pixelSize", { altParent: this });
     createSimpleProperty(this.font, "pointSize", { altParent: this });
+    createSimpleProperty(this.font, "strikeout", { altParent: this });
+    createSimpleProperty(this.font, "underline", { altParent: this });
+    createSimpleProperty(this.font, "weight", { altParent: this });
+    createSimpleProperty(this.font, "wordSpacing", { altParent: this });
 
     createSimpleProperty(this, "color");
-
     createSimpleProperty(this, "text");
+    createSimpleProperty(this, "lineHeight");
+    createSimpleProperty(this, "wrapMode");
+    createSimpleProperty(this, "horizontalAlignment");
+    createSimpleProperty(this, "style");
+    createSimpleProperty(this, "styleColor");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.$onColorChanged.push(function(newVal) {
@@ -1482,13 +1538,135 @@ function QMLText(meta, parent, engine) {
             this.$domElement.firstChild.style.fontSize = newVal + "pt";
             this.$geometry.update();
         });
+        this.font.$onBoldChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontWeight =
+                this.font.weight !== Undefined ? this.font.weight :
+                newVal ? "bold" : "normal";
+            this.$geometry.update();
+        });
+        this.font.$onCapitalizationChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontVariant =
+                newVal == "smallcaps" ? "small-caps" : "normal";
+            newVal = newVal == "smallcaps" ? "none" : newVal;
+            this.$domElement.firstChild.style.textTransform = newVal;
+        });
         this.font.$onFamilyChanged.push(function(newVal) {
             this.$domElement.firstChild.style.fontFamily = newVal;
             this.$geometry.update();
         });
+        this.font.$onItalicChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
+        });
+        this.font.$onLetterSpacingChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+        });
+        this.font.$onPixelSizeChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontSize = newVal !== Undefined
+                ? newVal + "px "
+                : (this.font.pointSize || 10) + "pt";
+            this.$geometry.update();
+        });
+        this.font.$onPointSizeChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontSize = this.font.pixelSize !== Undefined
+                ? this.font.pixelSize + "px "
+                : (newVal || 10) + "pt";
+            this.$geometry.update();
+        });
+        this.font.$onStrikeoutChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.textDecoration = newVal
+                ? "line-through"
+                : this.font.underline
+                ? "underline"
+                : "normal";
+        });
+        this.font.$onUnderlineChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.textDecoration = this.font.strikeout
+                ? "line-through"
+                : newVal
+                ? "underline"
+                : "normal";
+        });
+        this.font.$onWeightChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.fontWeight =
+                newVal !== Undefined ? newVal :
+                this.font.bold ? "bold" : "normal";
+        });
+        this.font.$onWordSpacingChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+        });
+        this.$onLineHeightChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.lineHeight = newVal + "px";
+        });
+        this.$onWrapModeChanged.push(function(newVal) {
+            switch (newVal) {
+                case 0:
+                    this.$domElement.firstChild.style.whiteSpace = "pre";
+                    break;
+                case 1:
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    break;
+                case 2:
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.$domElement.firstChild.style.wordBreak = "break-all";
+                    break;
+                case 3:
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.$domElement.firstChild.style.wordWrap = "break-word";
+            };
+            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+            // lesser of the two evils to be ignoring "\n"s inside the text.
+            if (this.horizontalAlignment == "justify")
+                this.$domElement.firstChild.style.whiteSpace = "normal";
+        });
+        this.$onHorizontalAlignmentChanged.push(function(newVal) {
+            this.$domElement.firstChild.style.textAlign = newVal;
+            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+            // lesser of the two evils to be ignoring "\n"s inside the text.
+            if (newVal == "justify")
+                this.$domElement.firstChild.style.whiteSpace = "normal";
+        });
+        this.$onStyleChanged.push(function(newVal) {
+            switch (newVal) {
+                case 0:
+                    this.$domElement.firstChild.style.textShadow = "none";
+                    break;
+                case 1:
+                    var color = this.styleColor;
+                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
+                        + ", -1px 0 0 " + color
+                        + ", 0 1px 0 " + color
+                        + ", 0 -1px 0 " + color;
+                    break;
+                case 2:
+                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                    break;
+                case 3:
+                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+            };
+        });
+        this.$onStyleColorChanged.push(function(newVal) {
+            switch (this.style) {
+                case 0:
+                    this.$domElement.firstChild.style.textShadow = "none";
+                    break;
+                case 1:
+                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
+                        + ", -1px 0 0 " + newVal
+                        + ", 0 1px 0 " + newVal
+                        + ", 0 -1px 0 " + newVal;
+                    break;
+                case 2:
+                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                    break;
+                case 3:
+                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+            };
+        });
         this.$geometry.geometryChanged = function() {
-            this.$domElement.style.width = "auto";
-            this.$domElement.style.height = "auto";
+            var w = this.$geometry.width,
+                h = this.$geometry.height;
+            this.$domElement.style.width = w ? w + "px" : "auto";
+            this.$domElement.style.height = h ? h + "px" : "auto";
             this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
             this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
         }
@@ -1501,6 +1679,7 @@ function QMLText(meta, parent, engine) {
     this.$init.push(function() {
         self.font.family = "sans-serif";
         self.font.pointSize = 10;
+        self.wrapMode = self.Text.NoWrap;
         self.color = "black";
         self.text = "";
     });

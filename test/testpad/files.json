@@ -47,6 +47,10 @@
     "title": "* BorderImage test"
 },
 {
+    "file": "font.qml",
+    "title": "* Text/Font test"
+},
+{
     "file": "widgetgallery.qml",
     "title": "* Widget Gallery"
 } ]
