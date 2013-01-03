@@ -2036,6 +2036,7 @@ function QMLImage(meta, parent, engine) {
     if (engine.renderMode == QMLRenderMode.DOM) {
         img.style.width = "100%";
         img.style.height = "100%";
+        img.style.position = "absolute";
         this.$domElement.appendChild(img);
     }
 
