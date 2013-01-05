@@ -1380,7 +1380,7 @@ function QMLItem(meta, parent, engine) {
             this.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
         });
         this.$onVisibleChanged.push(function(newVal) {
-            this.$domElement.style.visibility = newVal ? "visible" : "hidden";
+            this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
         });
         this.$onZChanged.push(function(newVal) {
             this.$domElement.style.zIndex = newVal;
