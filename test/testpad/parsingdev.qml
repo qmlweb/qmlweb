@@ -20,6 +20,7 @@ Rectangle {
         }
     
     }
+    Component.onCompleted: console.log("Component.onCompleted!");
 }
 
 

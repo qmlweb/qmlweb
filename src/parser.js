@@ -1334,8 +1334,31 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 if (qml_is_element(propname)) {
                     // Element statement
                     next();
-                    // todo: this is only basic case
-                    return as("qmlelem", propname, qmlblock());
+                    if (is("punc", ".")) {
+                        // Element.something
+                        // Create new child element with given property
+                        next();
+
+                        if (S.token.type !== "name") {
+                            croak("Expecting name");
+                        }
+                        var name = S.token.value;
+                        next();
+
+                        // Expect evaluatable item
+                        expect(":");
+                        var from = S.token.pos,
+                            stat = statement(),
+                            to = S.token.pos;
+
+                        return as("qmlelem", propname,
+                                [ as("qmlprop", name, stat,
+                                        $TEXT.substr(from, to - from)) ]);
+                    } else {
+                        // Element
+                        return as("qmlelem", propname, qmlblock());
+                    }
+
                 } else {
                     // property statement
                     next();
