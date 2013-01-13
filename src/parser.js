@@ -1331,39 +1331,15 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 return qmlpropdef();
             } else if (S.token.type == "name") {
                 var propname = S.token.value;
-                if (qml_is_element(propname)) {
-                    // Element statement
-                    next();
-                    if (is("punc", ".")) {
-                        // Element.something
-                        // Create new child element with given property
-                        next();
-
-                        if (S.token.type !== "name") {
-                            croak("Expecting name");
-                        }
-                        var name = S.token.value;
-                        next();
-
-                        // Expect evaluatable item
-                        expect(":");
-                        var from = S.token.pos,
-                            stat = statement(),
-                            to = S.token.pos;
-
-                        return as("qmlelem", propname,
-                                [ as("qmlprop", name, stat,
-                                        $TEXT.substr(from, to - from)) ]);
-                    } else {
-                        // Element
-                        return as("qmlelem", propname, qmlblock());
-                    }
-
+                next();
+                if (qml_is_element(propname) && !is("punc", ".")) {
+                    // Element
+                    return as("qmlelem", propname, qmlblock());
                 } else {
                     // property statement
-                    next();
                     if (is("punc", ".")) {
                         // anchors, fonts etc, a.b: statement;
+                        // Can also be Component.onCompleted: ...
                         // Assume only one subproperty
                         next();
                         var subname = S.token.value;
