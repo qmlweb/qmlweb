@@ -218,12 +218,12 @@ function construct(meta, parent, engine) {
         item = component.$children[0];
         //TODO: These $intern... properties are not nice. Find a better way.
         item.$internChildren = component.$children[0].$children;
-        item.$internComponent = component.$children[0].Component;
+        item.$internScope = component.$children[0].$scope;
         meta.$componentMeta = cTree.$children[0];
         if (cTree.$children[0].$defaultProperty) {
             var bindSrc = "function $Qbc(newVal) {" + cTree.$children[0].$defaultProperty.src
                             + " = newVal; };$Qbc";
-            item.$applyChild = evalBinding(item, bindSrc, item, item.Component.$scope.getIdScope());
+            item.$applyChild = evalBinding(item, bindSrc, item, item.$scope.getIdScope());
         }
         QMLBaseObject.call(item, meta, parent, engine);
         item.$$type = meta.$class; // Some debug info, don't depend on existence
@@ -255,7 +255,7 @@ function createFunction(obj, funcName) {
                     + "}; func";
         }
 
-        func = evalBinding(null, src, obj, workingContext[workingContext.length-1].$scope.getIdScope());
+        func = evalBinding(null, src, obj, workingContext[workingContext.length-1].getIdScope());
     }
 
     setupGetterSetter(obj, funcName, getter, setter);
@@ -356,7 +356,7 @@ function createSimpleProperty(obj, propName, options) {
 
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
-            binding = evalBinding(null, bindSrc, objectScope, workingContext[workingContext.length-1].$scope.getIdScope());
+            binding = evalBinding(null, bindSrc, objectScope, workingContext[workingContext.length-1].getIdScope());
             val = binding();
 
             evaluatingProperties.pop();
@@ -464,10 +464,10 @@ function applyProperties(meta, item, skip) {
         }
         // no property should begin with uppercase letter -- those indicate
         // classes
-        if (i[0] == i[0].toUpperCase()) {
-            console.log(meta, "has", i, "-- bug?");
-            continue;
-        }
+//         if (i[0] == i[0].toUpperCase()) {
+//             console.log(meta, "has", i, "-- bug?");
+//             continue;
+//         }
         // Handle objects which are already defined in item differently
         if (Object.prototype.toString.call(meta[i]) == '[object Object]') {
             if (item[i] && !(meta[i] instanceof QMLBinding)) {
@@ -552,6 +552,10 @@ QMLEngine = function (element, options) {
     this.rootElement = element;
     this.renderMode = element.nodeName == "CANVAS" ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
 
+    // List of slots registered with Component.onCompleted
+    //TODO: Implement as real signals
+    this.completedSlots = [];
+
 
 //----------Public Methods----------
     // Start the engine
@@ -604,6 +608,9 @@ QMLEngine = function (element, options) {
         }
         doc = construct(tree, {}, this);
         doc.$init();
+        for (var i in this.completedSlots) {
+            this.completedSlots[i]();
+        }
     }
 
     this.registerProperty = function(obj, propName)
@@ -895,7 +902,7 @@ function QMLBaseObject(meta, parent, engine) {
 
     if (!this.$draw)
         this.$draw = noop;
-    this.Component = workingContext[workingContext.length-1];
+    this.$scope = workingContext[workingContext.length-1];
     if (!this.$ownPropertyUpdaters)
         this.$ownPropertyUpdaters = [];
 
@@ -905,7 +912,7 @@ function QMLBaseObject(meta, parent, engine) {
     // id
     if (meta.id) {
         this.id = meta.id;
-        this.Component.$scope.defId(meta.id, this);
+        this.$scope.defId(meta.id, this);
     }
 
     // children
@@ -986,7 +993,7 @@ function QMLBaseObject(meta, parent, engine) {
         var func = evalBinding(null,
                                method + ";" + name,
                                item,
-                               workingContext[workingContext.length-1].$scope.getIdScope());
+                               workingContext[workingContext.length-1].getIdScope());
         return function() {
             return func.apply(null, arguments);
         };
@@ -1003,6 +1010,20 @@ function QMLBaseObject(meta, parent, engine) {
         
         }
     }
+
+    // Component.onCompleted
+    this.Component = {};
+    function addCompletedSlot(val) {
+        if (!(val instanceof QMLBinding))
+            return;
+        var src = "var func = function() {"
+                    + val.src
+                    + "}; func";
+
+        func = evalBinding(null, src, self, self.$scope.getIdScope());
+        engine.completedSlots.push(func);
+    }
+    setupSetter(this.Component, "onCompleted", addCompletedSlot);
 
     // Construct from meta, not from this!
     if (meta.$children) {
@@ -1024,12 +1045,12 @@ function QMLBaseObject(meta, parent, engine) {
 
         // Apply property-values which are set inside the Component-definition
         if (meta.$componentMeta) {
-            workingContext.push(self.$internComponent);
+            workingContext.push(self.$internScope);
             applyProperties(meta.$componentMeta, self);
             workingContext.pop();
         }
 
-        workingContext.push(self.Component);
+        workingContext.push(self.$scope);
         applyProperties(meta, self);
         workingContext.pop();
 
@@ -1172,7 +1193,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
-            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.vVal = (function(val) { return function() {
                     return val;
@@ -1186,7 +1207,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - height;};$Qbc";
-            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height;
@@ -1200,7 +1221,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
-            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.hVal = (function(val) { return function() {
                     return val;
@@ -1214,7 +1235,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - width;};$Qbc";
-            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width;
@@ -1228,7 +1249,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - width / 2;};$Qbc";
-            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width / 2;
@@ -1242,7 +1263,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - height / 2;};$Qbc";
-            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height / 2;
@@ -1256,16 +1277,16 @@ function QMLItem(meta, parent, engine) {
         var val = newVal.src;
         var hBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.left;};$Qbc";
-        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         var vBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.top;};$Qbc";
-        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         var widthBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.width;};$Qbc";
-        self.$geometry.widthVal = evalBinding(null, widthBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.widthVal = evalBinding(null, widthBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         var heightBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.height;};$Qbc";
-        self.$geometry.heightVal = evalBinding(null, heightBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.heightVal = evalBinding(null, heightBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         self.$geometry.update();
     }
     setupSetter(this.anchors, "fill", fillSetter);
@@ -1273,10 +1294,10 @@ function QMLItem(meta, parent, engine) {
         var val = newVal.src;
         var hBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.horizontalCenter - width / 2;};$Qbc";
-        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.hVal = evalBinding(null, hBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         var vBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.verticalCenter - height / 2;};$Qbc";
-        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+        self.$geometry.vVal = evalBinding(null, vBindSrc, self, workingContext[workingContext.length-1].getIdScope());
         self.$geometry.update();
     }
     setupSetter(this.anchors, "centerIn", centerInSetter);
@@ -1288,7 +1309,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv + parent.left;};$Qbc";
-            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val + obj.parent.left;
@@ -1305,7 +1326,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv + parent.top;};$Qbc";
-            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val + obj.parent.top;
@@ -1329,7 +1350,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
-            self.$geometry.widthVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.widthVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.widthVal = (function(val) { return function() {
                     return val;
@@ -1353,7 +1374,7 @@ function QMLItem(meta, parent, engine) {
         if (newVal instanceof QMLBinding) {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
-            self.$geometry.heightVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].$scope.getIdScope());
+            self.$geometry.heightVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
             self.$geometry.heightVal = (function(val) { return function() {
                     return val;
@@ -1861,7 +1882,7 @@ function QMLRepeater(meta, parent, engine) {
             applyChildProperties(child.$children[i]);
     }
     function insertChildren(startIndex, endIndex) {
-        workingContext.push(self.Component);
+        workingContext.push(self.$scope);
         for (var index = startIndex; index < endIndex; index++) {
             var newMeta = cloneObject(self.delegate);
             newMeta.id = newMeta.id + index;
@@ -1934,7 +1955,7 @@ function QMLRepeater(meta, parent, engine) {
     }
     function removeChildProperties(child) {
         if (child.id)
-            self.Component.$scope.remId(child.id);
+            self.$scope.remId(child.id);
         for (var i in child.$ownPropertyUpdaters)
             propertyUpdaters[child.$ownPropertyUpdaters[i]] = undefined;
         for (var i in child.$children)
@@ -2377,8 +2398,7 @@ function QMLDocument(meta, parent, engine) {
     parent.top = 0;
     parent.$domElement = engine.rootElement;
 
-    var Component = {};
-    Component.$scope = {
+    var scope = {
         // Get scope
         get: function() {
             return ids;
@@ -2400,7 +2420,7 @@ function QMLDocument(meta, parent, engine) {
             ids[name] = undefined;
         }
     };
-    workingContext.push(Component);
+    workingContext.push(scope);
 
     doc = new QMLItem(meta, parent, engine);
     item = doc.$children[0];
@@ -2430,7 +2450,7 @@ function QMLDocument(meta, parent, engine) {
             engine.rootElement.innerHTML = "";
             engine.rootElement.appendChild(doc.$domElement);
         }
-        workingContext.push(Component);
+        workingContext.push(scope);
         // The init-methods are called in reverse order for the $init
         // from QMLBaseObject, where explicitly-set-properties are applied,
         // needs to be called last.
