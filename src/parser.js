@@ -1331,16 +1331,15 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 return qmlpropdef();
             } else if (S.token.type == "name") {
                 var propname = S.token.value;
-                if (qml_is_element(propname)) {
-                    // Element statement
-                    next();
-                    // todo: this is only basic case
+                next();
+                if (qml_is_element(propname) && !is("punc", ".")) {
+                    // Element
                     return as("qmlelem", propname, qmlblock());
                 } else {
                     // property statement
-                    next();
                     if (is("punc", ".")) {
                         // anchors, fonts etc, a.b: statement;
+                        // Can also be Component.onCompleted: ...
                         // Assume only one subproperty
                         next();
                         var subname = S.token.value;
