@@ -679,9 +679,7 @@ QMLEngine = function (element, options) {
     // Return a path to load the file
     this.$resolvePath = function(file)
     {
-        if (file.indexOf("://") != -1) {
-            return file;
-        } else if (file.indexOf("/") == 0) {
+        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
             return file;
         }
         return basePath + file;
