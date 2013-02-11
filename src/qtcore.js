@@ -1863,7 +1863,7 @@ function QMLRepeater(meta, parent, engine) {
     this.$init.push(function() {
         self.model = 0;
         self.count = 0;
-        this.$completed = true;
+        self.$completed = true;
     });
 
     function applyChildProperties(child) {
