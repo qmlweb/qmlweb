@@ -641,16 +641,13 @@ QMLEngine = function (element, options) {
 
 //Intern
 
-    // Load file, parse and construct as Component (.qml or .qml.js)
+    // Load file, parse and construct as Component (.qml)
     this.loadComponent = function(name)
     {
         if (name in this.components)
             return this.components[name];
 
-        var file = name + ".qml";
-        basePath = file.split("/");
-        basePath[basePath.length - 1] = "";
-        basePath = basePath.join("/");
+        var file = basePath + name + ".qml";
 
         var src = getUrlContents(file);
         if (src=="")
