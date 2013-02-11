@@ -1016,9 +1016,13 @@ function QMLBaseObject(meta, parent, engine) {
                     + "}; func";
 
         func = evalBinding(null, src, self, self.$scope.getIdScope());
+        self.Component.$onCompleted = func;
         engine.completedSlots.push(func);
     }
-    setupSetter(this.Component, "onCompleted", addCompletedSlot);
+    function getCompletedSlot() {
+        return self.Component.$onCompleted;
+    }
+    setupGetterSetter(this.Component, "onCompleted", getCompletedSlot, addCompletedSlot);
 
     // Construct from meta, not from this!
     if (meta.$children) {
@@ -1850,6 +1854,7 @@ function QMLRepeater(meta, parent, engine) {
 
     createSimpleProperty(this, "model");
     createSimpleProperty(this, "count");
+    this.$completed = false;
 
     this.$onModelChanged.push(function() {
         applyModel();
@@ -1858,6 +1863,7 @@ function QMLRepeater(meta, parent, engine) {
     this.$init.push(function() {
         self.model = 0;
         self.count = 0;
+        this.$completed = true;
     });
 
     function applyChildProperties(child) {
@@ -1876,6 +1882,14 @@ function QMLRepeater(meta, parent, engine) {
         for (var i in child.$children)
             applyChildProperties(child.$children[i]);
     }
+    function callOnCompleted(child) {
+        if (child.Component.onCompleted)
+            child.Component.onCompleted();
+        for (var i in child.$internChildren)
+            callOnCompleted(child.$internChildren[i]);
+        for (var i in child.$children)
+            callOnCompleted(child.$children[i]);
+    }
     function insertChildren(startIndex, endIndex) {
         workingContext.push(self.$scope);
         for (var index = startIndex; index < endIndex; index++) {
@@ -1890,8 +1904,13 @@ function QMLRepeater(meta, parent, engine) {
             newItem.index = index;
             //TODO: Use parent's children, in order to make it completely transparent
             self.$children.splice(index, 0, newItem);
-            for (var i = newItem.$init.length - 1; i>=0; i--)
-                newItem.$init[i]();
+            if (self.$completed) {
+                // We don't call those on first creation, as they will be called
+                // by the regular creation-procedures at the right time.
+                for (var i = newItem.$init.length - 1; i>=0; i--)
+                    newItem.$init[i]();
+                callOnCompleted(newItem);
+            }
         }
         for (var i = endIndex; i < self.$children.length; i++) {
             self.$children[i].index = i;
