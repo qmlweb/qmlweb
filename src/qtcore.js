@@ -1863,6 +1863,11 @@ function QMLRepeater(meta, parent, engine) {
     this.$init.push(function() {
         self.model = 0;
         self.count = 0;
+    });
+
+    // We prepend this to the init-list in order to have it executed as the
+    // very last (the order of calling init is from last to first)
+    this.$init.unshift(function() {
         self.$completed = true;
     });
 
