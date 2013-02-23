@@ -1014,7 +1014,7 @@ function QMLBaseObject(meta, parent, engine) {
                     + val.src
                     + "}; func";
 
-        func = evalBinding(null, src, self, self.$scope.getIdScope());
+        func = evalBinding(null, src, self, workingContext[workingContext.length-1].getIdScope());
         self.Component.$onCompleted = func;
         engine.completedSlots.push(func);
     }
