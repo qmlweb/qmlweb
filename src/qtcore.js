@@ -361,9 +361,6 @@ function createSimpleProperty(obj, propName, options) {
 
             evaluatingProperties.pop();
 
-            if (obj[changeFuncName])
-                obj[changeFuncName]();
-
             // Trigger extended changesignal capabilities
             for (i in obj["$" + changeFuncName]) {
                 obj["$" + changeFuncName][i].call(objectScope, val, obj, propName);
@@ -372,9 +369,6 @@ function createSimpleProperty(obj, propName, options) {
             binding = false;
 
             val = newVal;
-
-            if (obj[changeFuncName])
-                obj[changeFuncName]();
 
             // Trigger extended changesignal capabilities
             for (i in obj["$" + changeFuncName]) {
@@ -387,6 +381,11 @@ function createSimpleProperty(obj, propName, options) {
                 if (propertyUpdaters[dependantProperties[i]] !== Undefined)
                     propertyUpdaters[dependantProperties[i]].call(objectScope);
             }
+        }
+
+        if (!(newVal instanceof QMLTransientValue)) {
+            if (obj[changeFuncName])
+                obj[changeFuncName]();
         }
     };
 
