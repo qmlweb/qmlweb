@@ -1596,14 +1596,14 @@ function QMLText(meta, parent, engine) {
                 ? "line-through"
                 : this.font.underline
                 ? "underline"
-                : "normal";
+                : "none";
         });
         this.font.$onUnderlineChanged.push(function(newVal) {
             this.$domElement.firstChild.style.textDecoration = this.font.strikeout
                 ? "line-through"
                 : newVal
                 ? "underline"
-                : "normal";
+                : "none";
         });
         this.font.$onWeightChanged.push(function(newVal) {
             this.$domElement.firstChild.style.fontWeight =
