@@ -84,10 +84,10 @@ var QMLGlobalObject = {
     // to pass it through all constructors.
     // The last element in the Stack is the currently relevant context.
     workingContext = [],
-    // Stack of properties that are currently are beeing evaluated. Used to
-    // get the information which property called a certain other property
-    // for evaluation and is thus dependant on it.
-    evaluatingProperties = [];
+    // Property that is currently beeing evaluated. Used to get the information
+    // which property called the getter of a certain other property for
+    // evaluation and is thus dependant on it.
+    evaluatingProperty = undefined;
 
 /**
  * Inheritance helper
@@ -320,14 +320,9 @@ function createSimpleProperty(obj, propName, options) {
     function getter() {
         // Find out if this call to the getter is due to a property that is
         // dependant on this one
-        if (evaluatingProperties.length !== 0) {
-            var item = evaluatingProperties[evaluatingProperties.length - 1];
-            if (evaluatingProperties.indexOf(updaterIndex) != -1)
-                //TODO: Can this happen without having a binding loop?
-                console.log("Probable binding loop detected!");
-            else if (dependantProperties.indexOf(item) == -1)
-                dependantProperties.push(item);
-        }
+        if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
+                dependantProperties.push(evaluatingProperty);
+
         return val;
     };
 
@@ -352,14 +347,14 @@ function createSimpleProperty(obj, propName, options) {
                 objectScope.$ownPropertyUpdaters.push(updaterIndex);
             }
 
-            evaluatingProperties.push(updaterIndex);
+            evaluatingProperty = updaterIndex;
 
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
             binding = evalBinding(null, bindSrc, objectScope, workingContext[workingContext.length-1].getIdScope());
             val = binding();
 
-            evaluatingProperties.pop();
+            evaluatingProperty = undefined;
 
             // Trigger extended changesignal capabilities
             for (i in obj["$" + changeFuncName]) {
@@ -618,11 +613,9 @@ QMLEngine = function (element, options) {
         var value = obj[propName];
 
         function getter() {
-            if (evaluatingProperties.length !== 0) {
-                var item = evaluatingProperties[evaluatingProperties.length - 1];
-                if (item[0] !== obj && dependantProperties.indexOf(item) == -1)
-                    dependantProperties.push(item);
-            }
+            if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
+                dependantProperties.push(evaluatingProperty);
+
             return value;
         }
 
@@ -1094,7 +1087,7 @@ function QMLItem(meta, parent, engine) {
                 self.$ownPropertyUpdaters.push(updaterIndex);
             }
 
-            evaluatingProperties.push(updaterIndex);
+            evaluatingProperty = updaterIndex;
             if (self.$geometry.widthVal)
                 self.$geometry.width = self.$geometry.widthVal();
             if (self.$geometry.heightVal)
@@ -1103,7 +1096,7 @@ function QMLItem(meta, parent, engine) {
                 self.$geometry.left = self.$geometry.hVal();
             if (self.$geometry.vVal)
                 self.$geometry.top = self.$geometry.vVal();
-            evaluatingProperties.pop();
+            evaluatingProperty = undefined;
 
             if (self.$geometry.geometryChanged) {
                 self.$geometry.geometryChanged.call(self);
@@ -1140,12 +1133,12 @@ function QMLItem(meta, parent, engine) {
     // left, right, top, bottom, horizontalCenter, verticalCenter, baseline
     // todo: margins
     function leftGetter() {
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
-                && self.$geometry.dependantProperties.indexOf(updater) == -1)
-                self.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
+
         return self.$geometry.left;
     }
     setupGetter(this, "left", leftGetter);
@@ -1156,12 +1149,12 @@ function QMLItem(meta, parent, engine) {
     setupGetter(this, "right", rightGetter);
 
     function topGetter() {
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
-                && self.$geometry.dependantProperties.indexOf(updater) == -1)
-                self.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
+
         return self.$geometry.top;
     }
     setupGetter(this, "top", topGetter);
@@ -1336,12 +1329,12 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this, "y", yGetter, ySetter);
 
     function widthGetter() {
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
-                && self.$geometry.dependantProperties.indexOf(updater) == -1)
-                self.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
+
         return self.$geometry.width !== Undefined ? self.$geometry.width : self.implicitWidth;
     }
     function widthSetter(newVal) {
@@ -1360,12 +1353,12 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this, "width", widthGetter, widthSetter);
 
     function heightGetter() {
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(self.$geometry.update)
-                && self.$geometry.dependantProperties.indexOf(updater) == -1)
-                self.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
+
         return self.$geometry.height !== Undefined ? self.$geometry.height : self.implicitHeight;
     }
     function heightSetter(newVal) {
@@ -1711,11 +1704,10 @@ function QMLText(meta, parent, engine) {
         lastH,
         lastHFont;
     function ihGetter(){
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(this.$geometry.update)
-                && this.$geometry.dependantProperties.indexOf(updater) == -1)
-                this.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
         // DOM
@@ -1760,11 +1752,10 @@ function QMLText(meta, parent, engine) {
         lastW,
         lastWFont;
     function iwGetter() {
-        if (evaluatingProperties.length !== 0) {
-            var updater = evaluatingProperties[evaluatingProperties.length - 1];
-            if (updater !== propertyUpdaters.indexOf(this.$geometry.update)
-                && this.$geometry.dependantProperties.indexOf(updater) == -1)
-                this.$geometry.dependantProperties.push(updater);
+        if (evaluatingProperty
+            && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
+            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
         var font = fontCss(this.font);
