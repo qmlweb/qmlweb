@@ -2327,8 +2327,15 @@ function QMLMouseArea(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
-    if (engine.renderMode == QMLRenderMode.DOM)
+    if (engine.renderMode == QMLRenderMode.DOM) {
         this.$domElement.style.pointerEvents = "all";
+
+        // IE does not handle mouse clicks to transparent divs, so we have
+        // to set a background color and make it invisible using opacity
+        // as that doesn't affect the mouse handling.
+        this.$domElement.style.backgroundColor = "white";
+        this.$domElement.style.opacity = 0;
+    }
 
     createSimpleProperty(this, "acceptedButtons");
     createSimpleProperty(this, "enabled");
