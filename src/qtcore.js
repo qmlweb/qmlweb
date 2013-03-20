@@ -1182,10 +1182,13 @@ function QMLItem(meta, parent, engine) {
     // Assign values from meta
     function topSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function and assign that to vVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
             self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to vVal returning the value of the property.
+            // The nesting of 'function's is done in order to isolate the scopes.
             self.$geometry.vVal = (function(val) { return function() {
                     return val;
                 }
@@ -1196,10 +1199,15 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this.anchors, "top", topGetter, topSetter, topSetter);
     function bottomSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the top position and assign that to vVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - height;};$Qbc";
             self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to vVal that calculates and returns the top
+            // position of the element. The nesting of 'function's is done in
+            // order to isolate the scopes.
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height;
                 }
@@ -1210,10 +1218,13 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this.anchors, "bottom", bottomGetter, bottomSetter);
     function leftSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function and assign that to hVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
             self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to hVal returning the value of the property.
+            // The nesting of 'function's is done in order to isolate the scopes.
             self.$geometry.hVal = (function(val) { return function() {
                     return val;
                 }
@@ -1224,10 +1235,15 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this.anchors, "left", leftGetter, leftSetter);
     function rightSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the left position and assign that to hVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - width;};$Qbc";
             self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to hVal that calculates and returns the left
+            // position of the element. The nesting of 'function's is done in
+            // order to isolate the scopes.
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width;
                 }
@@ -1238,10 +1254,15 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this.anchors, "right", rightGetter, rightSetter);
     function hzSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the left position and assign that to hVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - width / 2;};$Qbc";
             self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to hVal that calculates and returns the left
+            // position of the element. The nesting of 'function's is done in
+            // order to isolate the scopes.
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width / 2;
                 }
@@ -1252,10 +1273,15 @@ function QMLItem(meta, parent, engine) {
     setupGetterSetter(this.anchors, "horizontalCenter", hzGetter, hzSetter);
     function vzSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the top position and assign that to vVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv - height / 2;};$Qbc";
             self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to vVal that calculates and returns the top
+            // position of the element. The nesting of 'function's is done in
+            // order to isolate the scopes.
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height / 2;
                 }
@@ -1265,6 +1291,11 @@ function QMLItem(meta, parent, engine) {
     }
     setupGetterSetter(this.anchors, "verticalCenter", vzGetter, vzSetter);
     function fillSetter(newVal) {
+        // For fill we asopt the complete geometry of another element. So we
+        // wrap the binding source into multiple functions that return the
+        // position resp. the size of that element and assign them to the
+        // respective properties of $geometry. The value of fill can only be a
+        // QMLBinding, so we don't have to consider the case of a simple value.
         var val = newVal.src;
         var hBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.left;};$Qbc";
@@ -1282,6 +1313,11 @@ function QMLItem(meta, parent, engine) {
     }
     setupSetter(this.anchors, "fill", fillSetter);
     function centerInSetter(newVal) {
+        // For centerIn, we apply the horizontal and vertical center to the
+        // respective property of another element. So we wrap the binding into
+        // two functions for the horizontal and the vertical centering. The
+        // value of fill can only be a QMLBinding, so we don't have to consider
+        // the case of a simple value.
         var val = newVal.src;
         var hBindSrc = "function $Qbc() { var $Qbv = " + val
                 + "; return $Qbv.horizontalCenter - width / 2;};$Qbc";
@@ -1298,10 +1334,15 @@ function QMLItem(meta, parent, engine) {
     }
     function xSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the absolute left position of the element and assign that to hVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv + parent.left;};$Qbc";
             self.$geometry.hVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to hVal that calculates and returns the
+            // absolute left position of the element. The nesting of 'function's
+            // is done in order to isolate the scopes.
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val + obj.parent.left;
                 }
@@ -1315,10 +1356,15 @@ function QMLItem(meta, parent, engine) {
     }
     function ySetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function that calculates and returns
+            // the absolute top position of the element and assign that to vVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv + parent.top;};$Qbc";
             self.$geometry.vVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to vVal that calculates and returns the
+            // absolute top position of the element. The nesting of 'function's
+            // is done in order to isolate the scopes.
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val + obj.parent.top;
                 }
@@ -1339,10 +1385,13 @@ function QMLItem(meta, parent, engine) {
     }
     function widthSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function and assign that to widthVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
             self.$geometry.widthVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to widthVal returning the value of the property.
+            // The nesting of 'function's is done in order to isolate the scopes.
             self.$geometry.widthVal = (function(val) { return function() {
                     return val;
                 }
@@ -1363,10 +1412,13 @@ function QMLItem(meta, parent, engine) {
     }
     function heightSetter(newVal) {
         if (newVal instanceof QMLBinding) {
+            // Wrap the binding source into a function and assign that to heightVal.
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                     + "; return $Qbv;};$Qbc";
             self.$geometry.heightVal = evalBinding(null, bindSrc, self, workingContext[workingContext.length-1].getIdScope());
         } else {
+            // Assign a function to heightVal returning the value of the property.
+            // The nesting of 'function's is done in order to isolate the scopes.
             self.$geometry.heightVal = (function(val) { return function() {
                     return val;
                 }
