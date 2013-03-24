@@ -1,7 +1,7 @@
 /* @license
 
   Copyright (c) 2011 Lauri Paimen <lauri@paimen.info>
- 
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
@@ -36,7 +36,7 @@
  * Currently the file contains a lot of unused code for future
  * purposes. Most of it can be rewritten as there is now Javascript parser
  * available.
- * 
+ *
  * Exports:
  *
  * - getUrlContents(url) -- get URL contents. Returns contents or false in
@@ -87,7 +87,6 @@ getUrlContents = function (url) {
  * @param url Url of the directory
  * @return {Object} Object, where .internals lists qmldir internal references
  *                          and .externals lists qmldir external references.
- *                          
  */
 readQmlDir = function (url) {
     var qmldir = getUrlContents(url += "/qmldir"), // Modifies url here!
@@ -97,7 +96,7 @@ readQmlDir = function (url) {
         externals = {},
         match,
         i;
-        
+
     if (qmldir === false) {
         return false;
     }
@@ -129,7 +128,6 @@ readQmlDir = function (url) {
         }
     }
     return {internals: internals, externals: externals};
-    
 }
 
 
@@ -151,15 +149,15 @@ importJs = function (filename) {
     var i,
         src = getUrlContents(filename),
         exports = [];
-        
+
     if (src === false) {
         return;
     }
-    
+
     // Analyse source
     exports = readExports(src);
     console.log(filename + " exports:", exports);
-    
+
     // Wrap source to function to retain private scope of the variables.
     // Make that function return an object.
     // That object contains getters and setters for exported stuff.
@@ -179,7 +177,6 @@ importJs = function (filename) {
 
     // evaluate source to get the object.
     return eval(src);
-    
 }
 
 /**
@@ -206,7 +203,7 @@ function readExports(src) {
                     break;
                 }
                 switch(src[i]) {
-                 case "{": // inner block 
+                 case "{": // inner block
                     src = eatUntil(src.substr(i + 1), "}", true );
                     i = 0;
                     break;
@@ -235,7 +232,7 @@ function readExports(src) {
 
     // Strip comments and code blocks from the input source
     // This is quite similar with eatCodeBlock but still a bit different.
-    // If either section has bugs, check the other section, too! 
+    // If either section has bugs, check the other section, too!
     var i = 0,
         // Code without blocks and comments
         semi = "",
@@ -244,7 +241,7 @@ function readExports(src) {
         matches,
         tmp,
         exports = [];
-        
+
     while (i < src.length) {
         switch (src[i]) {
          case "{": // code block
@@ -276,7 +273,7 @@ function readExports(src) {
 
     // Search exports from semi
     matches = semi.match(matcher);
-    
+
     // matches now contain strings defined in matcher. Re-match these to get
     // exports. Matching can be done in one step, but I couldn't get it working
     // so bear this extra step.

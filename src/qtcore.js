@@ -33,7 +33,7 @@
 
 /*
  * QML engine and elements.
- * 
+ *
  * This is the main component of the project. It defines qml engine, elements
  * and helpers for each.
  *
@@ -50,26 +50,26 @@
 (function() {
 
 var QMLGlobalObject = {
-    Qt: {
-        rgba: function(r,g,b,a) {
-            var rgba = "rgba("
-                + Math.round(r * 255) + ","
-                + Math.round(g * 255) + ","
-                + Math.round(b * 255) + ","
-                + a + ")"
-            return rgba },
-        // Buttons masks
-        LeftButton: 1,
-        RightButton: 2,
-        MiddleButton: 4,
-        // Modifiers masks
-        NoModifier: 0,
-        ShiftModifier: 1,
-        ControlModifier: 2,
-        AltModifier: 4,
-        MetaModifier: 8,
-        KeypadModifier: 16 // Note: Not available in web
-
+        Qt: {
+            rgba: function(r,g,b,a) {
+                var rgba = "rgba("
+                    + Math.round(r * 255) + ","
+                    + Math.round(g * 255) + ","
+                    + Math.round(b * 255) + ","
+                    + a + ")";
+                return rgba;
+            },
+            // Buttons masks
+            LeftButton: 1,
+            RightButton: 2,
+            MiddleButton: 4,
+            // Modifiers masks
+            NoModifier: 0,
+            ShiftModifier: 1,
+            ControlModifier: 2,
+            AltModifier: 4,
+            MetaModifier: 8,
+            KeypadModifier: 16 // Note: Not available in web
         }
     },
     // Simple shortcuts to getter & setter functions, coolness with minifier
@@ -142,7 +142,7 @@ function descr(msg, obj, vals) {
  * Value for setter can be given with this function.
  * The difference is that no change signal is fired for setting the value.
  * @param {any} val Value to be passed.
- * @return {QMLTransientValue} special value for 
+ * @return {QMLTransientValue} special value for
  */
 function QMLTransientValue(val) {
     this.$val = val;
@@ -742,7 +742,7 @@ QMLEngine = function (element, options) {
     // In JS we cannot easily access public members from
     // private members so self acts as a bridge
     var self = this;
-    
+
     // Listen also to touchstart events on supporting devices
     // Makes clicks more responsive (do not wait for click event anymore)
     function touchHandler(e)
@@ -994,7 +994,7 @@ function QMLBaseObject(meta, parent, engine) {
     // signals
     if (meta.$signals) {
         for (i in meta.$signals) {
-        
+
         }
     }
 
@@ -2118,7 +2118,7 @@ function QMLImage(meta, parent, engine) {
 
     // Exports.
     this.Image = {
-        // fillMode 
+        // fillMode
         Stretch: 1,
         PreserveAspectFit: 2,
         PreserveAspectCrop: 3,
@@ -2491,7 +2491,7 @@ function QMLDocument(meta, parent, engine) {
     workingContext.pop();
 
     function heightGetter() {
-        return item.height; 
+        return item.height;
     }
     setupGetter(doc, "height", heightGetter);
 

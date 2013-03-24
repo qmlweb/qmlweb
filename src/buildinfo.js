@@ -2,7 +2,7 @@
  * Build information file.
  * To be overwritten for builds by util/publish.
  */
- 
+
 QMLWEB_BUILDINFO = {
     // Base commit hash for build.
     // "git" when not built

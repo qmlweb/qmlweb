@@ -75,7 +75,7 @@
  * Ultimately it would be great to keep the original parser and QML additions in
  * different files but the structure of code does not support that.
  */
- 
+
 /*
 var jsp = require("./parse-js"),
     slice = jsp.slice,
