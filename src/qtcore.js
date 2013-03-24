@@ -78,7 +78,7 @@ var QMLGlobalObject = {
     Undefined = undefined,
     // This registry kind of implements weak-pointers in order to make
     // garbage collecting possible
-    propertyUpdaters = [],
+    properties = [],
     // Stack of Components/Files in whose context variable names are used
     // Used to distribute the Component to all it's children without needing
     // to pass it through all constructors.
@@ -207,7 +207,7 @@ function construct(meta, parent, engine) {
         },
         item,
         cTree;
-        
+
     if (meta.$class in constructors) {
         item = new constructors[meta.$class](meta, parent, engine);
         item.$$type = meta.$class; // Some debug info, don't depend on existence
@@ -270,121 +270,123 @@ function createFunction(obj, funcName) {
 function createSimpleProperty(obj, propName, options) {
     if (options == Undefined)
         options = {};
-    var changeFuncName = 'on'
+    var prop = {
+        index: index,
+        obj: obj,
+        propName: propName,
+        changeFuncName: 'on'
                         + propName[0].toUpperCase()
                         + propName.substr(1)
                         + 'Changed',
-        binding,
-        objectScope = options.altParent || obj,
-        val,
-        dependantProperties = options.propDepList || [];
+        binding: undefined,
+        objectScope: options.altParent || obj,
+        val: undefined,
+        dependantProperties: options.propDepList || [],
+        dontCallUpdaters: options.dontCallUpdaters
+    };
 
-    createFunction(obj, changeFuncName);
+    createFunction(obj, prop.changeFuncName);
+
+    var index = properties.length;
+    properties.push(prop);
+    prop.objectScope.$ownProperties.push(index);
 
     // Extended changesignal capabilities
-    obj["$" + changeFuncName] = [];
+    obj["$" + prop.changeFuncName] = [];
 
-    // Updater recalculates the value of a property if one of the
-    // dependencies changed
-    function update() {
-        if (binding) {
-            updaterIndex = propertyUpdaters.indexOf(update);
-            if (updaterIndex == -1) {
-                propertyUpdaters.push(update);
-                updaterIndex = propertyUpdaters.indexOf(update);
-                objectScope.$ownPropertyUpdaters.push(updaterIndex);
-            }
+    (function(index, obj, propName) {
+        var getter = function() {
+            return getProperty(index);
+        };
+        var setter = function(newVal) {
+            setProperty(index, newVal);
+        };
+        setupGetterSetter(obj, propName, getter, setter);
 
+    })(index, obj, propName);
+}
 
-            val = binding();
-            if (obj[changeFuncName])
-                obj[changeFuncName]();
+// Updater recalculates the value of a property if one of the
+// dependencies changed
+function updateProperty(index) {
+    var prop = properties[index];
+    if (prop === Undefined)
+        return;
 
-            // Trigger extended changesignal capabilities
-            for (i in obj["$" + changeFuncName]) {
-                obj["$" + changeFuncName][i].call(objectScope, val, obj, propName);
-            }
-
-            if (!options.dontCallUpdaters) {
-                for (i in dependantProperties) {
-                    if (propertyUpdaters[dependantProperties[i]] !== Undefined)
-                        propertyUpdaters[dependantProperties[i]].call(objectScope);
-                }
-            }
-        }
+    if (prop.update) {
+        prop.update();
+        return;
     }
 
-    var updaterIndex;
+    if (!prop.binding)
+        return;
 
-    // Define getter
-    function getter() {
-        // Find out if this call to the getter is due to a property that is
-        // dependant on this one
-        if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
-                dependantProperties.push(evaluatingProperty);
+    prop.val = prop.binding();
+    if (prop.obj[prop.changeFuncName])
+        prop.obj[prop.changeFuncName]();
 
-        return val;
-    };
+    // Trigger extended changesignal capabilities
+    for (i in prop.obj["$" + prop.changeFuncName]) {
+        prop.obj["$" + prop.changeFuncName][i].call(prop.objectScope, prop.val, prop.obj, prop.propName);
+    }
 
-    // Define setter
-    function setter(newVal) {
-        var i;
-        //console.log("set", obj.id || obj, propName, newVal);
-        if (newVal instanceof QMLTransientValue) {
-            // TransientValue, don't fire signal handlers
-            val = newVal.$val;
-            binding = false;
+    if (!prop.dontCallUpdaters)
+        for (i in prop.dependantProperties)
+            updateProperty(prop.dependantProperties[i]);
+}
 
-            // Trigger extended changesignal capabilities (for internal use)
-            for (i in obj["$" + changeFuncName]) {
-                obj["$" + changeFuncName][i].call(objectScope, val, obj, propName);
-            }
-        } else if (newVal instanceof QMLBinding) {
-            updaterIndex = propertyUpdaters.indexOf(update);
-            if (updaterIndex == -1) {
-                propertyUpdaters.push(update);
-                updaterIndex = propertyUpdaters.indexOf(update);
-                objectScope.$ownPropertyUpdaters.push(updaterIndex);
-            }
+// Define getter
+function getProperty(index) {
+    var prop = properties[index];
+    if (prop === Undefined)
+        return Undefined;
 
-            evaluatingProperty = updaterIndex;
+    // Find out if this call to the getter is due to a property that is
+    // dependant on this one
+    if (evaluatingProperty && prop.dependantProperties.indexOf(evaluatingProperty) == -1)
+        prop.dependantProperties.push(evaluatingProperty);
 
-            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
-                + "; return $Qbv;};$Qbc";
-            binding = evalBinding(null, bindSrc, objectScope, workingContext[workingContext.length-1].getIdScope());
-            val = binding();
+    return prop.val;
+}
 
-            evaluatingProperty = undefined;
+// Define setter
+function setProperty(index, newVal) {
+    var i;
+    var prop = properties[index];
+    if (prop === Undefined)
+        return;
 
-            // Trigger extended changesignal capabilities
-            for (i in obj["$" + changeFuncName]) {
-                obj["$" + changeFuncName][i].call(objectScope, val, obj, propName);
-            }
-        } else {
-            binding = false;
+    if (newVal instanceof QMLTransientValue) {
+        // TransientValue, don't fire signal handlers
+        prop.val = newVal.$val;
+        prop.binding = false;
+    } else if (newVal instanceof QMLBinding) {
+        evaluatingProperty = index;
 
-            val = newVal;
+        var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+            + "; return $Qbv;};$Qbc";
+        prop.binding = evalBinding(null, bindSrc, prop.objectScope, workingContext[workingContext.length-1].getIdScope());
+        prop.val = prop.binding();
 
-            // Trigger extended changesignal capabilities
-            for (i in obj["$" + changeFuncName]) {
-                obj["$" + changeFuncName][i].call(objectScope, val, obj, propName);
-            }
-        }
+        evaluatingProperty = undefined;
+    } else {
+        prop.val = newVal;
+        prop.binding = false;
+    }
 
-        if (!options.dontCallUpdaters) {
-            for (i in dependantProperties) {
-                if (propertyUpdaters[dependantProperties[i]] !== Undefined)
-                    propertyUpdaters[dependantProperties[i]].call(objectScope);
-            }
-        }
+    // Trigger extended changesignal capabilities
+    for (i in prop.obj["$" + prop.changeFuncName]) {
+        prop.obj["$" + prop.changeFuncName][i].call(prop.objectScope, prop.val, prop.obj, prop.propName);
+    }
 
-        if (!(newVal instanceof QMLTransientValue)) {
-            if (obj[changeFuncName])
-                obj[changeFuncName]();
-        }
-    };
+    if (!prop.dontCallUpdaters)
+        for (i in prop.dependantProperties)
+            updateProperty(prop.dependantProperties[i]);
 
-    setupGetterSetter(obj, propName, getter, setter);
+    if (!(newVal instanceof QMLTransientValue)) {
+        if (prop.obj[prop.changeFuncName])
+            prop.obj[prop.changeFuncName]();
+    }
 }
 
 /**
@@ -622,10 +624,8 @@ QMLEngine = function (element, options) {
         function setter(newVal) {
             value = newVal;
 
-            for (i in dependantProperties) {
-                if (propertyUpdaters[dependantProperties[i]] !== Undefined)
-                    propertyUpdaters[dependantProperties[i]]();
-            }
+            for (i in prop.dependantProperties)
+                updateProperty(prop.dependantProperties[i]);
         }
 
         setupGetterSetter(obj, propName, getter, setter);
@@ -890,8 +890,8 @@ function QMLBaseObject(meta, parent, engine) {
     if (!this.$draw)
         this.$draw = noop;
     this.$scope = workingContext[workingContext.length-1];
-    if (!this.$ownPropertyUpdaters)
-        this.$ownPropertyUpdaters = [];
+    if (!this.$ownProperties)
+        this.$ownProperties = [];
 
     // parent
     this.parent = parent;
@@ -1077,17 +1077,11 @@ function QMLItem(meta, parent, engine) {
 
     this.$geometry = {
         dependantProperties: [],
+        index: properties.length,
         left: 0,
         top: 0,
         update: function() {
-            var updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-            if (updaterIndex == -1) {
-                propertyUpdaters.push(self.$geometry.update);
-                updaterIndex = propertyUpdaters.indexOf(self.$geometry.update);
-                self.$ownPropertyUpdaters.push(updaterIndex);
-            }
-
-            evaluatingProperty = updaterIndex;
+            evaluatingProperty = self.$geometry.index;
             if (self.$geometry.widthVal)
                 self.$geometry.width = self.$geometry.widthVal();
             if (self.$geometry.heightVal)
@@ -1102,13 +1096,13 @@ function QMLItem(meta, parent, engine) {
                 self.$geometry.geometryChanged.call(self);
             }
 
-            for (i in self.$geometry.dependantProperties) {
-                if (propertyUpdaters[self.$geometry.dependantProperties[i]] !== Undefined)
-                    propertyUpdaters[self.$geometry.dependantProperties[i]]();
-            }
+            for (i in self.$geometry.dependantProperties)
+                updateProperty(self.$geometry.dependantProperties[i]);
             engine.$requestDraw();
         }
     }
+    properties.push(this.$geometry);
+    this.$ownProperties.push(this.$geometry.index);
 
     // Anchors. Gah!
     // Create anchors object
@@ -1135,7 +1129,7 @@ function QMLItem(meta, parent, engine) {
     function leftGetter() {
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -1151,7 +1145,7 @@ function QMLItem(meta, parent, engine) {
     function topGetter() {
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -1377,7 +1371,7 @@ function QMLItem(meta, parent, engine) {
     function widthGetter() {
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -1404,7 +1398,7 @@ function QMLItem(meta, parent, engine) {
     function heightGetter() {
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -1758,7 +1752,7 @@ function QMLText(meta, parent, engine) {
     function ihGetter(){
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -1806,7 +1800,7 @@ function QMLText(meta, parent, engine) {
     function iwGetter() {
         if (evaluatingProperty
             && self.$geometry.dependantProperties.indexOf(evaluatingProperty) == -1
-            && evaluatingProperty !== propertyUpdaters.indexOf(self.$geometry.update)) {
+            && evaluatingProperty !== self.$geometry.index) {
             self.$geometry.dependantProperties.push(evaluatingProperty);
         }
 
@@ -2017,8 +2011,8 @@ function QMLRepeater(meta, parent, engine) {
     function removeChildProperties(child) {
         if (child.id)
             self.$scope.remId(child.id);
-        for (var i in child.$ownPropertyUpdaters)
-            propertyUpdaters[child.$ownPropertyUpdaters[i]] = undefined;
+        for (var i in child.$ownProperties)
+            properties[child.$ownProperties[i]] = undefined;
         for (var i in child.$children)
             removeChildProperties(child.$children[i])
         for (var i in child.$internChildren)
