@@ -1318,6 +1318,29 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     $TEXT.substr(from, to - from));
         }
 
+        function qmlsignaldef() {
+            next();
+            var name = S.token.value;
+            next();
+            var args = [];
+            if (is("punc", "(")) {
+                next();
+                var first = true;
+                while (!is("punc", ")")) {
+                        if (first) first = false; else expect(",");
+                        if (!is("name")) unexpected();
+                        var type = S.token.value;
+                        next();
+                        if (!is("name")) unexpected();
+                        args.push({type: type, name: S.token.value});
+                        next();
+                }
+                next();
+            }
+            return as("qmlsignaldef", name, args);
+
+        }
+
         function qmlstatement() {
             if (is("keyword", "function")) {
                 var from = S.token.pos;
@@ -1329,6 +1352,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     $TEXT.substr(from, to - from));
             } else if (is("name", "property")) {
                 return qmlpropdef();
+            } else if (is("name", "signal")) {
+                return qmlsignaldef();
             } else if (S.token.type == "name") {
                 var propname = S.token.value;
                 next();
@@ -1508,6 +1533,7 @@ function convertToEngine(tree) {
         "qmlelem": function(elem, statements) {
             var item = { $class: elem,
                 $children: [],
+                $signals: [],
                 $functions: {},
                 $properties: {} };
 
@@ -1537,6 +1563,9 @@ function convertToEngine(tree) {
                         item.$properties[statement[2]] = val;
                         item.$defaultProperty = val;
                         break;
+                    case "qmlsignaldef":
+                        item.$signals.push({ name: name, params: statement[2] });
+                        break;
                     default:
                         console.log("Unknown statement", statement);
 
@@ -1562,6 +1591,9 @@ function convertToEngine(tree) {
             // todo: bindings are not detected
             return { type: name,
                 value: tree[1] };
+        },
+        "qmlsignaldef": function(name, params) {
+            return { name: name, params: params };
         },
         "qmldefaultprop": function(name, tree, src) {
             return bindout(tree, src);

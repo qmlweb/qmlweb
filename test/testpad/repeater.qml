@@ -5,13 +5,44 @@ Rectangle {
     width: 500; height: 500
     color: "lightgray"
 
-    MouseArea {
-        anchors.fill: parent
+    Rectangle {
+        anchors.right: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: 100
+        height: 30
+        color: "lightgreen"
+        border.color: "grey"
+        border.width: 1
 
-        onClicked: if (Math.random() < 0.5) {
-            tModel.append({ label: "Hallo!" });
-        } else {
-            tModel.remove(Math.floor(rep.count * Math.random()));
+        Text {
+            anchors.centerIn: parent
+            text: "Add"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: tModel.append({ label: "Hullo!" });
+        }
+    }
+    Rectangle {
+        anchors.left: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: 100
+        height: 30
+        color: "lightgreen"
+        border.color: "grey"
+        border.width: 1
+
+        Text {
+            anchors.centerIn: parent
+            text: "Remove"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: tModel.remove(Math.floor(rep.count * Math.random()));
         }
     }
 
@@ -43,12 +74,16 @@ Rectangle {
             y: 5 + 100 * Math.floor(index /2)
             width: page.width / 2 - 10
             height: 90
+            onTest: {
+                color = newColor;
+                console.log("random number: " + number);
+            }
 
             Text {
                 anchors.centerIn: parent
                 text: label + " (Element " + index + "/" + rep.count + ")"
 
-                Component.onCompleted: console.log("Added an element");
+                Component.onCompleted: console.log("Added an element (index: " + index + ")");
             }
         }
     }

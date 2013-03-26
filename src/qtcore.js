@@ -138,17 +138,6 @@ function descr(msg, obj, vals) {
 }
 
 /**
- * QMLTransientValue.
- * Value for setter can be given with this function.
- * The difference is that no change signal is fired for setting the value.
- * @param {any} val Value to be passed.
- * @return {QMLTransientValue} special value for
- */
-function QMLTransientValue(val) {
-    this.$val = val;
-}
-
-/**
  * Evaluate binding.
  * @param {Object} thisObj Object to be this
  * @param {String} src Source code
@@ -234,31 +223,31 @@ function construct(meta, parent, engine) {
     }
 }
 
-function createFunction(obj, funcName) {
-    var func;
+/**
+ * Creates and returns a signal with the parameters specified in @p params.
+ *
+ * @param obj Object for the signal will be part of.
+ * @param signalName Signal name.
+ * @param params Array with the parameters of the signal. Each element has to be
+ *               an object with the two properties "type" and "name" specifying
+ *               the datatype of the parameter and its name. The type is
+ *               currently ignored.
+ * @param options Options that allow finetuning of the signal.
+ */
+function createSignal(obj, signalName, params, options) {
+    options = options || {};
+    var connectedSlots = [];
 
-    function getter() {
-        return func;
+    obj[signalName] = function() {
+        for (i in connectedSlots)
+            connectedSlots[i].apply(window, arguments);
+    };
+    obj[signalName].parameters = params || [];
+    obj[signalName].objectScope = options.altParent || obj;
+    obj[signalName].connect = function(slot) {
+        connectedSlots.push(slot);
     }
-
-    function setter(newVal) {
-        if (!(newVal instanceof QMLBinding))
-            return;
-        var src;
-        if (newVal.src.search("function") == 0) {
-            // The src begins already with "function", so no need to put "function" around it
-            src = newVal.src + "; " + funcName;
-        } else {
-            // The src contains only the function body, so we need to put "function" around it
-            src = "var func = function() {"
-                    + newVal.src
-                    + "}; func";
-        }
-
-        func = evalBinding(null, src, obj, workingContext[workingContext.length-1].getIdScope());
-    }
-
-    setupGetterSetter(obj, funcName, getter, setter);
+    return obj[signalName];
 }
 
 /**
@@ -268,16 +257,14 @@ function createFunction(obj, funcName) {
  * @param {Object} [options] Options that allow finetuning of the property
  */
 function createSimpleProperty(obj, propName, options) {
-    if (options == Undefined)
-        options = {};
+    options = options || {};
+
+    var changedSignal = createSignal(obj, propName + "Changed", [], options);
+
     var prop = {
         index: index,
         obj: obj,
-        propName: propName,
-        changeFuncName: 'on'
-                        + propName[0].toUpperCase()
-                        + propName.substr(1)
-                        + 'Changed',
+        changedSignal: changedSignal,
         binding: undefined,
         objectScope: options.altParent || obj,
         val: undefined,
@@ -285,14 +272,9 @@ function createSimpleProperty(obj, propName, options) {
         dontCallUpdaters: options.dontCallUpdaters
     };
 
-    createFunction(obj, prop.changeFuncName);
-
     var index = properties.length;
     properties.push(prop);
     prop.objectScope.$ownProperties.push(index);
-
-    // Extended changesignal capabilities
-    obj["$" + prop.changeFuncName] = [];
 
     (function(index, obj, propName) {
         var getter = function() {
@@ -322,13 +304,7 @@ function updateProperty(index) {
         return;
 
     prop.val = prop.binding();
-    if (prop.obj[prop.changeFuncName])
-        prop.obj[prop.changeFuncName]();
-
-    // Trigger extended changesignal capabilities
-    for (i in prop.obj["$" + prop.changeFuncName]) {
-        prop.obj["$" + prop.changeFuncName][i].call(prop.objectScope, prop.val, prop.obj, prop.propName);
-    }
+    prop.changedSignal(prop.val);
 
     if (!prop.dontCallUpdaters)
         for (i in prop.dependantProperties)
@@ -356,11 +332,7 @@ function setProperty(index, newVal) {
     if (prop === Undefined)
         return;
 
-    if (newVal instanceof QMLTransientValue) {
-        // TransientValue, don't fire signal handlers
-        prop.val = newVal.$val;
-        prop.binding = false;
-    } else if (newVal instanceof QMLBinding) {
+    if (newVal instanceof QMLBinding) {
         evaluatingProperty = index;
 
         var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
@@ -374,19 +346,11 @@ function setProperty(index, newVal) {
         prop.binding = false;
     }
 
-    // Trigger extended changesignal capabilities
-    for (i in prop.obj["$" + prop.changeFuncName]) {
-        prop.obj["$" + prop.changeFuncName][i].call(prop.objectScope, prop.val, prop.obj, prop.propName);
-    }
+    prop.changedSignal(prop.val);
 
     if (!prop.dontCallUpdaters)
         for (i in prop.dependantProperties)
             updateProperty(prop.dependantProperties[i]);
-
-    if (!(newVal instanceof QMLTransientValue)) {
-        if (prop.obj[prop.changeFuncName])
-            prop.obj[prop.changeFuncName]();
-    }
 }
 
 /**
@@ -458,12 +422,25 @@ function applyProperties(meta, item, skip) {
         if (i == "id" || i[0] == "$") {
             continue;
         }
-        // no property should begin with uppercase letter -- those indicate
-        // classes
-//         if (i[0] == i[0].toUpperCase()) {
-//             console.log(meta, "has", i, "-- bug?");
-//             continue;
-//         }
+        // slots
+        if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
+            var signalName =  i[2].toLowerCase() + i.slice(3);
+            var params = "";
+            if (!item[signalName]) {
+                console.log("No signal called " + signalName + " found!");
+                continue;
+            }
+            for (var j in item[signalName].parameters) {
+                params += j==0 ? "" : ", ";
+                params += item[signalName].parameters[j].name;
+            }
+            src = "var func = function(" + params + ") {"
+                    + meta[i].src
+                    + "}; func";
+            item[signalName].connect(evalBinding(null, src, item[signalName].objectScope,
+                                                 workingContext[workingContext.length-1].getIdScope()));
+        }
+
         // Handle objects which are already defined in item differently
         if (Object.prototype.toString.call(meta[i]) == '[object Object]') {
             if (item[i] && !(meta[i] instanceof QMLBinding)) {
@@ -479,42 +456,30 @@ function applyProperties(meta, item, skip) {
 
 // ItemModel. EXPORTED.
 JSItemModel = function() {
-    this.dataChangedCallbacks = [];
-    this.rowsInsertedCallbacks = [];
-    this.rowsMovedCallbacks = [];
-    this.rowsRemovedCallbacks = [];
-    this.modelResetCallbacks = [];
     this.roleNames = [];
 
     this.setRoleNames = function(names) {
         this.roleNames = names;
     }
 
-    this.emitDataChanged = function(startIndex, endIndex) {
-        for (var i in this.dataChangedCallbacks) {
-            this.dataChangedCallbacks[i](startIndex, endIndex);
-        }
-    }
-    this.emitRowsInserted = function(startIndex, endIndex) {
-        for (var i in this.rowsInsertedCallbacks) {
-            this.rowsInsertedCallbacks[i](startIndex, endIndex);
-        }
-    };
-    this.emitRowsMoved = function(sourceStartIndex, sourceEndIndex, destinationIndex) {
-        for (var i in this.rowsMovedCallbacks) {
-            this.rowsMovedCallbacks[i](sourceStartIndex, sourceEndIndex, destinationIndex);
-        }
-    };
-    this.emitRowsRemoved = function(startIndex, endIndex) {
-        for (var i in this.rowsRemovedCallbacks) {
-            this.rowsRemovedCallbacks[i](startIndex, endIndex);
-        }
-    };
-    this.emitModelReset = function() {
-        for (var i in this.modelResetCallbacks) {
-            this.modelResetCallbacks[i]();
-        }
-    };
+    createSignal(this, "dataChanged", [
+        {type:"int", name:"startIndex"},
+        {type:"int", name:"endIndex"}
+    ]);
+    createSignal(this, "rowsInserted", [
+        {type:"int", name:"startIndex"},
+        {type:"int", name:"endIndex"}
+    ]);
+    createSignal(this, "rowsMoved", [
+        {type:"int", name:"sourceStartIndex"},
+        {type:"int", name:"sourceEndIndex"},
+        {type:"int", name:"destinationIndex"}
+    ]);
+    createSignal(this, "rowsRemoved", [
+        {type:"int", name:"startIndex"},
+        {type:"int", name:"endIndex"}
+    ]);
+    createSignal(this, "modelReset");
 }
 
 // -----------------------------------------------------------------------------
@@ -548,9 +513,8 @@ QMLEngine = function (element, options) {
     this.rootElement = element;
     this.renderMode = element.nodeName == "CANVAS" ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
 
-    // List of slots registered with Component.onCompleted
-    //TODO: Implement as real signals
-    this.completedSlots = [];
+    // List of Component.completed signals
+    this.completedSignals = [];
 
 
 //----------Public Methods----------
@@ -604,8 +568,8 @@ QMLEngine = function (element, options) {
         }
         doc = construct(tree, {}, this);
         doc.$init();
-        for (var i in this.completedSlots) {
-            this.completedSlots[i]();
+        for (var i in this.completedSignals) {
+            this.completedSignals[i]();
         }
     }
 
@@ -624,8 +588,8 @@ QMLEngine = function (element, options) {
         function setter(newVal) {
             value = newVal;
 
-            for (i in prop.dependantProperties)
-                updateProperty(prop.dependantProperties[i]);
+            for (i in dependantProperties)
+                updateProperty(dependantProperties[i]);
         }
 
         setupGetterSetter(obj, propName, getter, setter);
@@ -764,7 +728,7 @@ QMLEngine = function (element, options) {
         var i;
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
-            if (l && l.onExited && l.hoverEnabled
+            if (l && l.hoverEnabled
                   && (self.oldMousePos.x >= l.left
                       && self.oldMousePos.x <= l.right
                       && self.oldMousePos.y >= l.top
@@ -773,11 +737,11 @@ QMLEngine = function (element, options) {
                        && e.pageX - element.offsetLeft <= l.right
                        && e.pageY - element.offsetTop >= l.top
                        && e.pageY - element.offsetTop <= l.bottom) )
-                l.onExited();
+                l.exited();
         }
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
-            if (l && l.onEntered && l.hoverEnabled
+            if (l && l.hoverEnabled
                   && (e.pageX - element.offsetLeft >= l.left
                       && e.pageX - element.offsetLeft <= l.right
                       && e.pageY - element.offsetTop >= l.top
@@ -786,7 +750,7 @@ QMLEngine = function (element, options) {
                        && self.oldMousePos.x <= l.right
                        && self.oldMousePos.y >= l.top
                        && self.oldMousePos.y <= l.bottom))
-                l.onEntered();
+                l.entered();
         }
         self.oldMousePos = { x: e.pageX - element.offsetLeft,
                             y: e.pageY - element.offsetTop };
@@ -869,10 +833,7 @@ QMLEngine = function (element, options) {
                 && (e.offsetX || e.layerX) <= l.right
                 && mouse.y >= 0 // equals: e.offsetY >= l.top
                 && (e.offsetY || e.layerY) <= l.bottom) {
-                    // Dispatch mouse event
-                    l.mouse = mouse;
-                    l.onClicked();
-                    l.mouse = Undefined;
+                    l.clicked(mouse);
                     self.$requestDraw();
                     break;
                 }
@@ -994,27 +955,14 @@ function QMLBaseObject(meta, parent, engine) {
     // signals
     if (meta.$signals) {
         for (i in meta.$signals) {
-
+            createSignal(this, meta.$signals[i].name, meta.$signals[i].params);
         }
     }
 
     // Component.onCompleted
     this.Component = {};
-    function addCompletedSlot(val) {
-        if (!(val instanceof QMLBinding))
-            return;
-        var src = "var func = function() {"
-                    + val.src
-                    + "}; func";
-
-        func = evalBinding(null, src, self, workingContext[workingContext.length-1].getIdScope());
-        self.Component.$onCompleted = func;
-        engine.completedSlots.push(func);
-    }
-    function getCompletedSlot() {
-        return self.Component.$onCompleted;
-    }
-    setupGetterSetter(this.Component, "onCompleted", getCompletedSlot, addCompletedSlot);
+    createSignal(this.Component, "completed", [], { altParent: this });
+    engine.completedSignals.push(this.Component.completed);
 
     // Construct from meta, not from this!
     if (meta.$children) {
@@ -1186,7 +1134,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.vVal = (function(val) { return function() {
                     return val;
                 }
-            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(newVal);
         }
         self.$geometry.update();
     }
@@ -1205,7 +1153,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1222,7 +1170,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.hVal = (function(val) { return function() {
                     return val;
                 }
-            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(newVal);
         }
         self.$geometry.update();
     }
@@ -1241,7 +1189,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1260,7 +1208,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val - obj.width / 2;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1279,7 +1227,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val - obj.height / 2;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1340,7 +1288,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.hVal = (function(obj, val) { return function() {
                     return val + obj.parent.left;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1362,7 +1310,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.vVal = (function(obj, val) { return function() {
                     return val + obj.parent.top;
                 }
-            })(self, newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(self, newVal);
         }
         self.$geometry.update();
     }
@@ -1389,7 +1337,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.widthVal = (function(val) { return function() {
                     return val;
                 }
-            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(newVal);
         }
         self.$geometry.update();
     }
@@ -1416,7 +1364,7 @@ function QMLItem(meta, parent, engine) {
             self.$geometry.heightVal = (function(val) { return function() {
                     return val;
                 }
-            })(newVal instanceof QMLTransientValue ? newVal.$val : newVal);
+            })(newVal);
         }
         self.$geometry.update();
     }
@@ -1430,26 +1378,26 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this, "z");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$onRotationChanged.push(function(newVal) {
-            this.$domElement.style.transform = "rotate(" + newVal + "deg)";
-            this.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
-            this.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
-            this.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
-            this.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
+        this.rotationChanged.connect(function(newVal) {
+            self.$domElement.style.transform = "rotate(" + newVal + "deg)";
+            self.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
+            self.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
+            self.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
+            self.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
         });
-        this.$onVisibleChanged.push(function(newVal) {
-            this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
+        this.visibleChanged.connect(function(newVal) {
+            self.$domElement.style.visibility = newVal ? "inherit" : "hidden";
         });
-        this.$onZChanged.push(function(newVal) {
-            this.$domElement.style.zIndex = newVal;
+        this.zChanged.connect(function(newVal) {
+            self.$domElement.style.zIndex = newVal;
         });
         this.$geometry.geometryChanged = function() {
-            var w = this.width,
-                h = this.height;
-            this.$domElement.style.width = w ? w + "px" : "auto";
-            this.$domElement.style.height = h ? h + "px" : "auto";
-            this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
-            this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+            var w = self.width,
+                h = self.height;
+            self.$domElement.style.width = w ? w + "px" : "auto";
+            self.$domElement.style.height = h ? h + "px" : "auto";
+            self.$domElement.style.top = (self.$geometry.top-self.parent.top) + "px";
+            self.$domElement.style.left = (self.$geometry.left-self.parent.left) + "px";
         }
     }
 
@@ -1585,153 +1533,153 @@ function QMLText(meta, parent, engine) {
     createSimpleProperty(this, "styleColor");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$onColorChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.color = newVal;
+        this.colorChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.color = newVal;
         });
-        this.$onTextChanged.push(function(newVal) {
-            this.$domElement.firstChild.innerHTML = newVal;
-            this.$geometry.update();
+        this.textChanged.connect(function(newVal) {
+            self.$domElement.firstChild.innerHTML = newVal;
+            self.$geometry.update();
         });
-        this.font.$onPointSizeChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontSize = newVal + "pt";
-            this.$geometry.update();
+        this.font.pointSizeChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontSize = newVal + "pt";
+            self.$geometry.update();
         });
-        this.font.$onBoldChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontWeight =
-                this.font.weight !== Undefined ? this.font.weight :
+        this.font.boldChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontWeight =
+                self.font.weight !== Undefined ? self.font.weight :
                 newVal ? "bold" : "normal";
-            this.$geometry.update();
+            self.$geometry.update();
         });
-        this.font.$onCapitalizationChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontVariant =
+        this.font.capitalizationChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontVariant =
                 newVal == "smallcaps" ? "small-caps" : "normal";
             newVal = newVal == "smallcaps" ? "none" : newVal;
-            this.$domElement.firstChild.style.textTransform = newVal;
+            self.$domElement.firstChild.style.textTransform = newVal;
         });
-        this.font.$onFamilyChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontFamily = newVal;
-            this.$geometry.update();
+        this.font.familyChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontFamily = newVal;
+            self.$geometry.update();
         });
-        this.font.$onItalicChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
+        this.font.italicChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
         });
-        this.font.$onLetterSpacingChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+        this.font.letterSpacingChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
-        this.font.$onPixelSizeChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontSize = newVal !== Undefined
+        this.font.pixelSizeChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontSize = newVal !== Undefined
                 ? newVal + "px "
-                : (this.font.pointSize || 10) + "pt";
-            this.$geometry.update();
+                : (self.font.pointSize || 10) + "pt";
+            self.$geometry.update();
         });
-        this.font.$onPointSizeChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontSize = this.font.pixelSize !== Undefined
-                ? this.font.pixelSize + "px "
+        this.font.pointSizeChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontSize = self.font.pixelSize !== Undefined
+                ? self.font.pixelSize + "px "
                 : (newVal || 10) + "pt";
-            this.$geometry.update();
+            self.$geometry.update();
         });
-        this.font.$onStrikeoutChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.textDecoration = newVal
+        this.font.strikeoutChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.textDecoration = newVal
                 ? "line-through"
-                : this.font.underline
+                : self.font.underline
                 ? "underline"
                 : "none";
         });
-        this.font.$onUnderlineChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.textDecoration = this.font.strikeout
+        this.font.underlineChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.textDecoration = self.font.strikeout
                 ? "line-through"
                 : newVal
                 ? "underline"
                 : "none";
         });
-        this.font.$onWeightChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.fontWeight =
+        this.font.weightChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.fontWeight =
                 newVal !== Undefined ? newVal :
-                this.font.bold ? "bold" : "normal";
+                self.font.bold ? "bold" : "normal";
         });
-        this.font.$onWordSpacingChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+        this.font.wordSpacingChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
-        this.$onLineHeightChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.lineHeight = newVal + "px";
+        this.lineHeightChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.lineHeight = newVal + "px";
         });
-        this.$onWrapModeChanged.push(function(newVal) {
+        this.wrapModeChanged.connect(function(newVal) {
             switch (newVal) {
                 case 0:
-                    this.$domElement.firstChild.style.whiteSpace = "pre";
+                    self.$domElement.firstChild.style.whiteSpace = "pre";
                     break;
                 case 1:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    this.$domElement.firstChild.style.wordBreak = "break-all";
+                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    self.$domElement.firstChild.style.wordBreak = "break-all";
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    this.$domElement.firstChild.style.wordWrap = "break-word";
+                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    self.$domElement.firstChild.style.wordWrap = "break-word";
             };
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (this.horizontalAlignment == "justify")
-                this.$domElement.firstChild.style.whiteSpace = "normal";
+            if (self.horizontalAlignment == "justify")
+                self.$domElement.firstChild.style.whiteSpace = "normal";
         });
-        this.$onHorizontalAlignmentChanged.push(function(newVal) {
-            this.$domElement.firstChild.style.textAlign = newVal;
+        this.horizontalAlignmentChanged.connect(function(newVal) {
+            self.$domElement.firstChild.style.textAlign = newVal;
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
             if (newVal == "justify")
-                this.$domElement.firstChild.style.whiteSpace = "normal";
+                self.$domElement.firstChild.style.whiteSpace = "normal";
         });
-        this.$onStyleChanged.push(function(newVal) {
+        this.styleChanged.connect(function(newVal) {
             switch (newVal) {
                 case 0:
-                    this.$domElement.firstChild.style.textShadow = "none";
+                    self.$domElement.firstChild.style.textShadow = "none";
                     break;
                 case 1:
                     var color = this.styleColor;
-                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
+                    self.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
                         + ", -1px 0 0 " + color
                         + ", 0 1px 0 " + color
                         + ", 0 -1px 0 " + color;
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                    self.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+                    self.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
             };
         });
-        this.$onStyleColorChanged.push(function(newVal) {
-            switch (this.style) {
+        this.styleColorChanged.connect(function(newVal) {
+            switch (self.style) {
                 case 0:
-                    this.$domElement.firstChild.style.textShadow = "none";
+                    self.$domElement.firstChild.style.textShadow = "none";
                     break;
                 case 1:
-                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
+                    self.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
                         + ", -1px 0 0 " + newVal
                         + ", 0 1px 0 " + newVal
                         + ", 0 -1px 0 " + newVal;
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                    self.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+                    self.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
             };
         });
         this.$geometry.geometryChanged = function() {
-            var w = this.$geometry.width,
-                h = this.$geometry.height;
-            this.$domElement.style.width = w ? w + "px" : "auto";
-            this.$domElement.style.height = h ? h + "px" : "auto";
-            this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
-            this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+            var w = self.$geometry.width,
+                h = self.$geometry.height;
+            self.$domElement.style.width = w ? w + "px" : "auto";
+            self.$domElement.style.height = h ? h + "px" : "auto";
+            self.$domElement.style.top = (self.$geometry.top-self.parent.top) + "px";
+            self.$domElement.style.left = (self.$geometry.left-self.parent.left) + "px";
         }
     } else {
-        this.$onTextChanged.push(this.$geometry.update);
-        this.font.$onFamilyChanged.push(this.$geometry.update);
-        this.font.$onPointSizeChanged.push(this.$geometry.update);
+        this.textChanged.connect(this.$geometry.update);
+        this.font.familyChanged.connect(this.$geometry.update);
+        this.font.pointSizeChanged.connect(this.$geometry.update);
     }
 
     this.$init.push(function() {
@@ -1847,16 +1795,16 @@ function QMLRectangle(meta, parent, engine) {
     createSimpleProperty(this.border, "width", { altParent: this });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$onColorChanged.push(function(newVal) {
-            this.$domElement.style.backgroundColor = newVal;
+        this.colorChanged.connect(function(newVal) {
+            self.$domElement.style.backgroundColor = newVal;
         });
-        this.border.$onColorChanged.push(function(newVal) {
-            this.$domElement.style.borderColor = newVal;
+        this.border.colorChanged.connect(function(newVal) {
+            self.$domElement.style.borderColor = newVal;
         });
-        this.border.$onWidthChanged.push(function(newVal) {
-            this.$domElement.style.borderWidth = newVal + "px";
-            this.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
-            this.$geometry.update();
+        this.border.widthChanged.connect(function(newVal) {
+            self.$domElement.style.borderWidth = newVal + "px";
+            self.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
+            self.$geometry.update();
         });
     }
 
@@ -1892,9 +1840,7 @@ function QMLRepeater(meta, parent, engine) {
     createSimpleProperty(this, "count");
     this.$completed = false;
 
-    this.$onModelChanged.push(function() {
-        applyModel();
-    });
+    this.modelChanged.connect(applyModel);
 
     this.$init.push(function() {
         self.model = 0;
@@ -1924,8 +1870,7 @@ function QMLRepeater(meta, parent, engine) {
             applyChildProperties(child.$children[i]);
     }
     function callOnCompleted(child) {
-        if (child.Component.onCompleted)
-            child.Component.onCompleted();
+        child.Component.completed();
         for (var i in child.$internChildren)
             callOnCompleted(child.$internChildren[i]);
         for (var i in child.$children)
@@ -1963,11 +1908,11 @@ function QMLRepeater(meta, parent, engine) {
     function applyModel() {
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
-            model.dataChangedCallbacks.push(function(startIndex, endIndex) {
+            model.dataChanged.connect(function(startIndex, endIndex) {
                 //TODO
             });
-            model.rowsInsertedCallbacks.push(insertChildren);
-            model.rowsMovedCallbacks.push(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
+            model.rowsInserted.connect(insertChildren);
+            model.rowsMoved.connect(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
                 var vals = self.$children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
                 for (var i = 0; i < vals.length; i++) {
                     self.$children.splice(destinationIndex + i, 0, vals[i]);
@@ -1979,7 +1924,7 @@ function QMLRepeater(meta, parent, engine) {
                 }
                 engine.$requestDraw();
             });
-            model.rowsRemovedCallbacks.push(function(startIndex, endIndex) {
+            model.rowsRemoved.connect(function(startIndex, endIndex) {
                 removeChildren(startIndex, endIndex);
                 for (var i = startIndex; i < self.$children.length; i++) {
                     self.$children[i].index = i;
@@ -1987,7 +1932,7 @@ function QMLRepeater(meta, parent, engine) {
                 self.count = self.$children.length;
                 engine.$requestDraw();
             });
-            model.modelResetCallbacks.push(function() {
+            model.modelReset.connect(function() {
                 removeChildren(0, self.$children.length);
                 insertChildren(0, model.rowCount());
                 engine.$requestDraw();
@@ -2041,29 +1986,29 @@ function QMLListModel(meta, parent, engine) {
 
     this.append = function(dict) {
         this.$children.push(dict);
-        this.$model.emitRowsInserted(this.$children.length-1, this.$children.length);
+        this.$model.rowsInserted(this.$children.length-1, this.$children.length);
     }
     this.clear = function() {
         this.$children = [];
-        this.$model.emitModelReset();
+        this.$model.modelReset();
     }
     this.get = function(index) {
         return this.$children[index];
     }
     this.insert = function(index, dict) {
         this.$children.splice(index, 0, dict);
-        this.$model.emitRowsInserted(index, index+1);
+        this.$model.rowsInserted(index, index+1);
     }
     this.move = function(from, to, n) {
         var vals = this.$children.splice(from, n);
         for (var i = 0; i < vals.length; i++) {
             this.$children.splice(to + i, 0, vals[i]);
         }
-        this.$model.emitRowsMoved(from, from+n, to);
+        this.$model.rowsMoved(from, from+n, to);
     }
     this.remove = function(index) {
         this.$children.splice(index, 1);
-        this.$model.emitRowsRemoved(index, index+1);
+        this.$model.rowsRemoved(index, index+1);
     }
     this.set = function(index, dict) {
         this.$children[index] = dict;
@@ -2092,7 +2037,7 @@ function QMLListElement(meta, parent, engine) {
                 (function(name) {
                     return function(newVal) {
                         val = newVal;
-                        parent.$model.emitDataChanged(this.index, this.index);
+                        parent.$model.dataChanged(this.index, this.index);
                     }
                 })(name)
             );
@@ -2187,7 +2132,7 @@ function QMLImage(meta, parent, engine) {
     }
 
     // Use extended changesignal capabilities to keep track of source
-    this.$onSourceChanged.push(function(val) {
+    this.sourceChanged.connect(function(val) {
         self.progress = 0;
         self.status = self.Image.Loading;
         img.src = engine.$resolvePath(val);
@@ -2250,17 +2195,17 @@ function QMLBorderImage(meta, parent, engine) {
     });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$onSourceChanged.push(function() {
-            this.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.sourceChanged.connect(function() {
+            self.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
         });
-        this.border.$onLeftChanged.push(updateBorder);
-        this.border.$onRightChanged.push(updateBorder);
-        this.border.$onTopChanged.push(updateBorder);
-        this.border.$onBottomChanged.push(updateBorder);
-        this.$onHorizontalTileModeChanged.push(updateBorder);
-        this.$onVerticalTileModeChanged.push(updateBorder);
+        this.border.leftChanged.connect(updateBorder);
+        this.border.rightChanged.connect(updateBorder);
+        this.border.topChanged.connect(updateBorder);
+        this.border.bottomChanged.connect(updateBorder);
+        this.horizontalTileModeChanged.connect(updateBorder);
+        this.verticalTileModeChanged.connect(updateBorder);
     } else {
-        this.$onSourceChanged.push(function(val) {
+        this.sourceChanged.connect(function(val) {
             self.progress = 0;
             self.status = self.BorderImage.Loading;
             img.src = engine.$resolvePath(val);
@@ -2276,52 +2221,52 @@ function QMLBorderImage(meta, parent, engine) {
     }
 
     function updateBorder() {
-        this.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.MozBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-        this.$domElement.style.MozBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.$domElement.style.MozBorderImageWidth = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
+        self.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
+        self.$domElement.style.MozBorderImageSlice = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
+        self.$domElement.style.MozBorderImageRepeat = self.horizontalTileMode + " "
+                                                    + self.verticalTileMode;
+        self.$domElement.style.MozBorderImageWidth = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
 
-        this.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.webkitBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-        this.$domElement.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.$domElement.style.webkitBorderImageWidth = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
+        self.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
+        self.$domElement.style.webkitBorderImageSlice = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
+        self.$domElement.style.webkitBorderImageRepeat = self.horizontalTileMode + " "
+                                                    + self.verticalTileMode;
+        self.$domElement.style.webkitBorderImageWidth = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
 
-        this.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.OBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-        this.$domElement.style.OBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.$domElement.style.OBorderImageWidth = this.border.top + "px "
-                                                + this.border.right + "px "
-                                                + this.border.bottom + "px "
-                                                + this.border.left + "px";
+        self.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
+        self.$domElement.style.OBorderImageSlice = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
+        self.$domElement.style.OBorderImageRepeat = self.horizontalTileMode + " "
+                                                    + self.verticalTileMode;
+        self.$domElement.style.OBorderImageWidth = self.border.top + "px "
+                                                + self.border.right + "px "
+                                                + self.border.bottom + "px "
+                                                + self.border.left + "px";
 
-        this.$domElement.style.borderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-        this.$domElement.style.borderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.$domElement.style.borderImageWidth = this.border.top + "px "
-                                                + this.border.right + "px "
-                                                + this.border.bottom + "px "
-                                                + this.border.left + "px";
+        self.$domElement.style.borderImageSlice = self.border.top + " "
+                                                + self.border.right + " "
+                                                + self.border.bottom + " "
+                                                + self.border.left;
+        self.$domElement.style.borderImageRepeat = self.horizontalTileMode + " "
+                                                    + self.verticalTileMode;
+        self.$domElement.style.borderImageWidth = self.border.top + "px "
+                                                + self.border.right + "px "
+                                                + self.border.bottom + "px "
+                                                + self.border.left + "px";
     }
 
     this.$drawItem = function(c) {
@@ -2386,9 +2331,9 @@ function QMLMouseArea(meta, parent, engine) {
     createSimpleProperty(this, "acceptedButtons");
     createSimpleProperty(this, "enabled");
     createSimpleProperty(this, "hoverEnabled");
-    createFunction(this, "onClicked");
-    createFunction(this, "onEntered");
-    createFunction(this, "onExited");
+    createSignal(this, "clicked", [{type: "variant", name: "mouse"}]);
+    createSignal(this, "entered");
+    createSignal(this, "exited");
     createSimpleProperty(this, "hovered");
 
     this.$init.push(function() {
@@ -2415,25 +2360,20 @@ function QMLMouseArea(meta, parent, engine) {
             };
 
             if (self.enabled) {
-                // Dispatch mouse event
-                self.mouse = mouse;
-                self.onClicked();
-                self.mouse = Undefined;
+                self.clicked(mouse);
                 engine.$requestDraw();
             }
         }
         this.$domElement.onmouseover = function(e) {
             if (self.hoverEnabled) {
                 self.hovered = true;
-                if (self.onEntered)
-                    self.onEntered();
+                self.entered();
             }
         }
         this.$domElement.onmouseout = function(e) {
             if (self.hoverEnabled) {
                 self.hovered = false;
-                if (self.onExited)
-                self.onExited();
+                self.exited();
             }
         }
     } else {
@@ -2558,7 +2498,7 @@ function QMLTimer(meta, parent, engine) {
 
     // Create trigger as simple property. Reading the property triggers
     // the function!
-    createFunction(this, "onTriggered");
+    createSignal(this, "triggered");
 
     engine.$addTicker(ticker);
     function ticker(now, elapsed) {
@@ -2591,7 +2531,7 @@ function QMLTimer(meta, parent, engine) {
 
     function trigger() {
         // Trigger this.
-        self.onTriggered();
+        self.triggered();
 
         engine.$requestDraw();
     }
@@ -2673,7 +2613,7 @@ function QMLSequentialAnimation(meta, parent, engine) {
     }
 
     for (i = 0; i < this.$children.length; i++) {
-        this.$children[i].$onRunningChanged.push(nextAnimation);
+        this.$children[i].runningChanged.connect(nextAnimation);
     }
     // $children is already constructed,
 
@@ -2777,8 +2717,7 @@ function QMLNumberAnimation(meta, parent, engine) {
             } else {
                 var at = (now - tickStart) / self.duration,
                     value = curve(at) * (self.to - self.from) + self.from;
-                self.target[self.property] = new QMLTransientValue(value);
-                engine.$requestDraw();
+                self.target[self.property] = value;
             }
 
         }
@@ -2827,7 +2766,7 @@ function QMLTextInput(meta, parent, engine) {
     this.$domElement.firstChild.style.margin = "0";
 
     createSimpleProperty(this, "text", "");
-    createFunction(this, "onAccepted");
+    createSignal(this, "accepted");
 
     function iwGetter() {
         return this.$domElement.firstChild.offsetWidth;
@@ -2856,13 +2795,13 @@ function QMLTextInput(meta, parent, engine) {
             this.$domElement.firstChild.style.height = this.$geometry.height - d + "px";
     }
 
-    this.$onTextChanged.push(function() {
-        this.$domElement.firstChild.value = this.text;
+    this.textChanged.connect(function(newVal) {
+        self.$domElement.firstChild.value = newVal;
     });
 
     this.$domElement.firstChild.onkeydown = function(e) {
         if (e.keyCode == 13) //Enter pressed
-            self.onAccepted();
+            self.accepted();
     }
 
     function updateValue(e) {
@@ -2890,14 +2829,14 @@ function QMLButton(meta, parent, engine) {
     this.$domElement.innerHTML = "<span></span>";
 
     createSimpleProperty(this, "text", "");
-    createFunction(this, "onClicked");
+    createSignal(this, "clicked");
 
-    this.$onTextChanged.push(function(newVal) {
-        this.$domElement.firstChild.innerHTML = newVal;
+    this.textChanged.connect(function(newVal) {
+        self.$domElement.firstChild.innerHTML = newVal;
     });
 
     this.$domElement.onclick = function(e) {
-        self.onClicked();
+        self.clicked();
     }
 }
 
