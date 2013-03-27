@@ -217,6 +217,8 @@ function construct(meta, parent, engine) {
         QMLBaseObject.call(item, meta, parent, engine);
         item.$$type = meta.$class; // Some debug info, don't depend on existence
         item.$$meta = meta; // Some debug info, don't depend on existence
+        if (engine.renderMode == QMLRenderMode.DOM)
+            item.$domElement.className += " " + meta.$class + (meta.id ? " " + meta.id : "");
         return item;
     } else {
         console.log("No constructor found for " + meta.$class);
@@ -1883,7 +1885,7 @@ function QMLRepeater(meta, parent, engine) {
             newMeta.id = newMeta.id + index;
             var newItem = construct(newMeta, self, engine);
 
-            if (engine.renderMode == QMLRenderMode.DOM)
+            if (engine.renderMode == QMLRenderMode.DOM && self.delegate.id)
                 newItem.$domElement.className += " " + self.delegate.id;
 
             applyChildProperties(newItem);
