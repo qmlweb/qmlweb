@@ -70,6 +70,19 @@ var QMLGlobalObject = {
             AltModifier: 4,
             MetaModifier: 8,
             KeypadModifier: 16 // Note: Not available in web
+        }, Font: {
+            // Capitalization
+            MixedCase: "none",
+            AllUppercase: "uppercase",
+            AllLowercase: "lowercase",
+            SmallCaps: "smallcaps",
+            Capitalize: "capitalize",
+            // Weight
+            Light: "lighter",
+            Normal: "normal",
+            DemiBold: "600",
+            Bold: "bold",
+            Black: "bolder",
         }
     },
     // Simple shortcuts to getter & setter functions, coolness with minifier
@@ -192,7 +205,8 @@ function construct(meta, parent, engine) {
             SequentialAnimation: QMLSequentialAnimation,
             NumberAnimation: QMLNumberAnimation,
             TextInput: QMLTextInput,
-            Button: QMLButton
+            Button: QMLButton,
+            TextArea: QMLTextArea
         },
         item,
         cTree;
@@ -1449,6 +1463,86 @@ function QMLItem(meta, parent, engine) {
     }
 }
 
+function QMLFont(parent, engine) {
+    createSimpleProperty(this, "bold", { altParent: parent });
+    createSimpleProperty(this, "capitalization", { altParent: parent });
+    createSimpleProperty(this, "family", { altParent: parent });
+    createSimpleProperty(this, "italic", { altParent: parent });
+    createSimpleProperty(this, "letterSpacing", { altParent: parent });
+    createSimpleProperty(this, "pixelSize", { altParent: parent });
+    createSimpleProperty(this, "pointSize", { altParent: parent });
+    createSimpleProperty(this, "strikeout", { altParent: parent });
+    createSimpleProperty(this, "underline", { altParent: parent });
+    createSimpleProperty(this, "weight", { altParent: parent });
+    createSimpleProperty(this, "wordSpacing", { altParent: parent });
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.pointSizeChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontSize = newVal + "pt";
+            parent.$geometry.update();
+        });
+        this.boldChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontWeight =
+                parent.font.weight !== Undefined ? parent.font.weight :
+                newVal ? "bold" : "normal";
+            parent.$geometry.update();
+        });
+        this.capitalizationChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontVariant =
+                newVal == "smallcaps" ? "small-caps" : "normal";
+            newVal = newVal == "smallcaps" ? "none" : newVal;
+            parent.$domElement.firstChild.style.textTransform = newVal;
+        });
+        this.familyChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontFamily = newVal;
+            parent.$geometry.update();
+        });
+        this.italicChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
+        });
+        this.letterSpacingChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+        });
+        this.pixelSizeChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontSize = newVal !== Undefined
+                ? newVal + "px "
+                : (parent.font.pointSize || 10) + "pt";
+            parent.$geometry.update();
+        });
+        this.pointSizeChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontSize = parent.font.pixelSize !== Undefined
+                ? parent.font.pixelSize + "px "
+                : (newVal || 10) + "pt";
+            parent.$geometry.update();
+        });
+        this.strikeoutChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.textDecoration = newVal
+                ? "line-through"
+                : parent.font.underline
+                ? "underline"
+                : "none";
+        });
+        this.underlineChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.textDecoration = parent.font.strikeout
+                ? "line-through"
+                : newVal
+                ? "underline"
+                : "none";
+        });
+        this.weightChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.fontWeight =
+                newVal !== Undefined ? newVal :
+                parent.font.bold ? "bold" : "normal";
+        });
+        this.wordSpacingChanged.connect(function(newVal) {
+            parent.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+        });
+    } else {
+        this.familyChanged.connect(parent.$geometry.update);
+        this.pointSizeChanged.connect(parent.$geometry.update);
+    }
+}
+
 function QMLText(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var self = this;
@@ -1468,9 +1562,9 @@ function QMLText(meta, parent, engine) {
         css += font.italic ? "italic " : "normal ";
         css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
         // Canvas seems to only support bold yes or no
-        css += (font.weight == self.Font.Bold
-            || font.weight == self.Font.DemiBold
-            || font.weight == self.Font.Black
+        css += (font.weight == QMLGlobalObject.Font.Bold
+            || font.weight == QMLGlobalObject.Font.DemiBold
+            || font.weight == QMLGlobalObject.Font.Black
             || font.bold) ? "bold " : "normal ";
         css += font.pixelSize !== Undefined
             ? font.pixelSize + "px "
@@ -1478,21 +1572,6 @@ function QMLText(meta, parent, engine) {
         css += self.lineHeight !== Undefined ? self.lineHeight + "px " : " ";
         css += (font.family || "sans-serif") + " ";
         return css;
-    }
-
-    this.Font = {
-        // Capitalization
-        MixedCase: "none",
-        AllUppercase: "uppercase",
-        AllLowercase: "lowercase",
-        SmallCaps: "smallcaps",
-        Capitalize: "capitalize",
-        // Weight
-        Light: "lighter",
-        Normal: "normal",
-        DemiBold: "600",
-        Bold: "bold",
-        Black: "bolder",
     }
 
     this.Text = {
@@ -1513,18 +1592,7 @@ function QMLText(meta, parent, engine) {
         Sunken: 3
     }
 
-    this.font = {};
-    createSimpleProperty(this.font, "bold", { altParent: this });
-    createSimpleProperty(this.font, "capitalization", { altParent: this });
-    createSimpleProperty(this.font, "family", { altParent: this });
-    createSimpleProperty(this.font, "italic", { altParent: this });
-    createSimpleProperty(this.font, "letterSpacing", { altParent: this });
-    createSimpleProperty(this.font, "pixelSize", { altParent: this });
-    createSimpleProperty(this.font, "pointSize", { altParent: this });
-    createSimpleProperty(this.font, "strikeout", { altParent: this });
-    createSimpleProperty(this.font, "underline", { altParent: this });
-    createSimpleProperty(this.font, "weight", { altParent: this });
-    createSimpleProperty(this.font, "wordSpacing", { altParent: this });
+    this.font = new QMLFont(this, engine);
 
     createSimpleProperty(this, "color");
     createSimpleProperty(this, "text");
@@ -1541,66 +1609,6 @@ function QMLText(meta, parent, engine) {
         this.textChanged.connect(function(newVal) {
             self.$domElement.firstChild.innerHTML = newVal;
             self.$geometry.update();
-        });
-        this.font.pointSizeChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontSize = newVal + "pt";
-            self.$geometry.update();
-        });
-        this.font.boldChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontWeight =
-                self.font.weight !== Undefined ? self.font.weight :
-                newVal ? "bold" : "normal";
-            self.$geometry.update();
-        });
-        this.font.capitalizationChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontVariant =
-                newVal == "smallcaps" ? "small-caps" : "normal";
-            newVal = newVal == "smallcaps" ? "none" : newVal;
-            self.$domElement.firstChild.style.textTransform = newVal;
-        });
-        this.font.familyChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontFamily = newVal;
-            self.$geometry.update();
-        });
-        this.font.italicChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
-        });
-        this.font.letterSpacingChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
-        });
-        this.font.pixelSizeChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontSize = newVal !== Undefined
-                ? newVal + "px "
-                : (self.font.pointSize || 10) + "pt";
-            self.$geometry.update();
-        });
-        this.font.pointSizeChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontSize = self.font.pixelSize !== Undefined
-                ? self.font.pixelSize + "px "
-                : (newVal || 10) + "pt";
-            self.$geometry.update();
-        });
-        this.font.strikeoutChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.textDecoration = newVal
-                ? "line-through"
-                : self.font.underline
-                ? "underline"
-                : "none";
-        });
-        this.font.underlineChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.textDecoration = self.font.strikeout
-                ? "line-through"
-                : newVal
-                ? "underline"
-                : "none";
-        });
-        this.font.weightChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.fontWeight =
-                newVal !== Undefined ? newVal :
-                self.font.bold ? "bold" : "normal";
-        });
-        this.font.wordSpacingChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
         this.lineHeightChanged.connect(function(newVal) {
             self.$domElement.firstChild.style.lineHeight = newVal + "px";
@@ -1680,8 +1688,6 @@ function QMLText(meta, parent, engine) {
         }
     } else {
         this.textChanged.connect(this.$geometry.update);
-        this.font.familyChanged.connect(this.$geometry.update);
-        this.font.pointSizeChanged.connect(this.$geometry.update);
     }
 
     this.$init.push(function() {
@@ -2761,6 +2767,8 @@ function QMLTextInput(meta, parent, engine) {
 
     var self = this;
 
+    this.font = new QMLFont(this, engine);
+
     this.$domElement.innerHTML = "<input type=\"text\"/>"
     this.$domElement.firstChild.style.pointerEvents = "auto";
     // In some browsers text-inputs have a margin by default, which distorts
@@ -2840,6 +2848,67 @@ function QMLButton(meta, parent, engine) {
     this.$domElement.onclick = function(e) {
         self.clicked();
     }
+}
+
+function QMLTextArea(meta, parent, engine) {
+    QMLItem.call(this, meta, parent, engine);
+
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        console.log("TextArea-type is only supported within the DOM-backend.");
+        return;
+    }
+
+    var self = this;
+
+    this.font = new QMLFont(this, engine);
+
+    this.$domElement.innerHTML = "<textarea></textarea>"
+    this.$domElement.firstChild.style.pointerEvents = "auto";
+    // In some browsers text-areas have a margin by default, which distorts
+    // the positioning, so we need to manually set it to 0.
+    this.$domElement.firstChild.style.margin = "0";
+
+    createSimpleProperty(this, "text", "");
+
+    function iwGetter() {
+        return this.$domElement.firstChild.offsetWidth;
+    }
+    setupGetter(this, "implicitWidth", iwGetter);
+
+    function ihGetter() {
+        return this.$domElement.firstChild.offsetHeight;
+    }
+    setupGetter(this, "implicitHeight", ihGetter);
+
+    this.$geometry.geometryChanged = function() {
+        var w = this.width,
+            h = this.height,
+            d = this.$domElement.firstChild.offsetHeight
+                - window.getComputedStyle(this.$domElement.firstChild).height.slice(0,-2);
+        this.$domElement.style.width = w + "px";
+        this.$domElement.style.height = h + "px";
+        this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
+        this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
+        // we need to subtract the width of the border and the padding so that
+        // the text-area has the width we want
+        if (this.$geometry.width !== Undefined)
+            this.$domElement.firstChild.style.width = this.$geometry.width - d + "px";
+        if (this.$geometry.height !== Undefined)
+            this.$domElement.firstChild.style.height = this.$geometry.height - d + "px";
+    }
+
+    this.textChanged.connect(function(newVal) {
+        self.$domElement.firstChild.value = newVal;
+    });
+
+    function updateValue(e) {
+        if (self.text != self.$domElement.firstChild.value) {
+            self.text = self.$domElement.firstChild.value;
+        }
+    }
+
+    this.$domElement.firstChild.oninput = updateValue;
+    this.$domElement.firstChild.onpropertychanged = updateValue;
 }
 
 })();

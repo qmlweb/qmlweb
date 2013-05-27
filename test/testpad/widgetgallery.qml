@@ -46,6 +46,15 @@ Rectangle {
         }
     }
 
+    TextArea {
+        x: 280
+        y: 80
+        width: 200
+        height: 100
+        text: "Hi,\nI'm a TextArea!"
+        font.bold: true
+    }
+
     Text {
         anchors.bottom: page.bottom
         color: "red"
