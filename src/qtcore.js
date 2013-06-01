@@ -256,12 +256,17 @@ function createSignal(obj, signalName, params, options) {
 
     obj[signalName] = function() {
         for (i in connectedSlots)
-            connectedSlots[i].apply(window, arguments);
+            connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
     };
     obj[signalName].parameters = params || [];
     obj[signalName].objectScope = options.altParent || obj;
-    obj[signalName].connect = function(slot) {
-        connectedSlots.push(slot);
+    obj[signalName].connect = function() {
+        if (arguments.length == 1)
+            connectedSlots.push({thisObj: window, slot: arguments[0]});
+        else if (typeof arguments[1] == 'string' || arguments[1] instanceof String)
+            connectedSlots.push({thisObj: arguments[0], slot: arguments[0][arguments[1]]});
+        else
+            connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
     }
     return obj[signalName];
 }
@@ -950,17 +955,10 @@ function QMLBaseObject(meta, parent, engine) {
 
     // methods
     function createMethod(item, name, method) {
-        // Trick: evaluate method with bindings to get pointer to
-        // function that can then be applied with arguments
-        // given to this function to do the job (and get the return
-        // values).
-        var func = evalBinding(null,
+        return evalBinding(null,
                                method + ";" + name,
                                item,
                                workingContext[workingContext.length-1].getIdScope());
-        return function() {
-            return func.apply(null, arguments);
-        };
     }
     if (meta.$functions) {
         for (i in meta.$functions) {
