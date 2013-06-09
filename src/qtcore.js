@@ -89,9 +89,6 @@ var QMLGlobalObject = {
     GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
     Undefined = undefined,
-    // This registry kind of implements weak-pointers in order to make
-    // garbage collecting possible
-    properties = [],
     // Stack of Components/Files in whose context variable names are used
     // Used to distribute the Component to all it's children without needing
     // to pass it through all constructors.
@@ -242,25 +239,22 @@ function construct(meta, parent, engine) {
 /**
  * Creates and returns a signal with the parameters specified in @p params.
  *
- * @param obj Object for the signal will be part of.
- * @param signalName Signal name.
  * @param params Array with the parameters of the signal. Each element has to be
  *               an object with the two properties "type" and "name" specifying
  *               the datatype of the parameter and its name. The type is
  *               currently ignored.
  * @param options Options that allow finetuning of the signal.
  */
-function createSignal(obj, signalName, params, options) {
+function Signal(params, options) {
     options = options || {};
     var connectedSlots = [];
 
-    obj[signalName] = function() {
-        for (i in connectedSlots)
+    var signal = function() {
+        for (var i in connectedSlots)
             connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
     };
-    obj[signalName].parameters = params || [];
-    obj[signalName].objectScope = options.altParent || obj;
-    obj[signalName].connect = function() {
+    signal.parameters = params || [];
+    signal.connect = function() {
         if (arguments.length == 1)
             connectedSlots.push({thisObj: window, slot: arguments[0]});
         else if (typeof arguments[1] == 'string' || arguments[1] instanceof String)
@@ -268,7 +262,19 @@ function createSignal(obj, signalName, params, options) {
         else
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
     }
-    return obj[signalName];
+    signal.disconnect = function() {
+        var callType = arguments.length == 1 ? 1
+                       : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 2 : 3;
+        for (var i in connectedSlots) {
+            var item = connectedSlots[i];
+            if ((callType == 1 && item.slot == arguments[0])
+                || (callType == 2 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
+                || (item.thisObj == arguments[0] && item.slot == arguments[1])
+            )
+                connectedSlots.splice(i, 1);
+        }
+    }
+    return signal;
 }
 
 /**
@@ -280,98 +286,70 @@ function createSignal(obj, signalName, params, options) {
 function createSimpleProperty(obj, propName, options) {
     options = options || {};
 
-    var changedSignal = createSignal(obj, propName + "Changed", [], options);
+    var prop = new QMLProperty(obj, options);
 
-    var prop = {
-        index: index,
-        obj: obj,
-        changedSignal: changedSignal,
-        binding: undefined,
-        objectScope: options.altParent || obj,
-        val: undefined,
-        dependantProperties: options.propDepList || [],
-        dontCallUpdaters: options.dontCallUpdaters
-    };
-
-    var index = properties.length;
-    properties.push(prop);
-    prop.objectScope.$ownProperties.push(index);
-
-    (function(index, obj, propName) {
+    obj[propName + "Changed"] = prop.changed;
+    obj.$properties[propName] = prop;
+    (function(obj, propName) {
         var getter = function() {
-            return getProperty(index);
+            return obj.$properties[propName].get();
         };
         var setter = function(newVal) {
-            setProperty(index, newVal);
+            return obj.$properties[propName].set(newVal);
         };
         setupGetterSetter(obj, propName, getter, setter);
+    })(obj, propName);
+}
 
-    })(index, obj, propName);
+function QMLProperty(obj, options) {
+    this.obj = obj;
+    this.changed = Signal([], options);
+    this.binding = noop;
+    this.objectScope = options.altParent || obj;
+    this.value = undefined;
 }
 
 // Updater recalculates the value of a property if one of the
 // dependencies changed
-function updateProperty(index) {
-    var prop = properties[index];
-    if (prop === Undefined)
+QMLProperty.prototype.update = function() {
+    if (!this.binding)
         return;
 
-    if (prop.update) {
-        prop.update();
-        return;
-    }
-
-    if (!prop.binding)
-        return;
-
-    prop.val = prop.binding();
-    prop.changedSignal(prop.val);
-
-    if (!prop.dontCallUpdaters)
-        for (i in prop.dependantProperties)
-            updateProperty(prop.dependantProperties[i]);
+    this.val = this.binding();
+    this.changed(this.val);
 }
 
 // Define getter
-function getProperty(index) {
-    var prop = properties[index];
-    if (prop === Undefined)
-        return Undefined;
-
+QMLProperty.prototype.get = function() {
     // Find out if this call to the getter is due to a property that is
     // dependant on this one
-    if (evaluatingProperty && prop.dependantProperties.indexOf(evaluatingProperty) == -1)
-        prop.dependantProperties.push(evaluatingProperty);
+    if (evaluatingProperty) {
+        this.changed.disconnect(evaluatingProperty, QMLProperty.prototype.update);
+        this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
+    }
 
-    return prop.val;
+    return this.val;
 }
 
 // Define setter
-function setProperty(index, newVal) {
+QMLProperty.prototype.set = function(newVal) {
     var i;
-    var prop = properties[index];
-    if (prop === Undefined)
-        return;
 
     if (newVal instanceof QMLBinding) {
-        evaluatingProperty = index;
+        evaluatingProperty = this;
 
         var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
             + "; return $Qbv;};$Qbc";
-        prop.binding = evalBinding(null, bindSrc, prop.objectScope, workingContext[workingContext.length-1].getIdScope());
-        prop.val = prop.binding();
+        this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].getIdScope());
+        this.val = this.binding();
 
         evaluatingProperty = undefined;
     } else {
-        prop.val = newVal;
-        prop.binding = false;
+        this.val = newVal;
+        this.binding = false;
     }
 
-    prop.changedSignal(prop.val);
-
-    if (!prop.dontCallUpdaters)
-        for (i in prop.dependantProperties)
-            updateProperty(prop.dependantProperties[i]);
+    this.changed(this.val);
 }
 
 /**
@@ -458,7 +436,7 @@ function applyProperties(meta, item, skip) {
             src = "var func = function(" + params + ") {"
                     + meta[i].src
                     + "}; func";
-            item[signalName].connect(evalBinding(null, src, item[signalName].objectScope,
+            item[signalName].connect(evalBinding(null, src, item.$parent || item,
                                                  workingContext[workingContext.length-1].getIdScope()));
         }
 
@@ -483,24 +461,24 @@ JSItemModel = function() {
         this.roleNames = names;
     }
 
-    createSignal(this, "dataChanged", [
+    this.dataChanged = Signal([
         {type:"int", name:"startIndex"},
         {type:"int", name:"endIndex"}
     ]);
-    createSignal(this, "rowsInserted", [
+    this.rowsInserted = Signal([
         {type:"int", name:"startIndex"},
         {type:"int", name:"endIndex"}
     ]);
-    createSignal(this, "rowsMoved", [
+    this.rowsMoved = Signal([
         {type:"int", name:"sourceStartIndex"},
         {type:"int", name:"sourceEndIndex"},
         {type:"int", name:"destinationIndex"}
     ]);
-    createSignal(this, "rowsRemoved", [
+    this.rowsRemoved = Signal([
         {type:"int", name:"startIndex"},
         {type:"int", name:"endIndex"}
     ]);
-    createSignal(this, "modelReset");
+    this.modelReset = Signal();
 }
 
 // -----------------------------------------------------------------------------
@@ -864,7 +842,15 @@ QMLEngine = function (element, options) {
 }
 
 // Base object for all qml thingies
+function QtObject(parent) {
+    this.$parent = parent;
+    if (!this.$properties)
+        this.$properties = {};
+}
+
+// Base object for all qml elements
 function QMLBaseObject(meta, parent, engine) {
+    QtObject.call(this);
     var i,
         prop,
         self = this;
@@ -969,13 +955,13 @@ function QMLBaseObject(meta, parent, engine) {
     // signals
     if (meta.$signals) {
         for (i in meta.$signals) {
-            createSignal(this, meta.$signals[i].name, meta.$signals[i].params);
+            this[meta.$signals[i].name] = Signal(meta.$signals[i].params);
         }
     }
 
     // Component.onCompleted
-    this.Component = {};
-    createSignal(this.Component, "completed", [], { altParent: this });
+    this.Component = new QtObject(this);
+    this.Component.completed = Signal([], { altParent: this });
     engine.completedSignals.push(this.Component.completed);
 
     // Construct from meta, not from this!
@@ -1039,7 +1025,6 @@ function QMLItem(meta, parent, engine) {
 
     this.$geometry = {
         dependantProperties: [],
-        index: properties.length,
         left: 0,
         top: 0,
         update: function() {
@@ -1059,16 +1044,14 @@ function QMLItem(meta, parent, engine) {
             }
 
             for (i in self.$geometry.dependantProperties)
-                updateProperty(self.$geometry.dependantProperties[i]);
+                self.$geometry.dependantProperties[i].update();
             engine.$requestDraw();
         }
     }
-    properties.push(this.$geometry);
-    this.$ownProperties.push(this.$geometry.index);
 
     // Anchors. Gah!
     // Create anchors object
-    this.anchors = {};
+    this.anchors = new QtObject(this);
 
     function marginsSetter(val) {
         this.topMargin = val;
@@ -1462,6 +1445,7 @@ function QMLItem(meta, parent, engine) {
 }
 
 function QMLFont(parent, engine) {
+    QtObject.call(this);
     createSimpleProperty(this, "bold", { altParent: parent });
     createSimpleProperty(this, "capitalization", { altParent: parent });
     createSimpleProperty(this, "family", { altParent: parent });
@@ -1796,7 +1780,7 @@ function QMLRectangle(meta, parent, engine) {
     var self = this;
 
     createSimpleProperty(this, "color");
-    this.border = {};
+    this.border = new QtObject(this);
     createSimpleProperty(this.border, "color", { altParent: this });
     createSimpleProperty(this.border, "width", { altParent: this });
 
@@ -1962,8 +1946,6 @@ function QMLRepeater(meta, parent, engine) {
     function removeChildProperties(child) {
         if (child.id)
             self.$scope.remId(child.id);
-        for (var i in child.$ownProperties)
-            properties[child.$ownProperties[i]] = undefined;
         for (var i in child.$children)
             removeChildProperties(child.$children[i])
         for (var i in child.$internChildren)
@@ -2094,7 +2076,7 @@ function QMLImage(meta, parent, engine) {
     createSimpleProperty(this, "source");
     createSimpleProperty(this, "status");
 
-    this.sourceSize = {};
+    this.sourceSize = new QtObject(this);
 
     createSimpleProperty(this.sourceSize, "width", { altParent: this });
     createSimpleProperty(this.sourceSize, "height", { altParent: this });
@@ -2181,7 +2163,7 @@ function QMLBorderImage(meta, parent, engine) {
 
     createSimpleProperty(this, "source");
     createSimpleProperty(this, "status");
-    this.border = {};
+    this.border = new QtObject(this);
     createSimpleProperty(this.border, "left", { altParent: this });
     createSimpleProperty(this.border, "right", { altParent: this });
     createSimpleProperty(this.border, "top", { altParent: this });
@@ -2337,9 +2319,9 @@ function QMLMouseArea(meta, parent, engine) {
     createSimpleProperty(this, "acceptedButtons");
     createSimpleProperty(this, "enabled");
     createSimpleProperty(this, "hoverEnabled");
-    createSignal(this, "clicked", [{type: "variant", name: "mouse"}]);
-    createSignal(this, "entered");
-    createSignal(this, "exited");
+    this.clicked = Signal([{type: "variant", name: "mouse"}]);
+    this.entered = Signal();
+    this.exited = Signal();
     createSimpleProperty(this, "hovered");
 
     this.$init.push(function() {
@@ -2504,7 +2486,7 @@ function QMLTimer(meta, parent, engine) {
 
     // Create trigger as simple property. Reading the property triggers
     // the function!
-    createSignal(this, "triggered");
+    this.triggered = Signal();
 
     engine.$addTicker(ticker);
     function ticker(now, elapsed) {
@@ -2674,7 +2656,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
     };
 
     createSimpleProperty(this, "duration");
-    this.easing = {};
+    this.easing = new QtObject(this);
     createSimpleProperty(this.easing, "type", { altParent: this });
     createSimpleProperty(this.easing, "amplitude", { altParent: this });
     createSimpleProperty(this.easing, "overshoot", { altParent: this });
@@ -2774,7 +2756,7 @@ function QMLTextInput(meta, parent, engine) {
     this.$domElement.firstChild.style.margin = "0";
 
     createSimpleProperty(this, "text", "");
-    createSignal(this, "accepted");
+    this.accepted = Signal();
 
     function iwGetter() {
         return this.$domElement.firstChild.offsetWidth;
@@ -2837,7 +2819,7 @@ function QMLButton(meta, parent, engine) {
     this.$domElement.innerHTML = "<span></span>";
 
     createSimpleProperty(this, "text", "");
-    createSignal(this, "clicked");
+    this.clicked = Signal();
 
     this.textChanged.connect(function(newVal) {
         self.$domElement.firstChild.innerHTML = newVal;
