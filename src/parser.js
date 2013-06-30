@@ -1298,8 +1298,11 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             var name = S.token.value;
             next();
             expect(":");
-            // TODO: bindings
-            return as("qmlpropdef", type, name, qmlproperty());
+            var from = S.token.pos,
+                stat = statement(),
+                to = S.token.pos;
+            return as("qmlpropdef", name, type, stat,
+                    $TEXT.substr(from, to - from));
 
         }
 
@@ -1314,7 +1317,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             var from = S.token.pos,
                 stat = statement(),
                 to = S.token.pos;
-            return as("qmldefaultprop", name, stat,
+            return as("qmldefaultprop", name, type, stat,
                     $TEXT.substr(from, to - from));
         }
 
@@ -1507,6 +1510,17 @@ function QMLBinding(src, tree) {
         })
 }
 
+/**
+ * Create an object representing a QML property definition.
+ * @param {String} type The type of the property
+ * @param {Array} value The default value of the property
+ * @return {Object} Object representing the defintion
+ */
+function QMLPropertyDefinition(type, value) {
+    this.type = type;
+    this.value = value;
+}
+
 QMLBinding.prototype.toJSON = function() {
     return {src: this.src,
         deps: JSON.stringify(this.deps),
@@ -1557,11 +1571,11 @@ function convertToEngine(tree) {
                         item[name][statement[2]] = val;
                         break;
                     case "qmlpropdef":
-                        item.$properties[statement[2]] = val;
+                        item.$properties[statement[1]] = val;
                         break;
                     case "qmldefaultprop":
-                        item.$properties[statement[2]] = val;
-                        item.$defaultProperty = val;
+                        item.$properties[statement[1]] = val;
+                        item.$defaultProperty = statement[1];
                         break;
                     case "qmlsignaldef":
                         item.$signals.push({ name: name, params: statement[2] });
@@ -1587,16 +1601,14 @@ function convertToEngine(tree) {
         "qmlmethod": function(name, tree, src) {
             return src;
         },
-        "qmlpropdef": function(name, type, tree) {
-            // todo: bindings are not detected
-            return { type: name,
-                value: tree[1] };
+        "qmlpropdef": function(name, type, tree, src) {
+            return new QMLPropertyDefinition(type, bindout(tree, src));
         },
         "qmlsignaldef": function(name, params) {
             return { name: name, params: params };
         },
-        "qmldefaultprop": function(name, tree, src) {
-            return bindout(tree, src);
+        "qmldefaultprop": function(name, type, tree, src) {
+            return new QMLPropertyDefinition(type, bindout(tree, src));
         }
     };
 
