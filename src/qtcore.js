@@ -254,6 +254,7 @@ function construct(meta, parent, engine) {
 function Signal(params, options) {
     options = options || {};
     var connectedSlots = [];
+    var obj = options.obj
 
     var signal = function() {
         for (var i in connectedSlots)
@@ -263,21 +264,31 @@ function Signal(params, options) {
     signal.connect = function() {
         if (arguments.length == 1)
             connectedSlots.push({thisObj: window, slot: arguments[0]});
-        else if (typeof arguments[1] == 'string' || arguments[1] instanceof String)
+        else if (typeof arguments[1] == 'string' || arguments[1] instanceof String) {
+            if (arguments[0].$tidyupList && arguments[0] !== obj)
+                arguments[0].$tidyupList.push(this);
             connectedSlots.push({thisObj: arguments[0], slot: arguments[0][arguments[1]]});
-        else
+        } else {
+            if (arguments[0].$tidyupList && (!obj || (arguments[0] !== obj && arguments[0] !== obj.$parent)))
+                arguments[0].$tidyupList.push(this);
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
+        }
     }
     signal.disconnect = function() {
-        var callType = arguments.length == 1 ? 1
-                       : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 2 : 3;
-        for (var i in connectedSlots) {
+        var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
+                       : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 3 : 4;
+        for (var i = 0; i < connectedSlots.length; i++) {
             var item = connectedSlots[i];
             if ((callType == 1 && item.slot == arguments[0])
-                || (callType == 2 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
+                || (callType == 2 && item.thisObj == arguments[0])
+                || (callType == 3 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
                 || (item.thisObj == arguments[0] && item.slot == arguments[1])
-            )
+            ) {
+                if (item.thisObj)
+                    item.thisObj.$tidyupList.splice(item.thisObj.$tidyupList.indexOf(this), 1);
                 connectedSlots.splice(i, 1);
+                i--; // We have removed an item from the list so the indexes shifted one backwards
+            }
         }
     }
     signal.isConnected = function() {
@@ -323,10 +334,14 @@ function createSimpleProperty(obj, propName, options) {
 function QMLProperty(obj, name, options) {
     this.obj = obj;
     this.name = name;
-    this.changed = Signal([], options);
+    this.changed = Signal([], {obj:obj});
     this.binding = noop;
     this.objectScope = options.altParent || obj;
     this.value = undefined;
+
+    // This list contains all signals that hold references to this object.
+    // It is needed when deleting, as we need to tidy up all references to this object.
+    this.$tidyupList = [];
 }
 
 // Updater recalculates the value of a property if one of the
@@ -432,14 +447,10 @@ var setupGetter,
  * @param {Object} item Target of property apply
  * @param {Array} [skip] Array of property names to skip
  */
-function applyProperties(meta, item, skip) {
+function applyProperties(meta, item, objectScope) {
     var i;
-    skip = skip || [];
+    objectScope = objectScope || item;
     for (i in meta) {
-        // skip if required
-        if (skip.indexOf(i) != -1) {
-            continue;
-        }
         if (i == "$properties") {
             applyProperties(meta[i], item);
             continue;
@@ -463,17 +474,16 @@ function applyProperties(meta, item, skip) {
             src = "var func = function(" + params + ") {"
                     + meta[i].src
                     + "}; func";
-            item[signalName].connect(evalBinding(null, src, item.$parent || item,
+            item[signalName].connect(evalBinding(null, src, objectScope,
                                                  workingContext[workingContext.length-1].getIdScope()));
         }
 
-        // Handle objects which are already defined in item differently
-        if (Object.prototype.toString.call(meta[i]) == '[object Object]') {
+        if (meta[i] instanceof Object) {
             // property-aliases
             if (meta[i] && meta[i].type == "alias") {
                 var val = meta[i].value;
                 var propName = val.src.replace(/.*\.(\w*)\s*/, "$1");
-                var obj = evalBinding(null, val.src.replace(/(.*)\.\w*\s*/, "$1"), item,
+                var obj = evalBinding(null, val.src.replace(/(.*)\.\w*\s*/, "$1"), objectScope,
                                         workingContext[workingContext.length-1].getIdScope());
                 (function(val, propName, obj) {
                     setupGetterSetter(item, i, function() {
@@ -489,7 +499,7 @@ function applyProperties(meta, item, skip) {
             } else if (item[i] && !(meta[i] instanceof QMLBinding)) {
                 // Apply properties one by one, otherwise apply at once
                 // skip nothing
-                applyProperties(meta[i], item[i]);
+                applyProperties(meta[i], item[i], item);
                 continue;
             }
         }
@@ -887,8 +897,32 @@ QMLEngine = function (element, options) {
 // Base object for all qml thingies
 function QtObject(parent) {
     this.$parent = parent;
+    if (parent && parent.$tidyupList)
+        parent.$tidyupList.push(this);
+    // List of things to tidy up when deleting this object.
+    if (!this.$tidyupList)
+        this.$tidyupList = [];
     if (!this.$properties)
         this.$properties = {};
+
+    this.$delete = function() {
+        while (this.$tidyupList.length > 0) {
+            var item = this.$tidyupList[0];
+            if (item.$delete) // It's a QtObject
+                item.$delete();
+            else // It must be a signal
+                item.disconnect(this);
+        }
+
+        for (var i in this.$properties) {
+            var prop = this.$properties[i];
+            while (prop.$tidyupList.length > 0)
+                prop.$tidyupList[0].disconnect(prop);
+        }
+
+        if (this.$parent && this.$parent.$tidyupList)
+            this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
+    }
 }
 
 // QML-basic type list (essentially needed for instanceof)
@@ -903,7 +937,7 @@ QMLList.prototype.push = function() {
 
 // Base object for all qml elements
 function QMLBaseObject(meta, parent, engine) {
-    QtObject.call(this);
+    QtObject.call(this, parent);
     var i,
         prop,
         self = this;
@@ -982,193 +1016,191 @@ function QMLBaseObject(meta, parent, engine) {
 }
 
 function updateHGeometry(newVal, oldVal, propName) {
-    var item = this.$parent || this;
     var anchors = this.anchors || this;
-    if (item.$updatingGeometry)
+    if (this.$updatingGeometry)
         return;
-    item.$updatingGeometry = true;
+    this.$updatingGeometry = true;
 
     var t, w, width, x, left, hC, right;
 
     // Width
-    if (item.$isUsingImplicitWidth && propName == "implicitWidth")
-        width = item.implicitWidth;
+    if (this.$isUsingImplicitWidth && propName == "implicitWidth")
+        width = this.implicitWidth;
     else if (propName == "width")
-        item.$isUsingImplicitWidth = false;
+        this.$isUsingImplicitWidth = false;
 
     // Position TODO: Layouts
     if ((t = anchors.fill) !== undefined) {
-        if (!t.$properties.left.changed.isConnected(item, updateHGeometry))
-            t.$properties.left.changed.connect(item, updateHGeometry);
-        if (!t.$properties.width.changed.isConnected(item, updateHGeometry));
-            t.$properties.width.changed.connect(item, updateHGeometry);
+        if (!t.$properties.left.changed.isConnected(this, updateHGeometry))
+            t.$properties.left.changed.connect(this, updateHGeometry);
+        if (!t.$properties.width.changed.isConnected(this, updateHGeometry));
+            t.$properties.width.changed.connect(this, updateHGeometry);
 
-        item.$isUsingImplicitWidth = false;
+        this.$isUsingImplicitWidth = false;
         width = t.width;
-        x = t.left - (item.parent ? item.parent.left : 0);
+        x = t.left - (this.parent ? this.parent.left : 0);
         left = t.left;
         right = t.right;
         hC = t.horizontalCenter;
     } else if ((t = anchors.centerIn) !== undefined) {
-        if (!t.$properties.horizontalCenter.changed.isConnected(item, updateHGeometry))
-            t.$properties.horizontalCenter.changed.connect(item, updateHGeometry);
+        if (!t.$properties.horizontalCenter.changed.isConnected(this, updateHGeometry))
+            t.$properties.horizontalCenter.changed.connect(this, updateHGeometry);
 
-        w = width || item.width;
+        w = width || this.width;
         hC = t.horizontalCenter;
-        x = hC - w / 2 - (item.parent ? item.parent.left : 0);
+        x = hC - w / 2 - (this.parent ? this.parent.left : 0);
         left = hC - w / 2;
         right = hC + w / 2;
     } else if ((left = anchors.left) !== undefined) {
         if ((right = anchors.right) !== undefined) {
-            item.$isUsingImplicitWidth = false;
+            this.$isUsingImplicitWidth = false;
             width = right - left;
-            x = left - (item.parent ? item.parent.left : 0);
+            x = left - (this.parent ? this.parent.left : 0);
             hC = (right + left) / 2;
         } else if ((hC = anchors.horizontalCenter) !== undefined) {
-            item.$isUsingImplicitWidth = false;
+            this.$isUsingImplicitWidth = false;
             width = (hC - left) * 2;
-            x = left - (item.parent ? item.parent.left : 0);
+            x = left - (this.parent ? this.parent.left : 0);
             right = 2 * hC - left;
         } else {
-            w = width || item.width;
-            x = left - (item.parent ? item.parent.left : 0);
+            w = width || this.width;
+            x = left - (this.parent ? this.parent.left : 0);
             right = left + w;
             hC = left + w / 2;
         }
     } else if ((right = anchors.right) !== undefined) {
         if ((hC = anchors.horizontalCenter) !== undefined) {
-            item.$isUsingImplicitWidth = false;
+            this.$isUsingImplicitWidth = false;
             width = (right - hC) * 2;
-            x = 2 * hC - right - (item.parent ? item.parent.left : 0);
+            x = 2 * hC - right - (this.parent ? this.parent.left : 0);
             left = 2 * hC - right;
         } else {
-            w = width || item.width;
-            x = right - w - (item.parent ? item.parent.left : 0);
+            w = width || this.width;
+            x = right - w - (this.parent ? this.parent.left : 0);
             left = right - w;
             hC = right - w / 2;
         }
     } else if ((hC = anchors.horizontalCenter) !== undefined) {
-        w = width || item.width;
-        x = hC - w / 2 - (item.parent ? item.parent.left : 0);
+        w = width || this.width;
+        x = hC - w / 2 - (this.parent ? this.parent.left : 0);
         left = hC - w / 2;
         right = hC + w / 2;
     } else {
-        if (item.parent && !item.parent.$properties.x.changed.isConnected(item, updateHGeometry))
-            item.parent.$properties.x.changed.connect(item, updateHGeometry);
+        if (this.parent && !this.parent.$properties.x.changed.isConnected(this, updateHGeometry))
+            this.parent.$properties.x.changed.connect(this, updateHGeometry);
 
-        w = width || item.width;
-        left = item.x + (item.parent ? item.parent.left : 0);
+        w = width || this.width;
+        left = this.x + (this.parent ? this.parent.left : 0);
         right = left + w;
         hC = left + w / 2;
     }
 
     if (hC !== undefined)
-        item.horizontalCenter = hC;
+        this.horizontalCenter = hC;
     if (right !== undefined)
-        item.right = right;
+        this.right = right;
     if (left !== undefined)
-        item.left = left;
+        this.left = left;
     if (x !== undefined)
-        item.x = x;
+        this.x = x;
     if (width !== undefined)
-        item.width = width;
+        this.width = width;
 
-    item.$updatingGeometry = false;
+    this.$updatingGeometry = false;
 }
 
 function updateVGeometry(newVal, oldVal, propName) {
-    var item = this.$parent || this;
     var anchors = this.anchors || this;
-    if (item.$updatingGeometry)
+    if (this.$updatingGeometry)
         return;
-    item.$updatingGeometry = true;
+    this.$updatingGeometry = true;
 
     var t, h, height, y, top, vC, bottom;
 
     // Height
-    if (item.$isUsingImplicitHeight && propName == "implicitHeight")
-        height = item.implicitHeight;
+    if (this.$isUsingImplicitHeight && propName == "implicitHeight")
+        height = this.implicitHeight;
     else if (propName == "height")
-        item.$isUsingImplicitHeight = false;
+        this.$isUsingImplicitHeight = false;
 
     // Position TODO: Layouts
     if ((t = anchors.fill) !== undefined) {
-        if (!t.$properties.top.changed.isConnected(item, updateVGeometry))
-            t.$properties.top.changed.connect(item, updateVGeometry);
-        if (!t.$properties.height.changed.isConnected(item, updateVGeometry));
-            t.$properties.height.changed.connect(item, updateVGeometry);
+        if (!t.$properties.top.changed.isConnected(this, updateVGeometry))
+            t.$properties.top.changed.connect(this, updateVGeometry);
+        if (!t.$properties.height.changed.isConnected(this, updateVGeometry));
+            t.$properties.height.changed.connect(this, updateVGeometry);
 
-        item.$isUsingImplicitHeight = false;
+        this.$isUsingImplicitHeight = false;
         height = t.height;
-        y = t.top - (item.parent ? item.parent.top : 0);
+        y = t.top - (this.parent ? this.parent.top : 0);
         top = t.top;
         bottom = t.bottom;
         vC = t.verticalCenter;
     } else if ((t = anchors.centerIn) !== undefined) {
-        if (!t.$properties.verticalCenter.changed.isConnected(item, updateVGeometry))
-            t.$properties.verticalCenter.changed.connect(item, updateVGeometry);
+        if (!t.$properties.verticalCenter.changed.isConnected(this, updateVGeometry))
+            t.$properties.verticalCenter.changed.connect(this, updateVGeometry);
 
-        h = height || item.height;
+        h = height || this.height;
         vC = t.verticalCenter;
-        y = vC - h / 2 - (item.parent ? item.parent.top : 0);
+        y = vC - h / 2 - (this.parent ? this.parent.top : 0);
         top = vC - h / 2;
         bottom = vC + h / 2;
     } else if ((top = anchors.top) !== undefined) {
         if ((bottom = anchors.bottom) !== undefined) {
-            item.$isUsingImplicitHeight = false;
+            this.$isUsingImplicitHeight = false;
             height = bottom - top;
-            y = top - (item.parent ? item.parent.top : 0);
+            y = top - (this.parent ? this.parent.top : 0);
             vC = (bottom + top) / 2;
         } else if ((vC = anchors.verticalCenter) !== undefined) {
-            item.$isUsingImplicitHeight = false;
+            this.$isUsingImplicitHeight = false;
             height = (vC - top) * 2;
-            y = top - (item.parent ? item.parent.top : 0);
+            y = top - (this.parent ? this.parent.top : 0);
             bottom = 2 * vC - top;
         } else {
-            h = height || item.height;
-            y = top - (item.parent ? item.parent.top : 0);
+            h = height || this.height;
+            y = top - (this.parent ? this.parent.top : 0);
             bottom = top + h;
             vC = top + h / 2;
         }
     } else if ((bottom = anchors.bottom) !== undefined) {
         if ((vC = anchors.verticalCenter) !== undefined) {
-            item.$isUsingImplicitHeight = false;
+            this.$isUsingImplicitHeight = false;
             height = (bottom - vC) * 2;
-            y = 2 * vC - bottom - (item.parent ? item.parent.top : 0);
+            y = 2 * vC - bottom - (this.parent ? this.parent.top : 0);
             top = 2 * vC - bottom;
         } else {
-            h = height || item.height;
-            y = bottom - h - (item.parent ? item.parent.top : 0);
+            h = height || this.height;
+            y = bottom - h - (this.parent ? this.parent.top : 0);
             top = bottom - h;
             vC = bottom - h / 2;
         }
     } else if ((vC = anchors.verticalCenter) !== undefined) {
-        h = height || item.height;
-        y = vC - h / 2 - (item.parent ? item.parent.top : 0);
+        h = height || this.height;
+        y = vC - h / 2 - (this.parent ? this.parent.top : 0);
         top = vC - h / 2;
         bottom = vC + h / 2;
     } else {
-        if (item.parent && !item.parent.$properties.y.changed.isConnected(item, updateVGeometry))
-            item.parent.$properties.y.changed.connect(item, updateVGeometry);
+        if (this.parent && !this.parent.$properties.y.changed.isConnected(this, updateVGeometry))
+            this.parent.$properties.y.changed.connect(this, updateVGeometry);
 
-        h = height || item.height;
-        top = item.y + (item.parent ? item.parent.top : 0);
+        h = height || this.height;
+        top = this.y + (this.parent ? this.parent.top : 0);
         bottom = top + h;
         vC = top + h / 2;
     }
 
     if (vC !== undefined)
-        item.verticalCenter = vC;
+        this.verticalCenter = vC;
     if (bottom !== undefined)
-        item.bottom = bottom;
+        this.bottom = bottom;
     if (top !== undefined)
-        item.top = top;
+        this.top = top;
     if (y !== undefined)
-        item.y = y;
+        this.y = y;
     if (height !== undefined)
-        item.height = height;
+        this.height = height;
 
-    item.$updatingGeometry = false;
+    this.$updatingGeometry = false;
 }
 
 // Item qml object
@@ -1192,7 +1224,7 @@ function QMLItem(meta, parent, engine) {
     this.resources = new QMLList(this.$properties.resources);
     this.parentChanged.connect(this, function(newParent, oldParent) {
         if (oldParent) {
-            oldParent.children.splice(oldParent.children.indexOf(this));
+            oldParent.children.splice(oldParent.children.indexOf(this), 1);
             if (engine.renderMode == QMLRenderMode.DOM)
                 oldParent.$domElement.removeChild(this.$domElement);
         }
@@ -1575,17 +1607,16 @@ function QMLText(meta, parent, engine) {
     this.font.wordSpacingChanged.connect(this, updateImplicitWidth);
 
     function updateImplicitHeight() {
-        var item = this.$parent || this;
         var height;
 
-        if (!item.text || item.text == "") {
+        if (!this.text || this.text == "") {
             height = 0;
         } else if (engine.renderMode == QMLRenderMode.DOM) {
-            height = item.$domElement ? item.$domElement.firstChild.offsetHeight : 0;
+            height = this.$domElement ? this.$domElement.firstChild.offsetHeight : 0;
         } else {
             var el = document.createElement("span");
-            el.style.font = fontCss(item.font);
-            el.innerText = item.text;
+            el.style.font = fontCss(this.font);
+            el.innerText = this.text;
             document.body.appendChild(el);
             height = el.offsetHeight;
             document.body.removeChild(el);
@@ -1601,23 +1632,22 @@ function QMLText(meta, parent, engine) {
             }
         }
 
-        item.implicitHeight = height;
-        updateVGeometry.call(item, height, undefined, "implicitHeight");
+        this.implicitHeight = height;
+        updateVGeometry.call(this, height, undefined, "implicitHeight");
     }
 
     function updateImplicitWidth() {
-        var item = this.$parent || this;
         var width;
 
-        if (!item.text || item.text == "")
+        if (!this.text || this.text == "")
             width = 0;
         else if (engine.renderMode == QMLRenderMode.DOM)
-            width = item.$domElement ? item.$domElement.firstChild.offsetWidth : 0;
+            width = this.$domElement ? this.$domElement.firstChild.offsetWidth : 0;
         else
-            width = engine.$getTextMetrics(this.text, fontCss(item.font)).width;
+            width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
 
-        item.implicitWidth = width;
-        updateHGeometry.call(item, width, undefined, "implicitWidth");
+        this.implicitWidth = width;
+        updateHGeometry.call(this, width, undefined, "implicitWidth");
     }
 
     this.$drawItem = function(c) {
@@ -1790,11 +1820,15 @@ function QMLRepeater(meta, parent, engine) {
             if (engine.renderMode == QMLRenderMode.DOM)
                 removed[index].parent.$domElement.removeChild(removed[index].$domElement);
             removeChildProperties(removed[index]);
+            removed[index].$delete();
         }
     }
     function removeChildProperties(child) {
         if (child.id)
             self.$scope.remId(child.id);
+        if (engine.renderMode == QMLRenderMode.Canvas && child instanceof QMLMouseArea)
+            engine.mouseAreas.splice(engine.mouseAreas.indexOf(child), 1);
+        engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed));
         for (var i = 0; i < child.children.length; i++)
             removeChildProperties(child.children[i])
     }
