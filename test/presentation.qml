@@ -147,7 +147,7 @@ Rectangle {
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
                 Text {
-                text: "- Current code by Lauri Paimen"
+                text: "- Current code by Lauri Paimen and Anton Kreuzkamp"
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
 

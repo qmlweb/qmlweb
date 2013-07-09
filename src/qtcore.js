@@ -1,7 +1,7 @@
 /* @license
 
   Copyright (c) 2011 Lauri Paimen <lauri@paimen.info>
-  Copyright (c) 2012 Anton Kreuzkamp <akreuzkamp@web.de>
+  Copyright (c) 2013 Anton Kreuzkamp <akreuzkamp@web.de>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
