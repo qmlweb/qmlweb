@@ -1246,6 +1246,7 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this, "rotation");
     createSimpleProperty(this, "spacing");
     createSimpleProperty(this, "visible");
+    createSimpleProperty(this, "clip");
     createSimpleProperty(this, "z");
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
@@ -1285,6 +1286,9 @@ function QMLItem(meta, parent, engine) {
         });
         this.visibleChanged.connect(this, function(newVal) {
             this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
+        });
+        this.clipChanged.connect(this, function(newVal) {
+            this.$domElement.style.overflow = newVal ? "hidden" : "visible";
         });
         this.zChanged.connect(this, function(newVal) {
             this.$domElement.style.zIndex = newVal;
