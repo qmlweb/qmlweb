@@ -212,15 +212,13 @@ function construct(meta, parent, engine) {
         item = new constructors[meta.$class](meta, parent, engine);
     } else if (cTree = engine.loadComponent(meta.$class)) {
         var item = QMLComponent(cTree, engine);
-//         item = component.children[0];
 
-        //TODO: These $intern... properties are not nice. Find a better way.
-        item.$internScope = item.$scope;
-        meta.$componentMeta = cTree.$children[0];
+        // Recall QMLBaseObject with the meta of the instance in order to get property
+        // definitions, etc. from the instance
         QMLBaseObject.call(item, meta, parent, engine);
         if (engine.renderMode == QMLRenderMode.DOM)
             item.$domElement.className += " " + meta.$class + (meta.id ? " " + meta.id : "");
-        var dProp;
+        var dProp; // Handle default properties
         if (dProp = cTree.$children[0].$defaultProperty) {
             //TODO: How does Qt really handle default properties + components?
             if (item[dProp] instanceof Array)
@@ -359,8 +357,8 @@ QMLProperty.prototype.update = function() {
 
 // Define getter
 QMLProperty.prototype.get = function() {
-    // Find out if this call to the getter is due to a property that is
-    // dependant on this one
+    // If this call to the getter is due to a property that is dependant on this
+    // one, we need it to take track of changes
     if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
         this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
 
@@ -442,10 +440,10 @@ var setupGetter,
 
 })();
 /**
- * Apply properties from meta to item. Skip values in skip.
+ * Apply properties from meta to item.
  * @param {Object} meta Source of properties
  * @param {Object} item Target of property apply
- * @param {Array} [skip] Array of property names to skip
+ * @param {Object} [objectScope] Alternative scope in which properties should be evaluated
  */
 function applyProperties(meta, item, objectScope) {
     var i;
@@ -498,7 +496,6 @@ function applyProperties(meta, item, objectScope) {
                 continue;
             } else if (item[i] && !(meta[i] instanceof QMLBinding)) {
                 // Apply properties one by one, otherwise apply at once
-                // skip nothing
                 applyProperties(meta[i], item[i], item);
                 continue;
             }
@@ -641,7 +638,7 @@ QMLEngine = function (element, options) {
             value = newVal;
 
             for (i in dependantProperties)
-                updateProperty(dependantProperties[i]);
+                dependantProperties[i].update();
         }
 
         setupGetterSetter(obj, propName, getter, setter);
@@ -895,7 +892,7 @@ QMLEngine = function (element, options) {
 }
 
 // Base object for all qml thingies
-function QtObject(parent) {
+function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
@@ -908,7 +905,7 @@ function QtObject(parent) {
     this.$delete = function() {
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
-            if (item.$delete) // It's a QtObject
+            if (item.$delete) // It's a QObject
                 item.$delete();
             else // It must be a signal
                 item.disconnect(this);
@@ -925,7 +922,7 @@ function QtObject(parent) {
     }
 }
 
-// QML-basic type list (essentially needed for instanceof)
+// QML-basic type list
 function QMLList(prop) {
     this.$prop = prop;
 }
@@ -937,14 +934,12 @@ QMLList.prototype.push = function() {
 
 // Base object for all qml elements
 function QMLBaseObject(meta, parent, engine) {
-    QtObject.call(this, parent);
+    QObject.call(this, parent);
     var i,
-        prop,
-        self = this;
+        prop;
 
     if (!this.$draw)
         this.$draw = noop;
-//     this.parent = parent;
     this.$scope = workingContext[workingContext.length-1];
 
     // id
@@ -985,33 +980,16 @@ function QMLBaseObject(meta, parent, engine) {
     }
 
     // Component.onCompleted
-    this.Component = new QtObject(this);
+    this.Component = new QObject(this);
     this.Component.completed = Signal([], { altParent: this });
     engine.completedSignals.push(this.Component.completed);
 
     if (!this.$init)
         this.$init = [];
     this.$init[0] = function() {
-        // Apply property-values which are set inside the Component-definition
-        if (meta.$componentMeta) {
-            workingContext.push(self.$internScope);
-            applyProperties(meta.$componentMeta, self);
-            workingContext.pop();
-        }
-
-        workingContext.push(self.$scope);
-        applyProperties(meta, self);
+        workingContext.push(this.$scope);
+        applyProperties(meta, this);
         workingContext.pop();
-
-//         if (self.$defaultProperty instanceof Array)
-//             for (var i in self.$defaultProperty)
-//                 if (self.$defaultProperty[i].$init)
-//                     for (var j = self.$defaultProperty[i].$init.length - 1; j>=0; j--)
-//                         self.$defaultProperty[i].$init[j]();
-//         else
-//             if (self.$defaultProperty.$init)
-//                 for (var i = self.$defaultProperty.$init.length - 1; i>=0; i--)
-//                     self.$defaultProperty.$init[i]();
     }
 }
 
@@ -1207,8 +1185,7 @@ function updateVGeometry(newVal, oldVal, propName) {
 function QMLItem(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
     var child,
-        o, i,
-        self = this;
+        o, i;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         if (!this.$domElement)
@@ -1278,7 +1255,7 @@ function QMLItem(meta, parent, engine) {
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
-    this.anchors = new QtObject(this);
+    this.anchors = new QObject(this);
     createSimpleProperty(this.anchors, "left", { altParent: this });
     createSimpleProperty(this.anchors, "right", { altParent: this });
     createSimpleProperty(this.anchors, "top", { altParent: this });
@@ -1299,18 +1276,18 @@ function QMLItem(meta, parent, engine) {
     this.anchors.centerInChanged.connect(this, updateVGeometry);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.rotationChanged.connect(function(newVal) {
-            self.$domElement.style.transform = "rotate(" + newVal + "deg)";
-            self.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
-            self.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
-            self.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
-            self.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
+        this.rotationChanged.connect(this, function(newVal) {
+            this.$domElement.style.transform = "rotate(" + newVal + "deg)";
+            this.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
+            this.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
+            this.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
+            this.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
         });
         this.visibleChanged.connect(this, function(newVal) {
-            self.$domElement.style.visibility = newVal ? "inherit" : "hidden";
+            this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
         });
         this.zChanged.connect(this, function(newVal) {
-            self.$domElement.style.zIndex = newVal;
+            this.$domElement.style.zIndex = newVal;
         });
         this.xChanged.connect(this, function(newVal) {
             this.$domElement.style.left = newVal + "px";
@@ -1341,12 +1318,12 @@ function QMLItem(meta, parent, engine) {
     this.y = 0;
 
     this.$init.push(function() {
-        for (var i = 0; i < self.children.length; i++)
-            for (var j = 0; j < self.children[i].$init.length; j++)
-                self.children[i].$init[j]();
-        for (var i = 0; i < self.resources.length; i++)
-            for (var j = 0; j < self.resources[i].$init.length; j++)
-                self.resources[i].$init[j]();
+        for (var i = 0; i < this.children.length; i++)
+            for (var j = 0; j < this.children[i].$init.length; j++)
+                this.children[i].$init[j].call(this.children[i]);
+        for (var i = 0; i < this.resources.length; i++)
+            for (var j = 0; j < this.resources[i].$init.length; j++)
+                this.resources[i].$init[j](this.resources[i]);
     });
 
     this.$draw = function(c) {
@@ -1379,7 +1356,7 @@ function QMLItem(meta, parent, engine) {
 }
 
 function QMLFont(parent, engine) {
-    QtObject.call(this);
+    QObject.call(this);
     createSimpleProperty(this, "bold", { altParent: parent });
     createSimpleProperty(this, "capitalization", { altParent: parent });
     createSimpleProperty(this, "family", { altParent: parent });
@@ -1453,7 +1430,6 @@ function QMLFont(parent, engine) {
 
 function QMLText(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
-    var self = this;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         // We create another span inside the text to distinguish the actual
@@ -1477,7 +1453,7 @@ function QMLText(meta, parent, engine) {
         css += font.pixelSize !== Undefined
             ? font.pixelSize + "px "
             : (font.pointSize || 10) + "pt ";
-        css += self.lineHeight !== Undefined ? self.lineHeight + "px " : " ";
+        css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
         css += (font.family || "sans-serif") + " ";
         return css;
     }
@@ -1511,85 +1487,85 @@ function QMLText(meta, parent, engine) {
     createSimpleProperty(this, "styleColor");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.color = newVal;
+        this.colorChanged.connect(this, function(newVal) {
+            this.$domElement.firstChild.style.color = newVal;
         });
-        this.textChanged.connect(function(newVal) {
-            self.$domElement.firstChild.innerHTML = newVal;
+        this.textChanged.connect(this, function(newVal) {
+            this.$domElement.firstChild.innerHTML = newVal;
         });
-        this.lineHeightChanged.connect(function(newVal) {
-            self.$domElement.firstChild.style.lineHeight = newVal + "px";
+        this.lineHeightChanged.connect(this, function(newVal) {
+            this.$domElement.firstChild.style.lineHeight = newVal + "px";
         });
-        this.wrapModeChanged.connect(function(newVal) {
+        this.wrapModeChanged.connect(this, function(newVal) {
             switch (newVal) {
                 case 0:
-                    self.$domElement.firstChild.style.whiteSpace = "pre";
+                    this.$domElement.firstChild.style.whiteSpace = "pre";
                     break;
                 case 1:
-                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
                     break;
                 case 2:
-                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    self.$domElement.firstChild.style.wordBreak = "break-all";
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.$domElement.firstChild.style.wordBreak = "break-all";
                     break;
                 case 3:
-                    self.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    self.$domElement.firstChild.style.wordWrap = "break-word";
+                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.$domElement.firstChild.style.wordWrap = "break-word";
             };
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (self.horizontalAlignment == "justify")
-                self.$domElement.firstChild.style.whiteSpace = "normal";
+            if (this.horizontalAlignment == "justify")
+                this.$domElement.firstChild.style.whiteSpace = "normal";
         });
-        this.horizontalAlignmentChanged.connect(function(newVal) {
-            self.$domElement.style.textAlign = newVal;
+        this.horizontalAlignmentChanged.connect(this, function(newVal) {
+            this.$domElement.style.textAlign = newVal;
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
             if (newVal == "justify")
-                self.$domElement.firstChild.style.whiteSpace = "normal";
+                this.$domElement.firstChild.style.whiteSpace = "normal";
         });
-        this.styleChanged.connect(function(newVal) {
+        this.styleChanged.connect(this, function(newVal) {
             switch (newVal) {
                 case 0:
-                    self.$domElement.firstChild.style.textShadow = "none";
+                    this.$domElement.firstChild.style.textShadow = "none";
                     break;
                 case 1:
                     var color = this.styleColor;
-                    self.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
+                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
                         + ", -1px 0 0 " + color
                         + ", 0 1px 0 " + color
                         + ", 0 -1px 0 " + color;
                     break;
                 case 2:
-                    self.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
                     break;
                 case 3:
-                    self.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
             };
         });
-        this.styleColorChanged.connect(function(newVal) {
-            switch (self.style) {
+        this.styleColorChanged.connect(this, function(newVal) {
+            switch (this.style) {
                 case 0:
-                    self.$domElement.firstChild.style.textShadow = "none";
+                    this.$domElement.firstChild.style.textShadow = "none";
                     break;
                 case 1:
-                    self.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
+                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
                         + ", -1px 0 0 " + newVal
                         + ", 0 1px 0 " + newVal
                         + ", 0 -1px 0 " + newVal;
                     break;
                 case 2:
-                    self.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
                     break;
                 case 3:
-                    self.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
             };
         });
     }
 
     this.font.family = "sans-serif";
     this.font.pointSize = 10;
-    this.wrapMode = self.Text.NoWrap;
+    this.wrapMode = this.Text.NoWrap;
     this.color = "black";
     this.text = "";
 
@@ -1665,23 +1641,22 @@ function QMLText(meta, parent, engine) {
 
 function QMLRectangle(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
-    var self = this;
 
     createSimpleProperty(this, "color");
-    this.border = new QtObject(this);
+    this.border = new QObject(this);
     createSimpleProperty(this.border, "color", { altParent: this });
     createSimpleProperty(this.border, "width", { altParent: this });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(function(newVal) {
-            self.$domElement.style.backgroundColor = newVal;
+        this.colorChanged.connect(this, function(newVal) {
+            this.$domElement.style.backgroundColor = newVal;
         });
-        this.border.colorChanged.connect(function(newVal) {
-            self.$domElement.style.borderColor = newVal;
+        this.border.colorChanged.connect(this, function(newVal) {
+            this.$domElement.style.borderColor = newVal;
         });
-        this.border.widthChanged.connect(function(newVal) {
-            self.$domElement.style.borderWidth = newVal + "px";
-            self.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
+        this.border.widthChanged.connect(this, function(newVal) {
+            this.$domElement.style.borderWidth = newVal + "px";
+            this.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
         });
     }
 
@@ -1721,7 +1696,7 @@ function QMLRepeater(meta, parent, engine) {
     this.count = 0;
 
     this.$init.push(function() {
-        self.$completed = true;
+        this.$completed = true;
     });
 
     function applyChildProperties(child) {
@@ -1763,7 +1738,7 @@ function QMLRepeater(meta, parent, engine) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
                 for (var i = 0; i < newItem.$init.length; i++)
-                    newItem.$init[i]();
+                    newItem.$init[i].call(newItem);
                 callOnCompleted(newItem);
             }
         }
@@ -1962,7 +1937,7 @@ function QMLImage(meta, parent, engine) {
     createSimpleProperty(this, "source");
     createSimpleProperty(this, "status");
 
-    this.sourceSize = new QtObject(this);
+    this.sourceSize = new QObject(this);
 
     createSimpleProperty(this.sourceSize, "width", { altParent: this });
     createSimpleProperty(this.sourceSize, "height", { altParent: this });
@@ -1970,11 +1945,11 @@ function QMLImage(meta, parent, engine) {
     this.asynchronous = true;
     this.cache = true;
     this.smooth = true;
-    this.fillMode = self.Image.Stretch;
+    this.fillMode = this.Image.Stretch;
     this.mirror = false;
     this.progress = 0;
     this.source = "";
-    this.status = self.Image.Null;
+    this.status = this.Image.Null;
     this.sourceSize.width = 0;
     this.sourceSize.height = 0;
 
@@ -1996,9 +1971,9 @@ function QMLImage(meta, parent, engine) {
         self.status = self.Image.Error;
     }
 
-    this.sourceChanged.connect(function(val) {
-        self.progress = 0;
-        self.status = self.Image.Loading;
+    this.sourceChanged.connect(this, function(val) {
+        this.progress = 0;
+        this.status = this.Image.Loading;
         img.src = engine.$resolvePath(val);
     });
 
@@ -2039,7 +2014,7 @@ function QMLBorderImage(meta, parent, engine) {
 
     createSimpleProperty(this, "source");
     createSimpleProperty(this, "status");
-    this.border = new QtObject(this);
+    this.border = new QObject(this);
     createSimpleProperty(this.border, "left", { altParent: this });
     createSimpleProperty(this.border, "right", { altParent: this });
     createSimpleProperty(this.border, "top", { altParent: this });
@@ -2048,28 +2023,28 @@ function QMLBorderImage(meta, parent, engine) {
     createSimpleProperty(this, "verticalTileMode");
 
     this.source = "";
-    this.status = self.BorderImage.Null;
+    this.status = this.BorderImage.Null;
     this.border.left = 0;
     this.border.right = 0;
     this.border.top = 0;
     this.border.bottom = 0;
-    this.horizontalTileMode = self.BorderImage.Stretch;
-    this.verticalTileMode = self.BorderImage.Stretch;
+    this.horizontalTileMode = this.BorderImage.Stretch;
+    this.verticalTileMode = this.BorderImage.Stretch;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.sourceChanged.connect(function() {
-            self.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
+        this.sourceChanged.connect(this, function() {
+            this.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
         });
-        this.border.leftChanged.connect(updateBorder);
-        this.border.rightChanged.connect(updateBorder);
-        this.border.topChanged.connect(updateBorder);
-        this.border.bottomChanged.connect(updateBorder);
-        this.horizontalTileModeChanged.connect(updateBorder);
-        this.verticalTileModeChanged.connect(updateBorder);
+        this.border.leftChanged.connect(this, updateBorder);
+        this.border.rightChanged.connect(this, updateBorder);
+        this.border.topChanged.connect(this, updateBorder);
+        this.border.bottomChanged.connect(this, updateBorder);
+        this.horizontalTileModeChanged.connect(this, updateBorder);
+        this.verticalTileModeChanged.connect(this, updateBorder);
     } else {
         this.sourceChanged.connect(this, function(val) {
             this.progress = 0;
-            this.status = self.BorderImage.Loading;
+            this.status = this.BorderImage.Loading;
             img.src = engine.$resolvePath(val);
         });
         img.onload = function() {
@@ -2083,52 +2058,52 @@ function QMLBorderImage(meta, parent, engine) {
     }
 
     function updateBorder() {
-        self.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
-        self.$domElement.style.MozBorderImageSlice = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
-        self.$domElement.style.MozBorderImageRepeat = self.horizontalTileMode + " "
-                                                    + self.verticalTileMode;
-        self.$domElement.style.MozBorderImageWidth = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
+        this.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.MozBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.MozBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.MozBorderImageWidth = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
 
-        self.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
-        self.$domElement.style.webkitBorderImageSlice = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
-        self.$domElement.style.webkitBorderImageRepeat = self.horizontalTileMode + " "
-                                                    + self.verticalTileMode;
-        self.$domElement.style.webkitBorderImageWidth = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
+        this.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.webkitBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.webkitBorderImageWidth = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
 
-        self.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(self.source) + ")";
-        self.$domElement.style.OBorderImageSlice = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
-        self.$domElement.style.OBorderImageRepeat = self.horizontalTileMode + " "
-                                                    + self.verticalTileMode;
-        self.$domElement.style.OBorderImageWidth = self.border.top + "px "
-                                                + self.border.right + "px "
-                                                + self.border.bottom + "px "
-                                                + self.border.left + "px";
+        this.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.$domElement.style.OBorderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.OBorderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.OBorderImageWidth = this.border.top + "px "
+                                                + this.border.right + "px "
+                                                + this.border.bottom + "px "
+                                                + this.border.left + "px";
 
-        self.$domElement.style.borderImageSlice = self.border.top + " "
-                                                + self.border.right + " "
-                                                + self.border.bottom + " "
-                                                + self.border.left;
-        self.$domElement.style.borderImageRepeat = self.horizontalTileMode + " "
-                                                    + self.verticalTileMode;
-        self.$domElement.style.borderImageWidth = self.border.top + "px "
-                                                + self.border.right + "px "
-                                                + self.border.bottom + "px "
-                                                + self.border.left + "px";
+        this.$domElement.style.borderImageSlice = this.border.top + " "
+                                                + this.border.right + " "
+                                                + this.border.bottom + " "
+                                                + this.border.left;
+        this.$domElement.style.borderImageRepeat = this.horizontalTileMode + " "
+                                                    + this.verticalTileMode;
+        this.$domElement.style.borderImageWidth = this.border.top + "px "
+                                                + this.border.right + "px "
+                                                + this.border.bottom + "px "
+                                                + this.border.left + "px";
     }
 
     this.$drawItem = function(c) {
@@ -2280,7 +2255,7 @@ function QMLComponent(meta, engine) {
 
     workingContext.push(scope);
     for (var i = 0; i < item.$init.length; i++)
-        item.$init[i]();
+        item.$init[i].call(item);
     workingContext.pop();
 
     return item;
@@ -2364,7 +2339,7 @@ function QMLDocument(meta, engine) {
     doc.y = 0;
     workingContext.push(scope);
     for (var i = 0; i < item.$init.length; i++)
-        item.$init[i]();
+        item.$init[i].call(item);
     workingContext.pop();
 
     if (engine.renderMode == QMLRenderMode.DOM) {
@@ -2449,7 +2424,6 @@ function QMLTimer(meta, parent, engine) {
 
 function QMLAnimation(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
-    var self = this;
 
     // Exports
     this.Animation = {
@@ -2486,11 +2460,10 @@ function QMLSequentialAnimation(meta, parent, engine) {
         i,
         self = this;
 
-    createSimpleProperty(this, "animations", {defaultProperty: true});
+    createSimpleProperty(this, "animations");
     this.animations = [];
 
     function nextAnimation(proceed) {
-
         var anim;
         if (self.running && !proceed) {
             curIndex++;
@@ -2572,7 +2545,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
     createSimpleProperty(this, "targets");
     createSimpleProperty(this, "to");
 
-    this.easing = new QtObject(this);
+    this.easing = new QObject(this);
     createSimpleProperty(this.easing, "type", { altParent: this });
     createSimpleProperty(this.easing, "amplitude", { altParent: this });
     createSimpleProperty(this.easing, "overshoot", { altParent: this });
@@ -2669,25 +2642,8 @@ function QMLTextInput(meta, parent, engine) {
     this.implicitWidth = this.$domElement.firstChild.offsetWidth;
     this.implicitHeight = this.$domElement.firstChild.offsetHeight;
 
-//     this.$geometry.geometryChanged = function() {
-//         var w = this.width,
-//             h = this.height,
-//             d = this.$domElement.firstChild.offsetHeight
-//                 - window.getComputedStyle(this.$domElement.firstChild).height.slice(0,-2);
-//         this.$domElement.style.width = w + "px";
-//         this.$domElement.style.height = h + "px";
-//         this.$domElement.style.top = (this.$geometry.top-this.parent.top) + "px";
-//         this.$domElement.style.left = (this.$geometry.left-this.parent.left) + "px";
-//         // we need to subtract the width of the border and the padding so that
-//         // the text-input has the width we want
-//         if (this.$geometry.width !== Undefined)
-//             this.$domElement.firstChild.style.width = this.$geometry.width - d + "px";
-//         if (this.$geometry.height !== Undefined)
-//             this.$domElement.firstChild.style.height = this.$geometry.height - d + "px";
-//     }
-
-    this.textChanged.connect(function(newVal) {
-        self.$domElement.firstChild.value = newVal;
+    this.textChanged.connect(this, function(newVal) {
+        this.$domElement.firstChild.value = newVal;
     });
 
     this.$domElement.firstChild.onkeydown = function(e) {
@@ -2722,8 +2678,8 @@ function QMLButton(meta, parent, engine) {
     createSimpleProperty(this, "text", "");
     this.clicked = Signal();
 
-    this.textChanged.connect(function(newVal) {
-        self.$domElement.firstChild.innerHTML = newVal;
+    this.textChanged.connect(this, function(newVal) {
+        this.$domElement.firstChild.innerHTML = newVal;
     });
 
     this.$domElement.onclick = function(e) {
@@ -2754,8 +2710,8 @@ function QMLTextArea(meta, parent, engine) {
     this.implicitWidth = this.$domElement.firstChild.offsetWidth;
     this.implicitHeight = this.$domElement.firstChild.offsetHeight;
 
-    this.textChanged.connect(function(newVal) {
-        self.$domElement.firstChild.value = newVal;
+    this.textChanged.connect(this, function(newVal) {
+        this.$domElement.firstChild.value = newVal;
     });
 
     function updateValue(e) {
