@@ -1818,10 +1818,13 @@ function QMLListModel(meta, parent, engine) {
     var self = this;
 
     createSimpleProperty(this, "$items");
+    createSimpleProperty(this, "count");
     this.$items = [];
     this.$model = new JSItemModel();
+    this.count = 0;
     this.$addChild = function(meta) {
         this.$items.push(construct(meta, this, engine));
+        this.count = this.$items.length;
     }
 
     this.$model.data = function(index, role) {
@@ -1840,10 +1843,12 @@ function QMLListModel(meta, parent, engine) {
     this.append = function(dict) {
         this.$items.push(dict);
         this.$model.rowsInserted(this.$items.length-1, this.$items.length);
+        this.count = this.$items.length;
     }
     this.clear = function() {
         this.$items = [];
         this.$model.modelReset();
+        this.count = 0;
     }
     this.get = function(index) {
         return this.$items[index];
@@ -1851,6 +1856,7 @@ function QMLListModel(meta, parent, engine) {
     this.insert = function(index, dict) {
         this.$items.splice(index, 0, dict);
         this.$model.rowsInserted(index, index+1);
+        this.count = this.$items.length;
     }
     this.move = function(from, to, n) {
         var vals = this.$items.splice(from, n);
@@ -1862,6 +1868,7 @@ function QMLListModel(meta, parent, engine) {
     this.remove = function(index) {
         this.$items.splice(index, 1);
         this.$model.rowsRemoved(index, index+1);
+        this.count = this.$items.length;
     }
     this.set = function(index, dict) {
         this.$items[index] = dict;
