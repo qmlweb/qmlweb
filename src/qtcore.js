@@ -1327,7 +1327,7 @@ function QMLItem(meta, parent, engine) {
                 this.children[i].$init[j].call(this.children[i]);
         for (var i = 0; i < this.resources.length; i++)
             for (var j = 0; j < this.resources[i].$init.length; j++)
-                this.resources[i].$init[j](this.resources[i]);
+                this.resources[i].$init[j].call(this.resources[i]);
     });
 
     this.$draw = function(c) {
