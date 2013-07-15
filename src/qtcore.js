@@ -561,7 +561,7 @@ QMLEngine = function (element, options) {
     this.components = {};
 
     this.rootElement = element;
-    this.renderMode = element.nodeName == "CANVAS" ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
+    this.renderMode = (element && element.nodeName == "CANVAS") ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
 
     // List of Component.completed signals
     this.completedSignals = [];
@@ -573,8 +573,10 @@ QMLEngine = function (element, options) {
     {
         var i;
         if (!this.running) {
-            element.addEventListener("touchstart", touchHandler);
-            element.addEventListener("mousemove", mousemoveHandler);
+            if (this.renderMode == QMLRenderMode.Canvas) {
+                element.addEventListener("touchstart", touchHandler);
+                element.addEventListener("mousemove", mousemoveHandler);
+            }
             this.running = true;
             tickerId = setInterval(tick, this.$interval);
             for (i = 0; i < whenStart.length; i++) {
@@ -857,34 +859,36 @@ QMLEngine = function (element, options) {
         };
     }
 
-    // Register mousehandler for element
-    element.onclick = function(e) {
-        if (self.running) {
-            var i;
-            for (i in self.mouseAreas) {
-                var l = self.mouseAreas[i];
-                var mouse = {
-                    accepted: true,
-                    button: e.button == 0 ? QMLGlobalObject.Qt.LeftButton :
-                            e.button == 1 ? QMLGlobalObject.Qt.RightButton :
-                            e.button == 2 ? QMLGlobalObject.Qt.MiddleButton :
-                            0,
-                    modifiers: (e.ctrlKey * QMLGlobalObject.Qt.CtrlModifier)
-                            | (e.altKey * QMLGlobalObject.Qt.AltModifier)
-                            | (e.shiftKey * QMLGlobalObject.Qt.ShiftModifier)
-                            | (e.metaKey * QMLGlobalObject.Qt.MetaModifier),
-                    x: (e.offsetX || e.layerX) - l.left,
-                    y: (e.offsetY || e.layerY) - l.top
-                };
+    if (this.renderMode == QMLRenderMode.Canvas) {
+        // Register mousehandler for element
+        element.onclick = function(e) {
+            if (self.running) {
+                var i;
+                for (i in self.mouseAreas) {
+                    var l = self.mouseAreas[i];
+                    var mouse = {
+                        accepted: true,
+                        button: e.button == 0 ? QMLGlobalObject.Qt.LeftButton :
+                                e.button == 1 ? QMLGlobalObject.Qt.RightButton :
+                                e.button == 2 ? QMLGlobalObject.Qt.MiddleButton :
+                                0,
+                        modifiers: (e.ctrlKey * QMLGlobalObject.Qt.CtrlModifier)
+                                | (e.altKey * QMLGlobalObject.Qt.AltModifier)
+                                | (e.shiftKey * QMLGlobalObject.Qt.ShiftModifier)
+                                | (e.metaKey * QMLGlobalObject.Qt.MetaModifier),
+                        x: (e.offsetX || e.layerX) - l.left,
+                        y: (e.offsetY || e.layerY) - l.top
+                    };
 
-                if (l.enabled
-                && mouse.x >= 0 // equals: e.offsetX >= l.left
-                && (e.offsetX || e.layerX) <= l.right
-                && mouse.y >= 0 // equals: e.offsetY >= l.top
-                && (e.offsetY || e.layerY) <= l.bottom) {
-                    l.clicked(mouse);
-                    self.$requestDraw();
-                    break;
+                    if (l.enabled
+                    && mouse.x >= 0 // equals: e.offsetX >= l.left
+                    && (e.offsetX || e.layerX) <= l.right
+                    && mouse.y >= 0 // equals: e.offsetY >= l.top
+                    && (e.offsetY || e.layerY) <= l.bottom) {
+                        l.clicked(mouse);
+                        self.$requestDraw();
+                        break;
+                    }
                 }
             }
         }
@@ -2182,12 +2186,12 @@ function QMLMouseArea(meta, parent, engine) {
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
-    createSimpleProperty(this, "hovered");
+    createSimpleProperty(this, "containsMouse");
 
     this.acceptedButtons = QMLGlobalObject.Qt.LeftButton;
     this.enabled = true;
     this.hoverEnabled = false;
-    this.hovered = false;
+    this.containsMouse = false;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.$domElement.onclick = function(e) {
@@ -2212,13 +2216,13 @@ function QMLMouseArea(meta, parent, engine) {
         }
         this.$domElement.onmouseover = function(e) {
             if (self.hoverEnabled) {
-                self.hovered = true;
+                self.containsMouse = true;
                 self.entered();
             }
         }
         this.$domElement.onmouseout = function(e) {
             if (self.hoverEnabled) {
-                self.hovered = false;
+                self.containsMouse = false;
                 self.exited();
             }
         }
@@ -2286,12 +2290,13 @@ function QMLDocument(meta, engine) {
         console.log("QMLDocument: children.length != 1");
     }
 
-    if (engine.renderMode == QMLRenderMode.DOM)
-        engine.rootElement.innerHTML = "";
-
     // Build parent
     doc = new QMLItem(meta, undefined, engine);
-    doc.$domElement = engine.rootElement;
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+	doc.$domElement = engine.rootElement || document.body;
+        doc.$domElement.innerHTML = "";
+    }
 
     var scope = {
         // Get scope
@@ -2323,15 +2328,23 @@ function QMLDocument(meta, engine) {
 
     doc.children.push(item);
 
-    function heightGetter() {
-        return item.height;
-    }
-    setupGetter(doc, "height", heightGetter);
+    if (engine.rootElement == undefined) {
+	window.onresize = function() {
+	    doc.height = window.innerHeight;
+	    doc.width = window.innerWidth;
+	}
+	window.onresize();
+    } else {
+	function heightGetter() {
+	    return item.height;
+	}
+	setupGetter(doc, "height", heightGetter);
 
-    function widthGetter() {
-        return item.width;
+	function widthGetter() {
+	    return item.width;
+	}
+	setupGetter(doc, "width", widthGetter);
     }
-    setupGetter(doc, "width", widthGetter);
 
 
     doc.$draw = function(c) {
