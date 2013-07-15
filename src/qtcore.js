@@ -1003,7 +1003,9 @@ function updateHGeometry(newVal, oldVal, propName) {
         return;
     this.$updatingGeometry = true;
 
-    var t, w, width, x, left, hC, right;
+    var t, w, width, x, left, hC, right,
+        lM = anchors.leftMargin || anchors.margins,
+        rM = anchors.rightMargin || anchors.margins;
 
     // Width
     if (this.$isUsingImplicitWidth && propName == "implicitWidth")
@@ -1019,11 +1021,11 @@ function updateHGeometry(newVal, oldVal, propName) {
             t.$properties.width.changed.connect(this, updateHGeometry);
 
         this.$isUsingImplicitWidth = false;
-        width = t.width;
-        x = t.left - (this.parent ? this.parent.left : 0);
-        left = t.left;
-        right = t.right;
-        hC = t.horizontalCenter;
+        width = t.width - lM - rM;
+        x = t.left - (this.parent ? this.parent.left : 0) + lM;
+        left = t.left + lM;
+        right = t.right - rM;
+        hC = (left + right) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
         if (!t.$properties.horizontalCenter.changed.isConnected(this, updateHGeometry))
             t.$properties.horizontalCenter.changed.connect(this, updateHGeometry);
@@ -1033,10 +1035,12 @@ function updateHGeometry(newVal, oldVal, propName) {
         x = hC - w / 2 - (this.parent ? this.parent.left : 0);
         left = hC - w / 2;
         right = hC + w / 2;
-    } else if ((left = anchors.left) !== undefined) {
-        if ((right = anchors.right) !== undefined) {
+    } else if ((t = anchors.left) !== undefined) {
+        left = t + lM
+        if ((u = anchors.right) !== undefined) {
+            right = u - rM;
             this.$isUsingImplicitWidth = false;
-            width = right - left;
+            width = right - left - lM - rM;
             x = left - (this.parent ? this.parent.left : 0);
             hC = (right + left) / 2;
         } else if ((hC = anchors.horizontalCenter) !== undefined) {
@@ -1050,7 +1054,8 @@ function updateHGeometry(newVal, oldVal, propName) {
             right = left + w;
             hC = left + w / 2;
         }
-    } else if ((right = anchors.right) !== undefined) {
+    } else if ((t = anchors.right) !== undefined) {
+        right = t - rM;
         if ((hC = anchors.horizontalCenter) !== undefined) {
             this.$isUsingImplicitWidth = false;
             width = (right - hC) * 2;
@@ -1097,7 +1102,9 @@ function updateVGeometry(newVal, oldVal, propName) {
         return;
     this.$updatingGeometry = true;
 
-    var t, h, height, y, top, vC, bottom;
+    var t, w, height, y, top, vC, bottom,
+        lM = anchors.topMargin || anchors.margins,
+        rM = anchors.bottomMargin || anchors.margins;
 
     // Height
     if (this.$isUsingImplicitHeight && propName == "implicitHeight")
@@ -1113,24 +1120,26 @@ function updateVGeometry(newVal, oldVal, propName) {
             t.$properties.height.changed.connect(this, updateVGeometry);
 
         this.$isUsingImplicitHeight = false;
-        height = t.height;
-        y = t.top - (this.parent ? this.parent.top : 0);
-        top = t.top;
-        bottom = t.bottom;
-        vC = t.verticalCenter;
+        height = t.height - lM - rM;
+        y = t.top - (this.parent ? this.parent.top : 0) + lM;
+        top = t.top + lM;
+        bottom = t.bottom - rM;
+        vC = (top + bottom) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
         if (!t.$properties.verticalCenter.changed.isConnected(this, updateVGeometry))
             t.$properties.verticalCenter.changed.connect(this, updateVGeometry);
 
-        h = height || this.height;
+        w = height || this.height;
         vC = t.verticalCenter;
-        y = vC - h / 2 - (this.parent ? this.parent.top : 0);
-        top = vC - h / 2;
-        bottom = vC + h / 2;
-    } else if ((top = anchors.top) !== undefined) {
-        if ((bottom = anchors.bottom) !== undefined) {
+        y = vC - w / 2 - (this.parent ? this.parent.top : 0);
+        top = vC - w / 2;
+        bottom = vC + w / 2;
+    } else if ((t = anchors.top) !== undefined) {
+        top = t + lM
+        if ((u = anchors.bottom) !== undefined) {
+            bottom = u - rM;
             this.$isUsingImplicitHeight = false;
-            height = bottom - top;
+            height = bottom - top - lM - rM;
             y = top - (this.parent ? this.parent.top : 0);
             vC = (bottom + top) / 2;
         } else if ((vC = anchors.verticalCenter) !== undefined) {
@@ -1139,36 +1148,37 @@ function updateVGeometry(newVal, oldVal, propName) {
             y = top - (this.parent ? this.parent.top : 0);
             bottom = 2 * vC - top;
         } else {
-            h = height || this.height;
+            w = height || this.height;
             y = top - (this.parent ? this.parent.top : 0);
-            bottom = top + h;
-            vC = top + h / 2;
+            bottom = top + w;
+            vC = top + w / 2;
         }
-    } else if ((bottom = anchors.bottom) !== undefined) {
+    } else if ((t = anchors.bottom) !== undefined) {
+        bottom = t - rM;
         if ((vC = anchors.verticalCenter) !== undefined) {
             this.$isUsingImplicitHeight = false;
             height = (bottom - vC) * 2;
             y = 2 * vC - bottom - (this.parent ? this.parent.top : 0);
             top = 2 * vC - bottom;
         } else {
-            h = height || this.height;
-            y = bottom - h - (this.parent ? this.parent.top : 0);
-            top = bottom - h;
-            vC = bottom - h / 2;
+            w = height || this.height;
+            y = bottom - w - (this.parent ? this.parent.top : 0);
+            top = bottom - w;
+            vC = bottom - w / 2;
         }
     } else if ((vC = anchors.verticalCenter) !== undefined) {
-        h = height || this.height;
-        y = vC - h / 2 - (this.parent ? this.parent.top : 0);
-        top = vC - h / 2;
-        bottom = vC + h / 2;
+        w = height || this.height;
+        y = vC - w / 2 - (this.parent ? this.parent.top : 0);
+        top = vC - w / 2;
+        bottom = vC + w / 2;
     } else {
         if (this.parent && !this.parent.$properties.y.changed.isConnected(this, updateVGeometry))
             this.parent.$properties.y.changed.connect(this, updateVGeometry);
 
-        h = height || this.height;
+        w = height || this.height;
         top = this.y + (this.parent ? this.parent.top : 0);
-        bottom = top + h;
-        vC = top + h / 2;
+        bottom = top + w;
+        vC = top + w / 2;
     }
 
     if (vC !== undefined)
@@ -1227,14 +1237,6 @@ function QMLItem(meta, parent, engine) {
             this.resources.push(child);
     }
 
-    function marginsSetter(val) {
-        this.topMargin = val;
-        this.bottomMargin = val;
-        this.leftMargin = val;
-        this.rightMargin = val;
-    }
-    setupSetter(this, 'margins', marginsSetter);
-
     createSimpleProperty(this, "x");
     createSimpleProperty(this, "y");
     createSimpleProperty(this, "width");
@@ -1269,6 +1271,11 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this.anchors, "verticalCenter", { altParent: this });
     createSimpleProperty(this.anchors, "fill", { altParent: this });
     createSimpleProperty(this.anchors, "centerIn", { altParent: this });
+    createSimpleProperty(this.anchors, "margins", { altParent: this });
+    createSimpleProperty(this.anchors, "leftMargin", { altParent: this });
+    createSimpleProperty(this.anchors, "rightMargin", { altParent: this });
+    createSimpleProperty(this.anchors, "topMargin", { altParent: this });
+    createSimpleProperty(this.anchors, "bottomMargin", { altParent: this });
     this.anchors.leftChanged.connect(this, updateHGeometry);
     this.anchors.rightChanged.connect(this, updateHGeometry);
     this.anchors.topChanged.connect(this, updateVGeometry);
@@ -1279,6 +1286,12 @@ function QMLItem(meta, parent, engine) {
     this.anchors.fillChanged.connect(this, updateVGeometry);
     this.anchors.centerInChanged.connect(this, updateHGeometry);
     this.anchors.centerInChanged.connect(this, updateVGeometry);
+    this.anchors.leftMarginChanged.connect(this, updateHGeometry);
+    this.anchors.rightMarginChanged.connect(this, updateHGeometry);
+    this.anchors.topMarginChanged.connect(this, updateVGeometry);
+    this.anchors.bottomMarginChanged.connect(this, updateVGeometry);
+    this.anchors.marginsChanged.connect(this, updateHGeometry);
+    this.anchors.marginsChanged.connect(this, updateVGeometry);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.rotationChanged.connect(this, function(newVal) {
@@ -1324,6 +1337,7 @@ function QMLItem(meta, parent, engine) {
     this.spacing = 0;
     this.x = 0;
     this.y = 0;
+    this.anchors.margins = 0;
 
     this.$init.push(function() {
         for (var i = 0; i < this.children.length; i++)
