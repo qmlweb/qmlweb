@@ -15,6 +15,11 @@ Rectangle {
             main.horizontalCenter
     }
     Item {
+        anchors {
+            left: parent.left
+            top: parent.top
+            margins: 5
+        }
         Text {
             text: "Property is: " + main.value
         }

@@ -1378,6 +1378,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                             to = S.token.pos;
                         return as("qmlobjdef", propname, subname, stat,
                             $TEXT.substr(from, to - from));
+                    } else if (is("punc", "{")) {
+                        return as("qmlobj", propname, qmlblock());
                     } else {
                         // Evaluatable item
                         expect(":");
@@ -1570,6 +1572,12 @@ function convertToEngine(tree) {
                         item[name] = item[name] || {};
                         item[name][statement[2]] = val;
                         break;
+                    case "qmlobj":
+                        // Create object to item
+                        item[name] = item[name] || {};
+                        for (var i in val)
+                            item[name][i] = val[i];
+                        break;
                     case "qmlpropdef":
                         item.$properties[statement[1]] = val;
                         break;
@@ -1597,6 +1605,19 @@ function convertToEngine(tree) {
         },
         "qmlobjdef": function(name, property, tree, src) {
             return bindout(tree, src);
+        },
+        "qmlobj": function(elem, statements) {
+            var item = {};
+
+            for (var i in statements) {
+                var statement = statements[i],
+                    name = statement[1],
+                    val = walk(statement);
+                if (statement[0] == "qmlprop")
+                    item[name] = val;
+            }
+
+            return item;
         },
         "qmlmethod": function(name, tree, src) {
             return src;
