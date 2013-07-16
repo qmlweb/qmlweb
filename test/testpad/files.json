@@ -1,18 +1,18 @@
 [ {
-    "file": "../presentation.qml",
-    "title": "Project introduction"
+    "file": "parse_dummy.qml",
+    "title": "* Parsing test"
 },
 {
-    "file": "imageview.qml",
-    "title": "Image View"
+    "file": "parsingdev.qml",
+    "title": "* Parser development QML"
 },
 {
     "file": "helloworld.qml",
-    "title": "Helloworld"
+    "title": "* Helloworld"
 },
 {
     "file": "example1.qml",
-    "title": "Example1 used in paper"
+    "title": "* Example1 used in paper"
 },
 {
     "file": "image.qml",
@@ -23,24 +23,16 @@
     "title": "* Anchoring test"
 },
 {
-    "file": "animation.qml",
-    "title": "* Animation test"
+    "file": "positioners.qml",
+    "title": "* Positioner test"
 },
 {
     "file": "mousearea.qml",
     "title": "* MouseArea test"
 },
 {
-    "file": "parse_dummy.qml",
-    "title": "* Parsing test"
-},
-{
-    "file": "parsingdev.qml",
-    "title": "* Parser development QML"
-},
-{
-    "file": "repeater.qml",
-    "title": "* Repeater test"
+    "file": "animation.qml",
+    "title": "* Animation test"
 },
 {
     "file": "borderimage.qml",
@@ -53,4 +45,16 @@
 {
     "file": "widgetgallery.qml",
     "title": "* Widget Gallery"
+},
+{
+    "file": "imageview.qml",
+    "title": "* Image View"
+},
+{
+    "file": "repeater.qml",
+    "title": "* Repeater test"
+},
+{
+    "file": "../presentation.qml",
+    "title": "* Project introduction"
 } ]

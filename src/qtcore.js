@@ -69,7 +69,10 @@ var QMLGlobalObject = {
             ControlModifier: 2,
             AltModifier: 4,
             MetaModifier: 8,
-            KeypadModifier: 16 // Note: Not available in web
+            KeypadModifier: 16, // Note: Not available in web
+            // Layout directions
+            LeftToRight: 0,
+            RightToLeft: 1
         }, Font: {
             // Capitalization
             MixedCase: "none",
@@ -189,8 +192,10 @@ function construct(meta, parent, engine) {
             Image: QMLImage,
             BorderImage: QMLBorderImage,
             Item: QMLItem,
-            Column: QMLItem, // todo
-            Row: QMLItem, // todo
+            Column: QMLColumn,
+            Row: QMLRow,
+            Grid: QMLGrid,
+            Flow: QMLFlow,
             Display: QMLItem, // todo
             Text: QMLText,
             Rectangle: QMLRectangle,
@@ -1258,6 +1263,8 @@ function QMLItem(meta, parent, engine) {
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
+    this.implicitWidthChanged.connect(this, updateHGeometry);
+    this.implicitHeightChanged.connect(this, updateVGeometry);
 
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
@@ -1338,6 +1345,7 @@ function QMLItem(meta, parent, engine) {
     this.x = 0;
     this.y = 0;
     this.anchors.margins = 0;
+    this.visible = true;
 
     this.$init.push(function() {
         for (var i = 0; i < this.children.length; i++)
@@ -1373,6 +1381,231 @@ function QMLItem(meta, parent, engine) {
                     this.children[i].$draw(c);
                 }
             }
+        }
+    }
+}
+
+function QMLPositioner(meta, parent, engine) {
+    QMLItem.call(this, meta, parent, engine);
+
+    createSimpleProperty(this, "spacing");
+    this.spacingChanged.connect(this, this.layoutChildren);
+    this.childrenChanged.connect(this, this.layoutChildren);
+    this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
+
+    this.spacing = 0;
+}
+QMLPositioner.slotChildrenChanged = function() {
+    for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        if (!child.widthChanged.isConnected(this, this.layoutChildren))
+            child.widthChanged.connect(this, this.layoutChildren);
+        if (!child.heightChanged.isConnected(this, this.layoutChildren))
+            child.heightChanged.connect(this, this.layoutChildren);
+        if (!child.visibleChanged.isConnected(this, this.layoutChildren))
+            child.visibleChanged.connect(this, this.layoutChildren);
+    }
+}
+
+function QMLRow(meta, parent, engine) {
+    QMLPositioner.call(this, meta, parent, engine);
+
+    createSimpleProperty(this, "layoutDirection");
+    this.layoutDirectionChanged.connect(this, this.layoutChildren);
+    this.layoutDirection = 0;
+}
+QMLRow.prototype.layoutChildren = function() {
+    var curPos = 0,
+        maxHeight = 0,
+        // When layoutDirection is RightToLeft we need oposite order
+        i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
+        endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
+        step = this.layoutDirection == 1 ? -1 : 1;
+    for (; i !== endPoint; i += step) {
+        var child = this.children[i];
+        maxHeight = child.height > maxHeight ? child.height : maxHeight;
+
+        child.x = curPos;
+        curPos += child.visible ? child.width + this.spacing : 0;
+    }
+    this.height = maxHeight;
+    this.width = curPos - this.spacing; // We want no spacing at the right side
+}
+
+function QMLColumn(meta, parent, engine) {
+    QMLPositioner.call(this, meta, parent, engine);
+}
+QMLColumn.prototype.layoutChildren = function() {
+    var curPos = 0,
+        maxWidth = 0;
+    for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        maxWidth = child.width > maxWidth ? child.width : maxWidth;
+
+        child.y = curPos;
+        curPos += child.visible ? child.height + this.spacing : 0;
+    }
+    this.width = maxWidth;
+    this.height = curPos - this.spacing; // We want no spacing at the bottom side
+}
+
+function QMLGrid(meta, parent, engine) {
+    QMLPositioner.call(this, meta, parent, engine);
+
+    this.Grid = {
+        LeftToRight: 0,
+        TopToBottom: 1
+    }
+
+    createSimpleProperty(this, "columns");
+    createSimpleProperty(this, "rows");
+    createSimpleProperty(this, "flow");
+    createSimpleProperty(this, "layoutDirection");
+    this.columnsChanged.connect(this, this.layoutChildren);
+    this.rowsChanged.connect(this, this.layoutChildren);
+    this.flowChanged.connect(this, this.layoutChildren);
+    this.layoutDirectionChanged.connect(this, this.layoutChildren);
+
+    this.flow = 0;
+    this.layoutDirection = 0;
+}
+QMLGrid.prototype.layoutChildren = function() {
+    var visibleItems = [],
+        r = 0, c = 0,
+        colWidth = [],
+        rowHeight = [],
+        gridWidth = 0,
+        gridHeight = 0,
+        curHPos = 0,
+        curVPos = 0;
+
+    // How many items are actually visible?
+    for (var i = 0; i < this.children.length; i++)
+        if (this.children[i].visible)
+            visibleItems.push(this.children[i]);
+
+    // How many rows and columns do we need?
+    if (!this.columns && !this.rows) {
+        c = 4;
+        r = Math.ceil(visibleItems.length / 4);
+    } else if (!this.rows) {
+        c = this.columns;
+        r = Math.ceil(visibleItems.length / c);
+    } else if (!this.columns) {
+        r = this.rows;
+        c = Math.ceil(visibleItems.length / r);
+    }
+
+    // How big are the colums/rows?
+    if (this.flow == 0)
+        for (var i = 0; i < r; i++) {
+            for (var j = 0; j < c; j++) {
+                var item = visibleItems[i*c+j];
+                if (!item)
+                    break;
+                if (!colWidth[j] || item.width > colWidth[j])
+                    colWidth[j] = item.width;
+                if (!rowHeight[i] || item.height > rowHeight[i])
+                    rowHeight[i] = item.height;
+            }
+        }
+    else
+        for (var i = 0; i < c; i++) {
+            for (var j = 0; j < r; j++) {
+                var item = visibleItems[i*r+j];
+                if (!item)
+                    break;
+                if (!rowHeight[j] || item.height > rowHeight[j])
+                    rowHeight[j] = item.height;
+                if (!colWidth[i] || item.width > colWidth[i])
+                    colWidth[i] = item.width;
+            }
+        }
+
+    // Do actual positioning
+    // When layoutDirection is RightToLeft we need oposite order of coumns
+    var step = this.layoutDirection == 1 ? -1 : 1,
+        startingPoint = this.layoutDirection == 1 ? c - 1 : 0,
+        endPoint = this.layoutDirection == 1 ? -1 : c;
+    if (this.flow == 0)
+        for (var i = 0; i < r; i++) {
+            for (var j = startingPoint; j !== endPoint; j += step) {
+                var item = visibleItems[i*c+j];
+                if (!item)
+                    break;
+                item.x = curHPos;
+                item.y = curVPos;
+
+                curHPos += colWidth[j] + this.spacing;
+            }
+            curVPos += rowHeight[i] + this.spacing;
+            curHPos = 0;
+        }
+    else
+        for (var i = startingPoint; i !== endPoint; i += step) {
+            for (var j = 0; j < r; j++) {
+                var item = visibleItems[i*r+j];
+                if (!item)
+                    break;
+                item.x = curHPos;
+                item.y = curVPos;
+
+                curVPos += rowHeight[j] + this.spacing;
+            }
+            curHPos += colWidth[i] + this.spacing;
+            curVPos = 0;
+        }
+}
+
+function QMLFlow(meta, parent, engine) {
+    QMLPositioner.call(this, meta, parent, engine);
+
+    this.Flow = {
+        LeftToRight: 0,
+        TopToBottom: 1
+    }
+
+    createSimpleProperty(this, "flow");
+    createSimpleProperty(this, "layoutDirection");
+    this.flowChanged.connect(this, this.layoutChildren);
+    this.layoutDirectionChanged.connect(this, this.layoutChildren);
+
+    this.flow = 0;
+    this.layoutDirection = 0;
+}
+QMLFlow.prototype.layoutChildren = function() {
+    var curHPos = 0,
+        curVPos = 0,
+        rowSize = 0;
+    for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        if (!child.visible)
+            continue;
+
+        if (this.flow == 0) {
+            if (curHPos + child.width > this.width) {
+                curHPos = 0;
+                curVPos += rowSize + this.spacing;
+                rowSize = 0;
+            }
+            rowSize = child.height > rowSize ? child.height : rowSize;
+
+            child.x = this.layoutDirection == 1
+                    ? this.width - curHPos - child.width : curHPos;
+            child.y = curVPos;
+            curHPos += child.width + this.spacing;
+        } else {
+            if (curVPos + child.height > this.height) {
+                curVPos = 0;
+                curHPos += rowSize + this.spacing;
+                rowSize = 0;
+            }
+            rowSize = child.width > rowSize ? child.width : rowSize;
+
+            child.x = this.layoutDirection == 1
+                    ? this.width - curHPos - child.width : curHPos;
+            child.y = curVPos;
+            curVPos += child.height + this.spacing;
         }
     }
 }
@@ -1631,7 +1864,6 @@ function QMLText(meta, parent, engine) {
         }
 
         this.implicitHeight = height;
-        updateVGeometry.call(this, height, undefined, "implicitHeight");
     }
 
     function updateImplicitWidth() {
@@ -1645,7 +1877,6 @@ function QMLText(meta, parent, engine) {
             width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
 
         this.implicitWidth = width;
-        updateHGeometry.call(this, width, undefined, "implicitWidth");
     }
 
     this.$drawItem = function(c) {
@@ -1684,7 +1915,7 @@ function QMLRectangle(meta, parent, engine) {
 
     this.color = "white";
     this.border.color = "rgba(0,0,0,0)";
-    this.border.width = 0;
+    this.border.width = 1;
 
     this.$drawItem = function(c) {
         //descr("draw rect", this, ["x", "y", "width", "height", "color"]);
@@ -1993,8 +2224,6 @@ function QMLImage(meta, parent, engine) {
         self.sourceSize.height = h;
         self.implicitWidth = w;
         self.implicitHeight = h;
-        updateHGeometry.call(self, w, undefined, "implicitWidth");
-        updateVGeometry.call(self, h, undefined, "implicitHeight");
     }
     img.onerror = function() {
         self.status = self.Image.Error;
