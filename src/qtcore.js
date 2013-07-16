@@ -1087,12 +1087,12 @@ function updateHGeometry(newVal, oldVal, propName) {
         hC = left + w / 2;
     }
 
+    if (left !== undefined)
+        this.left = left;
     if (hC !== undefined)
         this.horizontalCenter = hC;
     if (right !== undefined)
         this.right = right;
-    if (left !== undefined)
-        this.left = left;
     if (x !== undefined)
         this.x = x;
     if (width !== undefined)
@@ -1186,12 +1186,12 @@ function updateVGeometry(newVal, oldVal, propName) {
         vC = top + w / 2;
     }
 
+    if (top !== undefined)
+        this.top = top;
     if (vC !== undefined)
         this.verticalCenter = vC;
     if (bottom !== undefined)
         this.bottom = bottom;
-    if (top !== undefined)
-        this.top = top;
     if (y !== undefined)
         this.y = y;
     if (height !== undefined)
