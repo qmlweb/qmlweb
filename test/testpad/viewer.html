@@ -50,10 +50,6 @@ a { text-decoration: none; color: blue }
             <option value="dom">DOM-Backend</option>
         </select>
         <select id="fileSelector"></select>
-        <img src="../images/zoom_out.png" class="icon" onclick="scale*=0.9;update()">
-        <img src="../images/zoom_normal.png" class="icon" onclick="scale=1;update()">
-        <img src="../images/zoom_in.png" class="icon" onclick="scale*=1.1111111;update()">
-        <img src="../images/zoom_fit.png" class="icon" onclick="update(true)">
         <span id=stat></span>
     </span>
 </div>
@@ -66,73 +62,23 @@ var curFile = "",
     // Scaling options
     scale = 1;
 
-// Resizes drawable canvas
-// fitToScreen: true -> fit to screen, false -> Do scaling
-function resize(fitToScreen) {
-    // Scale
-    var size = eng.size();
-    var height = window.innerHeight - 30; // Leave 30px for viewer controls
-    var width = window.innerWidth - 2; // Leave 2px for borders
-    if (fitToScreen) {
-        // Retain aspect ratio
-        scale = Math.min(width / size.width,
-            height / size.height);
-    }
-    var xsize = size.width * scale;
-    var ysize = size.height * scale;
-
-    canvasEl.style.width = xsize + "px";
-    canvasEl.style.height = ysize + "px";
-
-    // Centerize
-    canvasEl.style.left = (width - xsize)/2 + "px";
-    canvasEl.style.top = (height - ysize)/2 + "px";
-    
-    statEl.innerText = size.width + "x" + size.height;
-    
-    // If scaled, show details
-    if (scale != 1) {
-        
-        statEl.innerText += " (" + (scale * 100|0) + "% "
-            + (xsize|0) + "x" + (ysize|0) + ")";
-    }
-}    
-
 // Hide browser support warning if supported browser detected
 if (navigator.userAgent.match(/(opera|firefox|chrome|msie 9\.0|msie 10\.0)/i)) {
     document.getElementById("browsSupport").style.display = 'none';
 }
-
-// Replaces element click handler with one understanding the scaling
-function scalerClick() {
-    var original = canvasEl.onclick;
-    canvasEl.onclick = function(e) {
-        var a = {layerX: (e.offsetX || e.layerX) / scale,
-            layerY: (e.offsetY || e.layerY) / scale,
-            button: e.button};
-        original(a);
-    }
-}
-
-function update(fit) {
-    resize(fit);
-}
-
 window.onhashchange = function() {
     if (window.location.hash) {
         curFile = window.location.hash.substr(1);
         if (eng && eng.running) {
             eng.stop();
         }
-        
+
         eng = new QMLEngine(canvasEl, engOpts);
         eng.loadFile(curFile);
         eng.start();
 
-        // Fit to screen if bigger than it
-        var fit = eng.size();
-        update(fit.width > window.innerWidth || fit.height > window.innerHeight);
-        scalerClick();
+        canvasEl.style.top = (window.innerHeight - canvasEl.offsetHeight)/2 + "px";
+        canvasEl.style.left = (window.innerWidth - canvasEl.offsetWidth)/2 + "px";
 
         var filename = curFile.split("/");
         filename = filename[filename.length - 1];
@@ -165,14 +111,14 @@ backendSel.onchange = function() {
 
 var list = JSON.parse(getUrlContents("files.json")),
     hash = window.location.hash.substr(1);
-    
+
 for (var i = 0; i < list.length; i++) {
     var optEl = document.createElement("option");
     optEl.value = list[i].file;
     optEl.textContent = list[i].title + " (" + list[i].file + ")";
     optEl.selected = (hash == list[i].file);
     selEl.appendChild(optEl);
-    
+
     // Update title if possible
     if (hash == list[i].file) {
         document.title = optEl.textContent + ' - QML Viewer';
