@@ -23,9 +23,17 @@ Rectangle {
         Text {
             text: "Property is: " + main.value
         }
-    
     }
     Component.onCompleted: console.log("Component.onCompleted!");
+
+    states: [
+        State {
+            name: "On"; PropertyChanges { target: main; color: "white"}
+        },
+        State {
+            name: "Off"; PropertyChanges { target: main; color: "black"}
+        }
+    ]
 }
 
 

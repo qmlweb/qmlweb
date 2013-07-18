@@ -1951,6 +1951,7 @@ function QMLRepeater(meta, parent, engine) {
     }
 
     this.modelChanged.connect(applyModel);
+    this.delegateChanged.connect(applyModel);
 
     this.model = 0;
     this.count = 0;
@@ -2010,6 +2011,8 @@ function QMLRepeater(meta, parent, engine) {
     }
 
     function applyModel() {
+        if (!self.delegate)
+            return;
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
             model.dataChanged.connect(function(startIndex, endIndex) {

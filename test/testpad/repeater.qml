@@ -69,7 +69,7 @@ Rectangle {
         id: rep
         model: tModel
 
-        TestComponent {
+        delegate: TestComponent {
             x: 5 + (width + 10) * (index %2)
             y: 5 + 100 * Math.floor(index /2)
             width: page.width / 2 - 10

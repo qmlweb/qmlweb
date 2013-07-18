@@ -1244,10 +1244,17 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 return left;
         };
 
+        function maybe_qmlelem(no_in) {
+                var expr = maybe_assign(no_in);
+                if (is("punc", "{"))
+                    return as("qmlelem", expr[1], qmlblock());
+                return expr;
+        };
+
         var expression = maybe_embed_tokens(function(commas, no_in) {
                 if (arguments.length == 0)
                         commas = true;
-                var expr = maybe_assign(no_in);
+                var expr = maybe_qmlelem(no_in);
                 if (commas && is("punc", ",")) {
                         next();
                         return as("seq", expr, expression(true, no_in));
@@ -1523,6 +1530,18 @@ function QMLPropertyDefinition(type, value) {
     this.value = value;
 }
 
+/**
+ * Create an object representing a QML element.
+ * @param {String} type The type of the element
+ */
+function QMLMetaElement(type) {
+    this.$class = type;
+    this.$children = [];
+    this.$signals = [];
+    this.$functions = {};
+    this.$properties = {};
+}
+
 QMLBinding.prototype.toJSON = function() {
     return {src: this.src,
         deps: JSON.stringify(this.deps),
@@ -1547,11 +1566,7 @@ function convertToEngine(tree) {
             return item;
         },
         "qmlelem": function(elem, statements) {
-            var item = { $class: elem,
-                $children: [],
-                $signals: [],
-                $functions: {},
-                $properties: {} };
+            var item = new QMLMetaElement(elem);
 
             for (var i in statements) {
                 var statement = statements[i],
@@ -1658,6 +1673,13 @@ function convertToEngine(tree) {
                 return +tree[1][1];
             case "string":
                 return String(tree[1][1]);
+            case "qmlelem":
+                return walk(tree[1]);
+            case "array":
+                var val = [];
+                for (var i in tree[1][1])
+                    val.push(walk(tree[1][1][i]));
+                return val;
             default:
                 return new QMLBinding(binding, tree);
         }
