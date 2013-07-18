@@ -389,6 +389,14 @@ QMLProperty.prototype.set = function(newVal) {
         this.binding = false;
     }
 
+    if (this.val instanceof Array) {
+        this.val.push = function() {
+            Array.prototype.push.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
+        this.val.$prop = this;
+    }
+
     if (this.val !== oldVal)
         this.changed(this.val, oldVal, this.name);
 }
@@ -931,16 +939,6 @@ function QObject(parent) {
     }
 }
 
-// QML-basic type list
-function QMLList(prop) {
-    this.$prop = prop;
-}
-QMLList.prototype = new Array();
-QMLList.prototype.push = function() {
-    Array.prototype.push.apply(this, arguments);
-    this.$prop.changed(arguments[0]);
-};
-
 // Base object for all qml elements
 function QMLBaseObject(meta, parent, engine) {
     QObject.call(this, parent);
@@ -1216,8 +1214,8 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this, "children");
     createSimpleProperty(this, "resources");
     createSimpleProperty(this, "parent");
-    this.children = new QMLList(this.$properties.children);
-    this.resources = new QMLList(this.$properties.resources);
+    this.children = [];
+    this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
         if (oldParent) {
             oldParent.children.splice(oldParent.children.indexOf(this), 1);
