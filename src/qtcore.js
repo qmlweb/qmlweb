@@ -485,8 +485,11 @@ function applyProperties(meta, item, objectScope) {
             src = "var func = function(" + params + ") {"
                     + meta[i].src
                     + "}; func";
-            item[signalName].connect(evalBinding(null, src, objectScope,
-                                                 workingContext[workingContext.length-1].getIdScope()));
+            item[signalName].disconnect(item, i);
+            item[i] = evalBinding(null, src, objectScope,
+                                    workingContext[workingContext.length-1].getIdScope());
+            item[signalName].connect(item, i);
+            continue;
         }
 
         if (meta[i] instanceof Object) {
