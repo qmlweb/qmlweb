@@ -1423,10 +1423,12 @@ QMLRow.prototype.layoutChildren = function() {
         step = this.layoutDirection == 1 ? -1 : 1;
     for (; i !== endPoint; i += step) {
         var child = this.children[i];
+        if (!(child.visible && child.width && child.height))
+            continue;
         maxHeight = child.height > maxHeight ? child.height : maxHeight;
 
         child.x = curPos;
-        curPos += child.visible ? child.width + this.spacing : 0;
+        curPos += child.width + this.spacing;
     }
     this.height = maxHeight;
     this.width = curPos - this.spacing; // We want no spacing at the right side
@@ -1440,10 +1442,12 @@ QMLColumn.prototype.layoutChildren = function() {
         maxWidth = 0;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
+        if (!(child.visible && child.width && child.height))
+            continue;
         maxWidth = child.width > maxWidth ? child.width : maxWidth;
 
         child.y = curPos;
-        curPos += child.visible ? child.height + this.spacing : 0;
+        curPos += child.height + this.spacing;
     }
     this.width = maxWidth;
     this.height = curPos - this.spacing; // We want no spacing at the bottom side
@@ -1480,9 +1484,11 @@ QMLGrid.prototype.layoutChildren = function() {
         curVPos = 0;
 
     // How many items are actually visible?
-    for (var i = 0; i < this.children.length; i++)
-        if (this.children[i].visible)
+    for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        if (child.visible && child.width && child.height)
             visibleItems.push(this.children[i]);
+    }
 
     // How many rows and columns do we need?
     if (!this.columns && !this.rows) {
@@ -1579,7 +1585,7 @@ QMLFlow.prototype.layoutChildren = function() {
         rowSize = 0;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (!child.visible)
+        if (!(child.visible && child.width && child.height))
             continue;
 
         if (this.flow == 0) {
@@ -1939,6 +1945,7 @@ function QMLRepeater(meta, parent, engine) {
     createSimpleProperty(this, "model");
     createSimpleProperty(this, "count");
     this.$completed = false;
+    this.$items = []; // List of created items
     this.$addChild = function(childMeta) {
         this.delegate = childMeta;
     }
@@ -1982,8 +1989,8 @@ function QMLRepeater(meta, parent, engine) {
                 newItem.$domElement.className += " " + self.delegate.id;
 
             //TODO: Use parent's children, in order to make it completely transparent
-            self.children.splice(index, 0, newItem);
-            newItem.parent = self;
+            self.$items.splice(index, 0, newItem);
+            newItem.parent = self.parent;
 
             applyChildProperties(newItem);
             newItem.index = index;
@@ -1995,11 +2002,11 @@ function QMLRepeater(meta, parent, engine) {
                 callOnCompleted(newItem);
             }
         }
-        for (var i = endIndex; i < self.children.length; i++) {
-            self.children[i].index = i;
+        for (var i = endIndex; i < self.$items.length; i++) {
+            self.$items[i].index = i;
         }
         workingContext.pop();
-        self.count = self.children.length;
+        self.count = self.$items.length;
     }
 
     function applyModel() {
@@ -2010,43 +2017,42 @@ function QMLRepeater(meta, parent, engine) {
             });
             model.rowsInserted.connect(insertChildren);
             model.rowsMoved.connect(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
-                var vals = self.children.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
+                var vals = self.$items.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
                 for (var i = 0; i < vals.length; i++) {
-                    self.children.splice(destinationIndex + i, 0, vals[i]);
+                    self.$items.splice(destinationIndex + i, 0, vals[i]);
                 }
                 var smallestChangedIndex = sourceStartIndex < destinationIndex
                                         ? sourceStartIndex : destinationIndex;
-                for (var i = smallestChangedIndex; i < self.children.length; i++) {
-                    self.children[i].index = i;
+                for (var i = smallestChangedIndex; i < self.$items.length; i++) {
+                    self.$items[i].index = i;
                 }
                 engine.$requestDraw();
             });
             model.rowsRemoved.connect(function(startIndex, endIndex) {
                 removeChildren(startIndex, endIndex);
-                for (var i = startIndex; i < self.children.length; i++) {
-                    self.children[i].index = i;
+                for (var i = startIndex; i < self.$items.length; i++) {
+                    self.$items[i].index = i;
                 }
-                self.count = self.children.length;
+                self.count = self.$items.length;
                 engine.$requestDraw();
             });
             model.modelReset.connect(function() {
-                removeChildren(0, self.children.length);
+                removeChildren(0, self.$items.length);
                 insertChildren(0, model.rowCount());
                 engine.$requestDraw();
             });
 
             insertChildren(0, model.rowCount());
         } else if (typeof model == "number") {
-            removeChildren(0, self.children.length);
+            removeChildren(0, self.$items.length);
             insertChildren(0, model);
         }
     }
 
     function removeChildren(startIndex, endIndex) {
-        var removed = self.children.splice(startIndex, endIndex - startIndex);
+        var removed = self.$items.splice(startIndex, endIndex - startIndex);
         for (var index in removed) {
-            if (engine.renderMode == QMLRenderMode.DOM)
-                removed[index].parent.$domElement.removeChild(removed[index].$domElement);
+            removed[index].parent = undefined;
             removeChildProperties(removed[index]);
             removed[index].$delete();
         }
