@@ -2942,11 +2942,14 @@ function QMLButton(meta, parent, engine) {
     this.$domElement.style.pointerEvents = "auto";
     this.$domElement.innerHTML = "<span></span>";
 
-    createSimpleProperty(this, "text", "");
+    createSimpleProperty(this, "text");
     this.clicked = Signal();
 
     this.textChanged.connect(this, function(newVal) {
         this.$domElement.firstChild.innerHTML = newVal;
+        //TODO: Replace those statically sized borders
+        this.implicitWidth = this.$domElement.firstChild.offsetWidth + 20;
+        this.implicitHeight = this.$domElement.firstChild.offsetHeight + 5;
     });
 
     this.$domElement.onclick = function(e) {
