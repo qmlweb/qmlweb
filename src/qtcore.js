@@ -2908,6 +2908,7 @@ function QMLTextInput(meta, parent, engine) {
     // In some browsers text-inputs have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     this.$domElement.firstChild.style.margin = "0";
+    this.$domElement.firstChild.style.width = "100%";
 
     createSimpleProperty(this, "text", "");
     this.accepted = Signal();
