@@ -1903,6 +1903,8 @@ function QMLRectangle(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
 
     createSimpleProperty(this, "color");
+    createSimpleProperty(this, "radius");
+
     this.border = new QObject(this);
     createSimpleProperty(this.border, "color", { altParent: this });
     createSimpleProperty(this.border, "width", { altParent: this });
@@ -1910,6 +1912,9 @@ function QMLRectangle(meta, parent, engine) {
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
             this.$domElement.style.backgroundColor = newVal;
+        });
+        this.radiusChanged.connect(this, function(newVal) {
+            this.$domElement.style.borderRadius = newVal + "px";
         });
         this.border.colorChanged.connect(this, function(newVal) {
             this.$domElement.style.borderColor = newVal;
@@ -1923,17 +1928,35 @@ function QMLRectangle(meta, parent, engine) {
     this.color = "white";
     this.border.color = "rgba(0,0,0,0)";
     this.border.width = 1;
+    this.radius = 0;
 
     this.$drawItem = function(c) {
         //descr("draw rect", this, ["x", "y", "width", "height", "color"]);
         //descr("draw rect.border", this.border, ["color", "width"]);
-
         c.save();
         c.fillStyle = this.color;
-        c.fillRect(this.left, this.top, this.width, this.height);
         c.strokeStyle = this.border.color;
         c.lineWidth = this.border.width;
-        c.strokeRect(this.left, this.top, this.width, this.height);
+
+        if (!this.radius) {
+            c.fillRect(this.left, this.top, this.width, this.height);
+            c.strokeRect(this.left, this.top, this.width, this.height);
+        } else {
+            var r = this.left + this.width;
+            var b = this.top + this.height;
+            c.beginPath();
+            c.moveTo(this.left + this.radius, this.top);
+            c.lineTo(r - this.radius, this.top);
+            c.quadraticCurveTo(r, this.top, r, this.top + this.radius);
+            c.lineTo(r, this.top + this.height - this.radius);
+            c.quadraticCurveTo(r, b, r - this.radius, b);
+            c.lineTo(this.left + this.radius, b);
+            c.quadraticCurveTo(this.left, b, this.left, b - this.radius);
+            c.lineTo(this.left, this.top + this.radius);
+            c.quadraticCurveTo(this.left, this.top, this.left + this.radius, this.top);
+            c.stroke();
+            c.fill();
+        }
         c.restore();
     }
 }
