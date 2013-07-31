@@ -1481,42 +1481,16 @@ var warn = function() {};
 
 /**
  * Create QML binding.
- * @param {String} src Code representing the binding
+ * @param {Variant} val Sourcecode or function representing the binding
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-function QMLBinding(src, tree) {
-    this.src = src;
-    this.tree = tree;
-
-    this.deps = {};
-
-    var w = ast_walker(),
-        walk = w.walk,
-        that = this,
-        depchain = [];
-
-    w.with_walkers(
-        {
-            "dot": function(expr, name) {
-                depchain.push(name);
-                return [this[0], walk(expr)].concat(slice(arguments, 1));
-            },
-            "name": function(name) {
-                var deps,
-                    i;
-
-                deps = that.deps[name] = that.deps[name] || {};
-                for (i = depchain.length - 1; i >= 0; i-- ) {
-                    var d = depchain[i];
-                    deps[d] = deps[d] || {};
-                    deps = deps[d];
-                }
-                depchain = [];
-            }
-        }, function() {
-            walk(tree);
-        })
+function QMLBinding(val, tree) {
+    if (val instanceof Function) {
+        this.binding = val;
+        return;
+    }
+    this.src = val;
 }
 
 /**
@@ -1645,6 +1619,9 @@ function convertToEngine(tree) {
         },
         "qmldefaultprop": function(name, type, tree, src) {
             return new QMLPropertyDefinition(type, bindout(tree, src));
+        },
+        "name": function(src) {
+            return bindout(tree, src);
         }
     };
 

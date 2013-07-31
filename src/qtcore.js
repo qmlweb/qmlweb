@@ -203,6 +203,9 @@ function construct(meta, parent, engine) {
             ListModel: QMLListModel,
             ListElement: QMLListElement,
             QMLDocument: QMLDocument,
+            State: QMLState,
+            PropertyChanges: QMLPropertyChanges,
+            Transition: QMLTransition,
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
             NumberAnimation: QMLNumberAnimation,
@@ -378,23 +381,32 @@ QMLProperty.prototype.set = function(newVal) {
     if (newVal instanceof QMLBinding) {
         evaluatingProperty = this;
 
-        var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
-            + "; return $Qbv;};$Qbc";
-        this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].getIdScope());
+        if (newVal.binding) {
+            this.binding = newVal.binding;
+        } else {
+            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
+                + "; return $Qbv;};$Qbc";
+            this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].getIdScope());
+        }
         this.val = this.binding();
 
         evaluatingProperty = undefined;
-    } else {
-        this.val = newVal;
-        this.binding = false;
-    }
-
-    if (this.val instanceof Array) {
+    } else if (newVal instanceof Array) {
+        this.val = [];
         this.val.push = function() {
             Array.prototype.push.apply(this, arguments);
             this.$prop.changed(arguments[0]);
         };
         this.val.$prop = this;
+        this.val.$properties = [];
+
+        for (i in newVal) {
+            createSimpleProperty(this.val, i, { altParent: this.objectScope });
+            this.val[i] = newVal[i];
+        }
+    } else {
+        this.val = newVal;
+        this.binding = false;
     }
 
     if (this.val !== oldVal)
@@ -510,13 +522,19 @@ function applyProperties(meta, item, objectScope) {
             } else if (meta[i] instanceof QMLPropertyDefinition) {
                 item[i] = meta[i].value;
                 continue;
-            } else if (item[i] && !(meta[i] instanceof QMLBinding)) {
+            } else if (item[i] && !(meta[i] instanceof Array)
+                        && !(meta[i] instanceof QMLBinding)) {
                 // Apply properties one by one, otherwise apply at once
                 applyProperties(meta[i], item[i], item);
                 continue;
             }
         }
-        item[i] = meta[i];
+        if (item.hasOwnProperty(i))
+            item[i] = meta[i];
+        else if (item.$setCustomData)
+            item.$setCustomData(i, meta[i]);
+        else
+            console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
 }
 
@@ -1301,6 +1319,137 @@ function QMLItem(meta, parent, engine) {
     this.anchors.marginsChanged.connect(this, updateHGeometry);
     this.anchors.marginsChanged.connect(this, updateVGeometry);
 
+    createSimpleProperty(this, "states");
+    createSimpleProperty(this, "state");
+    createSimpleProperty(this, "transitions");
+    this.statesChanged.connect(this, function() {
+        for (var i in this.states)
+            if (this.states[i] instanceof QMLMetaElement)
+                this.states[i] = construct(this.states[i], this, engine);
+    });
+    this.transitionsChanged.connect(this, function() {
+        for (var i in this.transitions)
+            if (this.transitions[i] instanceof QMLMetaElement)
+                this.transitions[i] = construct(this.transitions[i], this, engine);
+    });
+    this.stateChanged.connect(this, function(newVal, oldVal) {
+        workingContext.push(this.$scope);
+        var oldState, newState, i, j, k;
+        for (i = 0; i < this.states.length; i++)
+            if (this.states[i].name === newVal)
+                newState = this.states[i];
+            else if (this.states[i].name === oldVal)
+                oldState = this.states[i];
+
+        var actions = this.$revertActions.slice();
+
+        // Get current values for revert actions
+        for (i in actions) {
+            var action  = actions[i];
+            action.from = action.target[action.property];
+        }
+        if (newState) {
+            var changes = newState.$getAllChanges();
+
+            // Get all actions we need to do and create actions to revert them
+            for (i = 0; i < changes.length; i++) {
+                var change = changes[i];
+
+                for (j = 0; j < change.$actions.length; j++) {
+                    var item = change.$actions[j];
+
+                    var action = {
+                        target: change.target,
+                        property: item.property,
+                        origValue: change.target.$properties[item.property].binding
+                                    ? new QMLBinding(change.target.$properties[item.property].binding)
+                                    : change.target.$properties[item.property].val,
+                        value: item.value,
+                        from: change.target[item.property],
+                        to: undefined,
+                        explicit: change.explicit
+                    };
+                    var found = false;
+                    for (k in actions)
+                        if (actions[k].target == action.target
+                            && actions[k].property == action.property) {
+                            found = true;
+                            actions[k] = action;
+                            break;
+                        }
+                    if (!found)
+                        actions.push(action);
+
+                    // Look for existing revert action, else create it
+                    var found = false;
+                    for (k = 0; k < this.$revertActions.length; k++)
+                        if (this.$revertActions[k].target == change.target
+                            && this.$revertActions[k].property == item.property) {
+                            if (!change.restoreEntryValues)
+                                this.$revertActions.splice(k, 1); // We don't want to revert, so remove it
+                            found = true;
+                            break;
+                        }
+                    if (!found && change.restoreEntryValues)
+                        this.$revertActions.push({
+                            target: change.target,
+                            property: item.property,
+                            value: change.target.$properties[item.property].binding
+                                        ? new QMLBinding(change.target.$properties[item.property].binding)
+                                        : change.target.$properties[item.property].val,
+                            from: undefined,
+                            to: change.target[item.property]
+                        });
+                }
+            }
+
+            // Set all property changes and fetch the actual values afterwards
+            // The latter is needed for transitions. We need to set all properties
+            // before we fetch the values because properties can be interdependent.
+            for (i in actions) {
+                var action = actions[i];
+                action.target[action.property] = action.value;
+            }
+            for (i in actions) {
+                var action = actions[i];
+                action.to = action.target[action.property];
+                if (action.explicit) {
+                    action.target[action.property] = action.target[action.property]; //Remove binding
+                    action.value = action.target[action.property];
+                }
+            }
+        }
+
+        // Find the best transition to use
+        var transition,
+            rating = 0;
+        for (var i = 0; i < this.transitions.length; i++) {
+            this.transitions[i].$stop(); // We need to stop running transitions, so let's do
+                                        // it while iterating through the transitions anyway
+            var curTransition = this.transitions[i],
+                curRating = 0;
+            if (curTransition.from == oldVal || curTransition.reversible && curTransition.from == newVal)
+                curRating += 2;
+            else if (curTransition.from == "*")
+                curRating++;
+            else
+                continue;
+            if (curTransition.to == newVal || curTransition.reversible && curTransition.to == oldVal)
+                curRating += 2;
+            else if (curTransition.to == "*")
+                curRating++;
+            else
+                continue;
+            if (curRating > rating) {
+                rating = curRating;
+                transition = curTransition;
+            }
+        }
+        if (transition)
+            transition.$start(actions);
+        workingContext.pop();
+    });
+
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.rotationChanged.connect(this, function(newVal) {
             this.$domElement.style.transform = "rotate(" + newVal + "deg)";
@@ -1347,6 +1496,10 @@ function QMLItem(meta, parent, engine) {
     this.y = 0;
     this.anchors.margins = 0;
     this.visible = true;
+    this.$revertActions = [];
+    this.states = [];
+    this.transitions = [];
+    this.state = "";
 
     this.$init.push(function() {
         for (var i = 0; i < this.children.length; i++)
@@ -1355,6 +1508,12 @@ function QMLItem(meta, parent, engine) {
         for (var i = 0; i < this.resources.length; i++)
             for (var j = 0; j < this.resources[i].$init.length; j++)
                 this.resources[i].$init[j].call(this.resources[i]);
+        for (var i = 0; i < this.states.length; i++)
+            for (var j = 0; j < this.states[i].$init.length; j++)
+                this.states[i].$init[j].call(this.states[i]);
+        for (var i = 0; i < this.transitions.length; i++)
+            for (var j = 0; j < this.transitions[i].$init.length; j++)
+                this.transitions[i].$init[j].call(this.transitions[i]);
     });
 
     this.$draw = function(c) {
@@ -2655,6 +2814,101 @@ function QMLDocument(meta, engine) {
 
 }
 
+function QMLState(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(this, "name");
+    createSimpleProperty(this, "changes");
+    createSimpleProperty(this, "extend");
+    createSimpleProperty(this, "when");
+    this.changes = [];
+    this.$item = parent;
+
+    this.whenChanged.connect(this, function(newVal) {
+        if (newVal)
+            this.$item.state = this.name;
+        else if (this.$item.state == this.name)
+            this.$item.state = "";
+    });
+
+    this.$init.push(function() {
+        for (var i = 0; i < this.changes.length; i++)
+            for (var j = 0; j < this.changes[i].$init.length; j++)
+                this.changes[i].$init[j].call(this.changes[i]);
+    });
+
+    this.$addChild = function(meta) {
+        this.changes.push(construct(meta, this, engine));
+    }
+    this.$getAllChanges = function() {
+        if (this.extend) {
+            for (var i = 0; i < this.$item.states.length; i++)
+                if (this.$item.states[i].name == this.extend)
+                    return this.$item.states[i].$getAllChanges().concat(this.changes);
+        } else
+            return this.changes;
+    }
+}
+
+function QMLPropertyChanges(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(this, "target");
+    createSimpleProperty(this, "explicit");
+    createSimpleProperty(this, "restoreEntryValues");
+
+    this.explicit = false;
+    this.restoreEntryValues = true;
+    this.$actions = [];
+
+    this.$setCustomData = function(propName, value) {
+        this.$actions.push({
+            property: propName,
+            value: value
+        });
+    }
+}
+
+function QMLTransition(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(this, "animations");
+    createSimpleProperty(this, "from");
+    createSimpleProperty(this, "to");
+    createSimpleProperty(this, "reversible");
+    this.animations = [];
+    this.$item = parent;
+    this.from = "*";
+    this.to = "*";
+
+    this.$init.push(function() {
+        for (var i = 0; i < this.animations.length; i++)
+            for (var j = 0; j < this.animations[i].$init.length; j++)
+                this.animations[i].$init[j].call(this.animations[i]);
+    });
+
+    this.$addChild = function(meta) {
+        this.animations.push(construct(meta, this, engine));
+    }
+    this.$start = function(actions) {
+        for (var i = 0; i < this.animations.length; i++) {
+            var animation = this.animations[i];
+            animation.$actions = [];
+            for (var j in actions) {
+                var action = actions[j];
+                if ((animation.$targets.length === 0 || animation.$targets.indexOf(action.target) !== -1)
+                    && (animation.$props.length === 0 || animation.$props.indexOf(action.property) !== -1))
+                    animation.$actions.push(action);
+            }
+            animation.start();
+        }
+    }
+    this.$stop = function() {
+        for (var i = 0; i < this.animations.length; i++)
+            this.animations[i].stop();
+    }
+}
+
 function QMLTimer(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
     var prevTrigger,
@@ -2851,12 +3105,55 @@ function QMLPropertyAnimation(meta, parent, engine) {
     createSimpleProperty(this.easing, "overshoot", { altParent: this });
     createSimpleProperty(this.easing, "period", { altParent: this });
 
+    function redoActions() {
+        this.$actions = [];
+        for (var i = 0; i < this.$targets.length; i++) {
+            for (var j in this.$props) {
+                this.$actions.push({
+                    target: this.$targets[i],
+                    property: this.$props[j],
+                    from: this.from,
+                    to: this.to
+                });
+            }
+        }
+    }
+    function redoProperties() {
+        this.$props = this.properties.split(",");
+
+        // Remove whitespaces
+        for (var i in this.$props)
+            this.$props[i] = this.$props[i].match(/\w*/)[0];
+        // Merge properties and property
+        if (this.property && this.$props.indexOf(this.property) === -1)
+            this.$props.push(this.property);
+    }
+    function redoTargets() {
+        this.$targets = this.targets;
+
+        if (this.target && this.$targets.indexOf(this.target) === -1)
+            this.$targets.push(this.target);
+    }
+
     this.duration = 250;
     this.easing.type = this.Easing.Linear;
     this.from = 0;
-    this.properties = [];
+    this.$props = [];
+    this.$targets = [];
+    this.properties = "";
     this.targets = [];
     this.to = 0;
+
+    this.targetChanged.connect(this, redoTargets);
+    this.targetsChanged.connect(this, redoTargets);
+    this.propertyChanged.connect(this, redoProperties);
+    this.propertiesChanged.connect(this, redoProperties);
+    this.toChanged.connect(this, redoActions);
+    this.fromChanged.connect(this, redoActions);
+    this.targetChanged.connect(this, redoActions);
+    this.targetsChanged.connect(this, redoActions);
+    this.propertyChanged.connect(this, redoActions);
+    this.propertiesChanged.connect(this, redoActions);
 }
 
 function QMLNumberAnimation(meta, parent, engine) {
@@ -2884,9 +3181,12 @@ function QMLNumberAnimation(meta, parent, engine) {
             if (now > tickStart + self.duration) {
                 self.complete();
             } else {
-                var at = (now - tickStart) / self.duration,
-                    value = curve(at) * (self.to - self.from) + self.from;
-                self.target[self.property] = value;
+                for (var i in self.$actions) {
+                    var action = self.$actions[i],
+                        at = (now - tickStart) / self.duration,
+                        value = curve(at) * (action.to - action.from) + action.from;
+                    action.target[action.property] = value;
+                }
             }
 
         }
@@ -2908,7 +3208,14 @@ function QMLNumberAnimation(meta, parent, engine) {
 
     this.complete = function() {
         if (this.running) {
-            this.target[this.property] = this.to;
+            workingContext.push(this.$scope);
+            for (var i in this.$actions) {
+                var action = this.$actions[i];
+                // action.value is specified if there is a binding to be applied after the
+                // animation finished (used for transitions)
+                action.target[action.property] = action.value || action.to;
+            }
+            workingContext.pop();
             this.stop();
             engine.$requestDraw();
         }

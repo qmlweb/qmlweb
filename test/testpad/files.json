@@ -31,6 +31,10 @@
     "title": "* MouseArea test"
 },
 {
+    "file": "states.qml",
+    "title": "* State test"
+},
+{
     "file": "animation.qml",
     "title": "* Animation test"
 },
