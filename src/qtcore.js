@@ -1344,12 +1344,12 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this, "state");
     createSimpleProperty(this, "transitions");
     this.statesChanged.connect(this, function() {
-        for (var i in this.states)
+        for (var i = 0; i < this.states.length; i++)
             if (this.states[i] instanceof QMLMetaElement)
                 this.states[i] = construct(this.states[i], this, engine);
     });
     this.transitionsChanged.connect(this, function() {
-        for (var i in this.transitions)
+        for (var i = 0; i < this.transitions.length; i++)
             if (this.transitions[i] instanceof QMLMetaElement)
                 this.transitions[i] = construct(this.transitions[i], this, engine);
     });
@@ -1423,21 +1423,21 @@ function QMLItem(meta, parent, engine) {
                         });
                 }
             }
+        }
 
-            // Set all property changes and fetch the actual values afterwards
-            // The latter is needed for transitions. We need to set all properties
-            // before we fetch the values because properties can be interdependent.
-            for (i in actions) {
-                var action = actions[i];
-                action.target[action.property] = action.value;
-            }
-            for (i in actions) {
-                var action = actions[i];
-                action.to = action.target[action.property];
-                if (action.explicit) {
-                    action.target[action.property] = action.target[action.property]; //Remove binding
-                    action.value = action.target[action.property];
-                }
+        // Set all property changes and fetch the actual values afterwards
+        // The latter is needed for transitions. We need to set all properties
+        // before we fetch the values because properties can be interdependent.
+        for (i in actions) {
+            var action = actions[i];
+            action.target[action.property] = action.value;
+        }
+        for (i in actions) {
+            var action = actions[i];
+            action.to = action.target[action.property];
+            if (action.explicit) {
+                action.target[action.property] = action.target[action.property]; //Remove binding
+                action.value = action.target[action.property];
             }
         }
 
@@ -3149,7 +3149,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
 
         // Remove whitespaces
         for (var i in this.$props)
-            this.$props[i] = this.$props[i].match(/\w*/)[0];
+            this.$props[i] = this.$props[i].match(/\w+/)[0];
         // Merge properties and property
         if (this.property && this.$props.indexOf(this.property) === -1)
             this.$props.push(this.property);
