@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 
 Rectangle {
     id: page
@@ -229,6 +229,8 @@ Rectangle {
             height: parent.height
             wrapMode: Text.WrapAnywhere
             text: page.lorem
+            lineHeightMode: Text.FixedHeight
+            lineHeight: 10
         }
     }
 
@@ -244,6 +246,7 @@ Rectangle {
             height: parent.height
             wrapMode: Text.Wrap
             text: page.lorem
+            lineHeight: 1.2
         }
     }
 }

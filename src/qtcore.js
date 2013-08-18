@@ -1845,14 +1845,16 @@ function QMLFont(parent, engine) {
             parent.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
         this.pixelSizeChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontSize = newVal !== Undefined
-                ? newVal + "px "
+            var val = newVal !== Undefined ? newVal + "px "
                 : (parent.font.pointSize || 10) + "pt";
+            parent.$domElement.style.fontSize = val;
+            parent.$domElement.firstChild.style.fontSize = val;
         });
         this.pointSizeChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontSize = parent.font.pixelSize !== Undefined
-                ? parent.font.pixelSize + "px "
+            var val = parent.font.pixelSize !== Undefined ? parent.font.pixelSize + "px "
                 : (newVal || 10) + "pt";
+            parent.$domElement.style.fontSize = val;
+            parent.$domElement.firstChild.style.fontSize = val;
         });
         this.strikeoutChanged.connect(function(newVal) {
             parent.$domElement.firstChild.style.textDecoration = newVal
@@ -2032,6 +2034,11 @@ function QMLText(meta, parent, engine) {
     this.font.familyChanged.connect(this, updateImplicitWidth);
     this.font.letterSpacingChanged.connect(this, updateImplicitHeight);
     this.font.wordSpacingChanged.connect(this, updateImplicitWidth);
+
+    this.$init.push(function() {
+        updateImplicitWidth.call(this);
+        updateImplicitHeight.call(this);
+    });
 
     function updateImplicitHeight() {
         var height;
@@ -3277,8 +3284,10 @@ function QMLTextInput(meta, parent, engine) {
     createSimpleProperty(this, "text", "");
     this.accepted = Signal();
 
-    this.implicitWidth = this.$domElement.firstChild.offsetWidth;
-    this.implicitHeight = this.$domElement.firstChild.offsetHeight;
+    this.$init.push(function() {
+        this.implicitWidth = this.$domElement.firstChild.offsetWidth;
+        this.implicitHeight = this.$domElement.firstChild.offsetHeight;
+    });
 
     this.textChanged.connect(this, function(newVal) {
         this.$domElement.firstChild.value = newVal;
@@ -3342,6 +3351,8 @@ function QMLTextArea(meta, parent, engine) {
 
     this.$domElement.innerHTML = "<textarea></textarea>"
     this.$domElement.firstChild.style.pointerEvents = "auto";
+    this.$domElement.firstChild.style.width = "100%";
+    this.$domElement.firstChild.style.height = "100%";
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     this.$domElement.firstChild.style.margin = "0";
