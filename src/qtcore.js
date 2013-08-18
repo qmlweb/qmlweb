@@ -2114,15 +2114,18 @@ function QMLRectangle(meta, parent, engine) {
         });
         this.border.colorChanged.connect(this, function(newVal) {
             this.$domElement.style.borderColor = newVal;
+            this.$domElement.style.borderStyle = this.border.width == 0 || newVal == "transparent"
+                                                ? "none" : "solid";
         });
         this.border.widthChanged.connect(this, function(newVal) {
             this.$domElement.style.borderWidth = newVal + "px";
-            this.$domElement.style.borderStyle = newVal == 0 ? "none" : "solid";
+            this.$domElement.style.borderStyle = newVal == 0 || this.border.color == "transparent"
+                                                ? "none" : "solid";
         });
     }
 
     this.color = "white";
-    this.border.color = "rgba(0,0,0,0)";
+    this.border.color = "transparent";
     this.border.width = 1;
     this.radius = 0;
 
