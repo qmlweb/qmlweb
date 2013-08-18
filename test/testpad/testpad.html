@@ -12,7 +12,9 @@
 </style>
 </head>
 <body>
-<canvas id="canvas" style="border: 1px solid black"></canvas><br/>
+<div id="main">
+<div id="canvas" style="border: 1px solid black"></div><br/>
+</div>
 Your browser: <span id="browserId">Unknown</span><br/>
 QMLWEB buildinfo: <span id="buildId">Unknown</span><br/>
 <table><tr><td style="vertical-align: bottom;width: 50%">
@@ -42,6 +44,12 @@ average <span id="statAvgFps">N</span> fps, <span id="statFrames">N</span> frame
 Debugging and development:<br/>
 <input type="button" onclick="ugparse()" value="Parser output"/>
 <input type="button" onclick="parsetree()" value="Converted parser output"/>
+<br/>
+Rendering Backend:<br/>
+<select id="backendSelector">
+    <option value="dom">DOM-Backend</option>
+    <option value="canvas">Canvas-Backend</option>
+</select>
 </table>
 <textarea id="src" rows=24 style="width: 100%"></textarea>
 <br/>
@@ -109,6 +117,20 @@ var curFile = "",
             statFramesEl.innerHTML = drawTimes.length;
         }
         };
+
+
+
+var backendSel = document.getElementById("backendSelector");
+var mainView = document.getElementById("main");
+backendSel.onchange = function() {
+    if (backendSel.value == "canvas") {
+        mainView.innerHTML = '<canvas id="canvas"></canvas>';
+    } else {
+        mainView.innerHTML = '<div id="canvas"></div>';
+    }
+    canvasEl = document.getElementById("canvas");
+    window.onhashchange(); // Reload file
+}
 
 document.getElementById("browserId").innerHTML = navigator.userAgent;
 document.getElementById("buildId").innerHTML = JSON.stringify(QMLWEB_BUILDINFO);
