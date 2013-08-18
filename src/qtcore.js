@@ -2183,6 +2183,10 @@ function QMLRepeater(meta, parent, engine) {
         this.$completed = true;
     });
 
+    this.itemAt = function(index) {
+        return this.$items[index];
+    }
+
     function applyChildProperties(child) {
         createSimpleProperty(child, "index");
         child.index = new QMLBinding("parent.index");
