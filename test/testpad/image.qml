@@ -10,7 +10,8 @@ Rectangle {
     }
     Rectangle {
         anchors.fill: desc
-        color: "lightgray"
+        color: "white"
+        opacity: 0.8
     }
     Text {
         id: desc

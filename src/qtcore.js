@@ -1296,6 +1296,7 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(this, "rotation");
     createSimpleProperty(this, "spacing");
     createSimpleProperty(this, "visible");
+    createSimpleProperty(this, "opacity");
     createSimpleProperty(this, "clip");
     createSimpleProperty(this, "z");
     this.xChanged.connect(this, updateHGeometry);
@@ -1481,6 +1482,9 @@ function QMLItem(meta, parent, engine) {
         this.visibleChanged.connect(this, function(newVal) {
             this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
         });
+        this.opacityChanged.connect(this, function(newVal) {
+            this.$domElement.style.opacity = newVal;
+        });
         this.clipChanged.connect(this, function(newVal) {
             this.$domElement.style.overflow = newVal ? "hidden" : "visible";
         });
@@ -1516,6 +1520,7 @@ function QMLItem(meta, parent, engine) {
     this.y = 0;
     this.anchors.margins = 0;
     this.visible = true;
+    this.opacity = 1;
     this.$revertActions = [];
     this.states = [];
     this.transitions = [];
@@ -1547,6 +1552,7 @@ function QMLItem(meta, parent, engine) {
 
                 // Handle rotation
                 // todo: implement transformOrigin
+                c.globalAlpha = this.opacity;
                 c.translate(this.left + rotOffsetX, this.top + rotOffsetY);
                 c.rotate(rotRad);
                 c.translate(-this.left, -this.top);
@@ -1603,7 +1609,7 @@ QMLRow.prototype.layoutChildren = function() {
         step = this.layoutDirection == 1 ? -1 : 1;
     for (; i !== endPoint; i += step) {
         var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
+        if (!(child.visible && child.opacity && child.width && child.height))
             continue;
         maxHeight = child.height > maxHeight ? child.height : maxHeight;
 
@@ -1622,7 +1628,7 @@ QMLColumn.prototype.layoutChildren = function() {
         maxWidth = 0;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
+        if (!(child.visible && child.opacity && child.width && child.height))
             continue;
         maxWidth = child.width > maxWidth ? child.width : maxWidth;
 
@@ -1666,7 +1672,7 @@ QMLGrid.prototype.layoutChildren = function() {
     // How many items are actually visible?
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (child.visible && child.width && child.height)
+        if (child.visible && child.opacity && child.width && child.height)
             visibleItems.push(this.children[i]);
     }
 
@@ -1765,7 +1771,7 @@ QMLFlow.prototype.layoutChildren = function() {
         rowSize = 0;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
+        if (!(child.visible && child.opacity && child.width && child.height))
             continue;
 
         if (this.flow == 0) {
