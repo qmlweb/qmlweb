@@ -397,6 +397,26 @@ QMLProperty.prototype.set = function(newVal) {
             Array.prototype.push.apply(this, arguments);
             this.$prop.changed(arguments[0]);
         };
+        this.val.splice = function() {
+            Array.prototype.splice.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
+        this.val.pop = function() {
+            Array.prototype.pop.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
+        this.val.shift = function() {
+            Array.prototype.shift.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
+        this.val.sort = function() {
+            Array.prototype.sort.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
+        this.val.unshift = function() {
+            Array.prototype.unshift.apply(this, arguments);
+            this.$prop.changed(arguments[0]);
+        };
         this.val.$prop = this;
         this.val.$properties = [];
 
@@ -2172,9 +2192,9 @@ function QMLRepeater(meta, parent, engine) {
             if (engine.renderMode == QMLRenderMode.DOM && self.delegate.id)
                 newItem.$domElement.className += " " + self.delegate.id;
 
-            //TODO: Use parent's children, in order to make it completely transparent
-            self.$items.splice(index, 0, newItem);
+            parent.children.splice(parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
             newItem.parent = self.parent;
+            self.$items.splice(index, 0, newItem);
 
             applyChildProperties(newItem);
             newItem.index = index;
@@ -2238,9 +2258,9 @@ function QMLRepeater(meta, parent, engine) {
     function removeChildren(startIndex, endIndex) {
         var removed = self.$items.splice(startIndex, endIndex - startIndex);
         for (var index in removed) {
+            removed[index].$delete();
             removed[index].parent = undefined;
             removeChildProperties(removed[index]);
-            removed[index].$delete();
         }
     }
     function removeChildProperties(child) {
