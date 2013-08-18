@@ -1800,6 +1800,10 @@ QMLFlow.prototype.layoutChildren = function() {
             curVPos += child.height + this.spacing;
         }
     }
+    if (this.flow == 0)
+        this.height = curVPos + rowSize;
+    else
+        this.width = curHPos + rowSize;
 }
 
 function QMLFont(parent, engine) {
