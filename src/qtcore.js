@@ -2300,16 +2300,15 @@ function QMLRepeater(meta, parent, engine) {
 
 function QMLListModel(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
-    var self = this;
+    var self = this,
+    firstItem = true;
 
-    createSimpleProperty(this, "$items");
     createSimpleProperty(this, "count");
     this.$items = [];
     this.$model = new JSItemModel();
     this.count = 0;
     this.$addChild = function(meta) {
-        this.$items.push(construct(meta, this, engine));
-        this.count = this.$items.length;
+        this.append(construct(meta, this, engine));
     }
 
     this.$model.data = function(index, role) {
@@ -2318,17 +2317,9 @@ function QMLListModel(meta, parent, engine) {
     this.$model.rowCount = function() {
         return self.$items.length;
     }
-    var roleNames = [];
-    for (var i in meta.$children[0]) {
-        if (i != "id" && i != "index" && i[0] != "$")
-            roleNames.push(i);
-    }
-    this.$model.setRoleNames(roleNames);
 
     this.append = function(dict) {
-        this.$items.push(dict);
-        this.$model.rowsInserted(this.$items.length-1, this.$items.length);
-        this.count = this.$items.length;
+        this.insert(this.$items.length, dict);
     }
     this.clear = function() {
         this.$items = [];
@@ -2339,6 +2330,15 @@ function QMLListModel(meta, parent, engine) {
         return this.$items[index];
     }
     this.insert = function(index, dict) {
+        if (firstItem) {
+            firstItem = false;
+            var roleNames = [];
+            for (var i in dict) {
+                if (i != "id" && i != "index" && i[0] != "$")
+                    roleNames.push(i);
+            }
+            this.$model.setRoleNames(roleNames);
+        }
         this.$items.splice(index, 0, dict);
         this.$model.rowsInserted(index, index+1);
         this.count = this.$items.length;
