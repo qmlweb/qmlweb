@@ -148,6 +148,8 @@ Rectangle {
                 anchors.top: parent.bottom; anchors.left: parent.left
                 Text {
                 text: "- Current code by Lauri Paimen and Anton Kreuzkamp"
+                width: base.width
+                wrapMode: Text.Wrap
                 font.pointSize: 32
                 anchors.top: parent.bottom; anchors.left: parent.left
 

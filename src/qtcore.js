@@ -3166,14 +3166,21 @@ function QMLPropertyAnimation(meta, parent, engine) {
         this.$props = this.properties.split(",");
 
         // Remove whitespaces
-        for (var i in this.$props)
-            this.$props[i] = this.$props[i].match(/\w+/)[0];
+        for (var i = 0; i < this.$props.length; i++) {
+            var matches = this.$props[i].match(/\w+/);
+            if (matches) {
+                this.$props[i] = matches[0];
+            } else {
+                this.$props.splice(i, 1);
+                i--;
+            }
+        }
         // Merge properties and property
         if (this.property && this.$props.indexOf(this.property) === -1)
             this.$props.push(this.property);
     }
     function redoTargets() {
-        this.$targets = this.targets;
+        this.$targets = this.targets.slice();
 
         if (this.target && this.$targets.indexOf(this.target) === -1)
             this.$targets.push(this.target);
