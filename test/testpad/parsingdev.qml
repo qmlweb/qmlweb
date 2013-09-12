@@ -3,6 +3,7 @@ import Qt 4.7
 Rectangle {
     id: main
     property int value: 5
+    property bool novalue
     width: 600; height: 400
     function getSize() {
         return width + "x" + height
@@ -21,7 +22,7 @@ Rectangle {
             margins: 5
         }
         Text {
-            text: "Property is: " + main.value
+            text: "Property is: " + main.value + ", undefined boolean is: " + main.novalue
         }
     }
     Component.onCompleted: console.log("Component.onCompleted!");

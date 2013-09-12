@@ -1304,12 +1304,15 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
             var name = S.token.value;
             next();
-            expect(":");
-            var from = S.token.pos,
-                stat = statement(),
-                to = S.token.pos;
-            return as("qmlpropdef", name, type, stat,
-                    $TEXT.substr(from, to - from));
+            if (is("punc", ":")) {
+                next();
+                var from = S.token.pos,
+                    stat = statement(),
+                    to = S.token.pos;
+                return as("qmlpropdef", name, type, stat,
+                        $TEXT.substr(from, to - from));
+            }
+            return as("qmlpropdef", name, type);
 
         }
 
@@ -1612,7 +1615,7 @@ function convertToEngine(tree) {
             return src;
         },
         "qmlpropdef": function(name, type, tree, src) {
-            return new QMLPropertyDefinition(type, bindout(tree, src));
+            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : undefined);
         },
         "qmlsignaldef": function(name, params) {
             return { name: name, params: params };

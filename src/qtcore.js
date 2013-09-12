@@ -88,6 +88,13 @@ var QMLGlobalObject = {
             Black: "bolder",
         }
     },
+    qmlBasicTypes = {
+        int: Number,
+        real: Number,
+        double: Number,
+        string: String,
+        bool: Boolean
+    }
     // Simple shortcuts to getter & setter functions, coolness with minifier
     GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
@@ -344,6 +351,7 @@ function QMLProperty(obj, name, options) {
     this.binding = noop;
     this.objectScope = options.altParent || obj;
     this.value = undefined;
+    this.type = options.type;
 
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this object.
@@ -425,7 +433,10 @@ QMLProperty.prototype.set = function(newVal) {
             this.val[i] = newVal[i];
         }
     } else {
-        this.val = newVal;
+        if (this.type && this.type in qmlBasicTypes)
+            this.val = qmlBasicTypes[this.type](newVal);
+        else
+            this.val = newVal;
         this.binding = false;
     }
 
@@ -1001,7 +1012,7 @@ function QMLBaseObject(meta, parent, engine) {
         for (i in meta.$properties) {
             prop = meta.$properties[i];
             if (prop.type != "alias") {
-                createSimpleProperty(this, i);
+                createSimpleProperty(this, i, {type: prop.type});
                 this[i] = meta.$properties[i].value;
             }
         }
