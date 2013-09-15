@@ -69,15 +69,13 @@ Rectangle {
         id: rep
         model: tModel
 
-        delegate: TestComponent {
+        delegate: Rectangle {
             x: 5 + (width + 10) * (index %2)
             y: 5 + 100 * Math.floor(index /2)
             width: page.width / 2 - 10
             height: 90
-            onTest: {
-                color = newColor;
-                console.log("random number: " + number);
-            }
+            border.color: "darkgrey"
+            color: "orange"
 
             Text {
                 anchors.centerIn: parent

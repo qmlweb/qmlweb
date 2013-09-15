@@ -49,45 +49,44 @@
 
 (function() {
 
-var QMLGlobalObject = {
-        Qt: {
-            rgba: function(r,g,b,a) {
-                var rgba = "rgba("
-                    + Math.round(r * 255) + ","
-                    + Math.round(g * 255) + ","
-                    + Math.round(b * 255) + ","
-                    + a + ")";
-                return rgba;
-            },
-            // Buttons masks
-            LeftButton: 1,
-            RightButton: 2,
-            MiddleButton: 4,
-            // Modifiers masks
-            NoModifier: 0,
-            ShiftModifier: 1,
-            ControlModifier: 2,
-            AltModifier: 4,
-            MetaModifier: 8,
-            KeypadModifier: 16, // Note: Not available in web
-            // Layout directions
-            LeftToRight: 0,
-            RightToLeft: 1
-        }, Font: {
-            // Capitalization
-            MixedCase: "none",
-            AllUppercase: "uppercase",
-            AllLowercase: "lowercase",
-            SmallCaps: "smallcaps",
-            Capitalize: "capitalize",
-            // Weight
-            Light: "lighter",
-            Normal: "normal",
-            DemiBold: "600",
-            Bold: "bold",
-            Black: "bolder",
-        }
-    },
+    var Qt = {
+        rgba: function(r,g,b,a) {
+            var rgba = "rgba("
+                + Math.round(r * 255) + ","
+                + Math.round(g * 255) + ","
+                + Math.round(b * 255) + ","
+                + a + ")";
+            return rgba;
+        },
+        // Buttons masks
+        LeftButton: 1,
+        RightButton: 2,
+        MiddleButton: 4,
+        // Modifiers masks
+        NoModifier: 0,
+        ShiftModifier: 1,
+        ControlModifier: 2,
+        AltModifier: 4,
+        MetaModifier: 8,
+        KeypadModifier: 16, // Note: Not available in web
+        // Layout directions
+        LeftToRight: 0,
+        RightToLeft: 1
+    }
+    var Font = {
+        // Capitalization
+        MixedCase: "none",
+        AllUppercase: "uppercase",
+        AllLowercase: "lowercase",
+        SmallCaps: "smallcaps",
+        Capitalize: "capitalize",
+        // Weight
+        Light: "lighter",
+        Normal: "normal",
+        DemiBold: "600",
+        Bold: "bold",
+        Black: "bolder",
+    }
     qmlBasicTypes = {
         int: Number,
         real: Number,
@@ -162,10 +161,11 @@ function descr(msg, obj, vals) {
  * @param {Object} thisObj Object to be this
  * @param {String} src Source code
  * @param {Object} objectScope Scope for evaluation
- * @param {Object} [globalScope] A second Scope for evaluation (both scopes properties will be directly accessible)
+ * @param {Object} [componentScope] A second Scope for evaluation (all scopes' properties will be directly accessible)
+ * @param {Object} [globalScope] A third Scope for evaluation (all scopes' properties will be directly accessible)
  * @return {any} Resulting object.
  */
-function evalBinding(thisObj, src, objectScope, globalScope) {
+function evalBinding(thisObj, src, objectScope, componentScope, globalScope) {
     var val;
     // If "with" operator gets deprecated, you just have to create var of
     // every property in objectScope and globalScope, assign the values, and run. That'll be quite
@@ -173,13 +173,11 @@ function evalBinding(thisObj, src, objectScope, globalScope) {
     // todo: use thisObj.
     //console.log("evalBinding objectScope, this, src: ", objectScope, thisObj, src);
     (function() {
-        with(objectScope) {
-            if (globalScope) {
-                with (globalScope) {
+        with(globalScope || {}) {
+            with (componentScope || {}) {
+                with (objectScope) {
                     val = eval(src);
                 }
-            } else {
-                val = eval(src);
             }
         }
     })();
@@ -326,10 +324,10 @@ function Signal(params, options) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(obj, propName, options) {
+function createSimpleProperty(engine, obj, propName, options) {
     options = options || {};
 
-    var prop = new QMLProperty(obj, propName, options);
+    var prop = new QMLProperty(engine, obj, propName, options);
 
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
@@ -344,7 +342,7 @@ function createSimpleProperty(obj, propName, options) {
     })(obj, propName);
 }
 
-function QMLProperty(obj, name, options) {
+function QMLProperty(engine, obj, name, options) {
     this.obj = obj;
     this.name = name;
     this.changed = Signal([], {obj:obj});
@@ -352,6 +350,7 @@ function QMLProperty(obj, name, options) {
     this.objectScope = options.altParent || obj;
     this.value = undefined;
     this.type = options.type;
+    this.engine = engine;
 
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this object.
@@ -365,7 +364,11 @@ QMLProperty.prototype.update = function() {
         return;
 
     var oldVal = this.val;
-    this.val = this.binding();
+    try {
+        this.val = this.binding();
+    } catch(e) {
+        console.log(e);
+    }
 
     if (this.val !== oldVal)
         this.changed(this.val, oldVal, this.name);
@@ -394,9 +397,14 @@ QMLProperty.prototype.set = function(newVal) {
         } else {
             var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
                 + "; return $Qbv;};$Qbc";
-            this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].getIdScope());
+            this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].get(), this.engine.rootScope);
         }
-        this.val = this.binding();
+        try {
+            this.val = this.binding();
+        } catch(e) {
+            if (!(this.engine.operationFlags & QMLOperationFlag.IgnoreReferenceErrors && e instanceof ReferenceError))
+                throw e;
+        }
 
         evaluatingProperty = undefined;
     } else if (newVal instanceof Array) {
@@ -429,7 +437,7 @@ QMLProperty.prototype.set = function(newVal) {
         this.val.$properties = [];
 
         for (i in newVal) {
-            createSimpleProperty(this.val, i, { altParent: this.objectScope });
+            createSimpleProperty(this.engine, this.val, i, { altParent: this.objectScope });
             this.val[i] = newVal[i];
         }
     } else {
@@ -530,7 +538,7 @@ function applyProperties(meta, item, objectScope) {
                     + "}; func";
             item[signalName].disconnect(item, i);
             item[i] = evalBinding(null, src, objectScope,
-                                    workingContext[workingContext.length-1].getIdScope());
+                                    workingContext[workingContext.length-1].get());
             item[signalName].connect(item, i);
             continue;
         }
@@ -541,7 +549,7 @@ function applyProperties(meta, item, objectScope) {
                 var val = meta[i].value;
                 var propName = val.src.replace(/.*\.(\w*)\s*/, "$1");
                 var obj = evalBinding(null, val.src.replace(/(.*)\.\w*\s*/, "$1"), objectScope,
-                                        workingContext[workingContext.length-1].getIdScope());
+                                        workingContext[workingContext.length-1].get());
                 (function(val, propName, obj) {
                     setupGetterSetter(item, i, function() {
                         return obj.$properties[propName].get();
@@ -610,6 +618,9 @@ QMLRenderMode = {
     Canvas: 0,
     DOM: 1
 }
+QMLOperationFlag = {
+    IgnoreReferenceErrors: 1
+}
 
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
@@ -630,6 +641,9 @@ QMLEngine = function (element, options) {
 
     // List of Component.completed signals
     this.completedSignals = [];
+
+    // Flags about current operation state. Used only internally.
+    this.operationFlags = 0;
 
 
 //----------Public Methods----------
@@ -727,11 +741,6 @@ QMLEngine = function (element, options) {
         var tree = parseQML(src);
         this.components[name] = tree;
         return tree;
-    }
-
-    this.$getGlobalObj = function()
-    {
-        return globalObj;
     }
 
     this.$getTextMetrics = function(text, fontCss)
@@ -893,9 +902,7 @@ QMLEngine = function (element, options) {
     if (this.renderMode == QMLRenderMode.Canvas)
         var canvas = element.getContext('2d');
 
-    var // Global Qt object
-        globalObj = Object.create(QMLGlobalObject),
-        // Root document of the engine
+    var // Root document of the engine
         doc,
         // Callbacks for stopping or starting the engine
         whenStop = [],
@@ -917,8 +924,8 @@ QMLEngine = function (element, options) {
 
     if (options.debugConsole) {
         // Replace QML-side console.log
-        globalObj.console = {};
-        globalObj.console.log = function() {
+        console = {};
+        console.log = function() {
             var args = Array.prototype.slice.call(arguments);
             options.debugConsole.apply(Undefined, args);
         };
@@ -933,14 +940,14 @@ QMLEngine = function (element, options) {
                     var l = self.mouseAreas[i];
                     var mouse = {
                         accepted: true,
-                        button: e.button == 0 ? QMLGlobalObject.Qt.LeftButton :
-                                e.button == 1 ? QMLGlobalObject.Qt.RightButton :
-                                e.button == 2 ? QMLGlobalObject.Qt.MiddleButton :
+                        button: e.button == 0 ? Qt.LeftButton :
+                                e.button == 1 ? Qt.RightButton :
+                                e.button == 2 ? Qt.MiddleButton :
                                 0,
-                        modifiers: (e.ctrlKey * QMLGlobalObject.Qt.CtrlModifier)
-                                | (e.altKey * QMLGlobalObject.Qt.AltModifier)
-                                | (e.shiftKey * QMLGlobalObject.Qt.ShiftModifier)
-                                | (e.metaKey * QMLGlobalObject.Qt.MetaModifier),
+                        modifiers: (e.ctrlKey * Qt.CtrlModifier)
+                                | (e.altKey * Qt.AltModifier)
+                                | (e.shiftKey * Qt.ShiftModifier)
+                                | (e.metaKey * Qt.MetaModifier),
                         x: (e.offsetX || e.layerX) - l.left,
                         y: (e.offsetY || e.layerY) - l.top
                     };
@@ -999,6 +1006,29 @@ function QMLBaseObject(meta, parent, engine) {
 
     if (!this.$draw)
         this.$draw = noop;
+
+    // scope
+    if (!workingContext[workingContext.length-1]) {
+        var ids = Object.create(this);
+        workingContext[workingContext.length-1] = {
+            // Get scope
+            get: function() {
+                return ids;
+            },
+            // Define id
+            defId: function(name, obj) {
+                if (ids[name]) {
+                    console.error("QMLDocument: Id " + name
+                                + "is not unique. Overriding with object", obj);
+                }
+                ids[name] = obj;
+            },
+            // Remove id
+            remId: function(name) {
+                ids[name] = undefined;
+            }
+        };
+    }
     this.$scope = workingContext[workingContext.length-1];
 
     // id
@@ -1012,7 +1042,7 @@ function QMLBaseObject(meta, parent, engine) {
         for (i in meta.$properties) {
             prop = meta.$properties[i];
             if (prop.type != "alias") {
-                createSimpleProperty(this, i, {type: prop.type});
+                createSimpleProperty(engine, this, i, {type: prop.type});
                 this[i] = meta.$properties[i].value;
             }
         }
@@ -1023,7 +1053,7 @@ function QMLBaseObject(meta, parent, engine) {
         return evalBinding(null,
                                method + ";" + name,
                                item,
-                               workingContext[workingContext.length-1].getIdScope());
+                               workingContext[workingContext.length-1].get(), engine.rootScope);
     }
     if (meta.$functions) {
         for (i in meta.$functions) {
@@ -1263,9 +1293,9 @@ function QMLItem(meta, parent, engine) {
         this.$domElement.style.pointerEvents = "none";
         this.$domElement.className = meta.$class + (this.id ? " " + this.id : "");
     }
-    createSimpleProperty(this, "children");
-    createSimpleProperty(this, "resources");
-    createSimpleProperty(this, "parent");
+    createSimpleProperty(engine, this, "children");
+    createSimpleProperty(engine, this, "resources");
+    createSimpleProperty(engine, this, "parent");
     this.children = [];
     this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
@@ -1292,24 +1322,24 @@ function QMLItem(meta, parent, engine) {
             this.resources.push(child);
     }
 
-    createSimpleProperty(this, "x");
-    createSimpleProperty(this, "y");
-    createSimpleProperty(this, "width");
-    createSimpleProperty(this, "height");
-    createSimpleProperty(this, "implicitWidth");
-    createSimpleProperty(this, "implicitHeight");
-    createSimpleProperty(this, "left");
-    createSimpleProperty(this, "right");
-    createSimpleProperty(this, "top");
-    createSimpleProperty(this, "bottom");
-    createSimpleProperty(this, "horizontalCenter");
-    createSimpleProperty(this, "verticalCenter");
-    createSimpleProperty(this, "rotation");
-    createSimpleProperty(this, "spacing");
-    createSimpleProperty(this, "visible");
-    createSimpleProperty(this, "opacity");
-    createSimpleProperty(this, "clip");
-    createSimpleProperty(this, "z");
+    createSimpleProperty(engine, this, "x");
+    createSimpleProperty(engine, this, "y");
+    createSimpleProperty(engine, this, "width");
+    createSimpleProperty(engine, this, "height");
+    createSimpleProperty(engine, this, "implicitWidth");
+    createSimpleProperty(engine, this, "implicitHeight");
+    createSimpleProperty(engine, this, "left");
+    createSimpleProperty(engine, this, "right");
+    createSimpleProperty(engine, this, "top");
+    createSimpleProperty(engine, this, "bottom");
+    createSimpleProperty(engine, this, "horizontalCenter");
+    createSimpleProperty(engine, this, "verticalCenter");
+    createSimpleProperty(engine, this, "rotation");
+    createSimpleProperty(engine, this, "spacing");
+    createSimpleProperty(engine, this, "visible");
+    createSimpleProperty(engine, this, "opacity");
+    createSimpleProperty(engine, this, "clip");
+    createSimpleProperty(engine, this, "z");
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
@@ -1321,19 +1351,19 @@ function QMLItem(meta, parent, engine) {
     this.$isUsingImplicitHeight = true;
 
     this.anchors = new QObject(this);
-    createSimpleProperty(this.anchors, "left", { altParent: this });
-    createSimpleProperty(this.anchors, "right", { altParent: this });
-    createSimpleProperty(this.anchors, "top", { altParent: this });
-    createSimpleProperty(this.anchors, "bottom", { altParent: this });
-    createSimpleProperty(this.anchors, "horizontalCenter", { altParent: this });
-    createSimpleProperty(this.anchors, "verticalCenter", { altParent: this });
-    createSimpleProperty(this.anchors, "fill", { altParent: this });
-    createSimpleProperty(this.anchors, "centerIn", { altParent: this });
-    createSimpleProperty(this.anchors, "margins", { altParent: this });
-    createSimpleProperty(this.anchors, "leftMargin", { altParent: this });
-    createSimpleProperty(this.anchors, "rightMargin", { altParent: this });
-    createSimpleProperty(this.anchors, "topMargin", { altParent: this });
-    createSimpleProperty(this.anchors, "bottomMargin", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "left", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "right", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "top", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "bottom", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "horizontalCenter", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "verticalCenter", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "fill", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "centerIn", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "margins", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "leftMargin", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "rightMargin", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "topMargin", { altParent: this });
+    createSimpleProperty(engine, this.anchors, "bottomMargin", { altParent: this });
     this.anchors.leftChanged.connect(this, updateHGeometry);
     this.anchors.rightChanged.connect(this, updateHGeometry);
     this.anchors.topChanged.connect(this, updateVGeometry);
@@ -1351,9 +1381,9 @@ function QMLItem(meta, parent, engine) {
     this.anchors.marginsChanged.connect(this, updateHGeometry);
     this.anchors.marginsChanged.connect(this, updateVGeometry);
 
-    createSimpleProperty(this, "states");
-    createSimpleProperty(this, "state");
-    createSimpleProperty(this, "transitions");
+    createSimpleProperty(engine, this, "states");
+    createSimpleProperty(engine, this, "state");
+    createSimpleProperty(engine, this, "transitions");
     this.statesChanged.connect(this, function() {
         for (var i = 0; i < this.states.length; i++)
             if (this.states[i] instanceof QMLMetaElement)
@@ -1585,7 +1615,7 @@ function QMLItem(meta, parent, engine) {
 function QMLPositioner(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "spacing");
+    createSimpleProperty(engine, this, "spacing");
     this.spacingChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
@@ -1607,7 +1637,7 @@ QMLPositioner.slotChildrenChanged = function() {
 function QMLRow(meta, parent, engine) {
     QMLPositioner.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "layoutDirection");
+    createSimpleProperty(engine, this, "layoutDirection");
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutDirection = 0;
 }
@@ -1658,10 +1688,10 @@ function QMLGrid(meta, parent, engine) {
         TopToBottom: 1
     }
 
-    createSimpleProperty(this, "columns");
-    createSimpleProperty(this, "rows");
-    createSimpleProperty(this, "flow");
-    createSimpleProperty(this, "layoutDirection");
+    createSimpleProperty(engine, this, "columns");
+    createSimpleProperty(engine, this, "rows");
+    createSimpleProperty(engine, this, "flow");
+    createSimpleProperty(engine, this, "layoutDirection");
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);
@@ -1768,8 +1798,8 @@ function QMLFlow(meta, parent, engine) {
         TopToBottom: 1
     }
 
-    createSimpleProperty(this, "flow");
-    createSimpleProperty(this, "layoutDirection");
+    createSimpleProperty(engine, this, "flow");
+    createSimpleProperty(engine, this, "layoutDirection");
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
 
@@ -1819,17 +1849,17 @@ QMLFlow.prototype.layoutChildren = function() {
 
 function QMLFont(parent, engine) {
     QObject.call(this);
-    createSimpleProperty(this, "bold", { altParent: parent });
-    createSimpleProperty(this, "capitalization", { altParent: parent });
-    createSimpleProperty(this, "family", { altParent: parent });
-    createSimpleProperty(this, "italic", { altParent: parent });
-    createSimpleProperty(this, "letterSpacing", { altParent: parent });
-    createSimpleProperty(this, "pixelSize", { altParent: parent });
-    createSimpleProperty(this, "pointSize", { altParent: parent });
-    createSimpleProperty(this, "strikeout", { altParent: parent });
-    createSimpleProperty(this, "underline", { altParent: parent });
-    createSimpleProperty(this, "weight", { altParent: parent });
-    createSimpleProperty(this, "wordSpacing", { altParent: parent });
+    createSimpleProperty(engine, this, "bold", { altParent: parent });
+    createSimpleProperty(engine, this, "capitalization", { altParent: parent });
+    createSimpleProperty(engine, this, "family", { altParent: parent });
+    createSimpleProperty(engine, this, "italic", { altParent: parent });
+    createSimpleProperty(engine, this, "letterSpacing", { altParent: parent });
+    createSimpleProperty(engine, this, "pixelSize", { altParent: parent });
+    createSimpleProperty(engine, this, "pointSize", { altParent: parent });
+    createSimpleProperty(engine, this, "strikeout", { altParent: parent });
+    createSimpleProperty(engine, this, "underline", { altParent: parent });
+    createSimpleProperty(engine, this, "weight", { altParent: parent });
+    createSimpleProperty(engine, this, "wordSpacing", { altParent: parent });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.pointSizeChanged.connect(function(newVal) {
@@ -1910,9 +1940,9 @@ function QMLText(meta, parent, engine) {
         css += font.italic ? "italic " : "normal ";
         css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
         // Canvas seems to only support bold yes or no
-        css += (font.weight == QMLGlobalObject.Font.Bold
-            || font.weight == QMLGlobalObject.Font.DemiBold
-            || font.weight == QMLGlobalObject.Font.Black
+        css += (font.weight == Font.Bold
+            || font.weight == Font.DemiBold
+            || font.weight == Font.Black
             || font.bold) ? "bold " : "normal ";
         css += font.pixelSize !== Undefined
             ? font.pixelSize + "px "
@@ -1942,13 +1972,13 @@ function QMLText(meta, parent, engine) {
 
     this.font = new QMLFont(this, engine);
 
-    createSimpleProperty(this, "color");
-    createSimpleProperty(this, "text");
-    createSimpleProperty(this, "lineHeight");
-    createSimpleProperty(this, "wrapMode");
-    createSimpleProperty(this, "horizontalAlignment");
-    createSimpleProperty(this, "style");
-    createSimpleProperty(this, "styleColor");
+    createSimpleProperty(engine, this, "color");
+    createSimpleProperty(engine, this, "text");
+    createSimpleProperty(engine, this, "lineHeight");
+    createSimpleProperty(engine, this, "wrapMode");
+    createSimpleProperty(engine, this, "horizontalAlignment");
+    createSimpleProperty(engine, this, "style");
+    createSimpleProperty(engine, this, "styleColor");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
@@ -2109,12 +2139,12 @@ function QMLText(meta, parent, engine) {
 function QMLRectangle(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "color");
-    createSimpleProperty(this, "radius");
+    createSimpleProperty(engine, this, "color");
+    createSimpleProperty(engine, this, "radius");
 
     this.border = new QObject(this);
-    createSimpleProperty(this.border, "color", { altParent: this });
-    createSimpleProperty(this.border, "width", { altParent: this });
+    createSimpleProperty(engine, this.border, "color", { altParent: this });
+    createSimpleProperty(engine, this.border, "width", { altParent: this });
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
@@ -2175,9 +2205,9 @@ function QMLRepeater(meta, parent, engine) {
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
-    createSimpleProperty(this, "delegate");
-    createSimpleProperty(this, "model");
-    createSimpleProperty(this, "count");
+    createSimpleProperty(engine, this, "delegate");
+    createSimpleProperty(engine, this, "model");
+    createSimpleProperty(engine, this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
     this.$addChild = function(childMeta) {
@@ -2199,7 +2229,7 @@ function QMLRepeater(meta, parent, engine) {
     }
 
     function applyChildProperties(child) {
-        createSimpleProperty(child, "index");
+        createSimpleProperty(engine, child, "index");
         child.index = new QMLBinding("parent.index");
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         for (var i in model.roleNames) {
@@ -2314,7 +2344,7 @@ function QMLListModel(meta, parent, engine) {
     var self = this,
     firstItem = true;
 
-    createSimpleProperty(this, "count");
+    createSimpleProperty(engine, this, "count");
     this.$items = [];
     this.$model = new JSItemModel();
     this.count = 0;
@@ -2434,20 +2464,20 @@ function QMLImage(meta, parent, engine) {
     }
 
     // no-op properties
-    createSimpleProperty(this, "asynchronous");
-    createSimpleProperty(this, "cache");
-    createSimpleProperty(this, "smooth");
+    createSimpleProperty(engine, this, "asynchronous");
+    createSimpleProperty(engine, this, "cache");
+    createSimpleProperty(engine, this, "smooth");
 
-    createSimpleProperty(this, "fillMode");
-    createSimpleProperty(this, "mirror");
-    createSimpleProperty(this, "progress");
-    createSimpleProperty(this, "source");
-    createSimpleProperty(this, "status");
+    createSimpleProperty(engine, this, "fillMode");
+    createSimpleProperty(engine, this, "mirror");
+    createSimpleProperty(engine, this, "progress");
+    createSimpleProperty(engine, this, "source");
+    createSimpleProperty(engine, this, "status");
 
     this.sourceSize = new QObject(this);
 
-    createSimpleProperty(this.sourceSize, "width", { altParent: this });
-    createSimpleProperty(this.sourceSize, "height", { altParent: this });
+    createSimpleProperty(engine, this.sourceSize, "width", { altParent: this });
+    createSimpleProperty(engine, this.sourceSize, "height", { altParent: this });
 
     this.asynchronous = true;
     this.cache = true;
@@ -2517,15 +2547,15 @@ function QMLBorderImage(meta, parent, engine) {
         Error: 4
     }
 
-    createSimpleProperty(this, "source");
-    createSimpleProperty(this, "status");
+    createSimpleProperty(engine, this, "source");
+    createSimpleProperty(engine, this, "status");
     this.border = new QObject(this);
-    createSimpleProperty(this.border, "left", { altParent: this });
-    createSimpleProperty(this.border, "right", { altParent: this });
-    createSimpleProperty(this.border, "top", { altParent: this });
-    createSimpleProperty(this.border, "bottom", { altParent: this });
-    createSimpleProperty(this, "horizontalTileMode");
-    createSimpleProperty(this, "verticalTileMode");
+    createSimpleProperty(engine, this.border, "left", { altParent: this });
+    createSimpleProperty(engine, this.border, "right", { altParent: this });
+    createSimpleProperty(engine, this.border, "top", { altParent: this });
+    createSimpleProperty(engine, this.border, "bottom", { altParent: this });
+    createSimpleProperty(engine, this, "horizontalTileMode");
+    createSimpleProperty(engine, this, "verticalTileMode");
 
     this.source = "";
     this.status = this.BorderImage.Null;
@@ -2670,15 +2700,15 @@ function QMLMouseArea(meta, parent, engine) {
         this.$domElement.style.opacity = 0;
     }
 
-    createSimpleProperty(this, "acceptedButtons");
-    createSimpleProperty(this, "enabled");
-    createSimpleProperty(this, "hoverEnabled");
+    createSimpleProperty(engine, this, "acceptedButtons");
+    createSimpleProperty(engine, this, "enabled");
+    createSimpleProperty(engine, this, "hoverEnabled");
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
-    createSimpleProperty(this, "containsMouse");
+    createSimpleProperty(engine, this, "containsMouse");
 
-    this.acceptedButtons = QMLGlobalObject.Qt.LeftButton;
+    this.acceptedButtons = Qt.LeftButton;
     this.enabled = true;
     this.hoverEnabled = false;
     this.containsMouse = false;
@@ -2687,14 +2717,14 @@ function QMLMouseArea(meta, parent, engine) {
         this.$domElement.onclick = function(e) {
             var mouse = {
                 accepted: true,
-                button: e.button == 0 ? QMLGlobalObject.Qt.LeftButton :
-                        e.button == 1 ? QMLGlobalObject.Qt.RightButton :
-                        e.button == 2 ? QMLGlobalObject.Qt.MiddleButton :
+                button: e.button == 0 ? Qt.LeftButton :
+                        e.button == 1 ? Qt.MiddleButton :
+                        e.button == 2 ? Qt.RightButton :
                         0,
-                modifiers: (e.ctrlKey * QMLGlobalObject.Qt.CtrlModifier)
-                        | (e.altKey * QMLGlobalObject.Qt.AltModifier)
-                        | (e.shiftKey * QMLGlobalObject.Qt.ShiftModifier)
-                        | (e.metaKey * QMLGlobalObject.Qt.MetaModifier),
+                modifiers: (e.ctrlKey * Qt.CtrlModifier)
+                        | (e.altKey * Qt.AltModifier)
+                        | (e.shiftKey * Qt.ShiftModifier)
+                        | (e.metaKey * Qt.MetaModifier),
                 x: (e.offsetX || e.layerX),
                 y: (e.offsetY || e.layerY)
             };
@@ -2722,43 +2752,15 @@ function QMLMouseArea(meta, parent, engine) {
 }
 
 function QMLComponent(meta, engine) {
-    var item,
-        // id's in item scope
-        ids = Object.create(engine.$getGlobalObj());
+    var item;
 
-    if (meta.$children.length != 1) {
-        console.log("A QML document must only contain one root element!");
-    }
+    if (meta.$children.length !== 1)
+        console.error("A QML document must only contain one root element!");
 
-    var scope = {
-        // Get scope
-        get: function() {
-            return ids;
-        },
-        // Get base/id scope
-        getIdScope: function() {
-            return ids;
-        },
-        // Define id
-        defId: function(name, obj) {
-            if (ids[name]) {
-                console.log("QMLDocument: overriding " + name
-                            + " with object", obj);
-            }
-            ids[name] = obj;
-        },
-        // Remove id
-        remId: function(name) {
-            ids[name] = undefined;
-        }
-    };
-    workingContext.push(scope);
+    workingContext.push(false);
 
     item = construct(meta.$children[0], undefined, engine);
 
-    workingContext.pop();
-
-    workingContext.push(scope);
     for (var i = 0; i < item.$init.length; i++)
         item.$init[i].call(item);
     workingContext.pop();
@@ -2770,15 +2772,12 @@ function QMLDocument(meta, engine) {
 
     var doc,
         // The only item in this document
-        item,
-        // id's in item scope
-        ids = Object.create(engine.$getGlobalObj());
+        item
 
     // todo: imports
 
-    if (meta.$children.length != 1) {
-        console.log("QMLDocument: children.length != 1");
-    }
+    if (meta.$children.length !== 1)
+        console.error("A QML document must only contain one root element!");
 
     // Build parent
     doc = new QMLItem(meta, undefined, engine);
@@ -2788,33 +2787,13 @@ function QMLDocument(meta, engine) {
         doc.$domElement.innerHTML = "";
     }
 
-    var scope = {
-        // Get scope
-        get: function() {
-            return ids;
-        },
-        // Get base/id scope
-        getIdScope: function() {
-            return ids;
-        },
-        // Define id
-        defId: function(name, obj) {
-            if (ids[name]) {
-                console.log("QMLDocument: overriding " + name
-                            + " with object", obj);
-            }
-            ids[name] = obj;
-        },
-        // Remove id
-        remId: function(name) {
-            ids[name] = undefined;
-        }
-    };
-    workingContext.push(scope);
+    workingContext.push(false);
+    engine.operationFlags |= QMLOperationFlag.IgnoreReferenceErrors;
 
     item = construct(meta.$children[0], doc, engine);
 
-    workingContext.pop();
+    engine.operationFlags ^= QMLOperationFlag.IgnoreReferenceErrors;
+    engine.rootScope = workingContext.pop().get();
 
     doc.children.push(item);
 
@@ -2851,7 +2830,7 @@ function QMLDocument(meta, engine) {
 
     doc.x = 0;
     doc.y = 0;
-    workingContext.push(scope);
+    workingContext.push(engine.rootScope);
     for (var i = 0; i < item.$init.length; i++)
         item.$init[i].call(item);
     workingContext.pop();
@@ -2872,10 +2851,10 @@ function QMLDocument(meta, engine) {
 function QMLState(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "name");
-    createSimpleProperty(this, "changes");
-    createSimpleProperty(this, "extend");
-    createSimpleProperty(this, "when");
+    createSimpleProperty(engine, this, "name");
+    createSimpleProperty(engine, this, "changes");
+    createSimpleProperty(engine, this, "extend");
+    createSimpleProperty(engine, this, "when");
     this.changes = [];
     this.$item = parent;
 
@@ -2908,9 +2887,9 @@ function QMLState(meta, parent, engine) {
 function QMLPropertyChanges(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "target");
-    createSimpleProperty(this, "explicit");
-    createSimpleProperty(this, "restoreEntryValues");
+    createSimpleProperty(engine, this, "target");
+    createSimpleProperty(engine, this, "explicit");
+    createSimpleProperty(engine, this, "restoreEntryValues");
 
     this.explicit = false;
     this.restoreEntryValues = true;
@@ -2927,10 +2906,10 @@ function QMLPropertyChanges(meta, parent, engine) {
 function QMLTransition(meta, parent, engine) {
     QMLBaseObject.call(this, meta, parent, engine);
 
-    createSimpleProperty(this, "animations");
-    createSimpleProperty(this, "from");
-    createSimpleProperty(this, "to");
-    createSimpleProperty(this, "reversible");
+    createSimpleProperty(engine, this, "animations");
+    createSimpleProperty(engine, this, "from");
+    createSimpleProperty(engine, this, "to");
+    createSimpleProperty(engine, this, "reversible");
     this.animations = [];
     this.$item = parent;
     this.from = "*";
@@ -2969,10 +2948,10 @@ function QMLTimer(meta, parent, engine) {
     var prevTrigger,
         self = this;
 
-    createSimpleProperty(this, "interval");
-    createSimpleProperty(this, "repeat");
-    createSimpleProperty(this, "running");
-    createSimpleProperty(this, "triggeredOnStart");
+    createSimpleProperty(engine, this, "interval");
+    createSimpleProperty(engine, this, "repeat");
+    createSimpleProperty(engine, this, "running");
+    createSimpleProperty(engine, this, "triggeredOnStart");
 
     this.interval = 1000;
     this.repeat = false;
@@ -3039,10 +3018,10 @@ function QMLAnimation(meta, parent, engine) {
         Infinite: -1
     };
 
-    createSimpleProperty(this, "alwaysRunToEnd");
-    createSimpleProperty(this, "loops");
-    createSimpleProperty(this, "paused");
-    createSimpleProperty(this, "running");
+    createSimpleProperty(engine, this, "alwaysRunToEnd");
+    createSimpleProperty(engine, this, "loops");
+    createSimpleProperty(engine, this, "paused");
+    createSimpleProperty(engine, this, "running");
 
     this.alwaysRunToEnd = false;
     this.loops = 1;
@@ -3069,7 +3048,7 @@ function QMLSequentialAnimation(meta, parent, engine) {
         i,
         self = this;
 
-    createSimpleProperty(this, "animations");
+    createSimpleProperty(engine, this, "animations");
     this.animations = [];
 
     function nextAnimation(proceed) {
@@ -3146,19 +3125,19 @@ function QMLPropertyAnimation(meta, parent, engine) {
         // TODO: rest and support for them.
     };
 
-    createSimpleProperty(this, "duration");
-    createSimpleProperty(this, "from");
-    createSimpleProperty(this, "properties");
-    createSimpleProperty(this, "property");
-    createSimpleProperty(this, "target");
-    createSimpleProperty(this, "targets");
-    createSimpleProperty(this, "to");
+    createSimpleProperty(engine, this, "duration");
+    createSimpleProperty(engine, this, "from");
+    createSimpleProperty(engine, this, "properties");
+    createSimpleProperty(engine, this, "property");
+    createSimpleProperty(engine, this, "target");
+    createSimpleProperty(engine, this, "targets");
+    createSimpleProperty(engine, this, "to");
 
     this.easing = new QObject(this);
-    createSimpleProperty(this.easing, "type", { altParent: this });
-    createSimpleProperty(this.easing, "amplitude", { altParent: this });
-    createSimpleProperty(this.easing, "overshoot", { altParent: this });
-    createSimpleProperty(this.easing, "period", { altParent: this });
+    createSimpleProperty(engine, this.easing, "type", { altParent: this });
+    createSimpleProperty(engine, this.easing, "amplitude", { altParent: this });
+    createSimpleProperty(engine, this.easing, "overshoot", { altParent: this });
+    createSimpleProperty(engine, this.easing, "period", { altParent: this });
 
     function redoActions() {
         this.$actions = [];
@@ -3306,7 +3285,7 @@ function QMLTextInput(meta, parent, engine) {
     this.$domElement.firstChild.style.margin = "0";
     this.$domElement.firstChild.style.width = "100%";
 
-    createSimpleProperty(this, "text", "");
+    createSimpleProperty(engine, this, "text", "");
     this.accepted = Signal();
 
     this.$init.push(function() {
@@ -3347,7 +3326,7 @@ function QMLButton(meta, parent, engine) {
     this.$domElement.style.pointerEvents = "auto";
     this.$domElement.innerHTML = "<span></span>";
 
-    createSimpleProperty(this, "text");
+    createSimpleProperty(engine, this, "text");
     this.clicked = Signal();
 
     this.textChanged.connect(this, function(newVal) {
@@ -3382,7 +3361,7 @@ function QMLTextArea(meta, parent, engine) {
     // the positioning, so we need to manually set it to 0.
     this.$domElement.firstChild.style.margin = "0";
 
-    createSimpleProperty(this, "text", "");
+    createSimpleProperty(engine, this, "text", "");
 
     this.implicitWidth = this.$domElement.firstChild.offsetWidth;
     this.implicitHeight = this.$domElement.firstChild.offsetHeight;

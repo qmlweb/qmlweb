@@ -51,6 +51,10 @@
     "title": "* Widget Gallery"
 },
 {
+    "file": "components.qml",
+    "title": "* Component test"
+},
+{
     "file": "imageview.qml",
     "title": "* Image View"
 },

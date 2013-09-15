@@ -18,6 +18,12 @@ Rectangle {
         onClicked: comp.test("lightpink", Math.floor(10 * Math.random()));
     }
 
+    Text {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 10
+        text: number + " + " + comp2.number + " =  " + (number + comp2.number)
+    }
+
     Rectangle {
         id: greenRect
         color: "lightgreen"
