@@ -213,6 +213,7 @@ function construct(meta, parent, engine) {
             Transition: QMLTransition,
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
+            ParallelAnimation: QMLParallelAnimation,
             NumberAnimation: QMLNumberAnimation,
             Behavior: QMLBehavior,
             TextInput: QMLTextInput,
@@ -3088,7 +3089,6 @@ function QMLSequentialAnimation(meta, parent, engine) {
                 anim = self.animations[curIndex];
                 console.log("nextAnimation", self, curIndex, anim);
                 descr("", anim, ["target"]);
-                anim.from = anim.target[anim.property];
                 anim.start();
             } else {
                 passedLoops++;
@@ -3156,6 +3156,65 @@ function QMLSequentialAnimation(meta, parent, engine) {
     });
 };
 
+function QMLParallelAnimation(meta, parent, engine) {
+    QMLAnimation.call(this, meta, parent, engine);
+    var curIndex,
+        passedLoops,
+        i;
+
+    createSimpleProperty(engine, this, "animations");
+    this.animations = [];
+    this.$runningAnimations = 0;
+
+    this.animationsChanged.connect(this, function() {
+        for (i = 0; i < this.animations.length; i++) {
+            if (!this.animations[i].runningChanged.isConnected(this, animationFinished))
+                this.animations[i].runningChanged.connect(this, animationFinished);
+        }
+    });
+
+    function animationFinished(newVal) {
+        this.$runningAnimations += newVal ? 1 : -1;
+        if (this.$runningAnimations === 0)
+            this.running = false;
+    }
+
+    this.start = function() {
+        if (!this.running) {
+            this.running = true;
+            for (i = 0; i < this.animations.length; i++)
+                this.animations[i].start();
+        }
+    }
+    this.stop = function() {
+        if (this.running) {
+            for (i = 0; i < this.animations.length; i++)
+                this.animations[i].stop();
+            this.running = false;
+        }
+    }
+    this.complete = this.stop;
+
+    this.$addChild = function(childMeta) {
+        this.animations.push(construct(childMeta, this, engine));
+    }
+    this.$init.push(function() {
+        for (var i = 0; i < this.animations.length; i++)
+            for (var j = 0; j < this.animations[i].$init.length; j++)
+                this.animations[i].$init[j].call(this.animations[i]);
+    });
+
+    engine.$registerStart(function() {
+        if (self.running) {
+            self.running = false; // toggled back by start();
+            self.start();
+        }
+    });
+    engine.$registerStop(function() {
+        self.stop();
+    });
+};
+
 function QMLPropertyAnimation(meta, parent, engine) {
     QMLAnimation.call(this, meta, parent, engine);
 
@@ -3187,7 +3246,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
                 this.$actions.push({
                     target: this.$targets[i],
                     property: this.$props[j],
-                    from: this.from !== Undefined ? this.from : this.$targets[i][this.$props[j]],
+                    from: this.from,
                     to: this.to
                 });
             }
@@ -3275,6 +3334,10 @@ function QMLNumberAnimation(meta, parent, engine) {
     // Methods
     this.start = function() {
         if (!this.running) {
+            for (var i in self.$actions) {
+                var action = self.$actions[i];
+                action.from = action.from !== Undefined ? action.from : action.target[action.property];
+            }
             this.running = true;
             tickStart = (new Date).getTime();
         }
