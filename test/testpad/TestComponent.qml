@@ -2,7 +2,7 @@ import Qt 4.7
 
 Rectangle {
     id: comp
-    color: "lightblue"
+    color: rectColor
     height: 100
     width: 300
     // We fetch the border-properties from greenRect for testing purposes

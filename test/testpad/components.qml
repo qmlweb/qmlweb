@@ -7,6 +7,7 @@ Rectangle {
     color: "lightgrey"
 
     property int number: 5
+    property string rectColor: "palegoldenrod"
 
     TestComponent {
         x: 50

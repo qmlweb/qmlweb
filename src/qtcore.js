@@ -507,14 +507,16 @@ var setupGetter,
  * Apply properties from meta to item.
  * @param {Object} meta Source of properties
  * @param {Object} item Target of property apply
- * @param {Object} [objectScope] Alternative scope in which properties should be evaluated
+ * @param {Object} objectScope Scope in which properties should be evaluated
+ * @param {Object} componentScope Component scope in which properties should be evaluated
+ * @param {Object} rootScope Root scope in which properties should be evaluated
  */
-function applyProperties(meta, item, objectScope) {
+function applyProperties(meta, item, objectScope, componentScope, rootScope) {
     var i;
     objectScope = objectScope || item;
     for (i in meta) {
         if (i == "$properties") {
-            applyProperties(meta[i], item);
+            applyProperties(meta[i], item, item, componentScope, rootScope);
             continue;
         }
         // skip global id's and internal values
@@ -537,8 +539,7 @@ function applyProperties(meta, item, objectScope) {
                     + meta[i].src
                     + "}; func";
             item[signalName].disconnect(item, i);
-            item[i] = evalBinding(null, src, objectScope,
-                                    workingContext[workingContext.length-1].get());
+            item[i] = evalBinding(null, src, objectScope, componentScope.get(), rootScope);
             item[signalName].connect(item, i);
             continue;
         }
@@ -548,8 +549,7 @@ function applyProperties(meta, item, objectScope) {
             if (meta[i] && meta[i].type == "alias") {
                 var val = meta[i].value;
                 var propName = val.src.replace(/.*\.(\w*)\s*/, "$1");
-                var obj = evalBinding(null, val.src.replace(/(.*)\.\w*\s*/, "$1"), objectScope,
-                                        workingContext[workingContext.length-1].get());
+                var obj = evalBinding(null, val.src.replace(/(.*)\.\w*\s*/, "$1"), objectScope, componentScope.get(), rootScope);
                 (function(val, propName, obj) {
                     setupGetterSetter(item, i, function() {
                         return obj.$properties[propName].get();
@@ -564,13 +564,15 @@ function applyProperties(meta, item, objectScope) {
             } else if (item[i] && !(meta[i] instanceof Array)
                         && !(meta[i] instanceof QMLBinding)) {
                 // Apply properties one by one, otherwise apply at once
-                applyProperties(meta[i], item[i], item);
+                applyProperties(meta[i], item[i], item, componentScope, rootScope);
                 continue;
             }
         }
-        if (item.hasOwnProperty(i))
+        if (item.hasOwnProperty(i)) {
+            workingContext.push(componentScope);
             item[i] = meta[i];
-        else if (item.$setCustomData)
+            workingContext.pop();
+        } else if (item.$setCustomData)
             item.$setCustomData(i, meta[i]);
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
@@ -1029,7 +1031,8 @@ function QMLBaseObject(meta, parent, engine) {
             }
         };
     }
-    this.$scope = workingContext[workingContext.length-1];
+    var componentScope = workingContext[workingContext.length-1];
+    this.$scope = componentScope;
 
     // id
     if (meta.id) {
@@ -1075,11 +1078,11 @@ function QMLBaseObject(meta, parent, engine) {
 
     if (!this.$init)
         this.$init = [];
-    this.$init[0] = function() {
+    this.$init.push(function() {
         workingContext.push(this.$scope);
-        applyProperties(meta, this);
+        applyProperties(meta, this, this, componentScope, engine.rootScope);
         workingContext.pop();
-    }
+    });
 }
 
 function updateHGeometry(newVal, oldVal, propName) {
@@ -2430,8 +2433,10 @@ function QMLListElement(meta, parent, engine) {
         }
     }
 
+    var componentScope = workingContext[workingContext.length-1];
+
     this.$init = [function() {
-        applyProperties(meta, this);
+        applyProperties(meta, this, this, componentScope, engine.rootScope);
     }];
 }
 
@@ -2830,10 +2835,8 @@ function QMLDocument(meta, engine) {
 
     doc.x = 0;
     doc.y = 0;
-    workingContext.push(engine.rootScope);
     for (var i = 0; i < item.$init.length; i++)
         item.$init[i].call(item);
-    workingContext.pop();
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         doc.$domElement.style.position = "relative";
