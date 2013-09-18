@@ -1247,7 +1247,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         function maybe_qmlelem(no_in) {
                 var expr = maybe_assign(no_in);
                 if (is("punc", "{"))
-                    return as("qmlelem", expr[1], qmlblock());
+                    return as("qmlelem", expr[1], undefined, qmlblock());
                 return expr;
         };
 
@@ -1372,7 +1372,13 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     return qmlpropdef();
                 } else if (qml_is_element(propname) && !is("punc", ".")) {
                     // Element
-                    return as("qmlelem", propname, qmlblock());
+                    var onProp;
+                    if (is("name", "on")) {
+                        next();
+                        onProp = S.token.value;
+                        next();
+                    }
+                    return as("qmlelem", propname, onProp, qmlblock());
                 } else {
                     // property statement
                     if (is("punc", ".")) {
@@ -1508,15 +1514,23 @@ function QMLPropertyDefinition(type, value) {
 }
 
 /**
+ * Create an object representing a group of QML properties (like anchors).
+ * @return {Object} Object representing the group
+ */
+function QMLMetaPropertyGroup() {}
+
+/**
  * Create an object representing a QML element.
  * @param {String} type The type of the element
+ * @param {String} onProp The name of the property specified with the "on" keyword
  */
-function QMLMetaElement(type) {
+function QMLMetaElement(type, onProp) {
     this.$class = type;
     this.$children = [];
     this.$signals = [];
     this.$functions = {};
     this.$properties = {};
+    this.$on = onProp;
 }
 
 QMLBinding.prototype.toJSON = function() {
@@ -1542,8 +1556,8 @@ function convertToEngine(tree) {
             item.$children = [ walk(statements[0]) ];
             return item;
         },
-        "qmlelem": function(elem, statements) {
-            var item = new QMLMetaElement(elem);
+        "qmlelem": function(elem, onProp, statements) {
+            var item = new QMLMetaElement(elem, onProp);
 
             for (var i in statements) {
                 var statement = statements[i],
@@ -1561,12 +1575,12 @@ function convertToEngine(tree) {
                         break;
                     case "qmlobjdef":
                         // Create object to item
-                        item[name] = item[name] || {};
+                        item[name] = item[name] || new QMLMetaPropertyGroup();
                         item[name][statement[2]] = val;
                         break;
                     case "qmlobj":
                         // Create object to item
-                        item[name] = item[name] || {};
+                        item[name] = item[name] || new QMLMetaPropertyGroup();
                         for (var i in val)
                             item[name][i] = val[i];
                         break;
@@ -1615,7 +1629,7 @@ function convertToEngine(tree) {
             return src;
         },
         "qmlpropdef": function(name, type, tree, src) {
-            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : undefined);
+            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");
         },
         "qmlsignaldef": function(name, params) {
             return { name: name, params: params };

@@ -63,6 +63,10 @@
     "title": "* Repeater test"
 },
 {
+    "file": "behavior.qml",
+    "title": "* Behavior test"
+},
+{
     "file": "../presentation.qml",
     "title": "* Project introduction"
 } ]

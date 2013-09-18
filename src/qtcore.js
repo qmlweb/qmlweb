@@ -214,6 +214,7 @@ function construct(meta, parent, engine) {
             Timer: QMLTimer,
             SequentialAnimation: QMLSequentialAnimation,
             NumberAnimation: QMLNumberAnimation,
+            Behavior: QMLBehavior,
             TextInput: QMLTextInput,
             Button: QMLButton,
             TextArea: QMLTextArea
@@ -350,6 +351,7 @@ function QMLProperty(engine, obj, name, options) {
     this.objectScope = options.altParent || obj;
     this.value = undefined;
     this.type = options.type;
+    this.animation = null;
     this.engine = engine;
 
     // This list contains all signals that hold references to this object.
@@ -370,6 +372,16 @@ QMLProperty.prototype.update = function() {
         console.log(e);
     }
 
+    if (this.animation) {
+        this.animation.$actions = [{
+            target: this.animation.target || this.obj,
+            property: this.animation.property || this.name,
+            from: this.animation.from || oldVal,
+            to: this.animation.to || this.val
+        }];
+        this.animation.restart();
+    }
+
     if (this.val !== oldVal)
         this.changed(this.val, oldVal, this.name);
 }
@@ -385,7 +397,7 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal) {
+QMLProperty.prototype.set = function(newVal, fromAnimation) {
     var i,
         oldVal = this.val;
 
@@ -445,11 +457,22 @@ QMLProperty.prototype.set = function(newVal) {
             this.val = qmlBasicTypes[this.type](newVal);
         else
             this.val = newVal;
-        this.binding = false;
+        if (!fromAnimation)
+            this.binding = false;
     }
 
-    if (this.val !== oldVal)
+    if (this.val !== oldVal) {
+        if (this.animation && !fromAnimation) {
+            this.animation.$actions = [{
+                target: this.animation.target || this.obj,
+                property: this.animation.property || this.name,
+                from: this.animation.from || oldVal,
+                to: this.animation.to || this.val
+            }];
+            this.animation.restart();
+        }
         this.changed(this.val, oldVal, this.name);
+    }
 }
 
 /**
@@ -561,8 +584,7 @@ function applyProperties(meta, item, objectScope, componentScope, rootScope) {
             } else if (meta[i] instanceof QMLPropertyDefinition) {
                 item[i] = meta[i].value;
                 continue;
-            } else if (item[i] && !(meta[i] instanceof Array)
-                        && !(meta[i] instanceof QMLBinding)) {
+            } else if (item[i] && meta[i] instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
                 applyProperties(meta[i], item[i], item, componentScope, rootScope);
                 continue;
@@ -570,7 +592,7 @@ function applyProperties(meta, item, objectScope, componentScope, rootScope) {
         }
         if (item.hasOwnProperty(i)) {
             workingContext.push(componentScope);
-            item[i] = meta[i];
+            item.$properties[i].set(meta[i], true);
             workingContext.pop();
         } else if (item.$setCustomData)
             item.$setCustomData(i, meta[i]);
@@ -627,7 +649,7 @@ QMLOperationFlag = {
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
 //----------Public Members----------
-    this.fps = 25;
+    this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
     this.running = false;
 
@@ -2719,7 +2741,7 @@ function QMLMouseArea(meta, parent, engine) {
     this.containsMouse = false;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$domElement.onclick = function(e) {
+        function handleClick(e) {
             var mouse = {
                 accepted: true,
                 button: e.button == 0 ? Qt.LeftButton :
@@ -2734,11 +2756,15 @@ function QMLMouseArea(meta, parent, engine) {
                 y: (e.offsetY || e.layerY)
             };
 
-            if (self.enabled) {
+            if (self.enabled && self.acceptedButtons & mouse.button) {
                 self.clicked(mouse);
                 engine.$requestDraw();
             }
+            // This decides whether to show the browser's context menu on right click or not
+            return !(self.acceptedButtons & Qt.RightButton);
         }
+        this.$domElement.onclick = handleClick;
+        this.$domElement.oncontextmenu = handleClick;
         this.$domElement.onmouseover = function(e) {
             if (self.hoverEnabled) {
                 self.containsMouse = true;
@@ -3076,9 +3102,12 @@ function QMLSequentialAnimation(meta, parent, engine) {
         }
     }
 
-    for (i = 0; i < this.animations.length; i++) {
-        this.animations[i].runningChanged.connect(nextAnimation);
-    }
+    this.animationsChanged.connect(this, function() {
+        for (i = 0; i < this.animations.length; i++) {
+            if (!this.animations[i].runningChanged.isConnected(nextAnimation))
+                this.animations[i].runningChanged.connect(nextAnimation);
+        }
+    });
 
     this.start = function() {
         if (!this.running) {
@@ -3106,6 +3135,15 @@ function QMLSequentialAnimation(meta, parent, engine) {
             this.running = false;
         }
     }
+
+    this.$addChild = function(childMeta) {
+        this.animations.push(construct(childMeta, this, engine));
+    }
+    this.$init.push(function() {
+        for (var i = 0; i < this.animations.length; i++)
+            for (var j = 0; j < this.animations[i].$init.length; j++)
+                this.animations[i].$init[j].call(this.animations[i]);
+    });
 
     engine.$registerStart(function() {
         if (self.running) {
@@ -3149,7 +3187,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
                 this.$actions.push({
                     target: this.$targets[i],
                     property: this.$props[j],
-                    from: this.from,
+                    from: this.from !== Undefined ? this.from : this.$targets[i][this.$props[j]],
                     to: this.to
                 });
             }
@@ -3181,12 +3219,10 @@ function QMLPropertyAnimation(meta, parent, engine) {
 
     this.duration = 250;
     this.easing.type = this.Easing.Linear;
-    this.from = 0;
     this.$props = [];
     this.$targets = [];
     this.properties = "";
     this.targets = [];
-    this.to = 0;
 
     this.targetChanged.connect(this, redoTargets);
     this.targetsChanged.connect(this, redoTargets);
@@ -3229,7 +3265,7 @@ function QMLNumberAnimation(meta, parent, engine) {
                     var action = self.$actions[i],
                         at = (now - tickStart) / self.duration,
                         value = curve(at) * (action.to - action.from) + action.from;
-                    action.target[action.property] = value;
+                    action.target.$properties[action.property].set(value, true);
                 }
             }
 
@@ -3255,15 +3291,37 @@ function QMLNumberAnimation(meta, parent, engine) {
             workingContext.push(this.$scope);
             for (var i in this.$actions) {
                 var action = this.$actions[i];
-                // action.value is specified if there is a binding to be applied after the
-                // animation finished (used for transitions)
-                action.target[action.property] = action.value || action.to;
+                action.target.$properties[action.property].set(action.to, true);
             }
             workingContext.pop();
             this.stop();
             engine.$requestDraw();
         }
     }
+}
+
+function QMLBehavior(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(engine, this, "animation");
+    createSimpleProperty(engine, this, "enabled");
+
+    this.animationChanged.connect(this, function(newVal) {
+        newVal.target = parent;
+        newVal.property = meta.$on;
+        parent.$properties[meta.$on].animation = newVal;
+    });
+    this.enabledChanged.connect(this, function(newVal) {
+        parent.$properties[meta.$on].animation = newVal ? this.animation : null;
+    })
+
+    this.$addChild = function(childMeta) {
+        this.animation = construct(childMeta, this, engine);
+    }
+    this.$init.push(function() {
+        for (var i = 0; i < this.animation.$init.length; i++)
+            this.animation.$init[i].call(this.animation);
+    });
 }
 
 
