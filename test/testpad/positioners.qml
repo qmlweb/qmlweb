@@ -134,6 +134,29 @@
              color: "lightsteelblue"
              border.color: "black"
              radius: 15
+             scale: 2
+             transform: [
+                 Rotation {
+                     axis.y: 1
+                     angle: 45
+                 },
+                 Rotation {
+                     angle: -15
+                 },
+                 Scale {
+                     xScale: 0.5
+                     yScale: 0.8
+                 },
+                 Translate {
+                     x: 30
+                     y: -10
+                 }
+            ]
+            Text {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                text: "3D-\ntransform"
+            }
          }
 
          Rectangle { color: "red"; width: 50; height: 50; border.color: "black"; radius: 15 }

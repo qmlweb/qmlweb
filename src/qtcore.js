@@ -201,7 +201,9 @@ function construct(meta, parent, engine) {
             Row: QMLRow,
             Grid: QMLGrid,
             Flow: QMLFlow,
-            Display: QMLItem, // todo
+            Rotation: QMLRotation,
+            Scale: QMLScale,
+            Translate: QMLTranslate,
             Text: QMLText,
             Rectangle: QMLRectangle,
             Repeater: QMLRepeater,
@@ -1361,6 +1363,8 @@ function QMLItem(meta, parent, engine) {
     createSimpleProperty(engine, this, "horizontalCenter");
     createSimpleProperty(engine, this, "verticalCenter");
     createSimpleProperty(engine, this, "rotation");
+    createSimpleProperty(engine, this, "scale");
+    createSimpleProperty(engine, this, "transform");
     createSimpleProperty(engine, this, "spacing");
     createSimpleProperty(engine, this, "visible");
     createSimpleProperty(engine, this, "opacity");
@@ -1538,14 +1542,32 @@ function QMLItem(meta, parent, engine) {
         workingContext.pop();
     });
 
+    this.transformChanged.connect(this, function() {
+        for (var i = 0; i < this.transform.length; i++)
+            if (this.transform[i] instanceof QMLMetaElement)
+                this.transform[i] = construct(this.transform[i], this, engine);
+    });
+
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.rotationChanged.connect(this, function(newVal) {
-            this.$domElement.style.transform = "rotate(" + newVal + "deg)";
-            this.$domElement.style.MozTransform = "rotate(" + newVal + "deg)";      //Firefox
-            this.$domElement.style.webkitTransform = "rotate(" + newVal + "deg)";   //Chrome and Safari
-            this.$domElement.style.OTransform = "rotate(" + newVal + "deg)";        //Opera
-            this.$domElement.style.msTransform = "rotate(" + newVal + "deg)";       //IE
-        });
+        this.$updateTransform = function() {
+            var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
+            for (var i = 0; i < this.transform.length; i++) {
+                var t = this.transform[i];
+                if (t instanceof QMLRotation)
+                    transform += " rotate3d(" + t.axis.x + ", " + t.axis.y + ", " + t.axis.z + ", " + t.angle + "deg)";
+                else if (t instanceof QMLScale)
+                    transform += " scale(" + t.xScale + ", " + t.yScale + ")";
+                else if (t instanceof QMLTranslate)
+                    transform += " translate(" + t.x + "px, " + t.y + "px)";
+            }
+            this.$domElement.style.transform = transform;
+            this.$domElement.style.MozTransform = transform;    // Firefox
+            this.$domElement.style.webkitTransform = transform; // Chrome, Safari and Opera
+            this.$domElement.style.OTransform = transform;      // Opera
+            this.$domElement.style.msTransform = transform;     // IE
+        }
+        this.rotationChanged.connect(this, this.$updateTransform);
+        this.scaleChanged.connect(this, this.$updateTransform);
         this.visibleChanged.connect(this, function(newVal) {
             this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
         });
@@ -1592,6 +1614,9 @@ function QMLItem(meta, parent, engine) {
     this.states = [];
     this.transitions = [];
     this.state = "";
+    this.transform = [];
+    this.rotation = 0;
+    this.scale = 1;
 
     this.$init.push(function() {
         for (var i = 0; i < this.children.length; i++)
@@ -1606,6 +1631,9 @@ function QMLItem(meta, parent, engine) {
         for (var i = 0; i < this.transitions.length; i++)
             for (var j = 0; j < this.transitions[i].$init.length; j++)
                 this.transitions[i].$init[j].call(this.transitions[i]);
+        for (var i = 0; i < this.transform.length; i++)
+            for (var j = 0; j < this.transform[i].$init.length; j++)
+                this.transform[i].$init[j].call(this.transform[i]);
     });
 
     this.$draw = function(c) {
@@ -1657,6 +1685,8 @@ QMLPositioner.slotChildrenChanged = function() {
             child.heightChanged.connect(this, this.layoutChildren);
         if (!child.visibleChanged.isConnected(this, this.layoutChildren))
             child.visibleChanged.connect(this, this.layoutChildren);
+        if (!child.opacityChanged.isConnected(this, this.layoutChildren))
+            child.opacityChanged.connect(this, this.layoutChildren);
     }
 }
 
@@ -1871,6 +1901,87 @@ QMLFlow.prototype.layoutChildren = function() {
         this.height = curVPos + rowSize;
     else
         this.width = curHPos + rowSize;
+}
+
+function QMLRotation(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(engine, this, "angle");
+
+    this.axis = new QObject(this);
+    createSimpleProperty(engine, this.axis, "x");
+    createSimpleProperty(engine, this.axis, "y");
+    createSimpleProperty(engine, this.axis, "z");
+
+    this.origin = new QObject(this);
+    createSimpleProperty(engine, this.origin, "x");
+    createSimpleProperty(engine, this.origin, "y");
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        function updateOrigin() {
+            parent.$domElement.style.transformOrigin = this.origin.x + " " + this.origin.y;
+            parent.$domElement.style.MozTransformOrigin = this.origin.x + " " + this.origin.y;    // Firefox
+            parent.$domElement.style.webkitTransformOrigin = this.origin.x + " " + this.origin.y; // Chrome, Safari and Opera
+        }
+        this.angleChanged.connect(parent, parent.$updateTransform);
+        this.axis.xChanged.connect(parent, parent.$updateTransform);
+        this.axis.yChanged.connect(parent, parent.$updateTransform);
+        this.axis.zChanged.connect(parent, parent.$updateTransform);
+        this.origin.xChanged.connect(this, updateOrigin);
+        this.origin.yChanged.connect(this, updateOrigin);
+
+        this.angle = 0;
+        this.axis.x = 0;
+        this.axis.y = 0;
+        this.axis.z = 1;
+        this.origin.x = 0;
+        this.origin.y = 0;
+    }
+}
+
+function QMLScale(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(engine, this, "xScale");
+    createSimpleProperty(engine, this, "yScale");
+
+    this.origin = new QObject(this);
+    createSimpleProperty(engine, this.origin, "x");
+    createSimpleProperty(engine, this.origin, "y");
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        function updateOrigin() {
+            parent.$domElement.style.transformOrigin = this.origin.x + " " + this.origin.y;
+            parent.$domElement.style.MozTransformOrigin = this.origin.x + " " + this.origin.y;    // Firefox
+            parent.$domElement.style.webkitTransformOrigin = this.origin.x + " " + this.origin.y; // Chrome, Safari and Opera
+        }
+        this.xScaleChanged.connect(parent, parent.$updateTransform);
+        this.yScaleChanged.connect(parent, parent.$updateTransform);
+        this.origin.xChanged.connect(this, updateOrigin);
+        this.origin.yChanged.connect(this, updateOrigin);
+
+        this.xScale = 0;
+        this.yScale = 0;
+        this.origin.x = 0;
+        this.origin.y = 0;
+    }
+
+}
+
+function QMLTranslate(meta, parent, engine) {
+    QMLBaseObject.call(this, meta, parent, engine);
+
+    createSimpleProperty(engine, this, "x");
+    createSimpleProperty(engine, this, "y");
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        this.xChanged.connect(parent, parent.$updateTransform);
+        this.yChanged.connect(parent, parent.$updateTransform);
+
+        this.x = 0;
+        this.y = 0;
+    }
+
 }
 
 function QMLFont(parent, engine) {
