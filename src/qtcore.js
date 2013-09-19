@@ -1919,9 +1919,9 @@ function QMLRotation(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
-            parent.$domElement.style.transformOrigin = this.origin.x + " " + this.origin.y;
-            parent.$domElement.style.MozTransformOrigin = this.origin.x + " " + this.origin.y;    // Firefox
-            parent.$domElement.style.webkitTransformOrigin = this.origin.x + " " + this.origin.y; // Chrome, Safari and Opera
+            parent.$domElement.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
+            parent.$domElement.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
+            parent.$domElement.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
         }
         this.angleChanged.connect(parent, parent.$updateTransform);
         this.axis.xChanged.connect(parent, parent.$updateTransform);
@@ -1951,9 +1951,9 @@ function QMLScale(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
-            parent.$domElement.style.transformOrigin = this.origin.x + " " + this.origin.y;
-            parent.$domElement.style.MozTransformOrigin = this.origin.x + " " + this.origin.y;    // Firefox
-            parent.$domElement.style.webkitTransformOrigin = this.origin.x + " " + this.origin.y; // Chrome, Safari and Opera
+            parent.$domElement.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
+            parent.$domElement.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
+            parent.$domElement.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
         }
         this.xScaleChanged.connect(parent, parent.$updateTransform);
         this.yScaleChanged.connect(parent, parent.$updateTransform);
