@@ -410,8 +410,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation) {
         if (newVal.binding) {
             this.binding = newVal.binding;
         } else {
-            var bindSrc = "function $Qbc() { var $Qbv = " + newVal.src
-                + "; return $Qbv;};$Qbc";
+            var bindSrc = "(function() { return " + newVal.src + "})";
             this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].get(), this.engine.rootScope);
         }
         try {
@@ -593,14 +592,14 @@ function applyProperties(meta, item, objectScope, componentScope, rootScope) {
                 continue;
             }
         }
-        if (item.hasOwnProperty(i)) {
-            workingContext.push(componentScope);
+        workingContext.push(componentScope);
+        if (item.hasOwnProperty(i))
             item.$properties[i].set(meta[i], true);
-            workingContext.pop();
-        } else if (item.$setCustomData)
+        else if (item.$setCustomData)
             item.$setCustomData(i, meta[i]);
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
+        workingContext.pop();
     }
 }
 
@@ -1104,9 +1103,7 @@ function QMLBaseObject(meta, parent, engine) {
     if (!this.$init)
         this.$init = [];
     this.$init.push(function() {
-        workingContext.push(this.$scope);
         applyProperties(meta, this, this, componentScope, engine.rootScope);
-        workingContext.pop();
     });
 }
 
@@ -1425,7 +1422,6 @@ function QMLItem(meta, parent, engine) {
                 this.transitions[i] = construct(this.transitions[i], this, engine);
     });
     this.stateChanged.connect(this, function(newVal, oldVal) {
-        workingContext.push(this.$scope);
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
             if (this.states[i].name === newVal)
@@ -1539,7 +1535,6 @@ function QMLItem(meta, parent, engine) {
         }
         if (transition)
             transition.$start(actions);
-        workingContext.pop();
     });
 
     this.transformChanged.connect(this, function() {
@@ -3036,7 +3031,16 @@ function QMLPropertyChanges(meta, parent, engine) {
     this.restoreEntryValues = true;
     this.$actions = [];
 
+    this.targetChanged.connect(this, function(newVal) {
+        for (var i in this.$actions) {
+            var bindSrc = "(function() { return " + this.$actions[i].value.src + "})";
+            this.$actions[i].value.binding = evalBinding(null, bindSrc, newVal, workingContext[workingContext.length-1].get(), engine.rootScope);
+        }
+    });
+
     this.$setCustomData = function(propName, value) {
+        var bindSrc = "(function() { return " + value.src + "})";
+        value.binding = evalBinding(null, bindSrc, this.target, workingContext[workingContext.length-1].get(), engine.rootScope);
         this.$actions.push({
             property: propName,
             value: value
