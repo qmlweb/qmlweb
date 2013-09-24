@@ -369,11 +369,13 @@ QMLProperty.prototype.update = function() {
         return;
 
     var oldVal = this.val;
+    evaluatingProperty = this;
     try {
         this.val = this.binding();
     } catch(e) {
         console.log(e);
     }
+    evaluatingProperty = undefined;
 
     if (this.animation) {
         this.animation.$actions = [{
