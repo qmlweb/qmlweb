@@ -1774,12 +1774,12 @@ QMLGrid.prototype.layoutChildren = function() {
     if (!this.columns && !this.rows) {
         c = 4;
         r = Math.ceil(visibleItems.length / 4);
-    } else if (!this.rows) {
-        c = this.columns;
-        r = Math.ceil(visibleItems.length / c);
     } else if (!this.columns) {
         r = this.rows;
         c = Math.ceil(visibleItems.length / r);
+    } else {
+        c = this.columns;
+        r = Math.ceil(visibleItems.length / c);
     }
 
     // How big are the colums/rows?
