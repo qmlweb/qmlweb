@@ -2218,7 +2218,7 @@ function QMLText(meta, parent, engine) {
     function updateImplicitHeight() {
         var height;
 
-        if (!this.text || this.text == "") {
+        if (this.text === Undefined || this.text === "") {
             height = 0;
         } else if (engine.renderMode == QMLRenderMode.DOM) {
             height = this.$domElement ? this.$domElement.firstChild.offsetHeight : 0;
@@ -2247,7 +2247,7 @@ function QMLText(meta, parent, engine) {
     function updateImplicitWidth() {
         var width;
 
-        if (!this.text || this.text == "")
+        if (this.text === Undefined || this.text === "")
             width = 0;
         else if (engine.renderMode == QMLRenderMode.DOM)
             width = this.$domElement ? this.$domElement.firstChild.offsetWidth : 0;
