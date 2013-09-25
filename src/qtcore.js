@@ -1710,8 +1710,8 @@ QMLRow.prototype.layoutChildren = function() {
         child.x = curPos;
         curPos += child.width + this.spacing;
     }
-    this.height = maxHeight;
-    this.width = curPos - this.spacing; // We want no spacing at the right side
+    this.implicitHeight = maxHeight;
+    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
 
 function QMLColumn(meta, parent, engine) {
@@ -1729,8 +1729,8 @@ QMLColumn.prototype.layoutChildren = function() {
         child.y = curPos;
         curPos += child.height + this.spacing;
     }
-    this.width = maxWidth;
-    this.height = curPos - this.spacing; // We want no spacing at the bottom side
+    this.implicitWidth = maxWidth;
+    this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
 }
 
 function QMLGrid(meta, parent, engine) {
@@ -1758,8 +1758,8 @@ QMLGrid.prototype.layoutChildren = function() {
         r = 0, c = 0,
         colWidth = [],
         rowHeight = [],
-        gridWidth = 0,
-        gridHeight = 0,
+        gridWidth = -this.spacing,
+        gridHeight = -this.spacing,
         curHPos = 0,
         curVPos = 0;
 
@@ -1808,6 +1808,11 @@ QMLGrid.prototype.layoutChildren = function() {
             }
         }
 
+    for (var i in colWidth)
+        gridWidth += colWidth[i] + this.spacing;
+    for (var i in rowHeight)
+        gridHeight += rowHeight[i] + this.spacing;
+
     // Do actual positioning
     // When layoutDirection is RightToLeft we need oposite order of coumns
     var step = this.layoutDirection == 1 ? -1 : 1,
@@ -1841,6 +1846,9 @@ QMLGrid.prototype.layoutChildren = function() {
             curHPos += colWidth[i] + this.spacing;
             curVPos = 0;
         }
+
+    this.implicitWidth = gridWidth;
+    this.implicitHeight = gridHeight;
 }
 
 function QMLFlow(meta, parent, engine) {
@@ -1895,9 +1903,9 @@ QMLFlow.prototype.layoutChildren = function() {
         }
     }
     if (this.flow == 0)
-        this.height = curVPos + rowSize;
+        this.implicitHeight = curVPos + rowSize;
     else
-        this.width = curHPos + rowSize;
+        this.implicitWidth = curHPos + rowSize;
 }
 
 function QMLRotation(meta, parent, engine) {
