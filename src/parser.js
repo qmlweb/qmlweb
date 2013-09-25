@@ -1392,9 +1392,11 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                         var subname = S.token.value;
                         next();
                         expect(":");
+                        S.in_function++;
                         var from = S.token.pos,
                             stat = statement(),
                             to = S.token.pos;
+                        S.in_function--;
                         return as("qmlobjdef", propname, subname, stat,
                             $TEXT.substr(from, to - from));
                     } else if (is("punc", "{")) {
@@ -1402,9 +1404,11 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     } else {
                         // Evaluatable item
                         expect(":");
+                        S.in_function++;
                         var from = S.token.pos,
                             stat = statement(),
                             to = S.token.pos;
+                        S.in_function--;
                         return as("qmlprop", propname, stat,
                             $TEXT.substr(from, to - from));
                     }
@@ -1502,6 +1506,11 @@ function QMLBinding(val, tree) {
         this.binding = val;
         return;
     }
+    // this.function states whether the binding is a simple js statement or a function containing a
+    // return statement. We decide this on whether it is a code block or not. If it is, we require a
+    // return statement. If it is a code block it could though also be a object definition, so we
+    // need to check that as well (it is, if the content is labels).
+    this.function = tree && tree[0] == "block" && tree[1][0][0] !== "label";
     this.src = val;
 }
 

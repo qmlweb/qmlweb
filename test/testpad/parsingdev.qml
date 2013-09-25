@@ -11,7 +11,12 @@ Rectangle {
     Text {
         text: "Rectangle size is "
             + main.getSize()
-        y: main.height / 3
+        y: {
+            if (main.height > 100)
+                return main.height / 3;
+            else
+                return main.height / 2;
+        }
         anchors.horizontalCenter:
             main.horizontalCenter
     }

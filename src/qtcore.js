@@ -412,7 +412,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation) {
         if (newVal.binding) {
             this.binding = newVal.binding;
         } else {
-            var bindSrc = "(function() { return " + newVal.src + "})";
+            var bindSrc = newVal.function ? "(function() " + newVal.src + ")" : "(function() { return " + newVal.src + "})";
             this.binding = evalBinding(null, bindSrc, this.objectScope, workingContext[workingContext.length-1].get(), this.engine.rootScope);
         }
         try {
