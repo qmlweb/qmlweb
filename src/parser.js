@@ -1311,7 +1311,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     to = S.token.pos;
                 return as("qmlpropdef", name, type, stat,
                         $TEXT.substr(from, to - from));
-            }
+            } else if (is("punc", ";"))
+                next();
             return as("qmlpropdef", name, type);
 
         }
@@ -1350,6 +1351,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 }
                 next();
             }
+            if (is("punc", ";"))
+                next();
             return as("qmlsignaldef", name, args);
 
         }
