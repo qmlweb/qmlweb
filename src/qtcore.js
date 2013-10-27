@@ -2475,7 +2475,7 @@ function QMLRepeater(meta, parent, engine) {
             self.$scope.remId(child.id);
         if (engine.renderMode == QMLRenderMode.Canvas && child instanceof QMLMouseArea)
             engine.mouseAreas.splice(engine.mouseAreas.indexOf(child), 1);
-        engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed));
+        engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed), 1);
         for (var i = 0; i < child.children.length; i++)
             removeChildProperties(child.children[i])
     }
