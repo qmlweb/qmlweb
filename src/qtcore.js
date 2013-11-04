@@ -2847,10 +2847,14 @@ function QMLMouseArea(meta, parent, engine) {
     createSimpleProperty(engine, this, "acceptedButtons");
     createSimpleProperty(engine, this, "enabled");
     createSimpleProperty(engine, this, "hoverEnabled");
+    createSimpleProperty(engine, this, "mouseX");
+    createSimpleProperty(engine, this, "mouseY");
+    createSimpleProperty(engine, this, "pressed");
+    createSimpleProperty(engine, this, "containsMouse");
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
-    createSimpleProperty(engine, this, "containsMouse");
+    this.positionChanged = Signal([{type: "variant", name: "mouse"}]);
 
     this.acceptedButtons = Qt.LeftButton;
     this.enabled = true;
@@ -2858,8 +2862,8 @@ function QMLMouseArea(meta, parent, engine) {
     this.containsMouse = false;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        function handleClick(e) {
-            var mouse = {
+        function eventToMouse(e) {
+            return {
                 accepted: true,
                 button: e.button == 0 ? Qt.LeftButton :
                         e.button == 1 ? Qt.MiddleButton :
@@ -2872,6 +2876,9 @@ function QMLMouseArea(meta, parent, engine) {
                 x: (e.offsetX || e.layerX),
                 y: (e.offsetY || e.layerY)
             };
+        }
+        function handleClick(e) {
+            var mouse = eventToMouse(e);
 
             if (self.enabled && self.acceptedButtons & mouse.button) {
                 self.clicked(mouse);
@@ -2882,6 +2889,17 @@ function QMLMouseArea(meta, parent, engine) {
         }
         this.$domElement.onclick = handleClick;
         this.$domElement.oncontextmenu = handleClick;
+        this.$domElement.onmousedown = function(e) {
+            if (self.enabled) {
+                var mouse = eventToMouse(e);
+                self.mouseX = mouse.x;
+                self.mouseY = mouse.y;
+                self.pressed = true;
+            }
+        }
+        this.$domElement.onmouseup = function(e) {
+            self.pressed = false;
+        }
         this.$domElement.onmouseover = function(e) {
             if (self.hoverEnabled) {
                 self.containsMouse = true;
@@ -2892,6 +2910,14 @@ function QMLMouseArea(meta, parent, engine) {
             if (self.hoverEnabled) {
                 self.containsMouse = false;
                 self.exited();
+            }
+        }
+        this.$domElement.onmousemove = function(e) {
+            if (self.enabled && (self.hoverEnabled || self.pressed)) {
+                var mouse = eventToMouse(e);
+                self.positionChanged(mouse);
+                self.mouseX = mouse.x;
+                self.mouseY = mouse.y;
             }
         }
     } else {

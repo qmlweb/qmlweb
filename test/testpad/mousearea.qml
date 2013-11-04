@@ -16,6 +16,19 @@ Rectangle {
         color: "blue"
         anchors.centerIn: page
     }
+    Rectangle {
+        id: smallRect
+        width: 40; height: 40
+        color: "blue"
+        anchors { left: rect.right; bottom: rect.bottom; leftMargin: 3 }
+    }
+    Rectangle {
+        id: tinyRect
+        width: 20; height: 20
+        color: "grey"
+        visible: mA.pressed
+        anchors { left: rect.right; bottom: smallRect.top; margins: 3 }
+    }
     Text {
         text: "More blue ->"
         color: "blue"
@@ -29,7 +42,10 @@ Rectangle {
         anchors.top: rect.top
     }
     MouseArea {
+        id: mA
         anchors.fill: rect
+        hoverEnabled: true
         onClicked: rect.color = Qt.rgba(0, mouse.y / rect.height, mouse.x / rect.width, 1);
+        onPositionChanged: smallRect.color = Qt.rgba(0, mouse.y / rect.height, mouse.x / rect.width, 1);
     }
 }
