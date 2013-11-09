@@ -1185,8 +1185,8 @@ function updateHGeometry(newVal, oldVal, propName) {
         left = hC - w / 2;
         right = hC + w / 2;
     } else {
-        if (this.parent && !this.parent.$properties.x.changed.isConnected(this, updateHGeometry))
-            this.parent.$properties.x.changed.connect(this, updateHGeometry);
+        if (this.parent && !this.parent.$properties.left.changed.isConnected(this, updateHGeometry))
+            this.parent.$properties.left.changed.connect(this, updateHGeometry);
 
         w = width || this.width;
         left = this.x + (this.parent ? this.parent.left : 0);
@@ -1284,8 +1284,8 @@ function updateVGeometry(newVal, oldVal, propName) {
         top = vC - w / 2;
         bottom = vC + w / 2;
     } else {
-        if (this.parent && !this.parent.$properties.y.changed.isConnected(this, updateVGeometry))
-            this.parent.$properties.y.changed.connect(this, updateVGeometry);
+        if (this.parent && !this.parent.$properties.top.changed.isConnected(this, updateVGeometry))
+            this.parent.$properties.top.changed.connect(this, updateVGeometry);
 
         w = height || this.height;
         top = this.y + (this.parent ? this.parent.top : 0);
