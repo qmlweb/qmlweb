@@ -235,7 +235,7 @@ function construct(meta, parent, engine) {
         // definitions, etc. from the instance
         QMLBaseObject.call(item, meta, parent, engine);
         if (engine.renderMode == QMLRenderMode.DOM)
-            item.$domElement.className += " " + meta.$class + (meta.id ? " " + meta.id : "");
+            item.dom.className += " " + meta.$class + (meta.id ? " " + meta.id : "");
         var dProp; // Handle default properties
         if (dProp = cTree.$children[0].$defaultProperty) {
             //TODO: How does Qt really handle default properties + components?
@@ -596,8 +596,8 @@ function applyProperties(meta, item, objectScope, componentScope, rootScope) {
             }
         }
         workingContext.push(componentScope);
-        if (item.hasOwnProperty(i))
-            item.$properties[i].set(meta[i], true);
+        if (i in item)
+            item[i] = meta[i];
         else if (item.$setCustomData)
             item.$setCustomData(i, meta[i]);
         else
@@ -1315,11 +1315,12 @@ function QMLItem(meta, parent, engine) {
         o, i;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        if (!this.$domElement)
-            this.$domElement = document.createElement("div");
-        this.$domElement.style.position = "absolute";
-        this.$domElement.style.pointerEvents = "none";
-        this.$domElement.className = meta.$class + (this.id ? " " + this.id : "");
+        if (!this.dom)
+            this.dom = document.createElement("div");
+        this.dom.style.position = "absolute";
+        this.dom.style.pointerEvents = "none";
+        this.dom.className = meta.$class + (this.id ? " " + this.id : "");
+        this.css = this.dom.style;
     }
     createSimpleProperty(engine, this, "children");
     createSimpleProperty(engine, this, "resources");
@@ -1330,12 +1331,12 @@ function QMLItem(meta, parent, engine) {
         if (oldParent) {
             oldParent.children.splice(oldParent.children.indexOf(this), 1);
             if (engine.renderMode == QMLRenderMode.DOM)
-                oldParent.$domElement.removeChild(this.$domElement);
+                oldParent.dom.removeChild(this.dom);
         }
         if (newParent && newParent.children.indexOf(this) == -1)
             newParent.children.push(this);
         if (newParent && engine.renderMode == QMLRenderMode.DOM)
-            newParent.$domElement.appendChild(this.$domElement);
+            newParent.dom.appendChild(this.dom);
     });
     this.parentChanged.connect(this, updateHGeometry);
     this.parentChanged.connect(this, updateVGeometry);
@@ -1558,37 +1559,37 @@ function QMLItem(meta, parent, engine) {
                 else if (t instanceof QMLTranslate)
                     transform += " translate(" + t.x + "px, " + t.y + "px)";
             }
-            this.$domElement.style.transform = transform;
-            this.$domElement.style.MozTransform = transform;    // Firefox
-            this.$domElement.style.webkitTransform = transform; // Chrome, Safari and Opera
-            this.$domElement.style.OTransform = transform;      // Opera
-            this.$domElement.style.msTransform = transform;     // IE
+            this.dom.style.transform = transform;
+            this.dom.style.MozTransform = transform;    // Firefox
+            this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
+            this.dom.style.OTransform = transform;      // Opera
+            this.dom.style.msTransform = transform;     // IE
         }
         this.rotationChanged.connect(this, this.$updateTransform);
         this.scaleChanged.connect(this, this.$updateTransform);
         this.visibleChanged.connect(this, function(newVal) {
-            this.$domElement.style.visibility = newVal ? "inherit" : "hidden";
+            this.dom.style.visibility = newVal ? "inherit" : "hidden";
         });
         this.opacityChanged.connect(this, function(newVal) {
-            this.$domElement.style.opacity = newVal;
+            this.dom.style.opacity = newVal;
         });
         this.clipChanged.connect(this, function(newVal) {
-            this.$domElement.style.overflow = newVal ? "hidden" : "visible";
+            this.dom.style.overflow = newVal ? "hidden" : "visible";
         });
         this.zChanged.connect(this, function(newVal) {
-            this.$domElement.style.zIndex = newVal;
+            this.dom.style.zIndex = newVal;
         });
         this.xChanged.connect(this, function(newVal) {
-            this.$domElement.style.left = newVal + "px";
+            this.dom.style.left = newVal + "px";
         });
         this.yChanged.connect(this, function(newVal) {
-            this.$domElement.style.top = newVal + "px";
+            this.dom.style.top = newVal + "px";
         });
         this.widthChanged.connect(this, function(newVal) {
-            this.$domElement.style.width = newVal ? newVal + "px" : "auto";
+            this.dom.style.width = newVal ? newVal + "px" : "auto";
         });
         this.heightChanged.connect(this, function(newVal) {
-            this.$domElement.style.height = newVal ? newVal + "px" : "auto";
+            this.dom.style.height = newVal ? newVal + "px" : "auto";
         });
     } else {
         this.rotationChanged.connect(engine.$requestDraw);
@@ -1925,9 +1926,9 @@ function QMLRotation(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
-            parent.$domElement.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
-            parent.$domElement.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
-            parent.$domElement.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
+            parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
+            parent.dom.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
+            parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
         }
         this.angleChanged.connect(parent, parent.$updateTransform);
         this.axis.xChanged.connect(parent, parent.$updateTransform);
@@ -1957,9 +1958,9 @@ function QMLScale(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
-            parent.$domElement.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
-            parent.$domElement.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
-            parent.$domElement.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
+            parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
+            parent.dom.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
+            parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
         }
         this.xScaleChanged.connect(parent, parent.$updateTransform);
         this.yScaleChanged.connect(parent, parent.$updateTransform);
@@ -2006,61 +2007,61 @@ function QMLFont(parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.pointSizeChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontSize = newVal + "pt";
+            parent.dom.firstChild.style.fontSize = newVal + "pt";
         });
         this.boldChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontWeight =
+            parent.dom.firstChild.style.fontWeight =
                 parent.font.weight !== Undefined ? parent.font.weight :
                 newVal ? "bold" : "normal";
         });
         this.capitalizationChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontVariant =
+            parent.dom.firstChild.style.fontVariant =
                 newVal == "smallcaps" ? "small-caps" : "normal";
             newVal = newVal == "smallcaps" ? "none" : newVal;
-            parent.$domElement.firstChild.style.textTransform = newVal;
+            parent.dom.firstChild.style.textTransform = newVal;
         });
         this.familyChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontFamily = newVal;
+            parent.dom.firstChild.style.fontFamily = newVal;
         });
         this.italicChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontStyle = newVal ? "italic" : "normal";
+            parent.dom.firstChild.style.fontStyle = newVal ? "italic" : "normal";
         });
         this.letterSpacingChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+            parent.dom.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
         this.pixelSizeChanged.connect(function(newVal) {
             var val = newVal !== Undefined ? newVal + "px "
                 : (parent.font.pointSize || 10) + "pt";
-            parent.$domElement.style.fontSize = val;
-            parent.$domElement.firstChild.style.fontSize = val;
+            parent.dom.style.fontSize = val;
+            parent.dom.firstChild.style.fontSize = val;
         });
         this.pointSizeChanged.connect(function(newVal) {
             var val = parent.font.pixelSize !== Undefined ? parent.font.pixelSize + "px "
                 : (newVal || 10) + "pt";
-            parent.$domElement.style.fontSize = val;
-            parent.$domElement.firstChild.style.fontSize = val;
+            parent.dom.style.fontSize = val;
+            parent.dom.firstChild.style.fontSize = val;
         });
         this.strikeoutChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.textDecoration = newVal
+            parent.dom.firstChild.style.textDecoration = newVal
                 ? "line-through"
                 : parent.font.underline
                 ? "underline"
                 : "none";
         });
         this.underlineChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.textDecoration = parent.font.strikeout
+            parent.dom.firstChild.style.textDecoration = parent.font.strikeout
                 ? "line-through"
                 : newVal
                 ? "underline"
                 : "none";
         });
         this.weightChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.fontWeight =
+            parent.dom.firstChild.style.fontWeight =
                 newVal !== Undefined ? newVal :
                 parent.font.bold ? "bold" : "normal";
         });
         this.wordSpacingChanged.connect(function(newVal) {
-            parent.$domElement.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+            parent.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
     }
 }
@@ -2071,10 +2072,10 @@ function QMLText(meta, parent, engine) {
     if (engine.renderMode == QMLRenderMode.DOM) {
         // We create another span inside the text to distinguish the actual
         // (possibly html-formatted) text from child elements
-        this.$domElement.innerHTML = "<span></span>";
-        this.$domElement.style.pointerEvents = "auto";
-        this.$domElement.firstChild.style.width = "100%";
-        this.$domElement.firstChild.style.height = "100%";
+        this.dom.innerHTML = "<span></span>";
+        this.dom.style.pointerEvents = "auto";
+        this.dom.firstChild.style.width = "100%";
+        this.dom.firstChild.style.height = "100%";
     }
 
     // Creates font css description
@@ -2125,77 +2126,77 @@ function QMLText(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
-            this.$domElement.firstChild.style.color = newVal;
+            this.dom.firstChild.style.color = newVal;
         });
         this.textChanged.connect(this, function(newVal) {
-            this.$domElement.firstChild.innerHTML = newVal;
+            this.dom.firstChild.innerHTML = newVal;
         });
         this.lineHeightChanged.connect(this, function(newVal) {
-            this.$domElement.firstChild.style.lineHeight = newVal + "px";
+            this.dom.firstChild.style.lineHeight = newVal + "px";
         });
         this.wrapModeChanged.connect(this, function(newVal) {
             switch (newVal) {
                 case 0:
-                    this.$domElement.firstChild.style.whiteSpace = "pre";
+                    this.dom.firstChild.style.whiteSpace = "pre";
                     break;
                 case 1:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    this.$domElement.firstChild.style.wordBreak = "break-all";
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                    this.dom.firstChild.style.wordBreak = "break-all";
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.whiteSpace = "pre-wrap";
-                    this.$domElement.firstChild.style.wordWrap = "break-word";
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                    this.dom.firstChild.style.wordWrap = "break-word";
             };
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
             if (this.horizontalAlignment == "justify")
-                this.$domElement.firstChild.style.whiteSpace = "normal";
+                this.dom.firstChild.style.whiteSpace = "normal";
         });
         this.horizontalAlignmentChanged.connect(this, function(newVal) {
-            this.$domElement.style.textAlign = newVal;
+            this.dom.style.textAlign = newVal;
             // AlignJustify doesn't work with pre/pre-wrap, so we decide the
             // lesser of the two evils to be ignoring "\n"s inside the text.
             if (newVal == "justify")
-                this.$domElement.firstChild.style.whiteSpace = "normal";
+                this.dom.firstChild.style.whiteSpace = "normal";
         });
         this.styleChanged.connect(this, function(newVal) {
             switch (newVal) {
                 case 0:
-                    this.$domElement.firstChild.style.textShadow = "none";
+                    this.dom.firstChild.style.textShadow = "none";
                     break;
                 case 1:
                     var color = this.styleColor;
-                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + color
+                    this.dom.firstChild.style.textShadow = "1px 0 0 " + color
                         + ", -1px 0 0 " + color
                         + ", 0 1px 0 " + color
                         + ", 0 -1px 0 " + color;
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
             };
         });
         this.styleColorChanged.connect(this, function(newVal) {
             switch (this.style) {
                 case 0:
-                    this.$domElement.firstChild.style.textShadow = "none";
+                    this.dom.firstChild.style.textShadow = "none";
                     break;
                 case 1:
-                    this.$domElement.firstChild.style.textShadow = "1px 0 0 " + newVal
+                    this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
                         + ", -1px 0 0 " + newVal
                         + ", 0 1px 0 " + newVal
                         + ", 0 -1px 0 " + newVal;
                     break;
                 case 2:
-                    this.$domElement.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
                     break;
                 case 3:
-                    this.$domElement.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
             };
         });
     }
@@ -2230,7 +2231,7 @@ function QMLText(meta, parent, engine) {
         if (this.text === Undefined || this.text === "") {
             height = 0;
         } else if (engine.renderMode == QMLRenderMode.DOM) {
-            height = this.$domElement ? this.$domElement.firstChild.offsetHeight : 0;
+            height = this.dom ? this.dom.firstChild.offsetHeight : 0;
         } else {
             var el = document.createElement("span");
             el.style.font = fontCss(this.font);
@@ -2259,7 +2260,7 @@ function QMLText(meta, parent, engine) {
         if (this.text === Undefined || this.text === "")
             width = 0;
         else if (engine.renderMode == QMLRenderMode.DOM)
-            width = this.$domElement ? this.$domElement.firstChild.offsetWidth : 0;
+            width = this.dom ? this.dom.firstChild.offsetWidth : 0;
         else
             width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
 
@@ -2291,19 +2292,19 @@ function QMLRectangle(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
-            this.$domElement.style.backgroundColor = newVal;
+            this.dom.style.backgroundColor = newVal;
         });
         this.radiusChanged.connect(this, function(newVal) {
-            this.$domElement.style.borderRadius = newVal + "px";
+            this.dom.style.borderRadius = newVal + "px";
         });
         this.border.colorChanged.connect(this, function(newVal) {
-            this.$domElement.style.borderColor = newVal;
-            this.$domElement.style.borderStyle = this.border.width == 0 || newVal == "transparent"
+            this.dom.style.borderColor = newVal;
+            this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
                                                 ? "none" : "solid";
         });
         this.border.widthChanged.connect(this, function(newVal) {
-            this.$domElement.style.borderWidth = newVal + "px";
-            this.$domElement.style.borderStyle = newVal == 0 || this.border.color == "transparent"
+            this.dom.style.borderWidth = newVal + "px";
+            this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
                                                 ? "none" : "solid";
         });
     }
@@ -2398,7 +2399,7 @@ function QMLRepeater(meta, parent, engine) {
             var newItem = construct(newMeta, self, engine);
 
             if (engine.renderMode == QMLRenderMode.DOM && self.delegate.id)
-                newItem.$domElement.className += " " + self.delegate.id;
+                newItem.dom.className += " " + self.delegate.id;
 
             parent.children.splice(parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
             newItem.parent = self.parent;
@@ -2589,7 +2590,7 @@ function QMLImage(meta, parent, engine) {
         img.style.width = "100%";
         img.style.height = "100%";
         img.style.position = "absolute";
-        this.$domElement.appendChild(img);
+        this.dom.appendChild(img);
     }
 
     // Exports.
@@ -2713,7 +2714,7 @@ function QMLBorderImage(meta, parent, engine) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.sourceChanged.connect(this, function() {
-            this.$domElement.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+            this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
         });
         this.border.leftChanged.connect(this, updateBorder);
         this.border.rightChanged.connect(this, updateBorder);
@@ -2738,49 +2739,49 @@ function QMLBorderImage(meta, parent, engine) {
     }
 
     function updateBorder() {
-        this.$domElement.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.MozBorderImageSlice = this.border.top + " "
+        this.dom.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.MozBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
-        this.$domElement.style.MozBorderImageRepeat = this.horizontalTileMode + " "
+        this.dom.style.MozBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
-        this.$domElement.style.MozBorderImageWidth = this.border.top + " "
+        this.dom.style.MozBorderImageWidth = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
 
-        this.$domElement.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.webkitBorderImageSlice = this.border.top + " "
+        this.dom.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.webkitBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
-        this.$domElement.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
+        this.dom.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
-        this.$domElement.style.webkitBorderImageWidth = this.border.top + " "
+        this.dom.style.webkitBorderImageWidth = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
 
-        this.$domElement.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.$domElement.style.OBorderImageSlice = this.border.top + " "
+        this.dom.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.OBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
-        this.$domElement.style.OBorderImageRepeat = this.horizontalTileMode + " "
+        this.dom.style.OBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
-        this.$domElement.style.OBorderImageWidth = this.border.top + "px "
+        this.dom.style.OBorderImageWidth = this.border.top + "px "
                                                 + this.border.right + "px "
                                                 + this.border.bottom + "px "
                                                 + this.border.left + "px";
 
-        this.$domElement.style.borderImageSlice = this.border.top + " "
+        this.dom.style.borderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
                                                 + this.border.left;
-        this.$domElement.style.borderImageRepeat = this.horizontalTileMode + " "
+        this.dom.style.borderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
-        this.$domElement.style.borderImageWidth = this.border.top + "px "
+        this.dom.style.borderImageWidth = this.border.top + "px "
                                                 + this.border.right + "px "
                                                 + this.border.bottom + "px "
                                                 + this.border.left + "px";
@@ -2836,13 +2837,13 @@ function QMLMouseArea(meta, parent, engine) {
     var self = this;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$domElement.style.pointerEvents = "all";
+        this.dom.style.pointerEvents = "all";
 
         // IE does not handle mouse clicks to transparent divs, so we have
         // to set a background color and make it invisible using opacity
         // as that doesn't affect the mouse handling.
-        this.$domElement.style.backgroundColor = "white";
-        this.$domElement.style.opacity = 0;
+        this.dom.style.backgroundColor = "white";
+        this.dom.style.opacity = 0;
     }
 
     createSimpleProperty(engine, this, "acceptedButtons");
@@ -2888,9 +2889,9 @@ function QMLMouseArea(meta, parent, engine) {
             // This decides whether to show the browser's context menu on right click or not
             return !(self.acceptedButtons & Qt.RightButton);
         }
-        this.$domElement.onclick = handleClick;
-        this.$domElement.oncontextmenu = handleClick;
-        this.$domElement.onmousedown = function(e) {
+        this.dom.onclick = handleClick;
+        this.dom.oncontextmenu = handleClick;
+        this.dom.onmousedown = function(e) {
             if (self.enabled) {
                 var mouse = eventToMouse(e);
                 self.mouseX = mouse.x;
@@ -2898,22 +2899,22 @@ function QMLMouseArea(meta, parent, engine) {
                 self.pressed = true;
             }
         }
-        this.$domElement.onmouseup = function(e) {
+        this.dom.onmouseup = function(e) {
             self.pressed = false;
         }
-        this.$domElement.onmouseover = function(e) {
+        this.dom.onmouseover = function(e) {
             if (self.hoverEnabled) {
                 self.containsMouse = true;
                 self.entered();
             }
         }
-        this.$domElement.onmouseout = function(e) {
+        this.dom.onmouseout = function(e) {
             if (self.hoverEnabled) {
                 self.containsMouse = false;
                 self.exited();
             }
         }
-        this.$domElement.onmousemove = function(e) {
+        this.dom.onmousemove = function(e) {
             if (self.enabled && (self.hoverEnabled || self.pressed)) {
                 var mouse = eventToMouse(e);
                 self.positionChanged(mouse);
@@ -2958,8 +2959,8 @@ function QMLDocument(meta, engine) {
     doc = new QMLItem(meta, undefined, engine);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-	doc.$domElement = engine.rootElement || document.body;
-        doc.$domElement.innerHTML = "";
+	doc.dom = engine.rootElement || document.body;
+        doc.dom.innerHTML = "";
     }
 
     workingContext.push(false);
@@ -3009,12 +3010,12 @@ function QMLDocument(meta, engine) {
         item.$init[i].call(item);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        doc.$domElement.style.position = "relative";
-        doc.$domElement.style.top = "0";
-        doc.$domElement.style.left = "0";
-        doc.$domElement.style.overflow = "hidden";
-        doc.$domElement.style.width = item.width + "px";
-        doc.$domElement.style.height = item.height + "px";
+        doc.dom.style.position = "relative";
+        doc.dom.style.top = "0";
+        doc.dom.style.left = "0";
+        doc.dom.style.overflow = "hidden";
+        doc.dom.style.width = item.width + "px";
+        doc.dom.style.height = item.height + "px";
     }
 
     return doc; // todo: return doc instead of item
@@ -3554,38 +3555,38 @@ function QMLTextInput(meta, parent, engine) {
 
     this.font = new QMLFont(this, engine);
 
-    this.$domElement.innerHTML = "<input type=\"text\"/>"
-    this.$domElement.firstChild.style.pointerEvents = "auto";
+    this.dom.innerHTML = "<input type=\"text\"/>"
+    this.dom.firstChild.style.pointerEvents = "auto";
     // In some browsers text-inputs have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
-    this.$domElement.firstChild.style.margin = "0";
-    this.$domElement.firstChild.style.width = "100%";
+    this.dom.firstChild.style.margin = "0";
+    this.dom.firstChild.style.width = "100%";
 
     createSimpleProperty(engine, this, "text", "");
     this.accepted = Signal();
 
     this.$init.push(function() {
-        this.implicitWidth = this.$domElement.firstChild.offsetWidth;
-        this.implicitHeight = this.$domElement.firstChild.offsetHeight;
+        this.implicitWidth = this.dom.firstChild.offsetWidth;
+        this.implicitHeight = this.dom.firstChild.offsetHeight;
     });
 
     this.textChanged.connect(this, function(newVal) {
-        this.$domElement.firstChild.value = newVal;
+        this.dom.firstChild.value = newVal;
     });
 
-    this.$domElement.firstChild.onkeydown = function(e) {
+    this.dom.firstChild.onkeydown = function(e) {
         if (e.keyCode == 13) //Enter pressed
             self.accepted();
     }
 
     function updateValue(e) {
-        if (self.text != self.$domElement.firstChild.value) {
-            self.text = self.$domElement.firstChild.value;
+        if (self.text != self.dom.firstChild.value) {
+            self.text = self.dom.firstChild.value;
         }
     }
 
-    this.$domElement.firstChild.oninput = updateValue;
-    this.$domElement.firstChild.onpropertychanged = updateValue;
+    this.dom.firstChild.oninput = updateValue;
+    this.dom.firstChild.onpropertychanged = updateValue;
 }
 
 function QMLButton(meta, parent, engine) {
@@ -3595,24 +3596,24 @@ function QMLButton(meta, parent, engine) {
         return;
     }
 
-    this.$domElement = document.createElement("button");
+    this.dom = document.createElement("button");
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
-    this.$domElement.style.pointerEvents = "auto";
-    this.$domElement.innerHTML = "<span></span>";
+    this.dom.style.pointerEvents = "auto";
+    this.dom.innerHTML = "<span></span>";
 
     createSimpleProperty(engine, this, "text");
     this.clicked = Signal();
 
     this.textChanged.connect(this, function(newVal) {
-        this.$domElement.firstChild.innerHTML = newVal;
+        this.dom.firstChild.innerHTML = newVal;
         //TODO: Replace those statically sized borders
-        this.implicitWidth = this.$domElement.firstChild.offsetWidth + 20;
-        this.implicitHeight = this.$domElement.firstChild.offsetHeight + 5;
+        this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
+        this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
     });
 
-    this.$domElement.onclick = function(e) {
+    this.dom.onclick = function(e) {
         self.clicked();
     }
 }
@@ -3629,31 +3630,31 @@ function QMLTextArea(meta, parent, engine) {
 
     this.font = new QMLFont(this, engine);
 
-    this.$domElement.innerHTML = "<textarea></textarea>"
-    this.$domElement.firstChild.style.pointerEvents = "auto";
-    this.$domElement.firstChild.style.width = "100%";
-    this.$domElement.firstChild.style.height = "100%";
+    this.dom.innerHTML = "<textarea></textarea>"
+    this.dom.firstChild.style.pointerEvents = "auto";
+    this.dom.firstChild.style.width = "100%";
+    this.dom.firstChild.style.height = "100%";
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
-    this.$domElement.firstChild.style.margin = "0";
+    this.dom.firstChild.style.margin = "0";
 
     createSimpleProperty(engine, this, "text", "");
 
-    this.implicitWidth = this.$domElement.firstChild.offsetWidth;
-    this.implicitHeight = this.$domElement.firstChild.offsetHeight;
+    this.implicitWidth = this.dom.firstChild.offsetWidth;
+    this.implicitHeight = this.dom.firstChild.offsetHeight;
 
     this.textChanged.connect(this, function(newVal) {
-        this.$domElement.firstChild.value = newVal;
+        this.dom.firstChild.value = newVal;
     });
 
     function updateValue(e) {
-        if (self.text != self.$domElement.firstChild.value) {
-            self.text = self.$domElement.firstChild.value;
+        if (self.text != self.dom.firstChild.value) {
+            self.text = self.dom.firstChild.value;
         }
     }
 
-    this.$domElement.firstChild.oninput = updateValue;
-    this.$domElement.firstChild.onpropertychanged = updateValue;
+    this.dom.firstChild.oninput = updateValue;
+    this.dom.firstChild.onpropertychanged = updateValue;
 }
 
 function QMLCheckbox(meta, parent, engine) {
@@ -3663,30 +3664,30 @@ function QMLCheckbox(meta, parent, engine) {
         return;
     }
 
-    this.$domElement = document.createElement("label");
+    this.dom = document.createElement("label");
     QMLItem.call(this, meta, parent, engine);
     var self = this;
 
     this.font = new QMLFont(this, engine);
 
-    this.$domElement.innerHTML = "<input type=\"checkbox\"><span></span>";
-    this.$domElement.style.pointerEvents = "auto";
-    this.$domElement.firstChild.style.verticalAlign = "text-bottom";
+    this.dom.innerHTML = "<input type=\"checkbox\"><span></span>";
+    this.dom.style.pointerEvents = "auto";
+    this.dom.firstChild.style.verticalAlign = "text-bottom";
 
     createSimpleProperty(engine, this, "text");
     createSimpleProperty(engine, this, "checked");
     createSimpleProperty(engine, this, "color");
 
     this.textChanged.connect(this, function(newVal) {
-        this.$domElement.children[1].innerHTML = newVal;
-        this.implicitHeight = this.$domElement.offsetHeight;
-        this.implicitWidth = this.$domElement.offsetWidth;
+        this.dom.children[1].innerHTML = newVal;
+        this.implicitHeight = this.dom.offsetHeight;
+        this.implicitWidth = this.dom.offsetWidth;
     });
     this.colorChanged.connect(this, function(newVal) {
-        this.$domElement.children[1].style.color = newVal;
+        this.dom.children[1].style.color = newVal;
     });
 
-    this.$domElement.firstChild.onchange = function() {
+    this.dom.firstChild.onchange = function() {
         self.checked = this.checked;
     };
 }

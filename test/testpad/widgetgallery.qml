@@ -55,10 +55,15 @@ Rectangle {
         color: "grey"
 
         Rectangle {
-            width: 15
-            height: 15
+            width: 20
+            height: 20
             color: "grey"
+            radius: 10
             anchors { verticalCenter: parent.verticalCenter; right: parent.right }
+            css.boxShadow: "0 0 10px 1px #800"
+            css.color: "white"
+            css.textAlign: "center"
+            dom.innerHTML: ":)"
         }
     }
 
