@@ -220,7 +220,8 @@ function construct(meta, parent, engine) {
             Behavior: QMLBehavior,
             TextInput: QMLTextInput,
             Button: QMLButton,
-            TextArea: QMLTextArea
+            TextArea: QMLTextArea,
+            CheckBox: QMLCheckbox
         },
         item,
         cTree;
@@ -3653,6 +3654,41 @@ function QMLTextArea(meta, parent, engine) {
 
     this.$domElement.firstChild.oninput = updateValue;
     this.$domElement.firstChild.onpropertychanged = updateValue;
+}
+
+function QMLCheckbox(meta, parent, engine) {
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        console.log("CheckBox-type is only supported within the DOM-backend.");
+        QMLItem.call(this, meta, parent, engine);
+        return;
+    }
+
+    this.$domElement = document.createElement("label");
+    QMLItem.call(this, meta, parent, engine);
+    var self = this;
+
+    this.font = new QMLFont(this, engine);
+
+    this.$domElement.innerHTML = "<input type=\"checkbox\"><span></span>";
+    this.$domElement.style.pointerEvents = "auto";
+    this.$domElement.firstChild.style.verticalAlign = "text-bottom";
+
+    createSimpleProperty(engine, this, "text");
+    createSimpleProperty(engine, this, "checked");
+    createSimpleProperty(engine, this, "color");
+
+    this.textChanged.connect(this, function(newVal) {
+        this.$domElement.children[1].innerHTML = newVal;
+        this.implicitHeight = this.$domElement.offsetHeight;
+        this.implicitWidth = this.$domElement.offsetWidth;
+    });
+    this.colorChanged.connect(this, function(newVal) {
+        this.$domElement.children[1].style.color = newVal;
+    });
+
+    this.$domElement.firstChild.onchange = function() {
+        self.checked = this.checked;
+    };
 }
 
 })();

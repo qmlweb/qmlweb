@@ -46,12 +46,28 @@ Rectangle {
         }
     }
 
+    CheckBox {
+        id: checkbox
+        text: "<b>Checkbox</b>"
+        width: 150
+        x: 30
+        y: 150
+        color: "grey"
+
+        Rectangle {
+            width: 15
+            height: 15
+            color: "grey"
+            anchors { verticalCenter: parent.verticalCenter; right: parent.right }
+        }
+    }
+
     TextArea {
         x: 280
         y: 80
         width: 200
         height: 100
-        text: "Hi,\nI'm a TextArea!"
+        text: "Hi,\nI'm a TextArea!\n" + "The checkbox is " + (checkbox.checked ? "" : "not ") + "checked."
         font.bold: true
     }
 
