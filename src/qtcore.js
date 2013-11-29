@@ -468,13 +468,14 @@ QMLProperty.prototype.set = function(newVal, fromAnimation) {
 
     if (this.val !== oldVal) {
         if (this.animation && !fromAnimation) {
+            this.animation.running = false;
             this.animation.$actions = [{
                 target: this.animation.target || this.obj,
                 property: this.animation.property || this.name,
                 from: this.animation.from || oldVal,
                 to: this.animation.to || this.val
             }];
-            this.animation.restart();
+            this.animation.running = true;
         }
         this.changed(this.val, oldVal, this.name);
     }
@@ -3216,12 +3217,21 @@ function QMLAnimation(meta, parent, engine) {
         this.stop();
         this.start();
     };
+    this.start = function() {
+        this.running = true;
+    }
+    this.stop = function() {
+        this.running = false;
+    }
+    this.pause = function() {
+        this.paused = true;
+    }
+    this.resume = function() {
+        this.paused = false;
+    }
+
     // To be overridden
     this.complete = unboundMethod;
-    this.pause = unboundMethod;
-    this.resume = unboundMethod;
-    this.start = unboundMethod;
-    this.stop = unboundMethod;
 }
 
 function QMLSequentialAnimation(meta, parent, engine) {
@@ -3315,6 +3325,7 @@ function QMLParallelAnimation(meta, parent, engine) {
         passedLoops,
         i;
 
+    this.Animation = { Infinite: Math.Infinite }
     createSimpleProperty(engine, this, "animations");
     this.animations = [];
     this.$runningAnimations = 0;
@@ -3392,7 +3403,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
     createSimpleProperty(engine, this.easing, "overshoot", { altParent: this });
     createSimpleProperty(engine, this.easing, "period", { altParent: this });
 
-    function redoActions() {
+    this.$redoActions = function() {
         this.$actions = [];
         for (var i = 0; i < this.$targets.length; i++) {
             for (var j in this.$props) {
@@ -3433,6 +3444,7 @@ function QMLPropertyAnimation(meta, parent, engine) {
     this.easing.type = this.Easing.Linear;
     this.$props = [];
     this.$targets = [];
+    this.$actions = [];
     this.properties = "";
     this.targets = [];
 
@@ -3440,17 +3452,12 @@ function QMLPropertyAnimation(meta, parent, engine) {
     this.targetsChanged.connect(this, redoTargets);
     this.propertyChanged.connect(this, redoProperties);
     this.propertiesChanged.connect(this, redoProperties);
-    this.toChanged.connect(this, redoActions);
-    this.fromChanged.connect(this, redoActions);
-    this.targetChanged.connect(this, redoActions);
-    this.targetsChanged.connect(this, redoActions);
-    this.propertyChanged.connect(this, redoActions);
-    this.propertiesChanged.connect(this, redoActions);
 }
 
 function QMLNumberAnimation(meta, parent, engine) {
     QMLPropertyAnimation.call(this, meta, parent, engine);
-    var tickStart,
+    var at = 0,
+        loop = 0,
         self = this;
 
     engine.$addTicker(ticker);
@@ -3469,50 +3476,54 @@ function QMLNumberAnimation(meta, parent, engine) {
     }
 
     function ticker(now, elapsed) {
-        if (self.running) {
-            if (now > tickStart + self.duration) {
+        if ((self.running || loop === -1) && !self.paused) { // loop === -1 is a marker to just finish this run
+            at += elapsed / self.duration;
+            if (at >= 1)
                 self.complete();
-            } else {
+            else
                 for (var i in self.$actions) {
                     var action = self.$actions[i],
-                        at = (now - tickStart) / self.duration,
                         value = curve(at) * (action.to - action.from) + action.from;
                     action.target.$properties[action.property].set(value, true);
                 }
-            }
-
         }
     }
 
-    // Methods
-    this.start = function() {
-        if (!this.running) {
-            for (var i in self.$actions) {
-                var action = self.$actions[i];
-                action.from = action.from !== Undefined ? action.from : action.target[action.property];
-            }
-            this.running = true;
-            tickStart = (new Date).getTime();
+    function startLoop() {
+        for (var i in this.$actions) {
+            var action = this.$actions[i];
+            action.from = action.from !== Undefined ? action.from : action.target[action.property];
         }
+        at = 0;
     }
 
-    this.stop = function() {
-        if (this.running) {
-            this.running = false;
+    this.runningChanged.connect(this, function(newVal) {
+        if (newVal) {
+            if (!this.$actions.length)
+                this.$redoActions();
+            startLoop.call(this);
+            this.paused = false;
+        } else if (this.alwaysRunToEnd && at < 1) {
+            loop = -1; // -1 is used as a marker to stop
+        } else {
+            loop = 0;
+            this.$actions = [];
         }
-    }
+    });
 
     this.complete = function() {
-        if (this.running) {
-            workingContext.push(this.$scope);
-            for (var i in this.$actions) {
-                var action = this.$actions[i];
-                action.target.$properties[action.property].set(action.to, true);
-            }
-            workingContext.pop();
-            this.stop();
-            engine.$requestDraw();
+        workingContext.push(this.$scope);
+        for (var i in this.$actions) {
+            var action = this.$actions[i];
+            action.target.$properties[action.property].set(action.to, true);
         }
+        workingContext.pop();
+        engine.$requestDraw();
+
+        if (++loop == this.loops)
+            this.running = false;
+        else
+            startLoop.call(this);
     }
 }
 
