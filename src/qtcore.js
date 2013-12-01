@@ -2524,8 +2524,8 @@ function QMLListModel(meta, parent, engine) {
         if (firstItem) {
             firstItem = false;
             var roleNames = [];
-            for (var i in dict) {
-                if (i != "id" && i != "index" && i[0] != "$")
+            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
+                if (i != "index")
                     roleNames.push(i);
             }
             this.$model.setRoleNames(roleNames);
@@ -2557,34 +2557,14 @@ function QMLListModel(meta, parent, engine) {
 }
 
 function QMLListElement(meta, parent, engine) {
-    // QMLListElement can't have children and needs special handling of properties
-    // thus we don't use QMLBaseObject for it
-    var values = [];
+    QMLBaseObject.call(this, meta, parent, engine);
 
     for (var i in meta) {
         if (i[0] != "$") {
-            values[i] = meta[i];
-            setupGetterSetter(this, i,
-                (function(name){
-                    return function() {
-                        return values[name];
-                    }
-                })(i),
-                (function(name) {
-                    return function(newVal) {
-                        val = newVal;
-                        parent.$model.dataChanged(this.index, this.index);
-                    }
-                })(name)
-            );
+            createSimpleProperty(engine, this, i);
+            this[i] = meta[i];
         }
     }
-
-    var componentScope = workingContext[workingContext.length-1];
-
-    this.$init = [function() {
-        applyProperties(meta, this, this, componentScope, engine.rootScope);
-    }];
 }
 
 function QMLImage(meta, parent, engine) {
