@@ -419,7 +419,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation) {
         try {
             this.val = this.binding();
         } catch(e) {
-            if (!(this.engine.operationFlags & QMLOperationFlag.IgnoreReferenceErrors && e instanceof ReferenceError))
+            if (~this.engine.operationFlags & QMLOperationFlag.IgnoreBindingErrors)
                 throw e;
         }
 
@@ -649,7 +649,7 @@ QMLRenderMode = {
     DOM: 1
 }
 QMLOperationFlag = {
-    IgnoreReferenceErrors: 1
+    IgnoreBindingErrors: 1
 }
 
 // QML engine. EXPORTED.
@@ -2970,11 +2970,11 @@ function QMLDocument(meta, engine) {
     }
 
     workingContext.push(false);
-    engine.operationFlags |= QMLOperationFlag.IgnoreReferenceErrors;
+    engine.operationFlags |= QMLOperationFlag.IgnoreBindingErrors;
 
     item = construct(meta.$children[0], doc, engine);
 
-    engine.operationFlags ^= QMLOperationFlag.IgnoreReferenceErrors;
+    engine.operationFlags ^= QMLOperationFlag.IgnoreBindingErrors;
     engine.rootScope = workingContext.pop().get();
 
     doc.children.push(item);
