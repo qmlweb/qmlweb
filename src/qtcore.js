@@ -2414,6 +2414,11 @@ function QMLRepeater(meta, parent, engine) {
                 for (var i = 0; i < newItem.$init.length; i++)
                     newItem.$init[i].call(newItem);
                 callOnCompleted(newItem);
+            } else if (index == 0) {
+                //FIXME: This is a workaround for the bug, that in the loop, calling $init, the
+                // first item from the repeater is skipped. Find a proper solution!
+                for (var i = 0; i < newItem.$init.length; i++)
+                    newItem.$init[i].call(newItem);
             }
         }
         for (var i = endIndex; i < self.$items.length; i++) {
