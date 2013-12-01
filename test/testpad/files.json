@@ -39,6 +39,10 @@
     "title": "* Animation test"
 },
 {
+    "file": "easing.qml",
+    "title": "* Easing curves"
+},
+{
     "file": "borderimage.qml",
     "title": "* BorderImage test"
 },
