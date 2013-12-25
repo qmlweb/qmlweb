@@ -242,7 +242,9 @@ function construct(meta, parent, engine) {
     if (meta.$class in constructors) {
         item = new constructors[meta.$class](meta, parent, engine);
     } else if (cTree = engine.loadComponent(meta.$class)) {
-        var item = QMLComponent(cTree, engine);
+        if (cTree.$children.length !== 1)
+            console.error("A QML document must only contain one root element!");
+        var item = QMLComponent(cTree.$children[0], engine);
 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
@@ -2386,20 +2388,6 @@ function QMLRepeater(meta, parent, engine) {
         return this.$items[index];
     }
 
-    function applyChildProperties(child) {
-        createSimpleProperty(engine, child, "index");
-        child.index = new QMLBinding("parent.index");
-        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-        for (var i in model.roleNames) {
-            var func = (function(i) { return function() {
-                    return model.data(child.index, model.roleNames[i]);
-                    }
-                })(i);
-            setupGetter(child, model.roleNames[i], func);
-        }
-        for (var i = 0; i < child.children.length; i++)
-            applyChildProperties(child.children[i]);
-    }
     function callOnCompleted(child) {
         child.Component.completed();
         for (var i = 0; i < child.children.length; i++)
@@ -2408,9 +2396,20 @@ function QMLRepeater(meta, parent, engine) {
     function insertChildren(startIndex, endIndex) {
         workingContext.push(self.$scope);
         for (var index = startIndex; index < endIndex; index++) {
-            var newMeta = cloneObject(self.delegate);
-            newMeta.id = newMeta.id + index;
-            var newItem = construct(newMeta, self, engine);
+            engine.operationFlags |= QMLOperationFlag.IgnoreBindingErrors;
+            var newItem = QMLComponent(self.delegate, engine);
+            engine.operationFlags ^= QMLOperationFlag.IgnoreBindingErrors;
+
+            createSimpleProperty(engine, newItem, "index");
+            var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
+            for (var i in model.roleNames) {
+                var func = (function(name) {
+                    return function() {
+                        return model.data(this.index, name);
+                    }
+                })(model.roleNames[i]);
+                setupGetter(newItem, model.roleNames[i], func);
+            }
 
             if (engine.renderMode == QMLRenderMode.DOM && self.delegate.id)
                 newItem.dom.className += " " + self.delegate.id;
@@ -2419,7 +2418,6 @@ function QMLRepeater(meta, parent, engine) {
             newItem.parent = self.parent;
             self.$items.splice(index, 0, newItem);
 
-            applyChildProperties(newItem);
             newItem.index = index;
             if (self.$completed) {
                 // We don't call those on first creation, as they will be called
@@ -2929,13 +2927,9 @@ function QMLMouseArea(meta, parent, engine) {
 function QMLComponent(meta, engine) {
     var item;
 
-    if (meta.$children.length !== 1)
-        console.error("A QML document must only contain one root element!");
-
     workingContext.push(false);
 
-    item = construct(meta.$children[0], undefined, engine);
-
+    item = construct(meta, undefined, engine);
     for (var i = 0; i < item.$init.length; i++)
         item.$init[i].call(item);
     workingContext.pop();
