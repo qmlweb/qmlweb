@@ -70,6 +70,7 @@ Rectangle {
         model: tModel
 
         delegate: Rectangle {
+            id: item
             x: 5 + (width + 10) * (index %2)
             y: 5 + 100 * Math.floor(index /2)
             width: page.width / 2 - 10
@@ -81,7 +82,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: label + " (Element " + index + "/" + rep.count + ")"
 
-                Component.onCompleted: console.log("Added an element (index: " + index + ")");
+                Component.onCompleted: console.log("Added an element (index: " + item.index + ")");
             }
         }
     }

@@ -1504,7 +1504,7 @@ var warn = function() {};
  */
 function QMLBinding(val, tree) {
     if (val instanceof Function) {
-        this.binding = val;
+        this.eval = val;
         return;
     }
     // this.function states whether the binding is a simple js statement or a function containing a
@@ -1567,6 +1567,7 @@ function convertToEngine(tree) {
             var item = { $class: "QMLDocument" };
             // todo: imports etc
             item.$children = [ walk(statements[0]) ];
+            item.$children[0].$parent = item;
             return item;
         },
         "qmlelem": function(elem, onProp, statements) {
@@ -1582,6 +1583,7 @@ function convertToEngine(tree) {
                         break;
                     case "qmlelem":
                         item.$children.push(val);
+                        val.$parent = item;
                         break;
                     case "qmlmethod":
                         item.$functions[name] = val;
@@ -1639,7 +1641,7 @@ function convertToEngine(tree) {
             return item;
         },
         "qmlmethod": function(name, tree, src) {
-            return src;
+            return bindout(tree, src);
         },
         "qmlpropdef": function(name, type, tree, src) {
             return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");

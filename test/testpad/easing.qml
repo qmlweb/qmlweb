@@ -125,26 +125,24 @@ Rectangle {
                     }
 
                     Rectangle {
-                        x: 30
-                        color: "#454545"
-                        border.color: "White"
-                        border.width: 2
+                        id: rect; x: 30; color: "#454545"
+                        border.color: "White"; border.width: 2
                         width: 46; height: 46; radius: 12
                         anchors.verticalCenter: parent.verticalCenter
 
                         MouseArea {
-                            onClicked: if (parent.state == '') parent.state = "right"; else parent.state = ''
+                            onClicked: if (rect.state == '') rect.state = "right"; else rect.state = ''
                             anchors.fill: parent
                             anchors.margins: -5 // Make MouseArea bigger than the rectangle, itself
                         }
 
                         states : [ State {
                             name: "right"
-                            PropertyChanges { target: $parent.$parent; x: window.width - 76; color: $parent.$parent.ballColor }
+                            PropertyChanges { target: rect; x: window.width - 76; color: ballColor }
                         }]
 
                         transitions: [Transition {
-                            NumberAnimation { properties: "x"; easing.type: $parent.$parent.type; duration: 1000 }
+                            NumberAnimation { properties: "x"; easing.type: type; duration: 1000 }
                         }]
                     }
                 }
