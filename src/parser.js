@@ -1503,16 +1503,17 @@ var warn = function() {};
  * @return {Object} Object representing the binding
  */
 function QMLBinding(val, tree) {
-    if (val instanceof Function) {
-        this.eval = val;
-        return;
-    }
     // this.function states whether the binding is a simple js statement or a function containing a
     // return statement. We decide this on whether it is a code block or not. If it is, we require a
     // return statement. If it is a code block it could though also be a object definition, so we
     // need to check that as well (it is, if the content is labels).
     this.function = tree && tree[0] == "block" && tree[1][0] && tree[1][0][0] !== "label";
     this.src = val;
+}
+
+QMLMethod.prototype = new QMLBinding();
+function QMLMethod(src) {
+    this.src = src;
 }
 
 /**
@@ -1524,6 +1525,15 @@ function QMLBinding(val, tree) {
 function QMLPropertyDefinition(type, value) {
     this.type = type;
     this.value = value;
+}
+
+/**
+ * Create an object representing a QML signal definition.
+ * @param {Array} params The parameters the signal ships
+ * @return {Object} Object representing the defintion
+ */
+function QMLSignalDefinition(params) {
+    this.parameters = params;
 }
 
 /**
@@ -1540,9 +1550,6 @@ function QMLMetaPropertyGroup() {}
 function QMLMetaElement(type, onProp) {
     this.$class = type;
     this.$children = [];
-    this.$signals = [];
-    this.$functions = {};
-    this.$properties = {};
     this.$on = onProp;
 }
 
@@ -1567,7 +1574,6 @@ function convertToEngine(tree) {
             var item = { $class: "QMLDocument" };
             // todo: imports etc
             item.$children = [ walk(statements[0]) ];
-            item.$children[0].$parent = item;
             return item;
         },
         "qmlelem": function(elem, onProp, statements) {
@@ -1578,15 +1584,16 @@ function convertToEngine(tree) {
                     name = statement[1],
                     val = walk(statement);
                 switch (statement[0]) {
+                    case "qmldefaultprop":
+                        item.$defaultProperty = name;
                     case "qmlprop":
+                    case "qmlpropdef":
+                    case "qmlmethod":
+                    case "qmlsignaldef":
                         item[name] = val;
                         break;
                     case "qmlelem":
                         item.$children.push(val);
-                        val.$parent = item;
-                        break;
-                    case "qmlmethod":
-                        item.$functions[name] = val;
                         break;
                     case "qmlobjdef":
                         // Create object to item
@@ -1598,16 +1605,6 @@ function convertToEngine(tree) {
                         item[name] = item[name] || new QMLMetaPropertyGroup();
                         for (var i in val)
                             item[name][i] = val[i];
-                        break;
-                    case "qmlpropdef":
-                        item.$properties[statement[1]] = val;
-                        break;
-                    case "qmldefaultprop":
-                        item.$properties[statement[1]] = val;
-                        item.$defaultProperty = statement[1];
-                        break;
-                    case "qmlsignaldef":
-                        item.$signals.push({ name: name, params: statement[2] });
                         break;
                     default:
                         console.log("Unknown statement", statement);
@@ -1641,13 +1638,13 @@ function convertToEngine(tree) {
             return item;
         },
         "qmlmethod": function(name, tree, src) {
-            return bindout(tree, src);
+            return new QMLMethod(src);
         },
         "qmlpropdef": function(name, type, tree, src) {
             return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");
         },
         "qmlsignaldef": function(name, params) {
-            return { name: name, params: params };
+            return new QMLSignalDefinition(params);
         },
         "qmldefaultprop": function(name, type, tree, src) {
             return new QMLPropertyDefinition(type, bindout(tree, src));
