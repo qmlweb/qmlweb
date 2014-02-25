@@ -1372,7 +1372,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             } else if (S.token.type == "name") {
                 var propname = S.token.value;
                 next();
-                if (propname == "property" && S.token.type == "name") {
+                if (propname == "property" && (S.token.type == "name" || S.token.value == "var")) {
                     return qmlpropdef();
                 } else if (qml_is_element(propname) && !is("punc", ".")) {
                     // Element

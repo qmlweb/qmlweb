@@ -120,6 +120,7 @@
             enum: Number,
             url: String,
             variant: QMLVariant,
+            'var': QMLVariant,
             Component: QMLComponent,
             QMLDocument: QMLComponent,
             MouseArea: QMLMouseArea,
