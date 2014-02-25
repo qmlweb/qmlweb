@@ -39,6 +39,10 @@
     "title": "* Animation test"
 },
 {
+    "file": "timer.qml",
+    "title": "* Timer test"
+},
+{
     "file": "easing.qml",
     "title": "* Easing curves"
 },

@@ -2998,10 +2998,19 @@ function QMLTimer(meta) {
     }
 
     function trigger() {
+        if (!self.repeat)
+            // We set the value directly in order to be able to emit the runningChanged
+            // signal after triggered, like Qt does it.
+            self.$properties.running.val = false;
+
         // Trigger this.
         self.triggered();
 
         engine.$requestDraw();
+
+        if (!self.repeat)
+            // Emit changed signal manually after setting the value manually above.
+            self.runningChanged();
     }
 
     engine.$registerStart(function() {
