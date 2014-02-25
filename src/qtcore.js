@@ -125,6 +125,7 @@
             QMLDocument: QMLComponent,
             MouseArea: QMLMouseArea,
             Image: QMLImage,
+            AnimatedImage: QMLAnimatedImage,
             BorderImage: QMLBorderImage,
             Item: QMLItem,
             Column: QMLColumn,
@@ -2613,6 +2614,10 @@ function QMLImage(meta) {
             console.log("Waiting for image to load");
         }
     }
+}
+
+function QMLAnimatedImage(meta) {
+    QMLImage.call(this, meta);
 }
 
 function QMLBorderImage(meta) {
