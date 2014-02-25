@@ -2084,6 +2084,7 @@ function QMLText(meta) {
         WordWrap: 1,
         WrapAnywhere: 2,
         Wrap: 3,
+        WrapAtWordBoundaryOrAnywhere: 3, // COMPAT
         // Horizontal-Alignment
         AlignLeft: "left",
         AlignRight: "right",
