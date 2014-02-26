@@ -3423,6 +3423,11 @@ function QMLPropertyAnimation(meta) {
     this.targetsChanged.connect(this, redoTargets);
     this.propertyChanged.connect(this, redoProperties);
     this.propertiesChanged.connect(this, redoProperties);
+
+    if (meta.object.$on !== undefined) {
+        this.property = meta.object.$on;
+        this.target = this.$parent;
+    }
 }
 
 function QMLNumberAnimation(meta) {
