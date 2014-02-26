@@ -1146,7 +1146,7 @@ function updateHGeometry(newVal, oldVal, propName) {
         if ((u = anchors.right) !== undefined) {
             right = u - rM;
             this.$isUsingImplicitWidth = false;
-            width = right - left - lM - rM;
+            width = right - left;
             x = left - (this.parent ? this.parent.left : 0);
             hC = (right + left) / 2;
         } else if ((hC = anchors.horizontalCenter) !== undefined) {
@@ -1209,8 +1209,8 @@ function updateVGeometry(newVal, oldVal, propName) {
     this.$updatingGeometry = true;
 
     var t, w, height, y, top, vC, bottom,
-        lM = anchors.topMargin || anchors.margins,
-        rM = anchors.bottomMargin || anchors.margins;
+        tM = anchors.topMargin || anchors.margins,
+        bM = anchors.bottomMargin || anchors.margins;
 
     // Height
     if (this.$isUsingImplicitHeight && propName == "implicitHeight")
@@ -1226,10 +1226,10 @@ function updateVGeometry(newVal, oldVal, propName) {
             t.$properties.height.changed.connect(this, updateVGeometry);
 
         this.$isUsingImplicitHeight = false;
-        height = t.height - lM - rM;
-        y = t.top - (this.parent ? this.parent.top : 0) + lM;
-        top = t.top + lM;
-        bottom = t.bottom - rM;
+        height = t.height;
+        y = t.top - (this.parent ? this.parent.top : 0) + tM;
+        top = t.top + tM;
+        bottom = t.bottom - bM;
         vC = (top + bottom) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
         if (!t.$properties.verticalCenter.changed.isConnected(this, updateVGeometry))
@@ -1241,11 +1241,11 @@ function updateVGeometry(newVal, oldVal, propName) {
         top = vC - w / 2;
         bottom = vC + w / 2;
     } else if ((t = anchors.top) !== undefined) {
-        top = t + lM
+        top = t + tM
         if ((u = anchors.bottom) !== undefined) {
-            bottom = u - rM;
+            bottom = u - bM;
             this.$isUsingImplicitHeight = false;
-            height = bottom - top - lM - rM;
+            height = bottom - top - tM - bM;
             y = top - (this.parent ? this.parent.top : 0);
             vC = (bottom + top) / 2;
         } else if ((vC = anchors.verticalCenter) !== undefined) {
@@ -1260,7 +1260,7 @@ function updateVGeometry(newVal, oldVal, propName) {
             vC = top + w / 2;
         }
     } else if ((t = anchors.bottom) !== undefined) {
-        bottom = t - rM;
+        bottom = t - bM;
         if ((vC = anchors.verticalCenter) !== undefined) {
             this.$isUsingImplicitHeight = false;
             height = (bottom - vC) * 2;
