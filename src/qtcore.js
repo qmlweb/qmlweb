@@ -1226,7 +1226,7 @@ function updateVGeometry(newVal, oldVal, propName) {
             t.$properties.height.changed.connect(this, updateVGeometry);
 
         this.$isUsingImplicitHeight = false;
-        height = t.height;
+        height = t.height - tM - bM;
         y = t.top - (this.parent ? this.parent.top : 0) + tM;
         top = t.top + tM;
         bottom = t.bottom - bM;
@@ -1245,7 +1245,7 @@ function updateVGeometry(newVal, oldVal, propName) {
         if ((u = anchors.bottom) !== undefined) {
             bottom = u - bM;
             this.$isUsingImplicitHeight = false;
-            height = bottom - top - tM - bM;
+            height = bottom - top;
             y = top - (this.parent ? this.parent.top : 0);
             vC = (bottom + top) / 2;
         } else if ((vC = anchors.verticalCenter) !== undefined) {
