@@ -1848,6 +1848,7 @@ function QMLFlow(meta) {
     createSimpleProperty("enum", this, "layoutDirection");
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
+    this.widthChanged.connect(this, this.layoutChildren);
 
     this.flow = 0;
     this.layoutDirection = 0;
