@@ -3420,6 +3420,8 @@ function QMLPropertyAnimation(meta) {
     this.properties = "";
     this.targets = [];
 
+    this.fromChanged.connect(this, this.$redoActions);
+    this.toChanged.connect(this, this.$redoActions);
     this.targetChanged.connect(this, redoTargets);
     this.targetsChanged.connect(this, redoTargets);
     this.propertyChanged.connect(this, redoProperties);
