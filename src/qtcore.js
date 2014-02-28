@@ -72,8 +72,8 @@
         // Layout directions
         LeftToRight: 0,
         RightToLeft: 1
-    }
-    var Font = {
+    },
+    Font = {
         // Capitalization
         MixedCase: "none",
         AllUppercase: "uppercase",
@@ -86,8 +86,8 @@
         DemiBold: "600",
         Bold: "bold",
         Black: "bolder",
-    }
-    var Easing = {
+    },
+    Easing = {
         Linear: 1,
         InQuad: 2,          OutQuad: 3,     InOutQuad: 4,           OutInQuad: 5,
         InCubic: 6,         OutCubic: 7,    InOutCubic: 8,          OutInCubic: 9,
@@ -99,7 +99,7 @@
         InElastic: 30,      OutElastic: 31, InOutElastic: 32,       OutInElastic: 33,
         InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
         InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
-    }
+    },
     // Simple shortcuts to getter & setter functions, coolness with minifier
     GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
