@@ -3420,8 +3420,6 @@ function QMLPropertyAnimation(meta) {
     this.properties = "";
     this.targets = [];
 
-    this.fromChanged.connect(this, this.$redoActions);
-    this.toChanged.connect(this, this.$redoActions);
     this.targetChanged.connect(this, redoTargets);
     this.targetsChanged.connect(this, redoTargets);
     this.propertyChanged.connect(this, redoProperties);
@@ -3443,6 +3441,8 @@ function QMLNumberAnimation(meta) {
 
     function ticker(now, elapsed) {
         if ((self.running || loop === -1) && !self.paused) { // loop === -1 is a marker to just finish this run
+            if (at == 0 && loop == 0 && !self.$actions.length)
+                self.$redoActions();
             at += elapsed / self.duration;
             if (at >= 1)
                 self.complete();
@@ -3465,8 +3465,6 @@ function QMLNumberAnimation(meta) {
 
     this.runningChanged.connect(this, function(newVal) {
         if (newVal) {
-            if (!this.$actions.length)
-                this.$redoActions();
             startLoop.call(this);
             this.paused = false;
         } else if (this.alwaysRunToEnd && at < 1) {
