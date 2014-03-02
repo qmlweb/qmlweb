@@ -3484,6 +3484,8 @@ function QMLNumberAnimation(meta) {
 
         if (++loop == this.loops)
             this.running = false;
+        else if (!this.running)
+            this.$actions = [];
         else
             startLoop.call(this);
     }
