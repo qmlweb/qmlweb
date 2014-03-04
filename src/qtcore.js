@@ -234,22 +234,6 @@ function construct(meta) {
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
-        if (dProp = cTree.$children[0].$defaultProperty) {
-            // id
-            if (meta.object.id)
-                meta.context[meta.object.id] = item;
-
-            // Apply properties (Bindings won't get evaluated, yet)
-            applyProperties(meta.object, item, item, meta.context);
-
-            //TODO: How does Qt really handle default properties + components?
-            if (item[dProp] instanceof Array)
-                for (var i = 0; i < meta.object.$children.length; i++)
-                    item[dProp].push(construct({ object: meta.object.$children[i], parent: item, context: meta.context }));
-            else
-                item[dProp] = meta.object.$children[0];
-            return item;
-        }
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
@@ -261,10 +245,6 @@ function construct(meta) {
 
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, meta.context);
-
-    // Construct children
-    for (var i = 0; i < meta.object.$children.length; i++)
-        item.$addChild({ object: meta.object.$children[i], parent: item, context: meta.context});
 
     return item;
 }
@@ -413,6 +393,8 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
         oldVal = this.val;
 
     if (newVal instanceof QMLBinding) {
+        if (!objectScope || !componentScope)
+            throw "Internal error: binding assigned without scope";
         this.binding = newVal;
         this.objectScope = objectScope;
         this.componentScope = componentScope;
@@ -560,16 +542,19 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 if (item.$isComponentRoot)
                     componentScope[i] = item[i];
                 continue;
-            } else if (value.type === "alias") {
-                var getter = value.value;
-                getter.compile();
-                var setter = new QMLBinding(getter.src + " = arguments[2]");
-                setter.compile();
-                setupGetterSetter(item, i, function() {
-                    return getter.eval(objectScope, componentScope);
-                }, function(newVal) {
-                    setter.eval(objectScope, componentScope, newVal);
-                });
+            } else if (value instanceof QMLAliasDefinition) {
+                createSimpleProperty("alias", item, i);
+                item.$properties[i].componentScope = componentScope;
+                item.$properties[i].val = value;
+                item.$properties[i].get = function() {
+                    var obj = this.componentScope[this.val.objectName];
+                    return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
+                }
+                item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
+                    if (!this.val.propertyName)
+                        throw "Cannot set alias property pointing to an QML object.";
+                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
+                }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createSimpleProperty(value.type, item, i);
@@ -590,6 +575,16 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
+    if (metaObject.$children && metaObject.$children.length !== 0) {
+        if (item.$defaultProperty)
+            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+        else
+            throw "Cannot assign to unexistant default property";
+    }
+    // We purposefully set the default property AFTER using it, in order to only have it applied for
+    // instanciations of this component, but not for its internal children
+    if (metaObject.$defaultProperty)
+        item.$defaultProperty = metaObject.$defaultProperty;
 }
 
 // ItemModel. EXPORTED.
@@ -1334,6 +1329,8 @@ function QMLItem(meta) {
         this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
         this.css = this.dom.style;
     }
+    createSimpleProperty("list", this, "data");
+    this.$defaultProperty = "data";
     createSimpleProperty("list", this, "children");
     createSimpleProperty("list", this, "resources");
     createSimpleProperty("Item", this, "parent");
@@ -1355,13 +1352,15 @@ function QMLItem(meta) {
     });
     this.parentChanged.connect(this, updateHGeometry);
     this.parentChanged.connect(this, updateVGeometry);
-    this.$addChild = function(childMeta) {
-        var child = construct(childMeta);
-        if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
-            child.parent = this; // This will also add it to children.
-        else
-            this.resources.push(child);
-    }
+    this.dataChanged.connect(this, function(newData) {
+        for (var i in newData) {
+            var child = newData[i];
+            if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
+                child.parent = this; // This will also add it to children.
+            else
+                this.resources.push(child);
+        }
+    });
 
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
@@ -2333,13 +2332,11 @@ function QMLRepeater(meta) {
     var self = this;
 
     createSimpleProperty("Component", this, "delegate");
+    this.$defaultProperty = "delegate";
     createSimpleProperty("variant", this, "model");
     createSimpleProperty("int", this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
-    this.$addChild = function(childMeta) {
-        this.delegate = new QMLComponent(childMeta);
-    }
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
@@ -2452,12 +2449,24 @@ function QMLListModel(meta) {
     firstItem = true;
 
     createSimpleProperty("int", this, "count");
-    this.$items = [];
+    createSimpleProperty("list", this, "$items");
+    this.$defaultProperty = "$items";
     this.$model = new JSItemModel();
     this.count = 0;
-    this.$addChild = function(childMeta) {
-        this.append(construct(childMeta));
-    }
+
+    this.$itemsChanged.connect(this, function(newVal) {
+        if (firstItem) {
+            firstItem = false;
+            var roleNames = [];
+            var dict = newVal[0];
+            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
+                if (i != "index")
+                    roleNames.push(i);
+            }
+            this.$model.setRoleNames(roleNames);
+        }
+        this.count = this.$items.length;
+    });
 
     this.$model.data = function(index, role) {
         return self.$items[index][role];
@@ -2478,18 +2487,9 @@ function QMLListModel(meta) {
         return this.$items[index];
     }
     this.insert = function(index, dict) {
-        if (firstItem) {
-            firstItem = false;
-            var roleNames = [];
-            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
-                if (i != "index")
-                    roleNames.push(i);
-            }
-            this.$model.setRoleNames(roleNames);
-        }
         this.$items.splice(index, 0, dict);
         this.$model.rowsInserted(index, index+1);
-        this.count = this.$items.length;
+        this.$itemsChanged();
     }
     this.move = function(from, to, n) {
         var vals = this.$items.splice(from, n);
@@ -2879,6 +2879,7 @@ function QMLState(meta) {
 
     createSimpleProperty("string", this, "name");
     createSimpleProperty("list", this, "changes");
+    this.$defaultProperty = "changes";
     createSimpleProperty("string", this, "extend");
     createSimpleProperty("bool", this, "when");
     this.changes = [];
@@ -2891,9 +2892,6 @@ function QMLState(meta) {
             this.$item.state = "";
     });
 
-    this.$addChild = function(childMeta) {
-        this.changes.push(construct(childMeta));
-    }
     this.$getAllChanges = function() {
         if (this.extend) {
             for (var i = 0; i < this.$item.states.length; i++)
@@ -2927,6 +2925,7 @@ function QMLTransition(meta) {
     QMLBaseObject.call(this, meta);
 
     createSimpleProperty("list", this, "animations");
+    this.$defaultProperty = "animations";
     createSimpleProperty("string", this, "from");
     createSimpleProperty("string", this, "to");
     createSimpleProperty("bool", this, "reversible");
@@ -2935,9 +2934,6 @@ function QMLTransition(meta) {
     this.from = "*";
     this.to = "*";
 
-    this.$addChild = function(childMeta) {
-        this.animations.push(construct(childMeta));
-    }
     this.$start = function(actions) {
         for (var i = 0; i < this.animations.length; i++) {
             var animation = this.animations[i];
@@ -3081,6 +3077,7 @@ function QMLSequentialAnimation(meta) {
         self = this;
 
     createSimpleProperty("list", this, "animations");
+    this.$defaultProperty = "animations";
     this.animations = [];
 
     function nextAnimation(proceed) {
@@ -3138,11 +3135,6 @@ function QMLSequentialAnimation(meta) {
         }
     }
 
-    this.$addChild = function(childMeta) {
-        this.animations.push(construct(childMeta));
-        this.animationsChanged();
-    };
-
     engine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by start();
@@ -3162,6 +3154,7 @@ function QMLParallelAnimation(meta) {
 
     this.Animation = { Infinite: Math.Infinite }
     createSimpleProperty("list", this, "animations");
+    this.$defaultProperty = "animations";
     this.animations = [];
     this.$runningAnimations = 0;
 
@@ -3193,10 +3186,6 @@ function QMLParallelAnimation(meta) {
         }
     }
     this.complete = this.stop;
-
-    this.$addChild = function(childMeta) {
-        this.animations.push(construct(childMeta));
-    };
 
     engine.$registerStart(function() {
         if (self.running) {
@@ -3495,6 +3484,7 @@ function QMLBehavior(meta) {
     QMLBaseObject.call(this, meta);
 
     createSimpleProperty("Animation", this, "animation");
+    this.$defaultProperty = "animation";
     createSimpleProperty("bool", this, "enabled");
 
     this.animationChanged.connect(this, function(newVal) {
@@ -3504,11 +3494,7 @@ function QMLBehavior(meta) {
     });
     this.enabledChanged.connect(this, function(newVal) {
         this.$parent.$properties[meta.object.$on].animation = newVal ? this.animation : null;
-    })
-
-    this.$addChild = function(childMeta) {
-        this.animation = construct(childMeta);
-    };
+    });
 }
 
 

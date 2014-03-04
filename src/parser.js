@@ -1305,6 +1305,19 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
             var name = S.token.value;
             next();
+            if (type == "alias") {
+                expect(":");
+                if (!is("name")) unexpected();
+                var objName = S.token.value;
+                next();
+                if (is("punc", ".")) {
+                    next();
+                    if (!is("name")) unexpected();
+                    var propName = S.token.value;
+                    next();
+                }
+                return as("qmlaliasdef", name, objName, propName);
+            }
             if (is("punc", ":")) {
                 next();
                 var from = S.token.pos,
@@ -1319,18 +1332,10 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         }
 
         function qmldefaultprop() {
-            next(); //We trust that the next is "property"
             next();
-            var type = S.token.value;
-            next();
-            var name = S.token.value;
-            next();
-            expect(":");
-            var from = S.token.pos,
-                stat = statement(),
-                to = S.token.pos;
-            return as("qmldefaultprop", name, type, stat,
-                    $TEXT.substr(from, to - from));
+            expect_token("name", "property");
+
+            return as("qmldefaultprop", qmlpropdef());
         }
 
         function qmlsignaldef() {
@@ -1527,6 +1532,11 @@ function QMLPropertyDefinition(type, value) {
     this.value = value;
 }
 
+function QMLAliasDefinition(objName, propName) {
+    this.objectName = objName;
+    this.propertyName = propName;
+}
+
 /**
  * Create an object representing a QML signal definition.
  * @param {Array} params The parameters the signal ships
@@ -1588,6 +1598,7 @@ function convertToEngine(tree) {
                         item.$defaultProperty = name;
                     case "qmlprop":
                     case "qmlpropdef":
+                    case "qmlaliasdef":
                     case "qmlmethod":
                     case "qmlsignaldef":
                         item[name] = val;
@@ -1611,6 +1622,9 @@ function convertToEngine(tree) {
 
                 }
             }
+            // Make $children be either a single item or an array, if it's more than one
+            if (item.$children.length === 1)
+                item.$children = item.$children[0];
 
             return item;
         },
@@ -1643,11 +1657,14 @@ function convertToEngine(tree) {
         "qmlpropdef": function(name, type, tree, src) {
             return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");
         },
+        "qmlaliasdef": function(name, objName, propName) {
+            return new QMLAliasDefinition(objName, propName);
+        },
         "qmlsignaldef": function(name, params) {
             return new QMLSignalDefinition(params);
         },
-        "qmldefaultprop": function(name, type, tree, src) {
-            return new QMLPropertyDefinition(type, bindout(tree, src));
+        "qmldefaultprop": function(tree) {
+            return walk(tree);
         },
         "name": function(src) {
             return bindout(tree, src);
