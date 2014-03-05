@@ -10,5 +10,5 @@ global.Font = {
   Normal: "normal",
   DemiBold: "600",
   Bold: "bold",
-  Black: "bolder",
+  Black: "bolder"
 }

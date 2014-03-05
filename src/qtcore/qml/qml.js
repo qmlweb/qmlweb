@@ -6,14 +6,14 @@ var GETTER = "__defineGetter__",
     evaluatingProperty = undefined,
     // All object constructors
     constructors = {
-      int:         QMLInteger,
+      'int':       QMLInteger,
       real:        Number,
-      double:      Number,
+      'double':    Number,
       string:      String,
-      bool:        Boolean,
+      'bool':      Boolean,
       list:        QMLList,
       color:       QMLColor,
-      enum:        Number,
+      'enum':      Number,
       url:         String,
       variant:     QMLVariant,
       'var':       QMLVariant,
@@ -290,7 +290,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     params += item[signalName].parameters[j].name;
                 }
                 value.src = "(function(" + params + ") {" + value.src + "})";
-                value.function = false;
+                value.isFunction = false;
                 value.compile();
             }
             item[signalName].connect(item, value.eval(objectScope, componentScope));

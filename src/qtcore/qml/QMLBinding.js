@@ -5,11 +5,12 @@
  * @return {Object} Object representing the binding
  */
 global.QMLBinding = function(val, tree) {
-    // this.function states whether the binding is a simple js statement or a function containing a
-    // return statement. We decide this on whether it is a code block or not. If it is, we require a
-    // return statement. If it is a code block it could though also be a object definition, so we
+    // this.isFunction states whether the binding is a simple js statement or a function containing
+    // a return statement. We decide this on whether it is a code block or not. If it is, we require
+    // a return statement. If it is a code block it could though also be a object definition, so we
     // need to check that as well (it is, if the content is labels).
-    this.function = tree && tree[0] == "block" && tree[1][0] && tree[1][0][0] !== "label";
+    // need to check that as well (it is, if the content is labels).
+    this.isFunction = tree && tree[0] == "block" && tree[1][0] && tree[1][0][0] !== "label";
     this.src = val;
 }
 
@@ -23,5 +24,5 @@ global.QMLBinding.prototype.toJSON = function() {
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
 QMLBinding.prototype.compile = function() {
-    this.eval = new Function('__executionObject', '__executionContext', "with(__executionContext) with(__executionObject) " + ( this.function ? "" : "return " ) + this.src);
+    this.eval = new Function('__executionObject', '__executionContext', "with(__executionContext) with(__executionObject) " + ( this.isFunction ? "" : "return " ) + this.src);
 }
