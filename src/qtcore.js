@@ -1,4 +1,4 @@
-/* @license
+/** @license
 
   Copyright (c) 2011 Lauri Paimen <lauri@paimen.info>
   Copyright (c) 2013 Anton Kreuzkamp <akreuzkamp@web.de>
@@ -85,7 +85,7 @@
         Normal: "normal",
         DemiBold: "600",
         Bold: "bold",
-        Black: "bolder",
+        Black: "bolder"
     },
     Easing = {
         Linear: 1,
@@ -110,14 +110,14 @@
     evaluatingProperty = undefined,
     // All object constructors
     constructors = {
-            int: QMLInteger,
+            'int': QMLInteger,
             real: Number,
-            double: Number,
+            'double': Number,
             string: String,
-            bool: Boolean,
+            'bool': Boolean,
             list: QMLList,
             color: QMLColor,
-            enum: Number,
+            'enum': Number,
             url: String,
             variant: QMLVariant,
             'var': QMLVariant,
@@ -206,7 +206,7 @@ function descr(msg, obj, vals) {
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
 QMLBinding.prototype.compile = function() {
-    var bindSrc = this.function
+    var bindSrc = this.isFunction
                     ? "(function(o, c) { with(c) with(o) " + this.src + "})"
                     : "(function(o, c) { with(c) with(o) return " + this.src + "})";
     this.eval = eval(bindSrc);
@@ -523,7 +523,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     params += item[signalName].parameters[j].name;
                 }
                 value.src = "(function(" + params + ") {" + value.src + "})";
-                value.function = false;
+                value.isFunction = false;
                 value.compile();
             }
             item[signalName].connect(item, value.eval(objectScope, componentScope));
