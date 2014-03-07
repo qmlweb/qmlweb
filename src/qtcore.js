@@ -410,9 +410,9 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             engine.bindedProperties.push(this);
             return;
         }
-    } else if (!fromAnimation) {
-        this.binding = null;
-
+    } else {
+        if (!fromAnimation)
+            this.binding = null;
         if (newVal instanceof Array)
             newVal = newVal.slice(); // Copies the array
     }
