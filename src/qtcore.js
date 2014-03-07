@@ -2454,6 +2454,7 @@ function QMLListModel(meta) {
     createSimpleProperty("int", this, "count");
     createSimpleProperty("list", this, "$items");
     this.$defaultProperty = "$items";
+    this.$items = [];
     this.$model = new JSItemModel();
     this.count = 0;
 
@@ -2491,8 +2492,8 @@ function QMLListModel(meta) {
     }
     this.insert = function(index, dict) {
         this.$items.splice(index, 0, dict);
+        this.$itemsChanged(this.$items);
         this.$model.rowsInserted(index, index+1);
-        this.$itemsChanged();
     }
     this.move = function(from, to, n) {
         var vals = this.$items.splice(from, n);
