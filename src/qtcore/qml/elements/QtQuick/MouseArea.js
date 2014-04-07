@@ -22,6 +22,8 @@ registerQmlType({
     createSimpleProperty("real", this, "mouseY");
     createSimpleProperty("bool", this, "pressed");
     createSimpleProperty("bool", this, "containsMouse");
+    createSimpleProperty("variant", this, "pressedButtons");
+
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
@@ -65,9 +67,11 @@ registerQmlType({
             self.mouseY = mouse.y;
             self.pressed = true;
         }
+        this.pressedButtons = mouse.button;
     }
     this.dom.onmouseup = function(e) {
         self.pressed = false;
+        this.pressedButtons = 0;
     }
     this.dom.onmouseover = function(e) {
         self.containsMouse = true;
