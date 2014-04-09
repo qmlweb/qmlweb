@@ -6,11 +6,11 @@ registerQmlType({
   constructor: function QMLState(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("string", this, "name");
-    createSimpleProperty("list", this, "changes");
+    createProperty("string", this, "name");
+    createProperty("list", this, "changes");
     this.$defaultProperty = "changes";
-    createSimpleProperty("string", this, "extend");
-    createSimpleProperty("bool", this, "when");
+    createProperty("string", this, "extend");
+    createProperty("bool", this, "when");
     this.changes = [];
     this.$item = this.$parent;
 

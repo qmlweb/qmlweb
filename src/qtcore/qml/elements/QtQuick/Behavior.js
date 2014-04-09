@@ -6,9 +6,9 @@ registerQmlType({
   constructor: function QMLBehavior(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("Animation", this, "animation");
+    createProperty("Animation", this, "animation");
     this.$defaultProperty = "animation";
-    createSimpleProperty("bool", this, "enabled");
+    createProperty("bool", this, "enabled");
 
     this.animationChanged.connect(this, function(newVal) {
         newVal.target = this.$parent;

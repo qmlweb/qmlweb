@@ -1,9 +1,9 @@
 function QMLPropertyChanges(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("QtObject", this, "target");
-    createSimpleProperty("bool", this, "explicit");
-    createSimpleProperty("bool", this, "restoreEntryValues");
+    createProperty("QtObject", this, "target");
+    createProperty("bool", this, "explicit");
+    createProperty("bool", this, "restoreEntryValues");
 
     this.explicit = false;
     this.restoreEntryValues = true;

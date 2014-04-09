@@ -8,10 +8,10 @@ registerQmlType({
     var prevTrigger,
         self = this;
 
-    createSimpleProperty("int", this, "interval");
-    createSimpleProperty("bool", this, "repeat");
-    createSimpleProperty("bool", this, "running");
-    createSimpleProperty("bool", this, "triggeredOnStart");
+    createProperty("int", this, "interval");
+    createProperty("bool", this, "repeat");
+    createProperty("bool", this, "running");
+    createProperty("bool", this, "triggeredOnStart");
 
     this.interval = 1000;
     this.repeat = false;

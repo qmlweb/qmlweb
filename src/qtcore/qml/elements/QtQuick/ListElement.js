@@ -8,7 +8,7 @@ registerQmlType({
 
     for (var i in meta.object) {
         if (i[0] != "$") {
-            createSimpleProperty("variant", this, i);
+            createProperty("variant", this, i);
         }
     }
     applyProperties(meta.object, this, this, this.$context);

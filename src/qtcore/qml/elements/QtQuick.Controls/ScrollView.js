@@ -6,15 +6,15 @@ function QMLScrollView(meta) {
     this.css.pointerEvents = "auto";
     this.setupFocusOnDom(this.dom);
 
-    createSimpleProperty("Item", this, "contentItem");
+    createProperty("Item", this, "contentItem");
     this.$defaultProperty = "contentItem";
-    createSimpleProperty("Item", this, "flickableItem"); //TODO  0) implement it  1) make it read-only
-    createSimpleProperty("Item", this, "viewport"); //TODO
-    createSimpleProperty("bool", this, "frameVisible");
-    createSimpleProperty("bool", this, "highlightOnFocus"); //TODO test
-    createSimpleProperty("enum", this, "verticalScrollBarPolicy");
-    createSimpleProperty("enum", this, "horizontalScrollBarPolicy");
-    createSimpleProperty("Component", this, "style"); //TODO
+    createProperty("Item", this, "flickableItem"); //TODO  0) implement it  1) make it read-only
+    createProperty("Item", this, "viewport"); //TODO
+    createProperty("bool", this, "frameVisible");
+    createProperty("bool", this, "highlightOnFocus"); //TODO test
+    createProperty("enum", this, "verticalScrollBarPolicy");
+    createProperty("enum", this, "horizontalScrollBarPolicy");
+    createProperty("Component", this, "style"); //TODO
 
     this.contentItemChanged.connect(this, function(newItem){
         if (typeof newItem !== undefined) {

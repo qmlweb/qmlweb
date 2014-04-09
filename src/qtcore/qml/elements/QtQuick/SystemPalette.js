@@ -21,14 +21,14 @@ registerQmlType({
   constructor: function QMLSystemPalette(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("enum", this, "colorGroup");
+    createProperty("enum", this, "colorGroup");
 
     var attrs    = [ 'alternateBase', 'base', 'button', 'buttonText', 'dark', 'highlight', 'highlightedText', 'light', 'mid', 'midlight', 'shadow', 'text', 'window', 'windowText' ];
     var platform = 'OSX';
 
     for (var i = 0 ; i < attrs.length ; ++i)
-      createSimpleProperty("color", this, attrs[i], { readOnly: true });
-    createSimpleProperty("enum", this, "colorGroup");
+      createProperty("color", this, attrs[i], { readOnly: true });
+    createProperty("enum", this, "colorGroup");
 
     this.colorGroupChanged.connect(this, (function (newVal) {
       this.$canEditReadOnlyProperties = true;

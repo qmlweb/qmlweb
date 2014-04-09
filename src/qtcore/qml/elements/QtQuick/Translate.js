@@ -6,8 +6,8 @@ registerQmlType({
   constructor: function QMLTranslate(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("real", this, "x");
-    createSimpleProperty("real", this, "y");
+    createProperty("real", this, "x");
+    createProperty("real", this, "y");
 
     this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yChanged.connect(this.$parent, this.$parent.$updateTransform);

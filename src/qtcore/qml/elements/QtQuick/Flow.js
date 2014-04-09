@@ -6,8 +6,8 @@ function QMLFlow(meta) {
         TopToBottom: 1
     }
 
-    createSimpleProperty("enum", this, "flow");
-    createSimpleProperty("enum", this, "layoutDirection");
+    createProperty("enum", this, "flow");
+    createProperty("enum", this, "layoutDirection");
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);

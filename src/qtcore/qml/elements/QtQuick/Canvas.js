@@ -11,14 +11,14 @@ registerQmlType({
 
         var self = this;
 
-        createSimpleProperty('bool', this, 'available');
-        createSimpleProperty('var', this, 'canvasSize');
-        createSimpleProperty('var', this, 'canvasWindow');
-        createSimpleProperty('var', this, 'context');
-        createSimpleProperty('string', this, 'contextType');
-        createSimpleProperty('enum', this, 'renderStrategy');
-        createSimpleProperty('enum', this, 'renderTarget');
-        createSimpleProperty('var', this, 'tileSize');
+        createProperty('bool', this, 'available');
+        createProperty('var', this, 'canvasSize');
+        createProperty('var', this, 'canvasWindow');
+        createProperty('var', this, 'context');
+        createProperty('string', this, 'contextType');
+        createProperty('enum', this, 'renderStrategy');
+        createProperty('enum', this, 'renderTarget');
+        createProperty('var', this, 'tileSize');
 
         this.available = true;
         this.canvasSize = [0, 0];

@@ -6,16 +6,16 @@ registerQmlType({
   constructor: function QMLRotation(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("real", this, "angle");
+    createProperty("real", this, "angle");
 
     this.axis = new QObject(this);
-    createSimpleProperty("real", this.axis, "x");
-    createSimpleProperty("real", this.axis, "y");
-    createSimpleProperty("real", this.axis, "z");
+    createProperty("real", this.axis, "x");
+    createProperty("real", this.axis, "y");
+    createProperty("real", this.axis, "z");
 
     this.origin = new QObject(this);
-    createSimpleProperty("real", this.origin, "x");
-    createSimpleProperty("real", this.origin, "y");
+    createProperty("real", this.origin, "x");
+    createProperty("real", this.origin, "y");
 
     function updateOrigin() {
         this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";

@@ -19,10 +19,10 @@ registerQmlType({
         Error: 4
     }
 
-    createSimpleProperty("bool", this, "active");
-    createSimpleProperty("enum", this, "status");
-    createSimpleProperty("string", this, "errorString");
-    createSimpleProperty("url", this, "url");
+    createProperty("bool", this, "active");
+    createProperty("enum", this, "status");
+    createProperty("string", this, "errorString");
+    createProperty("url", this, "url");
 
     this.textMessageReceived = Signal([{type: "string", name: "message"}]);
 

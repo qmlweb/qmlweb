@@ -6,8 +6,8 @@ registerQmlType({
   constructor: function QMLIntValidator(meta) {
     QMLItem.call(this, meta);
 
-    createSimpleProperty("int", this, "bottom");
-    createSimpleProperty("int", this, "top");
+    createProperty("int", this, "bottom");
+    createProperty("int", this, "top");
     this.bottom = -2147483647;
     this.top    = 2147483647;
 

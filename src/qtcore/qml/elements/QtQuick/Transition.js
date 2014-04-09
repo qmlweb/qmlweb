@@ -6,11 +6,11 @@ registerQmlType({
   constructor: function QMLTransition(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("list", this, "animations");
+    createProperty("list", this, "animations");
     this.$defaultProperty = "animations";
-    createSimpleProperty("string", this, "from");
-    createSimpleProperty("string", this, "to");
-    createSimpleProperty("bool", this, "reversible");
+    createProperty("string", this, "from");
+    createProperty("string", this, "to");
+    createProperty("bool", this, "reversible");
     this.animations = [];
     this.$item = this.$parent;
     this.from = "*";

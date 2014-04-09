@@ -25,11 +25,11 @@ registerQmlType({
 
     this.setupFocusOnDom(this.dom.firstChild);
 
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("int",    this, "maximumLength");
-    createSimpleProperty("bool",   this, "readOnly");
-    createSimpleProperty("var",    this, "validator");
-    createSimpleProperty("enum",   this, "echoMode");
+    createProperty("string", this, "text");
+    createProperty("int",    this, "maximumLength");
+    createProperty("bool",   this, "readOnly");
+    createProperty("var",    this, "validator");
+    createProperty("enum",   this, "echoMode");
     this.accepted = Signal();
     this.readOnly = false;
     this.maximumLength = -1;

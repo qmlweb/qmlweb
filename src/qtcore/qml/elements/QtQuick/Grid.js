@@ -14,10 +14,10 @@ function QMLGrid(meta) {
         TopToBottom: 1
     }
 
-    createSimpleProperty("int", this, "columns");
-    createSimpleProperty("int", this, "rows");
-    createSimpleProperty("enum", this, "flow");
-    createSimpleProperty("enum", this, "layoutDirection");
+    createProperty("int", this, "columns");
+    createProperty("int", this, "rows");
+    createProperty("enum", this, "flow");
+    createProperty("enum", this, "layoutDirection");
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);

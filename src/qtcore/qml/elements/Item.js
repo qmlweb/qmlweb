@@ -22,11 +22,11 @@ function QMLItem(meta) {
 
     this.css.boxSizing = 'border-box';
 
-    createSimpleProperty("list", this, "data");
+    createProperty("list", this, "data");
     this.$defaultProperty = "data";
-    createSimpleProperty("list", this, "children");
-    createSimpleProperty("list", this, "resources");
-    createSimpleProperty("Item", this, "parent");
+    createProperty("list", this, "children");
+    createProperty("list", this, "resources");
+    createProperty("Item", this, "parent");
     this.children = [];
     this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
@@ -55,27 +55,27 @@ function QMLItem(meta) {
     });
 
     if (this.$isComponentRoot)
-      createSimpleProperty("var", this, "activeFocus");
-    createSimpleProperty("real", this, "x");
-    createSimpleProperty("real", this, "y");
-    createSimpleProperty("real", this, "width");
-    createSimpleProperty("real", this, "height");
-    createSimpleProperty("real", this, "implicitWidth");
-    createSimpleProperty("real", this, "implicitHeight");
-    createSimpleProperty("real", this, "left");
-    createSimpleProperty("real", this, "right");
-    createSimpleProperty("real", this, "top");
-    createSimpleProperty("real", this, "bottom");
-    createSimpleProperty("real", this, "horizontalCenter");
-    createSimpleProperty("real", this, "verticalCenter");
-    createSimpleProperty("real", this, "rotation");
-    createSimpleProperty("real", this, "scale");
-    createSimpleProperty("real", this, "z");
-    createSimpleProperty("list", this, "transform");
-    createSimpleProperty("bool", this, "visible");
-    createSimpleProperty("real", this, "opacity");
-    createSimpleProperty("bool", this, "clip");
-    createSimpleProperty("bool", this, "focus");
+      createProperty("var", this, "activeFocus");
+    createProperty("real", this, "x");
+    createProperty("real", this, "y");
+    createProperty("real", this, "width");
+    createProperty("real", this, "height");
+    createProperty("real", this, "implicitWidth");
+    createProperty("real", this, "implicitHeight");
+    createProperty("real", this, "left");
+    createProperty("real", this, "right");
+    createProperty("real", this, "top");
+    createProperty("real", this, "bottom");
+    createProperty("real", this, "horizontalCenter");
+    createProperty("real", this, "verticalCenter");
+    createProperty("real", this, "rotation");
+    createProperty("real", this, "scale");
+    createProperty("real", this, "z");
+    createProperty("list", this, "transform");
+    createProperty("bool", this, "visible");
+    createProperty("real", this, "opacity");
+    createProperty("bool", this, "clip");
+    createProperty("bool", this, "focus");
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
@@ -112,19 +112,19 @@ function QMLItem(meta) {
     this.$isUsingImplicitHeight = true;
 
     this.anchors = new QObject(this);
-    createSimpleProperty("real", this.anchors, "left");
-    createSimpleProperty("real", this.anchors, "right");
-    createSimpleProperty("real", this.anchors, "top");
-    createSimpleProperty("real", this.anchors, "bottom");
-    createSimpleProperty("real", this.anchors, "horizontalCenter");
-    createSimpleProperty("real", this.anchors, "verticalCenter");
-    createSimpleProperty("real", this.anchors, "fill");
-    createSimpleProperty("real", this.anchors, "centerIn");
-    createSimpleProperty("real", this.anchors, "margins");
-    createSimpleProperty("real", this.anchors, "leftMargin");
-    createSimpleProperty("real", this.anchors, "rightMargin");
-    createSimpleProperty("real", this.anchors, "topMargin");
-    createSimpleProperty("real", this.anchors, "bottomMargin");
+    createProperty("real", this.anchors, "left");
+    createProperty("real", this.anchors, "right");
+    createProperty("real", this.anchors, "top");
+    createProperty("real", this.anchors, "bottom");
+    createProperty("real", this.anchors, "horizontalCenter");
+    createProperty("real", this.anchors, "verticalCenter");
+    createProperty("real", this.anchors, "fill");
+    createProperty("real", this.anchors, "centerIn");
+    createProperty("real", this.anchors, "margins");
+    createProperty("real", this.anchors, "leftMargin");
+    createProperty("real", this.anchors, "rightMargin");
+    createProperty("real", this.anchors, "topMargin");
+    createProperty("real", this.anchors, "bottomMargin");
     this.anchors.leftChanged.connect(this, updateHGeometry);
     this.anchors.rightChanged.connect(this, updateHGeometry);
     this.anchors.topChanged.connect(this, updateVGeometry);
@@ -144,14 +144,14 @@ function QMLItem(meta) {
 
     // childrenRect property
     this.childrenRect = new QObject(this);
-    createSimpleProperty("real", this.childrenRect, "x"); // TODO ro
-    createSimpleProperty("real", this.childrenRect, "y"); // TODO ro
-    createSimpleProperty("real", this.childrenRect, "width"); // TODO ro
-    createSimpleProperty("real", this.childrenRect, "height"); // TODO ro
+    createProperty("real", this.childrenRect, "x"); // TODO ro
+    createProperty("real", this.childrenRect, "y"); // TODO ro
+    createProperty("real", this.childrenRect, "width"); // TODO ro
+    createProperty("real", this.childrenRect, "height"); // TODO ro
 
-    createSimpleProperty("list", this, "states");
-    createSimpleProperty("string", this, "state");
-    createSimpleProperty("list", this, "transitions");
+    createProperty("list", this, "states");
+    createProperty("string", this, "state");
+    createProperty("list", this, "transitions");
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)

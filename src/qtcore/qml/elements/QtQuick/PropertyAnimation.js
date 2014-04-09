@@ -7,19 +7,19 @@ registerQmlType({
     var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);
 
-    createSimpleProperty("int", this, "duration");
-    createSimpleProperty("real", this, "from");
-    createSimpleProperty("string", this, "properties");
-    createSimpleProperty("string", this, "property");
-    createSimpleProperty("QtObject", this, "target");
-    createSimpleProperty("list", this, "targets");
-    createSimpleProperty("real", this, "to");
+    createProperty("int", this, "duration");
+    createProperty("real", this, "from");
+    createProperty("string", this, "properties");
+    createProperty("string", this, "property");
+    createProperty("QtObject", this, "target");
+    createProperty("list", this, "targets");
+    createProperty("real", this, "to");
 
     this.easing = new QObject(this);
-    createSimpleProperty("enum", this.easing, "type");
-    createSimpleProperty("real", this.easing, "amplitude");
-    createSimpleProperty("real", this.easing, "overshoot");
-    createSimpleProperty("real", this.easing, "period");
+    createProperty("enum", this.easing, "type");
+    createProperty("real", this.easing, "amplitude");
+    createProperty("real", this.easing, "overshoot");
+    createProperty("real", this.easing, "period");
 
     this.easing.$valueForProgress = function(t) {
         switch(this.type) {

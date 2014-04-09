@@ -215,18 +215,18 @@ function construct(meta) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(type, obj, propName, options) {
+function createProperty(type, obj, propName, options) {
     var prop = new QMLProperty(type, obj, propName);
     var getter, setter;
 
     if (typeof options == 'undefined')
       options = {};
     else if (typeof options != 'object')
-      options = { default: options }
+      options = { initialValue: options }
 
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
-    obj.$properties[propName].set(options.default);
+    obj.$properties[propName].set(options.initialValue);
     getter = function()       { return obj.$properties[propName].get(); };
     if (!options.readOnly)
       setter = function(newVal) { obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
@@ -351,7 +351,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 // TODO: 1. Alias must be able to point to prop or id of local object,eg: property alias q: t
                 //       2. Alias may have same name as id it points to: property alias someid: someid
                 //       3. Alias proxy (or property proxy) to proxy prop access to selected incapsulated object. (think twice).
-                createSimpleProperty("alias", item, i);
+                createProperty("alias", item, i);
                 item.$properties[i].componentScope = componentScope;
                 item.$properties[i].val = value;
                 item.$properties[i].get = function() {
@@ -402,7 +402,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
 
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
-                createSimpleProperty(value.type, item, i);
+                createProperty(value.type, item, i);
                 item.$properties[i].set(value.value, QMLProperty.ReasonInit, objectScope, componentScope);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {

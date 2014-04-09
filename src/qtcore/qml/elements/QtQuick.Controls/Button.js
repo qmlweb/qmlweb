@@ -6,8 +6,8 @@ function QMLButton(meta) {
     this.dom.style.pointerEvents = "auto";
     this.dom.innerHTML = "<span></span>";
 
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("bool", this, "enabled");
+    createProperty("string", this, "text");
+    createProperty("bool", this, "enabled");
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {

@@ -9,8 +9,8 @@ registerQmlType({
     firstItem = true;
     var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
 
-    createSimpleProperty("int", this, "count");
-    createSimpleProperty("list", this, "$items");
+    createProperty("int", this, "count");
+    createProperty("list", this, "$items");
     this.$defaultProperty = "$items";
     this.$items = [];
     this.$model = new JSItemModel();

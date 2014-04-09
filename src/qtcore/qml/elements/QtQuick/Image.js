@@ -20,20 +20,20 @@ function QMLImage(meta) {
     }
 
     // no-op properties
-    createSimpleProperty("bool", this, "asynchronous");
-    createSimpleProperty("bool", this, "cache");
-    createSimpleProperty("bool", this, "smooth");
+    createProperty("bool", this, "asynchronous");
+    createProperty("bool", this, "cache");
+    createProperty("bool", this, "smooth");
 
-    createSimpleProperty("enum", this, "fillMode");
-    createSimpleProperty("bool", this, "mirror");
-    createSimpleProperty("real", this, "progress");
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
+    createProperty("enum", this, "fillMode");
+    createProperty("bool", this, "mirror");
+    createProperty("real", this, "progress");
+    createProperty("url", this, "source");
+    createProperty("enum", this, "status");
 
     this.sourceSize = new QObject(this);
 
-    createSimpleProperty("int", this.sourceSize, "width");
-    createSimpleProperty("int", this.sourceSize, "height");
+    createProperty("int", this.sourceSize, "width");
+    createProperty("int", this.sourceSize, "height");
 
     this.asynchronous = true;
     this.cache = true;

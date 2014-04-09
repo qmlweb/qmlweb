@@ -5,17 +5,17 @@ registerQmlType({
   baseClass: QMLBaseObject,
   constructor: function QMLFont(parent) {
     QObject.call(this);
-    createSimpleProperty("bool", this, "bold");
-    createSimpleProperty("enum", this, "capitalization");
-    createSimpleProperty("string", this, "family");
-    createSimpleProperty("bool", this, "italic");
-    createSimpleProperty("real", this, "letterSpacing");
-    createSimpleProperty("int", this, "pixelSize");
-    createSimpleProperty("real", this, "pointSize");
-    createSimpleProperty("bool", this, "strikeout");
-    createSimpleProperty("bool", this, "underline");
-    createSimpleProperty("enum", this, "weight");
-    createSimpleProperty("real", this, "wordSpacing");
+    createProperty("bool", this, "bold");
+    createProperty("enum", this, "capitalization");
+    createProperty("string", this, "family");
+    createProperty("bool", this, "italic");
+    createProperty("real", this, "letterSpacing");
+    createProperty("int", this, "pixelSize");
+    createProperty("real", this, "pointSize");
+    createProperty("bool", this, "strikeout");
+    createProperty("bool", this, "underline");
+    createProperty("enum", this, "weight");
+    createProperty("real", this, "wordSpacing");
 
         this.pointSizeChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontSize = newVal + "pt";

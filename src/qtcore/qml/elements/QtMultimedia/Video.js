@@ -25,17 +25,17 @@ registerQmlType({
     this.dom.firstChild.style.width = this.dom.firstChild.style.height = "100%";
     this.dom.firstChild.style.margin = "0";
 
-    createSimpleProperty("bool",   this, "autoPlay");
-    createSimpleProperty("enum",   this, "fillMode");
-    createSimpleProperty("int",    this, "duration");
-    createSimpleProperty("int",    this, "position");
-    createSimpleProperty("bool",   this, "muted");
-    createSimpleProperty("real",   this, "playbackRate");
-    createSimpleProperty("enum",   this, "playbackState");
-    createSimpleProperty("string", this, "source");
-    createSimpleProperty("real",   this, "volume");
-    createSimpleProperty("enum",   this, "status");
-    createSimpleProperty("enum",   this, "error");
+    createProperty("bool",   this, "autoPlay");
+    createProperty("enum",   this, "fillMode");
+    createProperty("int",    this, "duration");
+    createProperty("int",    this, "position");
+    createProperty("bool",   this, "muted");
+    createProperty("real",   this, "playbackRate");
+    createProperty("enum",   this, "playbackState");
+    createProperty("string", this, "source");
+    createProperty("real",   this, "volume");
+    createProperty("enum",   this, "status");
+    createProperty("enum",   this, "error");
     this.status = MediaPlayer.NoMedia;
     this.error = MediaPlayer.NoError;
     this.fillMode = VideoOutput.PreserveAspectFit;

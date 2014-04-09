@@ -3,7 +3,7 @@ function QMLDomElement(meta) {
     this.dom = document.createElement(tagName);
     QMLItem.call(this, meta);
 
-    createSimpleProperty('string', this, 'tagName');
+    createProperty('string', this, 'tagName');
 
     // TODO: support properties, styles, perhaps changing the tagName
 }

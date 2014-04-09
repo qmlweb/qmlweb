@@ -15,9 +15,9 @@ registerQmlType({
         Error: 3
     }
 
-    createSimpleProperty("string", this, "name");
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
+    createProperty("string", this, "name");
+    createProperty("url", this, "source");
+    createProperty("enum", this, "status");
 
     this.status = this.FontLoader.Null;
 

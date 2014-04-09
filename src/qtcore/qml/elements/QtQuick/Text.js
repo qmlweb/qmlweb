@@ -35,13 +35,13 @@ registerQmlType({
     var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
     this.font   = new QMLFont(this);
 
-    createSimpleProperty("color", this, "color");
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("real", this, "lineHeight");
-    createSimpleProperty("enum", this, "wrapMode");
-    createSimpleProperty("enum", this, "horizontalAlignment");
-    createSimpleProperty("enum", this, "style");
-    createSimpleProperty("color", this, "styleColor");
+    createProperty("color", this, "color");
+    createProperty("string", this, "text");
+    createProperty("real", this, "lineHeight");
+    createProperty("enum", this, "wrapMode");
+    createProperty("enum", this, "horizontalAlignment");
+    createProperty("enum", this, "style");
+    createProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
         this.dom.firstChild.style.color = QMLColor(newVal);
