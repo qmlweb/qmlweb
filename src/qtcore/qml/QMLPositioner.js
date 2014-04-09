@@ -1,7 +1,7 @@
 function QMLPositioner(meta) {
     QMLItem.call(this, meta);
 
-    createSimpleProperty("int", this, "spacing");
+    createProperty({ type: "int", object: this, name: "spacing" });
     this.spacingChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);

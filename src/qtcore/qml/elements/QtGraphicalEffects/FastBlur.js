@@ -9,8 +9,8 @@ registerQmlType({
     var previousSource = null;
     var filterObject;
 
-    createSimpleProperty("real", this, "radius");
-    createSimpleProperty("var",  this, "source");
+    createProperty({ type: "real", object: this, name: "radius" });
+    createProperty({ type: "var",  object: this, name: "source" });
     this.radius = 0;
     this.source = null;
 

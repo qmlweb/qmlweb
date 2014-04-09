@@ -5,17 +5,17 @@ registerQmlType({
   baseClass: QMLBaseObject,
   constructor: function QMLFont(parent) {
     QObject.call(this);
-    createSimpleProperty("bool", this, "bold");
-    createSimpleProperty("enum", this, "capitalization");
-    createSimpleProperty("string", this, "family");
-    createSimpleProperty("bool", this, "italic");
-    createSimpleProperty("real", this, "letterSpacing");
-    createSimpleProperty("int", this, "pixelSize");
-    createSimpleProperty("real", this, "pointSize");
-    createSimpleProperty("bool", this, "strikeout");
-    createSimpleProperty("bool", this, "underline");
-    createSimpleProperty("enum", this, "weight");
-    createSimpleProperty("real", this, "wordSpacing");
+    createProperty({ type: "bool", object: this, name: "bold" });
+    createProperty({ type: "enum", object: this, name: "capitalization" });
+    createProperty({ type: "string", object: this, name: "family" });
+    createProperty({ type: "bool", object: this, name: "italic" });
+    createProperty({ type: "real", object: this, name: "letterSpacing" });
+    createProperty({ type: "int", object: this, name: "pixelSize" });
+    createProperty({ type: "real", object: this, name: "pointSize" });
+    createProperty({ type: "bool", object: this, name: "strikeout" });
+    createProperty({ type: "bool", object: this, name: "underline" });
+    createProperty({ type: "enum", object: this, name: "weight" });
+    createProperty({ type: "real", object: this, name: "wordSpacing" });
 
         this.pointSizeChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontSize = newVal + "pt";

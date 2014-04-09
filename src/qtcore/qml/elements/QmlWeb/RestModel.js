@@ -8,10 +8,10 @@ registerQmlType({
     var self = this;
     var attributes = this.getAttributes();
 
-    createSimpleProperty("string", this, "url");
-    createSimpleProperty("bool",   this, "isLoading");
-    createSimpleProperty("string", this, "mimeType");
-    createSimpleProperty("string", this, "queryMimeType");
+    createProperty({ type: "string", object: this, name: "url" });
+    createProperty({ type: "bool",   object: this, name: "isLoading" });
+    createProperty({ type: "string", object: this, name: "mimeType" });
+    createProperty({ type: "string", object: this, name: "queryMimeType" });
 
     this.mimeType      = "application/json";
     this.queryMimeType = "application/x-www-urlencoded";

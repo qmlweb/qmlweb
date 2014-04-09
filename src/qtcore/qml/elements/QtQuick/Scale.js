@@ -6,12 +6,12 @@ registerQmlType({
   constructor: function QMLScale(meta) {
     QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("real", this, "xScale");
-    createSimpleProperty("real", this, "yScale");
+    createProperty({ type: "real", object: this, name: "xScale" });
+    createProperty({ type: "real", object: this, name: "yScale" });
 
     this.origin = new QObject(this);
-    createSimpleProperty("real", this.origin, "x");
-    createSimpleProperty("real", this.origin, "y");
+    createProperty({ type: "real", object: this.origin, name: "x" });
+    createProperty({ type: "real", object: this.origin, name: "y" });
 
     function updateOrigin() {
         this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";

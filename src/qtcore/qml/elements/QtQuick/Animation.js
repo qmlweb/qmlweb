@@ -6,10 +6,10 @@ function QMLAnimation(meta) {
         Infinite: -1
     };
 
-    createSimpleProperty("bool", this, "alwaysRunToEnd");
-    createSimpleProperty("int", this, "loops");
-    createSimpleProperty("bool", this, "paused");
-    createSimpleProperty("bool", this, "running");
+    createProperty({ type: "bool", object: this, name: "alwaysRunToEnd" });
+    createProperty({ type: "int", object: this, name: "loops" });
+    createProperty({ type: "bool", object: this, name: "paused" });
+    createProperty({ type: "bool", object: this, name: "running" });
 
     this.alwaysRunToEnd = false;
     this.loops = 1;

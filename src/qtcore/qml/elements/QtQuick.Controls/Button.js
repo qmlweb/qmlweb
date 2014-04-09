@@ -6,7 +6,7 @@ function QMLButton(meta) {
     this.dom.style.pointerEvents = "auto";
     this.dom.innerHTML = "<span></span>";
 
-    createSimpleProperty("string", this, "text");
+    createProperty({ type: "string", object: this, name: "text" });
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {

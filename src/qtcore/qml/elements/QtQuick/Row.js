@@ -9,7 +9,7 @@ registerQmlType({
 function QMLRow(meta) {
     QMLPositioner.call(this, meta);
 
-    createSimpleProperty("enum", this, "layoutDirection");
+    createProperty({ type: "enum", object: this, name: "layoutDirection" });
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutDirection = 0;
 }

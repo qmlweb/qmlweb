@@ -15,15 +15,15 @@ registerQmlType({
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
 
-    createSimpleProperty("variant", this, "acceptedButtons");
-    createSimpleProperty("bool", this, "enabled");
-    createSimpleProperty("bool", this, "hoverEnabled");
-    createSimpleProperty("real", this, "mouseX");
-    createSimpleProperty("real", this, "mouseY");
-    createSimpleProperty("bool", this, "pressed");
-    createSimpleProperty("bool", this, "containsMouse");
-    createSimpleProperty("variant", this, "pressedButtons");
-    createSimpleProperty("enum", this, "cursorShape");
+    createProperty({ type: "variant", object: this, name: "acceptedButtons" });
+    createProperty({ type: "bool", object: this, name: "enabled" });
+    createProperty({ type: "bool", object: this, name: "hoverEnabled" });
+    createProperty({ type: "real", object: this, name: "mouseX" });
+    createProperty({ type: "real", object: this, name: "mouseY" });
+    createProperty({ type: "bool", object: this, name: "pressed" });
+    createProperty({ type: "bool", object: this, name: "containsMouse" });
+    createProperty({ type: "variant", object: this, name: "pressedButtons" });
+    createProperty({ type: "enum", object: this, name: "cursorShape" });
 
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();

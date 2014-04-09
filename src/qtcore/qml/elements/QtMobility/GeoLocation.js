@@ -7,15 +7,15 @@ registerQmlType({
     var self = this;
     QMLItem.call(this, meta);
 
-    createSimpleProperty("double", this, "accuracy");
-    createSimpleProperty("double", this, "altitude");
-    createSimpleProperty("double", this, "altitudeAccuracy");
-    createSimpleProperty("double", this, "heading");
-    createSimpleProperty("string", this, "label");
-    createSimpleProperty("double", this, "latitude");
-    createSimpleProperty("double", this, "longitude");
-    createSimpleProperty("double", this, "speed");
-    createSimpleProperty("date",   this, "timestamp");
+    createProperty({ type: "double", object: this, name: "accuracy" });
+    createProperty({ type: "double", object: this, name: "altitude" });
+    createProperty({ type: "double", object: this, name: "altitudeAccuracy" });
+    createProperty({ type: "double", object: this, name: "heading" });
+    createProperty({ type: "string", object: this, name: "label" });
+    createProperty({ type: "double", object: this, name: "latitude" });
+    createProperty({ type: "double", object: this, name: "longitude" });
+    createProperty({ type: "double", object: this, name: "speed" });
+    createProperty({ type: "date",   object: this, name: "timestamp" });
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition

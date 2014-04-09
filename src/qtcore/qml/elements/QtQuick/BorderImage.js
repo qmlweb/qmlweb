@@ -19,15 +19,15 @@ registerQmlType({
         Error: 4
     }
 
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
+    createProperty({ type: "url", object: this, name: "source" });
+    createProperty({ type: "enum", object: this, name: "status" });
     this.border = new QObject(this);
-    createSimpleProperty("int", this.border, "left");
-    createSimpleProperty("int", this.border, "right");
-    createSimpleProperty("int", this.border, "top");
-    createSimpleProperty("int", this.border, "bottom");
-    createSimpleProperty("enum", this, "horizontalTileMode");
-    createSimpleProperty("enum", this, "verticalTileMode");
+    createProperty({ type: "int", object: this.border, name: "left" });
+    createProperty({ type: "int", object: this.border, name: "right" });
+    createProperty({ type: "int", object: this.border, name: "top" });
+    createProperty({ type: "int", object: this.border, name: "bottom" });
+    createProperty({ type: "enum", object: this, name: "horizontalTileMode" });
+    createProperty({ type: "enum", object: this, name: "verticalTileMode" });
 
     this.source = "";
     this.status = this.BorderImage.Null;
