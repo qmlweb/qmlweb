@@ -4,6 +4,7 @@ var GETTER = "__defineGetter__",
     // which property called the getter of a certain other property for
     // evaluation and is thus dependant on it.
     evaluatingProperty = undefined,
+    _executionContext = null,
     // All object constructors
     constructors = {
       'int':       QMLInteger,
@@ -266,6 +267,7 @@ var setupGetter,
 function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
     objectScope = objectScope || item;
+    _executionContext = componentScope;
     for (i in metaObject) {
         var value = metaObject[i];
         // skip global id's and internal values
@@ -289,7 +291,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     params += j==0 ? "" : ", ";
                     params += item[signalName].parameters[j].name;
                 }
-                value.src = "(function(" + params + ") {" + value.src + "})";
+                value.src = "(function(" + params + ") { _executionContext = __executionContext;" + value.src + "})";
                 value.isFunction = false;
                 value.compile();
             }
