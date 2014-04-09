@@ -107,7 +107,9 @@
     // Property that is currently beeing evaluated. Used to get the information
     // which property called the getter of a certain other property for
     // evaluation and is thus dependant on it.
-    evaluatingProperty = undefined,
+    evaluatingBinding = undefined,
+    // context in which a QML slot/function is executed or a binding is evaluated.
+    _executionContext = null,
     // All object constructors
     constructors = {
             'int': QMLInteger,
@@ -121,6 +123,8 @@
             url: String,
             variant: QMLVariant,
             'var': QMLVariant,
+            anchors: QMLAnchors,
+            font: QMLFont,
             Component: QMLComponent,
             QMLDocument: QMLComponent,
             MouseArea: QMLMouseArea,
@@ -207,9 +211,37 @@ function descr(msg, obj, vals) {
  */
 QMLBinding.prototype.compile = function() {
     var bindSrc = this.isFunction
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
+                    ? "(function(o, c) { _executionContext = c;\nwith(c)\nwith(o)\n" + this.src + "\n})"
+                    : "(function(o, c) { _executionContext = c;\nwith(c)\nwith(o)\nreturn " + this.src + "\n})";
     this.eval = eval(bindSrc);
+}
+QMLBinding.prototype.bind = function(object, propName, objectScope, componentScope) {
+    if (!objectScope || !componentScope)
+        throw "Internal error: trying to evaluate binding without scope";
+    var binding = Object.create(this);
+    binding.obj = object;
+    binding.propName = propName;
+    binding.objectScope = objectScope;
+    binding.componentScope = componentScope;
+
+    if (engine.operationState !== QMLOperationState.Init) {
+        binding.compile();
+
+        evaluatingBinding = binding;
+        var newVal = binding.eval(objectScope, componentScope);
+        evaluatingBinding = null;
+        return newVal;
+    } else {
+        engine.bindings.push(binding);
+        return;
+    }
+}
+// Update recalculates the value of a binding and resets the propertyit's assigned to.
+// Called when one of the dependencies changes.
+QMLBinding.prototype.update = function() {
+    evaluatingBinding = this;
+    this.obj[this.propName] = this.eval(this.objectScope, this.componentScope);
+    evaluatingBinding = undefined;
 }
 
 /**
@@ -222,7 +254,7 @@ function construct(meta) {
         cTree;
 
     if (meta.object.$class in constructors) {
-        item = new constructors[meta.object.$class](meta);
+        item = new constructors[meta.object.$class](meta.parent);
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("A QML component must only contain one root element!");
@@ -239,9 +271,17 @@ function construct(meta) {
         return;
     }
 
+    if (!item.$isComponentRoot)
+        item.$isComponentRoot = meta.isComponentRoot;
+    // scope
+    item.$context = meta.context;
+
     // id
-    if (meta.object.id)
+    if (meta.object.id) {
         meta.context[meta.object.id] = item;
+        if (item.dom)
+            item.dom.className += " " + meta.object.id;
+    }
 
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, meta.context);
@@ -320,126 +360,63 @@ function Signal(params, options) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(type, obj, propName) {
-    var prop = new QMLProperty(type, obj, propName);
+function createProperty(data) {
+    setupGetterSetter(data.object, data.name,
+        function() {
+            // If this call to the getter is due to a property that is dependant on this
+            // one, we need it to take track of changes
+            if (evaluatingBinding && !this[data.name + "Changed"].isConnected(evaluatingBinding, QMLBinding.prototype.update))
+                this[data.name + "Changed"].connect(evaluatingBinding, QMLBinding.prototype.update);
 
-    obj[propName + "Changed"] = prop.changed;
-    obj.$properties[propName] = prop;
-    var getter = function() {
-        return obj.$properties[propName].get();
-    };
-    var setter = function(newVal) {
-        return obj.$properties[propName].set(newVal);
-    };
-    setupGetterSetter(obj, propName, getter, setter);
-    if (obj.$isComponentRoot)
-        setupGetterSetter(obj.$context, propName, getter, setter);
-}
+            return data.get ? data.get.call(this, name) : this.$properties[data.name];
+        },
+        function(newVal) {
+            var i,
+                oldVal = this.$properties[data.name],
+                newVal;
 
-function QMLProperty(type, obj, name) {
-    this.obj = obj;
-    this.name = name;
-    this.changed = Signal([], {obj:obj});
-    this.binding = null;
-    this.objectScope = null;
-    this.componentScope = null;
-    this.value = undefined;
-    this.type = type;
-    this.animation = null;
+            if (constructors[data.type] == QMLList) {
+                newVal = QMLList(newVal, this, data.name);
+            } else if (newVal instanceof QMLMetaElement) {
+                if (constructors[newVal.$class] == QMLComponent || constructors[data.type] == QMLComponent)
+                    newVal = new QMLComponent({ object: newVal, parent: this, context: _executionContext });
+                else
+                    newVal = construct({ object: newVal, parent: this, context: _executionContext });
+            } else if (newVal instanceof Object || !newVal) {
+                newVal = newVal;
+            } else {
+                newVal = constructors[data.type](newVal, this, data.name);
+            }
+            data.set ? data.set.call(this, newVal, data.name) : (this.$properties[data.name] = newVal);
 
-    // This list contains all signals that hold references to this object.
-    // It is needed when deleting, as we need to tidy up all references to this object.
-    this.$tidyupList = [];
-}
-
-// Updater recalculates the value of a property if one of the
-// dependencies changed
-QMLProperty.prototype.update = function() {
-    if (!this.binding)
-        return;
-
-    var oldVal = this.val;
-    evaluatingProperty = this;
-    this.val = this.binding.eval(this.objectScope, this.componentScope);
-    evaluatingProperty = undefined;
-
-    if (this.animation) {
-        this.animation.$actions = [{
-            target: this.animation.target || this.obj,
-            property: this.animation.property || this.name,
-            from: this.animation.from || oldVal,
-            to: this.animation.to || this.val
-        }];
-        this.animation.restart();
-    }
-
-    if (this.val !== oldVal)
-        this.changed(this.val, oldVal, this.name);
-}
-
-// Define getter
-QMLProperty.prototype.get = function() {
-    // If this call to the getter is due to a property that is dependant on this
-    // one, we need it to take track of changes
-    if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
-        this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
-
-    return this.val;
-}
-
-// Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
-    var i,
-        oldVal = this.val;
-
-    if (newVal instanceof QMLBinding) {
-        if (!objectScope || !componentScope)
-            throw "Internal error: binding assigned without scope";
-        this.binding = newVal;
-        this.objectScope = objectScope;
-        this.componentScope = componentScope;
-
-        if (engine.operationState !== QMLOperationState.Init) {
-            if (!newVal.eval)
-                newVal.compile();
-
-            evaluatingProperty = this;
-            newVal = this.binding.eval(objectScope, componentScope);
-            evaluatingProperty = null;
-        } else {
-            engine.bindedProperties.push(this);
-            return;
+            if (newVal !== oldVal) {
+                if (this.animation && !fromAnimation) {
+                    this.animation.running = false;
+                    this.animation.$actions = [{
+                        target: this.animation.target || this,
+                        property: this.animation.property || this.name,
+                        from: this.animation.from || oldVal,
+                        to: this.animation.to || newVal
+                    }];
+                    this.animation.running = true;
+                }
+                if (this.$updateDirtyProperty)
+                    this.$updateDirtyProperty(data.name, newVal);
+                this[data.name + "Changed"](newVal, oldVal, newVal);
+            }
         }
-    } else if (!fromAnimation) {
-        this.binding = null;
-    }
+    );
+    data.object.$properties[data.name] = data.initialValue;
 
-    if (constructors[this.type] == QMLList) {
-        this.val = QMLList({ object: newVal, parent: this.obj, context: componentScope });
-    } else if (newVal instanceof QMLMetaElement) {
-        if (constructors[newVal.$class] == QMLComponent || constructors[this.type] == QMLComponent)
-            this.val = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
-        else
-            this.val = construct({ object: newVal, parent: this.obj, context: componentScope });
-    } else if (newVal instanceof Object || !newVal) {
-        this.val = newVal;
-    } else {
-        this.val = constructors[this.type](newVal);
-    }
-
-    if (this.val !== oldVal) {
-        if (this.animation && !fromAnimation) {
-            this.animation.running = false;
-            this.animation.$actions = [{
-                target: this.animation.target || this.obj,
-                property: this.animation.property || this.name,
-                from: this.animation.from || oldVal,
-                to: this.animation.to || this.val
-            }];
-            this.animation.running = true;
+    setupGetter(data.object, data.name + "Changed",
+        function() {
+            if (!(data.name in this.$changeSignals)) {
+                console.warn(data.name + " property object did not exist while asking for changed signal. Creating it.");
+                this.$changeSignals[data.name] = Signal();
+            }
+            return this.$changeSignals[data.name];
         }
-        this.changed(this.val, oldVal, this.name);
-    }
+    );
 }
 
 /**
@@ -503,6 +480,7 @@ var setupGetter,
 function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
     objectScope = objectScope || item;
+    _executionContext = componentScope;
     for (i in metaObject) {
         var value = metaObject[i];
         // skip global id's and internal values
@@ -522,7 +500,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     params += j==0 ? "" : ", ";
                     params += item[signalName].parameters[j].name;
                 }
-                value.src = "(function(" + params + ") {" + value.src + "})";
+                value.src = "(function(" + params + ") { _executionContext = c;\n" + value.src + "\n})";
                 value.isFunction = false;
                 value.compile();
             }
@@ -543,7 +521,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
-                createSimpleProperty("alias", item, i);
+                createProperty({ type: "alias", object: item, name: i });
                 item.$properties[i].componentScope = componentScope;
                 item.$properties[i].val = value;
                 item.$properties[i].get = function() {
@@ -557,18 +535,20 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
-                createSimpleProperty(value.type, item, i);
-                item.$properties[i].set(value.value, true, objectScope, componentScope);
+                createProperty({ type: value.type, object: item, name: i });
+                item[i] = value.value;
                 continue;
-            } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
+            } else if (i in item && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
                 applyProperties(value, item[i], objectScope, componentScope);
                 continue;
+            } else if (value instanceof QMLBinding) {
+                value = value.bind(item, i, objectScope, componentScope)
             }
         }
-        if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, true, objectScope, componentScope);
-        else if (i in item)
+//         if (item.$properties && i in item.$properties)
+//             item.$properties[i].set(value, true, objectScope, componentScope);
+        /*else*/ if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
             item.$setCustomData(i, value);
@@ -577,7 +557,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+            item[item.$defaultProperty] = metaObject.$children;
         else
             throw "Cannot assign to unexistant default property";
     }
@@ -635,10 +615,7 @@ QMLOperationState = {
 }
 
 // There can only be one running QMLEngine. This variable points to the currently running engine.
-var engine = null;
-
-// QML engine. EXPORTED.
-QMLEngine = function (element, options) {
+var engine = new (function () {
 //----------Public Members----------
     this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
@@ -651,9 +628,6 @@ QMLEngine = function (element, options) {
     // List of available Components
     this.components = {};
 
-    this.rootElement = element;
-    this.renderMode = (element && element.nodeName == "CANVAS") ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
-
     // List of Component.completed signals
     this.completedSignals = [];
 
@@ -661,7 +635,7 @@ QMLEngine = function (element, options) {
     this.operationState = 1;
 
     // List of properties whose values are bindings. For internal use only.
-    this.bindedProperties = [];
+    this.bindings = [];
 
 
 //----------Public Methods----------
@@ -705,18 +679,18 @@ QMLEngine = function (element, options) {
         basePath[basePath.length - 1] = "";
         basePath = basePath.join("/");
         var src = getUrlContents(file);
-        if (options.debugSrc) {
-            options.debugSrc(src);
-        }
+//         if (options.debugSrc) {
+//             options.debugSrc(src);
+//         }
         this.loadQML(src);
     }
     // parse and construct qml
     this.loadQML = function(src) {
         engine = this;
         var tree = parseQML(src);
-        if (options.debugTree) {
-            options.debugTree(tree);
-        }
+//         if (options.debugTree) {
+//             options.debugTree(tree);
+//         }
 
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
@@ -737,8 +711,8 @@ QMLEngine = function (element, options) {
         var value = obj[propName];
 
         function getter() {
-            if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
-                dependantProperties.push(evaluatingProperty);
+            if (evaluatingBinding && dependantProperties.indexOf(evaluatingBinding) == -1)
+                dependantProperties.push(evaluatingBinding);
 
             return value;
         }
@@ -754,6 +728,10 @@ QMLEngine = function (element, options) {
     }
 
 //Intern
+    // Stylesheet used for default style of elements.
+    this.globalStylesheet = document.createElement("style");
+    this.globalStylesheet.type = "text/css";
+    document.head.appendChild(this.globalStylesheet);
 
     // Load file, parse and construct as Component (.qml)
     this.loadComponent = function(name)
@@ -773,12 +751,12 @@ QMLEngine = function (element, options) {
 
     this.$initializePropertyBindings = function() {
         // Initialize property bindings
-        for (var i = 0; i < this.bindedProperties.length; i++) {
-            var property = this.bindedProperties[i];
-            property.binding.compile();
-            property.update();
+        for (var i = 0; i < this.bindings.length; i++) {
+            var binding = this.bindings[i];
+            binding.compile();
+            binding.update();
         }
-        this.bindedProperties = [];
+        this.bindings = [];
     }
 
     this.$getTextMetrics = function(text, fontCss)
@@ -854,9 +832,9 @@ QMLEngine = function (element, options) {
 
         doc.$draw(canvas);
 
-        if (options.drawStat) {
-            options.drawStat((new Date()).getTime() - time.getTime());
-        }
+//         if (options.drawStat) {
+//             options.drawStat((new Date()).getTime() - time.getTime());
+//         }
     }
 
 
@@ -953,16 +931,16 @@ QMLEngine = function (element, options) {
 
 //----------Construct----------
 
-    options = options || {};
-
-    if (options.debugConsole) {
-        // Replace QML-side console.log
-        console = {};
-        console.log = function() {
-            var args = Array.prototype.slice.call(arguments);
-            options.debugConsole.apply(Undefined, args);
-        };
-    }
+//     options = options || {};
+//
+//     if (options.debugConsole) {
+//         // Replace QML-side console.log
+//         console = {};
+//         console.log = function() {
+//             var args = Array.prototype.slice.call(arguments);
+//             options.debugConsole.apply(Undefined, args);
+//         };
+//     }
 
     if (this.renderMode == QMLRenderMode.Canvas) {
         // Register mousehandler for element
@@ -998,6 +976,11 @@ QMLEngine = function (element, options) {
             }
         }
     }
+})();
+QMLEngine = function(element, options) {
+    engine.rootElement = element;
+    engine.renderMode = (element && element.nodeName == "CANVAS") ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
+    return engine
 }
 
 function QMLInteger(val) {
@@ -1013,15 +996,83 @@ function QMLColor(val) {
     return val;
 }
 
-function QMLList(meta) {
+function QMLList(val, obj, name) {
     var list = [];
-    if (meta.object instanceof Array)
-        for (var i in meta.object)
-            list.push(construct({object: meta.object[i], parent: meta.parent, context: meta.context }));
-    else if (meta.object instanceof QMLMetaElement)
-        list.push(construct({object: meta.object, parent: meta.parent, context: meta.context }));
+    if (val instanceof Array)
+        for (var i in val)
+            list.push(construct({object: val[i], parent: obj, context: _executionContext }));
+    else if (val instanceof QMLMetaElement)
+        list.push(construct({object: val, parent: obj, context: _executionContext }));
 
     return list;
+}
+
+var p = QMLAnchors.prototype = new QObject();
+p.$setHorizontalAnchorsProperty = function(newVal, name) {
+    this.$properties[name] = newVal;
+    this.$parent.$updateHGeometry();
+}
+p.$setVerticalAnchorsProperty = function(newVal, name) {
+    this.$properties[name] = newVal;
+    this.$parent.$updateVGeometry();
+}
+p.$setConvenienceAnchorsProperty = function(newVal, name) {
+    this.$properties[name] = newVal;
+    this.$parent.$updateHGeometry();
+    this.$parent.$updateVGeometry();
+}
+createProperty({ type: "real", object: p, name: "left", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "horizontalCenter", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "right", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "top", set: p.$setVerticalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "verticalCenter", set: p.$setVerticalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "bottom", set: p.$setVerticalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "fill", set: p.$setConvenienceAnchorsProperty });
+createProperty({ type: "real", object: p, name: "centerIn", set: p.$setConvenienceAnchorsProperty });
+createProperty({ type: "real", object: p, name: "margins", initialValue: 0, set: p.$setConvenienceAnchorsProperty });
+createProperty({ type: "real", object: p, name: "leftMargin", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "horizontalCenterOffset", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "rightMargin", set: p.$setHorizontalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "topMargin", set: p.$setVerticalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "verticalCenterOffset", set: p.$setVerticalAnchorsProperty });
+createProperty({ type: "real", object: p, name: "bottomMargin", set: p.$setVerticalAnchorsProperty });
+p.$updateDirtyProperty = function(n, newVal) {
+    this.$parent.$updateDirtyProperty(this.$name, this);
+}
+function QMLAnchors(val, obj, name) {
+    QObject.call(this, obj);
+    this.$name = name;
+}
+
+p = QMLFont.prototype = new QObject();
+createProperty({ type: "bool", object: p, name: "bold", initialValue: false });
+createProperty({ type: "enum", object: p, name: "capitalization", initialValue: 0 });
+createProperty({ type: "string", object: p, name: "family", initialValue: "sans-serif" });
+createProperty({ type: "bool", object: p, name: "italic", initialValue: false });
+createProperty({ type: "real", object: p, name: "letterSpacing", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "pixelSize" });
+createProperty({ type: "real", object: p, name: "pointSize", initialValue: 10 });
+createProperty({ type: "bool", object: p, name: "strikeout", initialValue: false });
+createProperty({ type: "bool", object: p, name: "underline", initialValue: false });
+createProperty({ type: "enum", object: p, name: "weight" });
+createProperty({ type: "real", object: p, name: "wordSpacing", initialValue: 0 });
+p.$updateDirtyProperty = function(name, newVal) {
+    this.$parent.$updateDirtyProperty(this.$name + "." + name, newVal);
+}
+function QMLFont(val, obj, name) {
+    QObject.call(this, obj);
+    this.$name = name;
+}
+
+p = QMLPen.prototype = new QObject();
+createProperty({ type: "color", object: p, name: "color", initialValue: "transparent" });
+createProperty({ type: "int", object: p, name: "width", initialValue: 1 });
+p.$updateDirtyProperty = function(name, newVal) {
+    this.$parent.$updateDirtyProperty(this.$name + "." + name, newVal);
+}
+function QMLPen(val, obj, name) {
+    QObject.call(this, obj);
+    this.$name = name
 }
 
 QMLComponent.prototype.createObject = function(parent, properties) {
@@ -1048,49 +1099,42 @@ function QMLComponent(meta) {
 }
 
 // Base object for all qml thingies
+QObject.prototype.$delete = function() {
+    while (this.$tidyupList.length > 0) {
+        var item = this.$tidyupList[0];
+        if (item.$delete) // It's a QObject
+            item.$delete();
+        else // It must be a signal
+            item.disconnect(this);
+    }
+
+    for (var i in this.$properties) {
+        var prop = this.$properties[i];
+        while (prop.$tidyupList.length > 0)
+            prop.$tidyupList[0].disconnect(prop);
+    }
+
+    if (this.$parent && this.$parent.$tidyupList)
+        this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
+}
 function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
+    this.$properties = Object.create(this.$properties);
+    this.$changeSignals = {};
     // List of things to tidy up when deleting this object.
-    if (!this.$tidyupList)
-        this.$tidyupList = [];
-    if (!this.$properties)
-        this.$properties = {};
-
-    this.$delete = function() {
-        while (this.$tidyupList.length > 0) {
-            var item = this.$tidyupList[0];
-            if (item.$delete) // It's a QObject
-                item.$delete();
-            else // It must be a signal
-                item.disconnect(this);
-        }
-
-        for (var i in this.$properties) {
-            var prop = this.$properties[i];
-            while (prop.$tidyupList.length > 0)
-                prop.$tidyupList[0].disconnect(prop);
-        }
-
-        if (this.$parent && this.$parent.$tidyupList)
-            this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
-    }
+    this.$tidyupList = [];
 }
 
 // Base object for all qml elements
-function QMLBaseObject(meta) {
-    QObject.call(this, meta.parent);
+function QMLBaseObject(parent) {
+    QObject.call(this, parent);
     var i,
         prop;
 
     if (!this.$draw)
         this.$draw = noop;
-
-    if (!this.$isComponentRoot)
-        this.$isComponentRoot = meta.isComponentRoot;
-    // scope
-    this.$context = meta.context;
 
     // Component.onCompleted
     this.Component = new QObject(this);
@@ -1098,7 +1142,49 @@ function QMLBaseObject(meta) {
     engine.completedSignals.push(this.Component.completed);
 }
 
-function updateHGeometry(newVal, oldVal, propName) {
+p = QMLItem.prototype = new QMLBaseObject();
+p.$defaultProperty = "data";
+
+p.$setX = function(newVal) {
+    this.$properties.x = newVal;
+    this.$updateHGeometry();
+}
+p.$setY = function(newVal) {
+    this.$properties.y = newVal;
+    this.$updateVGeometry();
+}
+p.$getWidth = function() {
+    return this.$properties.width || this.$properties.implicitWidth;
+}
+p.$setWidth = function(newVal) {
+    this.$properties.width = newVal;
+    this.$updateHGeometry();
+}
+p.$getHeight = function() {
+    return this.$properties.height || this.$properties.implicitHeight;
+}
+p.$setHeight = function(newVal) {
+    this.$properties.height = newVal;
+    this.$updateVGeometry();
+}
+p.$setParent = function(newVal) {
+    if (this.$properties.parent) {
+        oldParent.children.splice(oldParent.children.indexOf(this), 1);
+        oldParent.childrenChanged();
+        if (engine.renderMode == QMLRenderMode.DOM)
+            oldParent.dom.removeChild(this.dom);
+    }
+    this.$properties.parent = newVal;
+    if (newVal && newVal.children.indexOf(this) == -1) {
+        newVal.children.push(this);
+        newVal.childrenChanged();
+    }
+    if (newVal && engine.renderMode == QMLRenderMode.DOM)
+        newVal.dom.appendChild(this.dom);
+    this.$updateHGeometry();
+    this.$updateVGeometry();
+}
+p.$updateHGeometry = function() {
     var anchors = this.anchors || this;
     if (this.$updatingGeometry)
         return;
@@ -1108,18 +1194,11 @@ function updateHGeometry(newVal, oldVal, propName) {
         lM = anchors.leftMargin || anchors.margins,
         rM = anchors.rightMargin || anchors.margins;
 
-    // Width
-    if (this.$isUsingImplicitWidth && propName == "implicitWidth")
-        width = this.implicitWidth;
-    else if (propName == "width")
-        this.$isUsingImplicitWidth = false;
-
-    // Position TODO: Layouts
     if ((t = anchors.fill) !== undefined) {
-        if (!t.$properties.left.changed.isConnected(this, updateHGeometry))
-            t.$properties.left.changed.connect(this, updateHGeometry);
-        if (!t.$properties.width.changed.isConnected(this, updateHGeometry))
-            t.$properties.width.changed.connect(this, updateHGeometry);
+        if (!t.leftChanged.isConnected(this, this.$updateHGeometry))
+            t.leftChanged.connect(this, this.$updateHGeometry);
+        if (!t.widthChanged.isConnected(this, this.$updateHGeometry))
+            t.widthChanged.connect(this, this.$updateHGeometry);
 
         this.$isUsingImplicitWidth = false;
         width = t.width - lM - rM;
@@ -1128,8 +1207,8 @@ function updateHGeometry(newVal, oldVal, propName) {
         right = t.right - rM;
         hC = (left + right) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
-        if (!t.$properties.horizontalCenter.changed.isConnected(this, updateHGeometry))
-            t.$properties.horizontalCenter.changed.connect(this, updateHGeometry);
+        if (!t.horizontalCenterChanged.isConnected(this, this.$updateHGeometry))
+            t.horizontalCenterChanged.connect(this, this.$updateHGeometry);
 
         w = width || this.width;
         hC = t.horizontalCenter;
@@ -1174,8 +1253,8 @@ function updateHGeometry(newVal, oldVal, propName) {
         left = hC - w / 2;
         right = hC + w / 2;
     } else {
-        if (this.parent && !this.parent.$properties.left.changed.isConnected(this, updateHGeometry))
-            this.parent.$properties.left.changed.connect(this, updateHGeometry);
+        if (this.parent && !this.parent.leftChanged.isConnected(this, this.$updateHGeometry))
+            this.parent.leftChanged.connect(this, this.$updateHGeometry);
 
         w = width || this.width;
         left = this.x + (this.parent ? this.parent.left : 0);
@@ -1196,8 +1275,7 @@ function updateHGeometry(newVal, oldVal, propName) {
 
     this.$updatingGeometry = false;
 }
-
-function updateVGeometry(newVal, oldVal, propName) {
+p.$updateVGeometry = function() {
     var anchors = this.anchors || this;
     if (this.$updatingGeometry)
         return;
@@ -1207,18 +1285,11 @@ function updateVGeometry(newVal, oldVal, propName) {
         tM = anchors.topMargin || anchors.margins,
         bM = anchors.bottomMargin || anchors.margins;
 
-    // Height
-    if (this.$isUsingImplicitHeight && propName == "implicitHeight")
-        height = this.implicitHeight;
-    else if (propName == "height")
-        this.$isUsingImplicitHeight = false;
-
-    // Position TODO: Layouts
     if ((t = anchors.fill) !== undefined) {
-        if (!t.$properties.top.changed.isConnected(this, updateVGeometry))
-            t.$properties.top.changed.connect(this, updateVGeometry);
-        if (!t.$properties.height.changed.isConnected(this, updateVGeometry))
-            t.$properties.height.changed.connect(this, updateVGeometry);
+        if (!t.topChanged.isConnected(this, this.$updateVGeometry))
+            t.topChanged.connect(this, this.$updateVGeometry);
+        if (!t.heightChanged.isConnected(this, this.$updateVGeometry))
+            t.heightChanged.connect(this, this.$updateVGeometry);
 
         this.$isUsingImplicitHeight = false;
         height = t.height - tM - bM;
@@ -1227,8 +1298,8 @@ function updateVGeometry(newVal, oldVal, propName) {
         bottom = t.bottom - bM;
         vC = (top + bottom) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
-        if (!t.$properties.verticalCenter.changed.isConnected(this, updateVGeometry))
-            t.$properties.verticalCenter.changed.connect(this, updateVGeometry);
+        if (!t.verticalCenterChanged.isConnected(this, this.$updateVGeometry))
+            t.verticalCenterChanged.connect(this, this.$updateVGeometry);
 
         w = height || this.height;
         vC = t.verticalCenter;
@@ -1273,8 +1344,8 @@ function updateVGeometry(newVal, oldVal, propName) {
         top = vC - w / 2;
         bottom = vC + w / 2;
     } else {
-        if (this.parent && !this.parent.$properties.top.changed.isConnected(this, updateVGeometry))
-            this.parent.$properties.top.changed.connect(this, updateVGeometry);
+        if (this.parent && !this.parent.topChanged.isConnected(this, this.$updateVGeometry))
+            this.parent.topChanged.connect(this, this.$updateVGeometry);
 
         w = height || this.height;
         top = this.y + (this.parent ? this.parent.top : 0);
@@ -1295,12 +1366,97 @@ function updateVGeometry(newVal, oldVal, propName) {
 
     this.$updatingGeometry = false;
 }
+p.$updateDirtyProperty = function(name, newVal) {
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        engine.$requestDraw();
+        return;
+    }
 
+    switch (name) {
+        case "clip":
+            this.css.overflow = newVal ? "hidden" : "visible";
+            break;
+        case "height":
+            this.css.height = newVal ? newVal + "px" : "auto";
+            break;
+        case "opacity":
+            this.css.opacity = newVal;
+            break;
+        case "rotation":
+        case "scale":
+        case "transform":
+            var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
+            for (var i = 0; i < this.transform.length; i++) {
+                var t = this.transform[i];
+                if (t instanceof QMLRotation)
+                    transform += " rotate3d(" + t.axis.x + ", " + t.axis.y + ", " + t.axis.z + ", " + t.angle + "deg)";
+                else if (t instanceof QMLScale)
+                    transform += " scale(" + t.xScale + ", " + t.yScale + ")";
+                else if (t instanceof QMLTranslate)
+                    transform += " translate(" + t.x + "px, " + t.y + "px)";
+            }
+            this.css.transform = transform;
+            this.css.MozTransform = transform;    // Firefox
+            this.css.webkitTransform = transform; // Chrome, Safari and Opera
+            this.css.OTransform = transform;      // Opera
+            this.css.msTransform = transform;     // IE
+            break;
+        case "visible":
+            this.css.visibility = newVal ? "inherit" : "hidden";
+            break;
+        case "width":
+            this.css.width = newVal ? newVal + "px" : "auto";
+            break;
+        case "x":
+            this.css.left = newVal + "px";
+            break;
+        case "y":
+            this.css.top = newVal + "px";
+            break;
+        case "z":
+            this.css.zIndex = newVal;
+            break;
+    }
+}
+
+createProperty({ type: "anchors", object: p, name: "anchors", initialValue: [] });
+createProperty({ type: "list", object: p, name: "data", initialValue: [] });
+createProperty({ type: "list", object: p, name: "children", initialValue: [] });
+createProperty({ type: "list", object: p, name: "resources", initialValue: [] });
+createProperty({ type: "Item", object: p, name: "parent", initialValue: null, set: p.$setParent });
+createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "left" });
+createProperty({ type: "real", object: p, name: "right" });
+createProperty({ type: "real", object: p, name: "top" });
+createProperty({ type: "real", object: p, name: "bottom" });
+createProperty({ type: "real", object: p, name: "horizontalCenter" });
+createProperty({ type: "real", object: p, name: "verticalCenter" });
+createProperty({ type: "real", object: p, name: "rotation", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "scale", initialValue: 1 });
+createProperty({ type: "real", object: p, name: "z", initialValue: 0 });
+createProperty({ type: "list", object: p, name: "transform", initialValue: [] });
+createProperty({ type: "bool", object: p, name: "visible", initialValue: false });
+createProperty({ type: "real", object: p, name: "opacity", initialValue: 1 });
+createProperty({ type: "bool", object: p, name: "clip", initialValue: false });
+createProperty({ type: "list", object: p, name: "states", initialValue: [] });
+createProperty({ type: "list", object: p, name: "transitions", initialValue: [] });
+createProperty({ type: "string", object: p, name: "state", initialValue: "" });
+createProperty({ type: "real", object: p, name: "x", initialValue: 0, set: p.$setX });
+createProperty({ type: "real", object: p, name: "y", initialValue: 0, set: p.$setY });
+createProperty({ type: "real", object: p, name: "width", get: p.$getWidth, set: p.$setWidth });
+createProperty({ type: "real", object: p, name: "height", get: p.$getHeight, set: p.$setHeight });
+engine.globalStylesheet.appendChild(document.createTextNode(".Item { position: absolute; pointerEvents: none }"));
 // Item qml object
-function QMLItem(meta) {
-    QMLBaseObject.call(this, meta);
+function QMLItem(parent) {
+    QMLBaseObject.call(this, parent);
     var child,
         o, i;
+
+    this.data = [];
+    this.children = [];
+    this.resources = [];
+    this.anchors = new QMLAnchors(null, this, "anchors");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         if (this.$parent === null) { // This is the root element. Initialize it.
@@ -1320,111 +1476,22 @@ function QMLItem(meta) {
             this.dom.style.top = "0";
             this.dom.style.left = "0";
             this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
-        } else {
-            if (!this.dom) // Create a dom element for this item.
-                this.dom = document.createElement("div");
-            this.dom.style.position = "absolute";
+        } else if (!this.dom) { // Create a dom element for this item.
+            this.dom = document.createElement("div");
         }
-        this.dom.style.pointerEvents = "none";
-        this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
+        this.dom.className = "Item";
         this.css = this.dom.style;
     }
-    createSimpleProperty("list", this, "data");
-    this.$defaultProperty = "data";
-    createSimpleProperty("list", this, "children");
-    createSimpleProperty("list", this, "resources");
-    createSimpleProperty("Item", this, "parent");
-    this.children = [];
-    this.resources = [];
-    this.parentChanged.connect(this, function(newParent, oldParent) {
-        if (oldParent) {
-            oldParent.children.splice(oldParent.children.indexOf(this), 1);
-            oldParent.childrenChanged();
-            if (engine.renderMode == QMLRenderMode.DOM)
-                oldParent.dom.removeChild(this.dom);
-        }
-        if (newParent && newParent.children.indexOf(this) == -1) {
-            newParent.children.push(this);
-            newParent.childrenChanged();
-        }
-        if (newParent && engine.renderMode == QMLRenderMode.DOM)
-            newParent.dom.appendChild(this.dom);
-    });
-    this.parentChanged.connect(this, updateHGeometry);
-    this.parentChanged.connect(this, updateVGeometry);
     this.dataChanged.connect(this, function(newData) {
         for (var i in newData) {
             var child = newData[i];
-            if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
+            if (child instanceof QMLItem)
                 child.parent = this; // This will also add it to children.
             else
                 this.resources.push(child);
         }
     });
 
-    createSimpleProperty("real", this, "x");
-    createSimpleProperty("real", this, "y");
-    createSimpleProperty("real", this, "width");
-    createSimpleProperty("real", this, "height");
-    createSimpleProperty("real", this, "implicitWidth");
-    createSimpleProperty("real", this, "implicitHeight");
-    createSimpleProperty("real", this, "left");
-    createSimpleProperty("real", this, "right");
-    createSimpleProperty("real", this, "top");
-    createSimpleProperty("real", this, "bottom");
-    createSimpleProperty("real", this, "horizontalCenter");
-    createSimpleProperty("real", this, "verticalCenter");
-    createSimpleProperty("real", this, "rotation");
-    createSimpleProperty("real", this, "scale");
-    createSimpleProperty("real", this, "z");
-    createSimpleProperty("list", this, "transform");
-    createSimpleProperty("bool", this, "visible");
-    createSimpleProperty("real", this, "opacity");
-    createSimpleProperty("bool", this, "clip");
-    this.xChanged.connect(this, updateHGeometry);
-    this.yChanged.connect(this, updateVGeometry);
-    this.widthChanged.connect(this, updateHGeometry);
-    this.heightChanged.connect(this, updateVGeometry);
-    this.implicitWidthChanged.connect(this, updateHGeometry);
-    this.implicitHeightChanged.connect(this, updateVGeometry);
-
-    this.$isUsingImplicitWidth = true;
-    this.$isUsingImplicitHeight = true;
-
-    this.anchors = new QObject(this);
-    createSimpleProperty("real", this.anchors, "left");
-    createSimpleProperty("real", this.anchors, "right");
-    createSimpleProperty("real", this.anchors, "top");
-    createSimpleProperty("real", this.anchors, "bottom");
-    createSimpleProperty("real", this.anchors, "horizontalCenter");
-    createSimpleProperty("real", this.anchors, "verticalCenter");
-    createSimpleProperty("real", this.anchors, "fill");
-    createSimpleProperty("real", this.anchors, "centerIn");
-    createSimpleProperty("real", this.anchors, "margins");
-    createSimpleProperty("real", this.anchors, "leftMargin");
-    createSimpleProperty("real", this.anchors, "rightMargin");
-    createSimpleProperty("real", this.anchors, "topMargin");
-    createSimpleProperty("real", this.anchors, "bottomMargin");
-    this.anchors.leftChanged.connect(this, updateHGeometry);
-    this.anchors.rightChanged.connect(this, updateHGeometry);
-    this.anchors.topChanged.connect(this, updateVGeometry);
-    this.anchors.bottomChanged.connect(this, updateVGeometry);
-    this.anchors.horizontalCenterChanged.connect(this, updateHGeometry);
-    this.anchors.verticalCenterChanged.connect(this, updateVGeometry);
-    this.anchors.fillChanged.connect(this, updateHGeometry);
-    this.anchors.fillChanged.connect(this, updateVGeometry);
-    this.anchors.centerInChanged.connect(this, updateHGeometry);
-    this.anchors.centerInChanged.connect(this, updateVGeometry);
-    this.anchors.leftMarginChanged.connect(this, updateHGeometry);
-    this.anchors.rightMarginChanged.connect(this, updateHGeometry);
-    this.anchors.topMarginChanged.connect(this, updateVGeometry);
-    this.anchors.bottomMarginChanged.connect(this, updateVGeometry);
-    this.anchors.marginsChanged.connect(this, updateHGeometry);
-    this.anchors.marginsChanged.connect(this, updateVGeometry);
-
-    createSimpleProperty("list", this, "states");
-    createSimpleProperty("string", this, "state");
-    createSimpleProperty("list", this, "transitions");
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
@@ -1540,77 +1607,6 @@ function QMLItem(meta) {
             transition.$start(actions);
     });
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.$updateTransform = function() {
-            var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
-            for (var i = 0; i < this.transform.length; i++) {
-                var t = this.transform[i];
-                if (t instanceof QMLRotation)
-                    transform += " rotate3d(" + t.axis.x + ", " + t.axis.y + ", " + t.axis.z + ", " + t.angle + "deg)";
-                else if (t instanceof QMLScale)
-                    transform += " scale(" + t.xScale + ", " + t.yScale + ")";
-                else if (t instanceof QMLTranslate)
-                    transform += " translate(" + t.x + "px, " + t.y + "px)";
-            }
-            this.dom.style.transform = transform;
-            this.dom.style.MozTransform = transform;    // Firefox
-            this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
-            this.dom.style.OTransform = transform;      // Opera
-            this.dom.style.msTransform = transform;     // IE
-        }
-        this.rotationChanged.connect(this, this.$updateTransform);
-        this.scaleChanged.connect(this, this.$updateTransform);
-        this.transformChanged.connect(this, this.$updateTransform);
-        this.visibleChanged.connect(this, function(newVal) {
-            this.dom.style.visibility = newVal ? "inherit" : "hidden";
-        });
-        this.opacityChanged.connect(this, function(newVal) {
-            this.dom.style.opacity = newVal;
-        });
-        this.clipChanged.connect(this, function(newVal) {
-            this.dom.style.overflow = newVal ? "hidden" : "visible";
-        });
-        this.zChanged.connect(this, function(newVal) {
-            this.dom.style.zIndex = newVal;
-        });
-        this.xChanged.connect(this, function(newVal) {
-            this.dom.style.left = newVal + "px";
-        });
-        this.yChanged.connect(this, function(newVal) {
-            this.dom.style.top = newVal + "px";
-        });
-        this.widthChanged.connect(this, function(newVal) {
-            this.dom.style.width = newVal ? newVal + "px" : "auto";
-        });
-        this.heightChanged.connect(this, function(newVal) {
-            this.dom.style.height = newVal ? newVal + "px" : "auto";
-        });
-    } else {
-        this.rotationChanged.connect(engine.$requestDraw);
-        this.visibleChanged.connect(engine.$requestDraw);
-        this.zChanged.connect(engine.$requestDraw);
-        this.xChanged.connect(engine.$requestDraw);
-        this.yChanged.connect(engine.$requestDraw);
-        this.widthChanged.connect(engine.$requestDraw);
-        this.heightChanged.connect(engine.$requestDraw);
-    }
-
-    this.implicitHeight = 0;
-    this.implicitWidth = 0;
-    this.spacing = 0;
-    this.x = 0;
-    this.y = 0;
-    this.anchors.margins = 0;
-    this.visible = true;
-    this.opacity = 1;
-    this.$revertActions = [];
-    this.states = [];
-    this.transitions = [];
-    this.state = "";
-    this.transform = [];
-    this.rotation = 0;
-    this.scale = 1;
-
     // Init size of root element
     if (engine.renderMode == QMLRenderMode.DOM
         && this.$parent === null && engine.rootElement == undefined) {
@@ -1647,15 +1643,15 @@ function QMLItem(meta) {
     }
 }
 
-function QMLPositioner(meta) {
-    QMLItem.call(this, meta);
+p = QMLPositioner.prototype = new QMLItem();
+createProperty({ type: "int", object: p, name: "spacing", initialValue: 0 });
 
-    createSimpleProperty("int", this, "spacing");
-    this.spacingChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
+function QMLPositioner(parent) {
+    QMLItem.call(this, parent);
 
-    this.spacing = 0;
+//     this.spacingChanged.connect(this, this.layoutChildren);
+//     this.childrenChanged.connect(this, this.layoutChildren);
+//     this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
 }
 QMLPositioner.slotChildrenChanged = function() {
     for (var i = 0; i < this.children.length; i++) {
@@ -1671,12 +1667,14 @@ QMLPositioner.slotChildrenChanged = function() {
     }
 }
 
-function QMLRow(meta) {
-    QMLPositioner.call(this, meta);
+p = QMLRow.prototype = new QMLPositioner();
+createProperty({ type: "enum", object: p, name: "layoutDirection", initialValue: 0 });
+function QMLRow(parent) {
+    QMLPositioner.call(this, parent);
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.dom.className += " Row";
 
-    createSimpleProperty("enum", this, "layoutDirection");
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
-    this.layoutDirection = 0;
 }
 QMLRow.prototype.layoutChildren = function() {
     var curPos = 0,
@@ -1698,8 +1696,11 @@ QMLRow.prototype.layoutChildren = function() {
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
 
-function QMLColumn(meta) {
-    QMLPositioner.call(this, meta);
+p = QMLColumn.prototype = new QMLPositioner();
+function QMLColumn(parent) {
+    QMLPositioner.call(this, parent);
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.dom.className += " Column";
 }
 QMLColumn.prototype.layoutChildren = function() {
     var curPos = 0,
@@ -1717,25 +1718,25 @@ QMLColumn.prototype.layoutChildren = function() {
     this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
 }
 
-function QMLGrid(meta) {
-    QMLPositioner.call(this, meta);
+p = QMLGrid.prototype = new QMLPositioner();
+createProperty({ type: "int", object: p, name: "columns" });
+createProperty({ type: "int", object: p, name: "rows" });
+createProperty({ type: "enum", object: p, name: "flow", initialValue: 0 });
+createProperty({ type: "enum", object: p, name: "layoutDirection", initialValue: 0 });
+function QMLGrid(parent) {
+    QMLPositioner.call(this, parent);
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.dom.className += " Grid";
 
     this.Grid = {
         LeftToRight: 0,
         TopToBottom: 1
     }
 
-    createSimpleProperty("int", this, "columns");
-    createSimpleProperty("int", this, "rows");
-    createSimpleProperty("enum", this, "flow");
-    createSimpleProperty("enum", this, "layoutDirection");
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
-
-    this.flow = 0;
-    this.layoutDirection = 0;
 }
 QMLGrid.prototype.layoutChildren = function() {
     var visibleItems = [],
@@ -1835,22 +1836,22 @@ QMLGrid.prototype.layoutChildren = function() {
     this.implicitHeight = gridHeight;
 }
 
-function QMLFlow(meta) {
-    QMLPositioner.call(this, meta);
+p = QMLFlow.prototype = new QMLPositioner();
+createProperty({ type: "enum", object: p, name: "flow", initialValue: 0 });
+createProperty({ type: "enum", object: p, name: "layoutDirection", initialValue: 0 });
+function QMLFlow(parent) {
+    QMLPositioner.call(this, parent);
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.dom.className += " Flow";
 
     this.Flow = {
         LeftToRight: 0,
         TopToBottom: 1
     }
 
-    createSimpleProperty("enum", this, "flow");
-    createSimpleProperty("enum", this, "layoutDirection");
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
-
-    this.flow = 0;
-    this.layoutDirection = 0;
 }
 QMLFlow.prototype.layoutChildren = function() {
     var curHPos = 0,
@@ -1893,19 +1894,23 @@ QMLFlow.prototype.layoutChildren = function() {
         this.implicitWidth = curHPos + rowSize;
 }
 
-function QMLRotation(meta) {
-    QMLBaseObject.call(this, meta);
 
-    createSimpleProperty("real", this, "angle");
+p = QMLVector3D.prototype = new QObject();
+createProperty({ type: "real", object: p, name: "x", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "y", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "z", initialValue: 0 });
+function QMLVector3D(parent) {
+    QObject.call(this, parent);
+}
 
-    this.axis = new QObject(this);
-    createSimpleProperty("real", this.axis, "x");
-    createSimpleProperty("real", this.axis, "y");
-    createSimpleProperty("real", this.axis, "z");
+p = QMLRotation.prototype = new QMLBaseObject();
+createProperty({ type: "real", object: p, name: "angle", initialValue: 0 });
+function QMLRotation(parent) {
+    QMLBaseObject.call(this, parent);
 
-    this.origin = new QObject(this);
-    createSimpleProperty("real", this.origin, "x");
-    createSimpleProperty("real", this.origin, "y");
+    this.axis = new QMLVector3D(this);
+    this.axis.z = 1;
+    this.origin = new QMLVector3D(this);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
@@ -1919,25 +1924,16 @@ function QMLRotation(meta) {
         this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
         this.origin.xChanged.connect(this, updateOrigin);
         this.origin.yChanged.connect(this, updateOrigin);
-
-        this.angle = 0;
-        this.axis.x = 0;
-        this.axis.y = 0;
-        this.axis.z = 1;
-        this.origin.x = 0;
-        this.origin.y = 0;
     }
 }
 
-function QMLScale(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLScale.prototype = new QMLBaseObject();
+createProperty({ type: "real", object: p, name: "xScale", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "yScale", initialValue: 0 });
+function QMLScale(parent) {
+    QMLBaseObject.call(this, parent);
 
-    createSimpleProperty("real", this, "xScale");
-    createSimpleProperty("real", this, "yScale");
-
-    this.origin = new QObject(this);
-    createSimpleProperty("real", this.origin, "x");
-    createSimpleProperty("real", this.origin, "y");
+    this.origin = new QMLVector3D(this);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function updateOrigin() {
@@ -1949,108 +1945,263 @@ function QMLScale(meta) {
         this.yScaleChanged.connect(this.$parent, this.$parent.$updateTransform);
         this.origin.xChanged.connect(this, updateOrigin);
         this.origin.yChanged.connect(this, updateOrigin);
-
-        this.xScale = 0;
-        this.yScale = 0;
-        this.origin.x = 0;
-        this.origin.y = 0;
     }
 
 }
 
-function QMLTranslate(meta) {
-    QMLBaseObject.call(this, meta);
-
-    createSimpleProperty("real", this, "x");
-    createSimpleProperty("real", this, "y");
+p = QMLTranslate.prototype = new QMLBaseObject();
+createProperty({ type: "real", object: p, name: "x", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "y", initialValue: 0 });
+function QMLTranslate(parent) {
+    QMLBaseObject.call(this, parent);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
         this.yChanged.connect(this.$parent, this.$parent.$updateTransform);
-
-        this.x = 0;
-        this.y = 0;
     }
 
 }
 
-function QMLFont(parent) {
-    QObject.call(this);
-    createSimpleProperty("bool", this, "bold");
-    createSimpleProperty("enum", this, "capitalization");
-    createSimpleProperty("string", this, "family");
-    createSimpleProperty("bool", this, "italic");
-    createSimpleProperty("real", this, "letterSpacing");
-    createSimpleProperty("int", this, "pixelSize");
-    createSimpleProperty("real", this, "pointSize");
-    createSimpleProperty("bool", this, "strikeout");
-    createSimpleProperty("bool", this, "underline");
-    createSimpleProperty("enum", this, "weight");
-    createSimpleProperty("real", this, "wordSpacing");
+p = QMLText.prototype = new QMLItem();
+p.Text = {
+    // Wrap Mode
+    NoWrap: 0,
+    WordWrap: 1,
+    WrapAnywhere: 2,
+    Wrap: 3,
+    WrapAtWordBoundaryOrAnywhere: 3, // COMPAT
+    // Horizontal-Alignment
+    AlignLeft: "left",
+    AlignRight: "right",
+    AlignHCenter: "center",
+    AlignJustify: "justify",
+    // Style
+    Normal: 0,
+    Outline: 1,
+    Raised: 2,
+    Sunken: 3
+}
+p.$setImplicitWidth = function(newVal) {
+    this.$properties.width = newVal;
+    this.widthChanged();
+}
+p.$setImplicitHeight = function(newVal) {
+    this.$properties.implicitHeight = newVal;
+    this.heightChanged();
+}
+createProperty({ type: "color", object: p, name: "color", initialValue: "black" });
+createProperty({ type: "font", object: p, name: "font" });
+createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0, set: p.$setImplicitWidth });
+createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0, set: p.$setImplicitHeight });
+createProperty({ type: "string", object: p, name: "text", initialValue: "" });
+createProperty({ type: "real", object: p, name: "lineHeight", initialValue: 1 });
+createProperty({ type: "enum", object: p, name: "wrapMode", initialValue: p.Text.NoWrap });
+createProperty({ type: "enum", object: p, name: "horizontalAlignment" });
+createProperty({ type: "enum", object: p, name: "style" });
+createProperty({ type: "color", object: p, name: "styleColor" });
+p.$updateImplicitSize = function() {
+    var height = 0,
+        width = 0;
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.pointSizeChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontSize = newVal + "pt";
-        });
-        this.boldChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontWeight =
-                parent.font.weight !== Undefined ? parent.font.weight :
+    if (engine.renderMode == QMLRenderMode.DOM && this.dom) {
+        height = this.dom.firstChild.offsetHeight;
+        width = this.dom.firstChild.offsetWidth;
+    } else {
+        var el = document.createElement("span");
+        el.style.font = fontCss(this.font);
+        el.innerText = this.text;
+        document.body.appendChild(el);
+        height = el.offsetHeight;
+        document.body.removeChild(el);
+        if (!height) {
+            // Firefox doesn't support getting the height this way,
+            // approximate from point size (full of win) :P
+            if (this.font && this.font.pointSize) {
+                height = this.font.pointSize * 96 / 72;
+            } else {
+                height = 10 * 96 / 72;
+            }
+
+        }
+        width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
+    }
+
+    this.implicitHeight = height;
+    this.implicitWidth = width;
+}
+p.$updateDirtyProperty = function(name, newVal) {
+    if (engine.renderMode !== QMLRenderMode.DOM)
+        return;
+    switch (name) {
+        case "color":
+            this.dom.firstChild.style.color = newVal;
+            break;
+        case "font.bold":
+            this.dom.firstChild.style.fontWeight =
+                this.font.weight !== Undefined ? this.font.weight :
                 newVal ? "bold" : "normal";
-        });
-        this.capitalizationChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontVariant =
+            this.$updateImplicitSize();
+            break;
+        case "font.capitalization":
+            this.dom.firstChild.style.fontVariant =
                 newVal == "smallcaps" ? "small-caps" : "normal";
             newVal = newVal == "smallcaps" ? "none" : newVal;
-            parent.dom.firstChild.style.textTransform = newVal;
-        });
-        this.familyChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontFamily = newVal;
-        });
-        this.italicChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontStyle = newVal ? "italic" : "normal";
-        });
-        this.letterSpacingChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
-        });
-        this.pixelSizeChanged.connect(function(newVal) {
+            this.dom.firstChild.style.textTransform = newVal;
+            this.$updateImplicitSize();
+            break;
+        case "font.family":
+            this.dom.firstChild.style.fontFamily = newVal;
+            break;
+        case "font.italic":
+            this.dom.firstChild.style.fontStyle = newVal ? "italic" : "normal";
+            this.$updateImplicitSize();
+            break;
+        case "font.letterSpacing":
+            this.dom.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+            this.$updateImplicitSize();
+            break;
+        case "font.pixelSize":
             var val = newVal !== Undefined ? newVal + "px "
-                : (parent.font.pointSize || 10) + "pt";
-            parent.dom.style.fontSize = val;
-            parent.dom.firstChild.style.fontSize = val;
-        });
-        this.pointSizeChanged.connect(function(newVal) {
-            var val = parent.font.pixelSize !== Undefined ? parent.font.pixelSize + "px "
+                : (this.font.pointSize || 10) + "pt";
+            this.dom.style.fontSize = val;
+            this.dom.firstChild.style.fontSize = val;
+            this.$updateImplicitSize();
+            break;
+        case "font.pointSize":
+            var val = this.font.pixelSize !== Undefined ? this.font.pixelSize + "px "
                 : (newVal || 10) + "pt";
-            parent.dom.style.fontSize = val;
-            parent.dom.firstChild.style.fontSize = val;
-        });
-        this.strikeoutChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.textDecoration = newVal
+            this.dom.style.fontSize = val;
+            this.dom.firstChild.style.fontSize = val;
+            this.$updateImplicitSize();
+            break;
+        case "font.strikeout":
+            this.dom.firstChild.style.textDecoration = newVal
                 ? "line-through"
-                : parent.font.underline
+                : this.font.underline
                 ? "underline"
                 : "none";
-        });
-        this.underlineChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.textDecoration = parent.font.strikeout
+            this.$updateImplicitSize();
+            break;
+        case "font.underline":
+            this.dom.firstChild.style.textDecoration = this.font.strikeout
                 ? "line-through"
                 : newVal
                 ? "underline"
                 : "none";
-        });
-        this.weightChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontWeight =
+            this.$updateImplicitSize();
+            break;
+        case "font.weight":
+            this.dom.firstChild.style.fontWeight =
                 newVal !== Undefined ? newVal :
-                parent.font.bold ? "bold" : "normal";
-        });
-        this.wordSpacingChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
-        });
+                this.font.bold ? "bold" : "normal";
+            this.$updateImplicitSize();
+            break;
+        case "font.wordSpacing":
+            this.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+            this.$updateImplicitSize();
+            break;
+        case "horizontalAlignment":
+            this.dom.style.textAlign = newVal;
+            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+            // lesser of the two evils to be ignoring "\n"s inside the text.
+            if (newVal == "justify")
+                this.dom.firstChild.style.whiteSpace = "normal";
+            break;
+        case "lineHeight":
+            this.dom.firstChild.style.lineHeight = newVal + "px";
+            this.$updateImplicitSize();
+            break;
+        case "style":
+            switch (newVal) {
+                case 0:
+                    this.dom.firstChild.style.textShadow = "none";
+                    break;
+                case 1:
+                    var color = this.styleColor;
+                    this.dom.firstChild.style.textShadow = "1px 0 0 " + color
+                        + ", -1px 0 0 " + color
+                        + ", 0 1px 0 " + color
+                        + ", 0 -1px 0 " + color;
+                    break;
+                case 2:
+                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                    break;
+                case 3:
+                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+            }
+            this.$updateImplicitSize();
+            break;
+        case "styleColor":
+            switch (this.style) {
+                case 0:
+                    this.dom.firstChild.style.textShadow = "none";
+                    break;
+                case 1:
+                    this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
+                        + ", -1px 0 0 " + newVal
+                        + ", 0 1px 0 " + newVal
+                        + ", 0 -1px 0 " + newVal;
+                    break;
+                case 2:
+                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                    break;
+                case 3:
+                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+            }
+            break;
+        case "text":
+            this.dom.firstChild.innerHTML = newVal;
+            this.$updateImplicitSize();
+            break;
+        case "wrapMode":
+            switch (newVal) {
+                case 0:
+                    this.dom.firstChild.style.whiteSpace = "pre";
+                    break;
+                case 1:
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                    break;
+                case 2:
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                    this.dom.firstChild.style.wordBreak = "break-all";
+                    break;
+                case 3:
+                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                    this.dom.firstChild.style.wordWrap = "break-word";
+            }
+            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+            // lesser of the two evils to be ignoring "\n"s inside the text.
+            if (this.horizontalAlignment == "justify")
+                this.dom.firstChild.style.whiteSpace = "normal";
+            this.$updateImplicitSize();
+        case "parent":
+            this.$updateImplicitSize();
+        default:
+            QMLItem.prototype.$updateDirtyProperty.call(this, name, newVal);
     }
 }
+engine.globalStylesheet.appendChild(document.createTextNode(".Text {\
+    color: black;\
+    font-weight: normal;\
+    font-variant: normal;\
+    font-family: sans-serif;\
+    font-style: normal;\
+    letter-spacing: normal;\
+    line-height: 1;\
+    font-size: 10pt;\
+    text-align: left;\
+    text-decoration: none;\
+    text-shadow: none;\
+    white-space: normal;\
+    word-break: normal;\
+    word-spacing: normal;\
+}"));
+function QMLText(parent) {
+    QMLItem.call(this, parent);
+    if (engine.renderMode == QMLRenderMode.DOM)
+        this.dom.className += " Text";
 
-function QMLText(meta) {
-    QMLItem.call(this, meta);
+    this.font = new QMLFont(null, this, "font");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         // We create another span inside the text to distinguish the actual
@@ -2079,175 +2230,8 @@ function QMLText(meta) {
         return css;
     }
 
-    this.Text = {
-        // Wrap Mode
-        NoWrap: 0,
-        WordWrap: 1,
-        WrapAnywhere: 2,
-        Wrap: 3,
-        WrapAtWordBoundaryOrAnywhere: 3, // COMPAT
-        // Horizontal-Alignment
-        AlignLeft: "left",
-        AlignRight: "right",
-        AlignHCenter: "center",
-        AlignJustify: "justify",
-        // Style
-        Normal: 0,
-        Outline: 1,
-        Raised: 2,
-        Sunken: 3
-    }
-
-    this.font = new QMLFont(this);
-
-    createSimpleProperty("color", this, "color");
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("real", this, "lineHeight");
-    createSimpleProperty("enum", this, "wrapMode");
-    createSimpleProperty("enum", this, "horizontalAlignment");
-    createSimpleProperty("enum", this, "style");
-    createSimpleProperty("color", this, "styleColor");
-
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(this, function(newVal) {
-            this.dom.firstChild.style.color = newVal;
-        });
-        this.textChanged.connect(this, function(newVal) {
-            this.dom.firstChild.innerHTML = newVal;
-        });
-        this.lineHeightChanged.connect(this, function(newVal) {
-            this.dom.firstChild.style.lineHeight = newVal + "px";
-        });
-        this.wrapModeChanged.connect(this, function(newVal) {
-            switch (newVal) {
-                case 0:
-                    this.dom.firstChild.style.whiteSpace = "pre";
-                    break;
-                case 1:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    break;
-                case 2:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    this.dom.firstChild.style.wordBreak = "break-all";
-                    break;
-                case 3:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    this.dom.firstChild.style.wordWrap = "break-word";
-            };
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (this.horizontalAlignment == "justify")
-                this.dom.firstChild.style.whiteSpace = "normal";
-        });
-        this.horizontalAlignmentChanged.connect(this, function(newVal) {
-            this.dom.style.textAlign = newVal;
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (newVal == "justify")
-                this.dom.firstChild.style.whiteSpace = "normal";
-        });
-        this.styleChanged.connect(this, function(newVal) {
-            switch (newVal) {
-                case 0:
-                    this.dom.firstChild.style.textShadow = "none";
-                    break;
-                case 1:
-                    var color = this.styleColor;
-                    this.dom.firstChild.style.textShadow = "1px 0 0 " + color
-                        + ", -1px 0 0 " + color
-                        + ", 0 1px 0 " + color
-                        + ", 0 -1px 0 " + color;
-                    break;
-                case 2:
-                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
-                    break;
-                case 3:
-                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
-            };
-        });
-        this.styleColorChanged.connect(this, function(newVal) {
-            switch (this.style) {
-                case 0:
-                    this.dom.firstChild.style.textShadow = "none";
-                    break;
-                case 1:
-                    this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
-                        + ", -1px 0 0 " + newVal
-                        + ", 0 1px 0 " + newVal
-                        + ", 0 -1px 0 " + newVal;
-                    break;
-                case 2:
-                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
-                    break;
-                case 3:
-                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
-            };
-        });
-    }
-
-    this.font.family = "sans-serif";
-    this.font.pointSize = 10;
-    this.wrapMode = this.Text.NoWrap;
-    this.color = "black";
-    this.text = "";
-
-    this.textChanged.connect(this, updateImplicitHeight);
-    this.textChanged.connect(this, updateImplicitWidth);
-    this.font.boldChanged.connect(this, updateImplicitHeight);
-    this.font.boldChanged.connect(this, updateImplicitWidth);
-    this.font.pixelSizeChanged.connect(this, updateImplicitHeight);
-    this.font.pixelSizeChanged.connect(this, updateImplicitWidth);
-    this.font.pointSizeChanged.connect(this, updateImplicitHeight);
-    this.font.pointSizeChanged.connect(this, updateImplicitWidth);
-    this.font.familyChanged.connect(this, updateImplicitHeight);
-    this.font.familyChanged.connect(this, updateImplicitWidth);
-    this.font.letterSpacingChanged.connect(this, updateImplicitHeight);
-    this.font.wordSpacingChanged.connect(this, updateImplicitWidth);
-
-    this.Component.completed.connect(this, updateImplicitHeight);
-    this.Component.completed.connect(this, updateImplicitWidth);
-
-    function updateImplicitHeight() {
-        var height;
-
-        if (this.text === Undefined || this.text === "") {
-            height = 0;
-        } else if (engine.renderMode == QMLRenderMode.DOM) {
-            height = this.dom ? this.dom.firstChild.offsetHeight : 0;
-        } else {
-            var el = document.createElement("span");
-            el.style.font = fontCss(this.font);
-            el.innerText = this.text;
-            document.body.appendChild(el);
-            height = el.offsetHeight;
-            document.body.removeChild(el);
-            if (!height) {
-                // Firefox doesn't support getting the height this way,
-                // approximate from point size (full of win) :P
-                if (this.font && this.font.pointSize) {
-                    height = this.font.pointSize * 96 / 72;
-                } else {
-                    height = 10 * 96 / 72;
-                }
-
-            }
-        }
-
-        this.implicitHeight = height;
-    }
-
-    function updateImplicitWidth() {
-        var width;
-
-        if (this.text === Undefined || this.text === "")
-            width = 0;
-        else if (engine.renderMode == QMLRenderMode.DOM)
-            width = this.dom ? this.dom.firstChild.offsetWidth : 0;
-        else
-            width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
-
-        this.implicitWidth = width;
-    }
+//     this.Component.completed.connect(this, updateImplicitHeight);
+//     this.Component.completed.connect(this, updateImplicitWidth);
 
     this.$drawItem = function(c) {
         //descr("draw text", this, ["x", "y", "text",
@@ -2262,43 +2246,41 @@ function QMLText(meta) {
     }
 }
 
-function QMLRectangle(meta) {
-    QMLItem.call(this, meta);
+p = QMLRectangle.prototype = new QMLItem();
+createProperty({ type: "color", object: p, name: "color", initialValue: "white" });
+createProperty({ type: "real", object: p, name: "radius", initialValue: 0 });
+p.$updateDirtyProperty = function(name, newVal) {
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        engine.$requestDraw();
+        return;
+    }
 
-    createSimpleProperty("color", this, "color");
-    createSimpleProperty("real", this, "radius");
-
-    this.border = new QObject(this);
-    createSimpleProperty("color", this.border, "color");
-    createSimpleProperty("int", this.border, "width");
-
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(this, function(newVal) {
+    switch (name) {
+        case "color":
             this.dom.style.backgroundColor = newVal;
-        });
-        this.radiusChanged.connect(this, function(newVal) {
+        case "radius":
             this.dom.style.borderRadius = newVal + "px";
-        });
-        this.border.colorChanged.connect(this, function(newVal) {
+        case "border.color":
             this.dom.style.borderColor = newVal;
             this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
                                                 ? "none" : "solid";
-        });
-        this.border.widthChanged.connect(this, function(newVal) {
+        case "border.width":
             this.dom.style.borderWidth = newVal + "px";
             this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
                                                 ? "none" : "solid";
-        });
-    }
+        default:
+            QMLItem.prototype.$updateDirtyProperty.call(this, name, newVal);
 
-    this.color = "white";
-    this.border.color = "transparent";
-    this.border.width = 1;
-    this.radius = 0;
+    }
+}
+engine.globalStylesheet.appendChild(document.createTextNode(".Rectangle { background-color: white; border-width: 1px }"))
+function QMLRectangle(parent) {
+    QMLItem.call(this, parent);
+
+    this.dom.className += " Rectangle";
+    this.border = new QMLPen(null, this, "border");
 
     this.$drawItem = function(c) {
-        //descr("draw rect", this, ["x", "y", "width", "height", "color"]);
-        //descr("draw rect.border", this.border, ["color", "width"]);
         c.save();
         c.fillStyle = this.color;
         c.strokeStyle = this.border.color;
@@ -2327,26 +2309,25 @@ function QMLRectangle(meta) {
     }
 }
 
-function QMLRepeater(meta) {
-    QMLItem.call(this, meta);
+p = QMLRepeater.prototype = new QMLItem();
+p.$defaultProperty = "delegate";
+p.itemAt = function(index) {
+    return this.$items[index];
+}
+
+createProperty({ type: "Component", object: p, name: "delegate" });
+createProperty({ type: "variant", object: p, name: "model", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "count", initialValue: 0 });
+function QMLRepeater(parent) {
+    QMLItem.call(this, parent);
     var self = this;
 
-    createSimpleProperty("Component", this, "delegate");
-    this.$defaultProperty = "delegate";
-    createSimpleProperty("variant", this, "model");
-    createSimpleProperty("int", this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
 
-    this.model = 0;
-    this.count = 0;
-
-    this.itemAt = function(index) {
-        return this.$items[index];
-    }
 
     function callOnCompleted(child) {
         child.Component.completed();
@@ -2357,10 +2338,10 @@ function QMLRepeater(meta) {
         for (var index = startIndex; index < endIndex; index++) {
             var newItem = self.delegate.createObject(self);
 
-            createSimpleProperty("int", newItem, "index");
+            createProperty({ type: "int", object: newItem, name: "index" });
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             for (var i in model.roleNames) {
-                createSimpleProperty("variant", newItem, model.roleNames[i]);
+                createProperty({ type: "variant", object: newItem, name: model.roleNames[i] });
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
             }
 
@@ -2443,17 +2424,53 @@ function QMLRepeater(meta) {
     }
 }
 
-function QMLListModel(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLListModel.prototype = new QMLBaseObject();
+p.$defaultProperty = "$items";
+p.append = function(dict) {
+    this.insert(this.$items.length, dict);
+}
+p.clear = function() {
+    this.$items = [];
+    this.$model.modelReset();
+    this.count = 0;
+}
+p.get = function(index) {
+    return this.$items[index];
+}
+p.insert = function(index, dict) {
+    this.$items.splice(index, 0, dict);
+    this.$itemsChanged(this.$items);
+    this.$model.rowsInserted(index, index+1);
+}
+p.move = function(from, to, n) {
+    var vals = this.$items.splice(from, n);
+    for (var i = 0; i < vals.length; i++) {
+        this.$items.splice(to + i, 0, vals[i]);
+    }
+    this.$model.rowsMoved(from, from+n, to);
+}
+p.remove = function(index) {
+    this.$items.splice(index, 1);
+    this.$model.rowsRemoved(index, index+1);
+    this.count = this.$items.length;
+}
+p.set = function(index, dict) {
+    this.$items[index] = dict;
+    engine.$requestDraw();
+}
+p.setProperty = function(index, property, value) {
+    this.$items[index][property] = value;
+    engine.$requestDraw();
+}
+
+createProperty({ type: "int", object: p, name: "count", initialValue: 0 });
+createProperty({ type: "list", object: p, name: "$items", initialValue: [] });
+function QMLListModel(parent) {
+    QMLBaseObject.call(this, parent);
     var self = this,
         firstItem = true;
 
-    createSimpleProperty("int", this, "count");
-    createSimpleProperty("list", this, "$items");
-    this.$defaultProperty = "$items";
-    this.$items = [];
     this.$model = new JSItemModel();
-    this.count = 0;
 
     this.$itemsChanged.connect(this, function(newVal) {
         if (firstItem) {
@@ -2475,58 +2492,51 @@ function QMLListModel(meta) {
     this.$model.rowCount = function() {
         return self.$items.length;
     }
+}
 
-    this.append = function(dict) {
-        this.insert(this.$items.length, dict);
-    }
-    this.clear = function() {
-        this.$items = [];
-        this.$model.modelReset();
-        this.count = 0;
-    }
-    this.get = function(index) {
-        return this.$items[index];
-    }
-    this.insert = function(index, dict) {
-        this.$items.splice(index, 0, dict);
-        this.$itemsChanged(this.$items);
-        this.$model.rowsInserted(index, index+1);
-    }
-    this.move = function(from, to, n) {
-        var vals = this.$items.splice(from, n);
-        for (var i = 0; i < vals.length; i++) {
-            this.$items.splice(to + i, 0, vals[i]);
-        }
-        this.$model.rowsMoved(from, from+n, to);
-    }
-    this.remove = function(index) {
-        this.$items.splice(index, 1);
-        this.$model.rowsRemoved(index, index+1);
-        this.count = this.$items.length;
-    }
-    this.set = function(index, dict) {
-        this.$items[index] = dict;
-        engine.$requestDraw();
-    }
-    this.setProperty = function(index, property, value) {
-        this.$items[index][property] = value;
-        engine.$requestDraw();
+p = QMLListElement.prototype = new QMLBaseObject();
+function QMLListElement(parent) {
+    QMLBaseObject.call(this, parent);
+
+    this.$setCustomData = function(propName, value) {
+        createProperty({ type: "variant", object: this, name: i, initialValue: value });
     }
 }
 
-function QMLListElement(meta) {
-    QMLBaseObject.call(this, meta);
-
-    for (var i in meta.object) {
-        if (i[0] != "$") {
-            createSimpleProperty("variant", this, i);
-        }
-    }
-    applyProperties(meta.object, this, this, this.$context);
+p = QMLSize.prototype = new QObject();
+createProperty({ type: "int", object: p, name: "width", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "height", initialValue: 0 });
+function QMLSize(parent) {
+    QObject.call(this, parent);
 }
 
-function QMLImage(meta) {
-    QMLItem.call(this, meta);
+
+p = QMLImage.prototype = new QMLItem();
+p.Image = {
+    // fillMode
+    Stretch: 1,
+    PreserveAspectFit: 2,
+    PreserveAspectCrop: 3,
+    Tile: 4,
+    TileVertically: 5,
+    TileHorizontally: 6,
+    // status
+    Null: 1,
+    Ready: 2,
+    Loading: 3,
+    Error: 4
+}
+createProperty({ type: "enum", object: p, name: "fillMode", initialValue: p.Image.Stretch });
+createProperty({ type: "bool", object: p, name: "mirror", initialValue: false });
+createProperty({ type: "real", object: p, name: "progress", initialValue: 0 });
+createProperty({ type: "url", object: p, name: "source", initialValue: "" });
+createProperty({ type: "enum", object: p, name: "status", initialValue: p.Image.Null });
+// no-op properties
+createProperty({ type: "bool", object: p, name: "asynchronous", initialValue: true });
+createProperty({ type: "bool", object: p, name: "cache", initialValue: true });
+createProperty({ type: "bool", object: p, name: "smooth", initialValue: true });
+function QMLImage(parent) {
+    QMLItem.call(this, parent);
     var img = new Image(),
         self = this;
 
@@ -2537,48 +2547,7 @@ function QMLImage(meta) {
         this.dom.appendChild(img);
     }
 
-    // Exports.
-    this.Image = {
-        // fillMode
-        Stretch: 1,
-        PreserveAspectFit: 2,
-        PreserveAspectCrop: 3,
-        Tile: 4,
-        TileVertically: 5,
-        TileHorizontally: 6,
-        // status
-        Null: 1,
-        Ready: 2,
-        Loading: 3,
-        Error: 4
-    }
-
-    // no-op properties
-    createSimpleProperty("bool", this, "asynchronous");
-    createSimpleProperty("bool", this, "cache");
-    createSimpleProperty("bool", this, "smooth");
-
-    createSimpleProperty("enum", this, "fillMode");
-    createSimpleProperty("bool", this, "mirror");
-    createSimpleProperty("real", this, "progress");
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
-
-    this.sourceSize = new QObject(this);
-
-    createSimpleProperty("int", this.sourceSize, "width");
-    createSimpleProperty("int", this.sourceSize, "height");
-
-    this.asynchronous = true;
-    this.cache = true;
-    this.smooth = true;
-    this.fillMode = this.Image.Stretch;
-    this.mirror = false;
-    this.progress = 0;
-    this.source = "";
-    this.status = this.Image.Null;
-    this.sourceSize.width = 0;
-    this.sourceSize.height = 0;
+    this.sourceSize = new QMLSize(this);
 
     // Bind status to img element
     img.onload = function() {
@@ -2618,47 +2587,44 @@ function QMLImage(meta) {
     }
 }
 
-function QMLAnimatedImage(meta) {
-    QMLImage.call(this, meta);
+p = QMLAnimatedImage.prototype = new QMLImage();
+function QMLAnimatedImage(parent) {
+    QMLImage.call(this, parent);
 }
 
-function QMLBorderImage(meta) {
-    QMLItem.call(this, meta);
+p = QMLScaleGrid.prototype = new QObject();
+createProperty({ type: "int", object: p, name: "left", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "right", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "top", initialValue: 0 });
+createProperty({ type: "int", object: p, name: "bottom", initialValue: 0 });
+function QMLScaleGrid(parent) {
+    QObject.call(parent);
+}
+
+p = QMLBorderImage.prototype = new QMLItem();
+p.BorderImage = {
+    // tileMode
+    Stretch: "stretch",
+    Repeat: "repeat",
+    Round: "round",
+    // status
+    Null: 1,
+    Ready: 2,
+    Loading: 3,
+    Error: 4
+}
+createProperty({ type: "url", object: p, name: "source", initialValue: "" });
+createProperty({ type: "enum", object: p, name: "status", initialValue: p.BorderImage.Null });
+createProperty({ type: "enum", object: p, name: "horizontalTileMode", initialValue: p.BorderImage.Stretch });
+createProperty({ type: "enum", object: p, name: "verticalTileMode", initialValue: p.BorderImage.Stretch });
+function QMLBorderImage(parent) {
+    QMLItem.call(this, parent);
     var self = this;
 
     if (engine.renderMode == QMLRenderMode.Canvas)
         var img = new Image();
 
-    this.BorderImage = {
-        // tileMode
-        Stretch: "stretch",
-        Repeat: "repeat",
-        Round: "round",
-        // status
-        Null: 1,
-        Ready: 2,
-        Loading: 3,
-        Error: 4
-    }
-
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
-    this.border = new QObject(this);
-    createSimpleProperty("int", this.border, "left");
-    createSimpleProperty("int", this.border, "right");
-    createSimpleProperty("int", this.border, "top");
-    createSimpleProperty("int", this.border, "bottom");
-    createSimpleProperty("enum", this, "horizontalTileMode");
-    createSimpleProperty("enum", this, "verticalTileMode");
-
-    this.source = "";
-    this.status = this.BorderImage.Null;
-    this.border.left = 0;
-    this.border.right = 0;
-    this.border.top = 0;
-    this.border.bottom = 0;
-    this.horizontalTileMode = this.BorderImage.Stretch;
-    this.verticalTileMode = this.BorderImage.Stretch;
+    this.border = new QMLScaleGrid(this);
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.sourceChanged.connect(this, function() {
@@ -2780,8 +2746,16 @@ function QMLBorderImage(meta) {
     }
 }
 
-function QMLMouseArea(meta) {
-    QMLItem.call(this, meta);
+p = QMLMouseArea.prototype = new QMLItem();
+createProperty({ type: "variant", object: p, name: "acceptedButtons", initialValue: Qt.LeftButton });
+createProperty({ type: "bool", object: p, name: "enabled", initialValue: true });
+createProperty({ type: "bool", object: p, name: "hoverEnabled", initialValue: false });
+createProperty({ type: "real", object: p, name: "mouseX", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "mouseY", initialValue: 0 });
+createProperty({ type: "bool", object: p, name: "pressed", initialValue: false });
+createProperty({ type: "bool", object: p, name: "containsMouse", initialValue: false });
+function QMLMouseArea(parent) {
+    QMLItem.call(this, parent);
     var self = this;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
@@ -2794,22 +2768,10 @@ function QMLMouseArea(meta) {
         this.dom.style.opacity = 0;
     }
 
-    createSimpleProperty("variant", this, "acceptedButtons");
-    createSimpleProperty("bool", this, "enabled");
-    createSimpleProperty("bool", this, "hoverEnabled");
-    createSimpleProperty("real", this, "mouseX");
-    createSimpleProperty("real", this, "mouseY");
-    createSimpleProperty("bool", this, "pressed");
-    createSimpleProperty("bool", this, "containsMouse");
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
     this.positionChanged = Signal([{type: "variant", name: "mouse"}]);
-
-    this.acceptedButtons = Qt.LeftButton;
-    this.enabled = true;
-    this.hoverEnabled = false;
-    this.containsMouse = false;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         function eventToMouse(e) {
@@ -2875,15 +2837,15 @@ function QMLMouseArea(meta) {
     }
 }
 
-function QMLState(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLState.prototype = new QMLBaseObject();
+p.$defaultProperty = "changes";
+createProperty({ type: "string", object: p, name: "name", initialValue: "" });
+createProperty({ type: "list", object: p, name: "changes", initialValue: [] });
+createProperty({ type: "string", object: p, name: "extend", initialValue: "" });
+createProperty({ type: "bool", object: p, name: "when", initialValue: false });
+function QMLState(parent) {
+    QMLBaseObject.call(this, parent);
 
-    createSimpleProperty("string", this, "name");
-    createSimpleProperty("list", this, "changes");
-    this.$defaultProperty = "changes";
-    createSimpleProperty("string", this, "extend");
-    createSimpleProperty("bool", this, "when");
-    this.changes = [];
     this.$item = this.$parent;
 
     this.whenChanged.connect(this, function(newVal) {
@@ -2903,15 +2865,13 @@ function QMLState(meta) {
     }
 }
 
-function QMLPropertyChanges(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLPropertyChanges.prototype = new QMLBaseObject();
+createProperty({ type: "QtObject", object: p, name: "target" });
+createProperty({ type: "bool", object: p, name: "explicit", initialValue: false });
+createProperty({ type: "bool", object: p, name: "restoreEntryValues", initialValue: true });
+function QMLPropertyChanges(parent) {
+    QMLBaseObject.call(this, parent);
 
-    createSimpleProperty("QtObject", this, "target");
-    createSimpleProperty("bool", this, "explicit");
-    createSimpleProperty("bool", this, "restoreEntryValues");
-
-    this.explicit = false;
-    this.restoreEntryValues = true;
     this.$actions = [];
 
     this.$setCustomData = function(propName, value) {
@@ -2922,18 +2882,14 @@ function QMLPropertyChanges(meta) {
     }
 }
 
-function QMLTransition(meta) {
-    QMLBaseObject.call(this, meta);
-
-    createSimpleProperty("list", this, "animations");
-    this.$defaultProperty = "animations";
-    createSimpleProperty("string", this, "from");
-    createSimpleProperty("string", this, "to");
-    createSimpleProperty("bool", this, "reversible");
-    this.animations = [];
-    this.$item = this.$parent;
-    this.from = "*";
-    this.to = "*";
+p = QMLTransition.prototype = new QMLBaseObject();
+p.$defaultProperty = "animations";
+createProperty({ type: "list", object: p, name: "animations", initialValue: [] });
+createProperty({ type: "string", object: p, name: "from", initialValue: "*" });
+createProperty({ type: "string", object: p, name: "to", initialValue: "*" });
+createProperty({ type: "bool", object: p, name: "reversible", initialValue: false });
+function QMLTransition(parent) {
+    QMLBaseObject.call(this, parent);
 
     this.$start = function(actions) {
         for (var i = 0; i < this.animations.length; i++) {
@@ -2954,20 +2910,34 @@ function QMLTransition(meta) {
     }
 }
 
-function QMLTimer(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLTimer.prototype = new QMLBaseObject();
+p.start = function() {
+    if (!this.running) {
+        this.running = true;
+        prevTrigger = (new Date).getTime();
+        if (this.triggeredOnStart) {
+            trigger();
+        }
+    }
+}
+p.stop = function() {
+    if (this.running) {
+        this.running = false;
+    }
+}
+p.restart = function() {
+    this.stop();
+    this.start();
+}
+
+createProperty({ type: "int", object: p, name: "interval", initialValue: 1000 });
+createProperty({ type: "bool", object: p, name: "repeat", initialValue: false });
+createProperty({ type: "bool", object: p, name: "running", initialValue: false });
+createProperty({ type: "bool", object: p, name: "triggeredOnStart", initialValue: false });
+function QMLTimer(parent) {
+    QMLBaseObject.call(this, parent);
     var prevTrigger,
         self = this;
-
-    createSimpleProperty("int", this, "interval");
-    createSimpleProperty("bool", this, "repeat");
-    createSimpleProperty("bool", this, "running");
-    createSimpleProperty("bool", this, "triggeredOnStart");
-
-    this.interval = 1000;
-    this.repeat = false;
-    this.running = false;
-    this.triggeredOnStart = false;
 
     // Create trigger as simple property. Reading the property triggers
     // the function!
@@ -2981,25 +2951,6 @@ function QMLTimer(meta) {
                 trigger();
             }
         }
-    }
-
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            prevTrigger = (new Date).getTime();
-            if (this.triggeredOnStart) {
-                trigger();
-            }
-        }
-    }
-    this.stop = function() {
-        if (this.running) {
-            this.running = false;
-        }
-    }
-    this.restart = function() {
-        this.stop();
-        this.start();
     }
 
     function trigger() {
@@ -3030,56 +2981,73 @@ function QMLTimer(meta) {
     });
 }
 
-function QMLAnimation(meta) {
-    QMLBaseObject.call(this, meta);
-
-    // Exports
-    this.Animation = {
-        Infinite: -1
-    };
-
-    createSimpleProperty("bool", this, "alwaysRunToEnd");
-    createSimpleProperty("int", this, "loops");
-    createSimpleProperty("bool", this, "paused");
-    createSimpleProperty("bool", this, "running");
-
-    this.alwaysRunToEnd = false;
-    this.loops = 1;
-    this.paused = false;
+p = QMLAnimation.prototype = new QMLBaseObject();
+p.Animation = {
+    Infinite: Math.Infinite
+};
+// Methods
+p.restart = function() {
+    this.stop();
+    this.start();
+};
+p.start = function() {
+    this.running = true;
+}
+p.stop = function() {
     this.running = false;
+}
+p.pause = function() {
+    this.paused = true;
+}
+p.resume = function() {
+    this.paused = false;
+}
+// To be overridden
+p.complete = unboundMethod;
 
-    // Methods
-    this.restart = function() {
-        this.stop();
-        this.start();
-    };
-    this.start = function() {
-        this.running = true;
-    }
-    this.stop = function() {
-        this.running = false;
-    }
-    this.pause = function() {
-        this.paused = true;
-    }
-    this.resume = function() {
-        this.paused = false;
-    }
-
-    // To be overridden
-    this.complete = unboundMethod;
+createProperty({ type: "bool", object: p, name: "alwaysRunToEnd", initialValue: false });
+createProperty({ type: "int", object: p, name: "loops", initialValue: 1 });
+createProperty({ type: "bool", object: p, name: "paused", initialValue: false });
+createProperty({ type: "bool", object: p, name: "running", initialValue: false });
+function QMLAnimation(parent) {
+    QMLBaseObject.call(this, parent);
 }
 
-function QMLSequentialAnimation(meta) {
-    QMLAnimation.call(this, meta);
+p = QMLSequentialAnimation.prototype = new QMLAnimation();
+p.$defaultProperty = "animations";
+p.start = function() {
+    if (!this.running) {
+        this.running = true;
+        curIndex = -1;
+        passedLoops = 0;
+        nextAnimation();
+    }
+}
+p.stop = function() {
+    if (this.running) {
+        this.running = false;
+        if (curIndex < this.animations.length) {
+            this.animations[curIndex].stop();
+        }
+    }
+}
+p.complete = function() {
+    if (this.running) {
+        if (curIndex < this.animations.length) {
+            // Stop current animation
+            this.animations[curIndex].stop();
+        }
+        this.running = false;
+    }
+}
+
+createProperty({ type: "list", object: p, name: "animations", initialValue: [] });
+function QMLSequentialAnimation(parent) {
+    QMLAnimation.call(this, parent);
     var curIndex,
         passedLoops,
         i,
         self = this;
-
-    createSimpleProperty("list", this, "animations");
-    this.$defaultProperty = "animations";
-    this.animations = [];
 
     function nextAnimation(proceed) {
         var anim;
@@ -3109,33 +3077,6 @@ function QMLSequentialAnimation(meta) {
         }
     });
 
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            curIndex = -1;
-            passedLoops = 0;
-            nextAnimation();
-        }
-    }
-    this.stop = function() {
-        if (this.running) {
-            this.running = false;
-            if (curIndex < this.animations.length) {
-                this.animations[curIndex].stop();
-            }
-        }
-    }
-
-    this.complete = function() {
-        if (this.running) {
-            if (curIndex < this.animations.length) {
-                // Stop current animation
-                this.animations[curIndex].stop();
-            }
-            this.running = false;
-        }
-    }
-
     engine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by start();
@@ -3147,16 +3088,32 @@ function QMLSequentialAnimation(meta) {
     });
 };
 
-function QMLParallelAnimation(meta) {
-    QMLAnimation.call(this, meta);
+p = QMLParallelAnimation.prototype = new QMLAnimation();
+p.$defaultProperty = "animations";
+
+p.start = function() {
+    if (!this.running) {
+        this.running = true;
+        for (i = 0; i < this.animations.length; i++)
+            this.animations[i].start();
+    }
+}
+p.stop = function() {
+    if (this.running) {
+        for (i = 0; i < this.animations.length; i++)
+            this.animations[i].stop();
+        this.running = false;
+    }
+}
+p.complete = p.stop;
+
+createProperty({ type: "list", object: p, name: "animations", initialValue: [] });
+function QMLParallelAnimation(parent) {
+    QMLAnimation.call(this, parent);
     var curIndex,
         passedLoops,
         i;
 
-    this.Animation = { Infinite: Math.Infinite }
-    createSimpleProperty("list", this, "animations");
-    this.$defaultProperty = "animations";
-    this.animations = [];
     this.$runningAnimations = 0;
 
     this.animationsChanged.connect(this, function() {
@@ -3172,22 +3129,6 @@ function QMLParallelAnimation(meta) {
             this.running = false;
     }
 
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            for (i = 0; i < this.animations.length; i++)
-                this.animations[i].start();
-        }
-    }
-    this.stop = function() {
-        if (this.running) {
-            for (i = 0; i < this.animations.length; i++)
-                this.animations[i].stop();
-            this.running = false;
-        }
-    }
-    this.complete = this.stop;
-
     engine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by start();
@@ -3199,168 +3140,172 @@ function QMLParallelAnimation(meta) {
     });
 };
 
-function QMLPropertyAnimation(meta) {
-    QMLAnimation.call(this, meta);
-
-    createSimpleProperty("int", this, "duration");
-    createSimpleProperty("real", this, "from");
-    createSimpleProperty("string", this, "properties");
-    createSimpleProperty("string", this, "property");
-    createSimpleProperty("QtObject", this, "target");
-    createSimpleProperty("list", this, "targets");
-    createSimpleProperty("real", this, "to");
-
-    this.easing = new QObject(this);
-    createSimpleProperty("enum", this.easing, "type");
-    createSimpleProperty("real", this.easing, "amplitude");
-    createSimpleProperty("real", this.easing, "overshoot");
-    createSimpleProperty("real", this.easing, "period");
-
-    this.easing.$valueForProgress = function(t) {
-        switch(this.type) {
-            // Quad
-            case Easing.InQuad: return Math.pow(t, 2);
-            case Easing.OutQuad: return -Math.pow(t - 1, 2) + 1;
-            case Easing.InOutQuad:
-                if (t < 0.5)
-                    return 2 * Math.pow(t, 2);
-                return -2 * Math.pow(t - 1, 2) + 1;
-            case Easing.OutInQuad:
-                if (t < 0.5)
-                    return -2 * Math.pow(t - 0.5, 2) + 0.5;
-                return 2 * Math.pow(t - 0.5, 2) + 0.5;
-            // Cubic
-            case Easing.InCubic: return Math.pow(t, 3);
-            case Easing.OutCubic: return Math.pow(t - 1, 3) + 1;
-            case Easing.InOutCubic:
-                if (t < 0.5)
-                    return 4 * Math.pow(t, 3);
-                return 4 * Math.pow(t - 1, 3) + 1;
-            case Easing.OutInCubic:
-                return 4 * Math.pow(t - 0.5, 3) + 0.5;
-            // Quart
-            case Easing.InQuart: return Math.pow(t, 4);
-            case Easing.OutQuart: return -Math.pow(t - 1, 4) + 1;
-            case Easing.InOutQuart:
-                if (t < 0.5)
-                    return 8 * Math.pow(t, 4);
-                return -8 * Math.pow(t - 1, 4) + 1;
-            case Easing.OutInQuart:
-                if (t < 0.5)
-                    return -8 * Math.pow(t - 0.5, 4) + 0.5;
-                return 8 * Math.pow(t - 0.5, 4) + 0.5;
-            // Quint
-            case Easing.InQuint: return Math.pow(t, 5);
-            case Easing.OutQuint: return Math.pow(t - 1, 5) + 1;
-            case Easing.InOutQuint:
-                if (t < 0.5)
-                    return 16 * Math.pow(t, 5);
-                return 16 * Math.pow(t - 1, 5) + 1;
-            case Easing.OutInQuint:
-                if (t < 0.5)
-                    return 16 * Math.pow(t - 0.5, 5) + 0.5;
+p = QMLEasingCurve.prototype = new QObject();
+p.$valueForProgress = function(t) {
+    switch(this.type) {
+        // Quad
+        case Easing.InQuad: return Math.pow(t, 2);
+        case Easing.OutQuad: return -Math.pow(t - 1, 2) + 1;
+        case Easing.InOutQuad:
+            if (t < 0.5)
+                return 2 * Math.pow(t, 2);
+            return -2 * Math.pow(t - 1, 2) + 1;
+        case Easing.OutInQuad:
+            if (t < 0.5)
+                return -2 * Math.pow(t - 0.5, 2) + 0.5;
+            return 2 * Math.pow(t - 0.5, 2) + 0.5;
+        // Cubic
+        case Easing.InCubic: return Math.pow(t, 3);
+        case Easing.OutCubic: return Math.pow(t - 1, 3) + 1;
+        case Easing.InOutCubic:
+            if (t < 0.5)
+                return 4 * Math.pow(t, 3);
+            return 4 * Math.pow(t - 1, 3) + 1;
+        case Easing.OutInCubic:
+            return 4 * Math.pow(t - 0.5, 3) + 0.5;
+        // Quart
+        case Easing.InQuart: return Math.pow(t, 4);
+        case Easing.OutQuart: return -Math.pow(t - 1, 4) + 1;
+        case Easing.InOutQuart:
+            if (t < 0.5)
+                return 8 * Math.pow(t, 4);
+            return -8 * Math.pow(t - 1, 4) + 1;
+        case Easing.OutInQuart:
+            if (t < 0.5)
+                return -8 * Math.pow(t - 0.5, 4) + 0.5;
+            return 8 * Math.pow(t - 0.5, 4) + 0.5;
+        // Quint
+        case Easing.InQuint: return Math.pow(t, 5);
+        case Easing.OutQuint: return Math.pow(t - 1, 5) + 1;
+        case Easing.InOutQuint:
+            if (t < 0.5)
+                return 16 * Math.pow(t, 5);
+            return 16 * Math.pow(t - 1, 5) + 1;
+        case Easing.OutInQuint:
+            if (t < 0.5)
                 return 16 * Math.pow(t - 0.5, 5) + 0.5;
-            // Sine
-            case Easing.InSine: return -Math.cos(0.5 * Math.PI * t) + 1;
-            case Easing.OutSine: return Math.sin(0.5 * Math.PI * t);
-            case Easing.InOutSine: return -0.5 * Math.cos(Math.PI * t) + 0.5;
-            case Easing.OutInSine:
-                if (t < 0.5)
-                    return 0.5 * Math.sin(Math.PI * t);
-                return -0.5 * Math.sin(Math.PI * t) + 1;
-            // Expo
-            case Easing.InExpo: return (1/1023) * (Math.pow(2, 10*t) - 1);
-            case Easing.OutExpo: return -(1024/1023) * (Math.pow(2, -10*t) - 1);
-            case Easing.InOutExpo:
-                if (t < 0.5)
-                    return (1/62) * (Math.pow(2, 10*t) - 1);
-                return -(512/31) * Math.pow(2, -10*t) + (63/62);
-            case Easing.OutInExpo:
-                if (t < 0.5)
-                    return -(16/31) * (Math.pow(2, -10*t) - 1);
-                return (1/1984) * Math.pow(2, 10*t) + (15/31);
-            // Circ
-            case Easing.InCirc: return 1 - Math.sqrt(1 - t*t);
-            case Easing.OutCirc: return Math.sqrt(1 - Math.pow(t - 1, 2));
-            case Easing.InOutCirc:
-                if (t < 0.5)
-                    return 0.5 * (1 - Math.sqrt(1 - 4*t*t));
-                return 0.5 * (Math.sqrt(1 - 4 * Math.pow(t - 1, 2)) + 1);
-            case Easing.OutInCirc:
-                if (t < 0.5)
-                    return 0.5 * Math.sqrt(1 - Math.pow(2 * t - 1, 2));
-                return 0.5 * (2 - Math.sqrt(1 - Math.pow(2 * t - 1, 2)));
-            // Elastic
-            case Easing.InElastic:
-                return -this.amplitude * Math.pow(2, 10 * t - 10)
-                        * Math.sin(2 * t * Math.PI / this.period - Math.asin(1 / this.amplitude));
-            case Easing.OutElastic:
-                return this.amplitude * Math.pow(2, -10 * t)
-                        * Math.sin(2 * t * Math.PI / this.period - Math.asin(1 / this.amplitude))
-                        + 1;
-            case Easing.InOutElastic:
-                if (t < 0.5)
-                    return -0.5 * this.amplitude * Math.pow(2, 20 * t - 10)
-                            * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude));
-                return -0.5 * this.amplitude * Math.pow(2, -20 * t + 10)
-                        * Math.sin(4 * t * Math.PI / this.period + Math.asin(1 / this.amplitude))
-                        + 1;
-            case Easing.OutInElastic:
-                if (t < 0.5)
-                    return 0.5 * this.amplitude * Math.pow(2, -20 * t)
-                            * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude))
-                            + 0.5;
-                return -0.5 * this.amplitude * Math.pow(2, 20 * t - 20)
+            return 16 * Math.pow(t - 0.5, 5) + 0.5;
+        // Sine
+        case Easing.InSine: return -Math.cos(0.5 * Math.PI * t) + 1;
+        case Easing.OutSine: return Math.sin(0.5 * Math.PI * t);
+        case Easing.InOutSine: return -0.5 * Math.cos(Math.PI * t) + 0.5;
+        case Easing.OutInSine:
+            if (t < 0.5)
+                return 0.5 * Math.sin(Math.PI * t);
+            return -0.5 * Math.sin(Math.PI * t) + 1;
+        // Expo
+        case Easing.InExpo: return (1/1023) * (Math.pow(2, 10*t) - 1);
+        case Easing.OutExpo: return -(1024/1023) * (Math.pow(2, -10*t) - 1);
+        case Easing.InOutExpo:
+            if (t < 0.5)
+                return (1/62) * (Math.pow(2, 10*t) - 1);
+            return -(512/31) * Math.pow(2, -10*t) + (63/62);
+        case Easing.OutInExpo:
+            if (t < 0.5)
+                return -(16/31) * (Math.pow(2, -10*t) - 1);
+            return (1/1984) * Math.pow(2, 10*t) + (15/31);
+        // Circ
+        case Easing.InCirc: return 1 - Math.sqrt(1 - t*t);
+        case Easing.OutCirc: return Math.sqrt(1 - Math.pow(t - 1, 2));
+        case Easing.InOutCirc:
+            if (t < 0.5)
+                return 0.5 * (1 - Math.sqrt(1 - 4*t*t));
+            return 0.5 * (Math.sqrt(1 - 4 * Math.pow(t - 1, 2)) + 1);
+        case Easing.OutInCirc:
+            if (t < 0.5)
+                return 0.5 * Math.sqrt(1 - Math.pow(2 * t - 1, 2));
+            return 0.5 * (2 - Math.sqrt(1 - Math.pow(2 * t - 1, 2)));
+        // Elastic
+        case Easing.InElastic:
+            return -this.amplitude * Math.pow(2, 10 * t - 10)
+                    * Math.sin(2 * t * Math.PI / this.period - Math.asin(1 / this.amplitude));
+        case Easing.OutElastic:
+            return this.amplitude * Math.pow(2, -10 * t)
+                    * Math.sin(2 * t * Math.PI / this.period - Math.asin(1 / this.amplitude))
+                    + 1;
+        case Easing.InOutElastic:
+            if (t < 0.5)
+                return -0.5 * this.amplitude * Math.pow(2, 20 * t - 10)
+                        * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude));
+            return -0.5 * this.amplitude * Math.pow(2, -20 * t + 10)
+                    * Math.sin(4 * t * Math.PI / this.period + Math.asin(1 / this.amplitude))
+                    + 1;
+        case Easing.OutInElastic:
+            if (t < 0.5)
+                return 0.5 * this.amplitude * Math.pow(2, -20 * t)
                         * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude))
                         + 0.5;
-            // Back
-            case Easing.InBack: return (this.overshoot + 1) * Math.pow(t, 3) - this.overshoot * Math.pow(t, 2);
-            case Easing.OutBack: return (this.overshoot + 1) * Math.pow(t - 1, 3) + this.overshoot * Math.pow(t - 1, 2) + 1;
-            case Easing.InOutBack:
-                if (t < 0.5)
-                    return 4 * (this.overshoot + 1) * Math.pow(t, 3) - 2 * this.overshoot * Math.pow(t, 2);
-                return 0.5 * (this.overshoot + 1) * Math.pow(2 * t - 2, 3) + this.overshoot/2 * Math.pow(2 * t - 2, 2) + 1;
-            case Easing.OutInBack:
-                if (t < 0.5)
-                    return 0.5 * ((this.overshoot + 1) * Math.pow(2 * t - 1, 3) + this.overshoot * Math.pow(2 * t - 1, 2) + 1);
-                return 4 * (this.overshoot + 1) * Math.pow( t - 0.5, 3) - 2 * this.overshoot * Math.pow(t - 0.5, 2) + 0.5;
-            // Bounce
-            case Easing.InBounce:
-                if (t < 1/11) return -this.amplitude * (121/16) * (t*t - (1/11)*t);
-                if (t < 3/11) return -this.amplitude * (121/16) * (t*t - (4/11)*t + (3/121));
-                if (t < 7/11) return -this.amplitude * (121/16) * (t*t - (10/11)*t + (21/121));
-                return -(121/16) * (t*t - 2*t + 1) + 1;
-            case Easing.OutBounce:
-                if (t < 4/11) return (121/16) * t*t;
-                if (t < 8/11) return this.amplitude * (121/16) * (t*t - (12/11)*t + (32/121)) + 1;
-                if (t < 10/11) return this.amplitude * (121/16) * (t*t - (18/11)*t + (80/121)) + 1;
-                return this.amplitude * (121/16) * (t*t - (21/11)*t + (10/11)) + 1;
-            case Easing.InOutBounce:
-                if (t < 1/22) return -this.amplitude * (121/8) * (t*t - (1/22)*t);
-                if (t < 3/22) return -this.amplitude * (121/8) * (t*t - (2/11)*t + (3/484));
-                if (t < 7/22) return -this.amplitude * (121/8) * (t*t - (5/11)*t + (21/484));
-                if (t < 11/22) return -(121/8) * (t*t - t + 0.25) + 0.5;
-                if (t < 15/22) return (121/8) * (t*t - t) + (137/32);
-                if (t < 19/22) return this.amplitude * (121/8) * (t*t - (17/11)*t + (285/484)) + 1;
-                if (t < 21/22) return this.amplitude * (121/8) * (t*t - (20/11)*t + (399/484)) + 1;
-                return this.amplitude * (121/8) * (t*t - (43/22)*t + (21/22)) + 1;
-            case Easing.OutInBounce:
-                if (t < 4/22) return (121/8) * t*t;
-                if (t < 8/22) return -this.amplitude * (121/8) * (t*t - (6/11)*t + (8/121)) + 0.5;
-                if (t < 10/22) return -this.amplitude * (121/8) * (t*t - (9/11)*t + (20/121)) + 0.5;
-                if (t < 11/22) return -this.amplitude * (121/8) * (t*t - (21/22)*t + (5/22)) + 0.5;
-                if (t < 12/22) return this.amplitude * (121/8) * (t*t - (23/22)*t + (3/11)) + 0.5;
-                if (t < 14/22) return this.amplitude * (121/8) * (t*t - (13/11)*t + (42/121)) + 0.5;
-                if (t < 18/22) return this.amplitude * (121/8) * (t*t - (16/11)*t + (63/121)) + 0.5;
-                return -(121/8) * (t*t - 2*t + (117/121)) + 0.5;
-            // Default
-            default:
-                console.log("Unsupported animation type: ", this.type);
-            // Linear
-            case Easing.Linear:
-                return t;
-        }
+            return -0.5 * this.amplitude * Math.pow(2, 20 * t - 20)
+                    * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude))
+                    + 0.5;
+        // Back
+        case Easing.InBack: return (this.overshoot + 1) * Math.pow(t, 3) - this.overshoot * Math.pow(t, 2);
+        case Easing.OutBack: return (this.overshoot + 1) * Math.pow(t - 1, 3) + this.overshoot * Math.pow(t - 1, 2) + 1;
+        case Easing.InOutBack:
+            if (t < 0.5)
+                return 4 * (this.overshoot + 1) * Math.pow(t, 3) - 2 * this.overshoot * Math.pow(t, 2);
+            return 0.5 * (this.overshoot + 1) * Math.pow(2 * t - 2, 3) + this.overshoot/2 * Math.pow(2 * t - 2, 2) + 1;
+        case Easing.OutInBack:
+            if (t < 0.5)
+                return 0.5 * ((this.overshoot + 1) * Math.pow(2 * t - 1, 3) + this.overshoot * Math.pow(2 * t - 1, 2) + 1);
+            return 4 * (this.overshoot + 1) * Math.pow( t - 0.5, 3) - 2 * this.overshoot * Math.pow(t - 0.5, 2) + 0.5;
+        // Bounce
+        case Easing.InBounce:
+            if (t < 1/11) return -this.amplitude * (121/16) * (t*t - (1/11)*t);
+            if (t < 3/11) return -this.amplitude * (121/16) * (t*t - (4/11)*t + (3/121));
+            if (t < 7/11) return -this.amplitude * (121/16) * (t*t - (10/11)*t + (21/121));
+            return -(121/16) * (t*t - 2*t + 1) + 1;
+        case Easing.OutBounce:
+            if (t < 4/11) return (121/16) * t*t;
+            if (t < 8/11) return this.amplitude * (121/16) * (t*t - (12/11)*t + (32/121)) + 1;
+            if (t < 10/11) return this.amplitude * (121/16) * (t*t - (18/11)*t + (80/121)) + 1;
+            return this.amplitude * (121/16) * (t*t - (21/11)*t + (10/11)) + 1;
+        case Easing.InOutBounce:
+            if (t < 1/22) return -this.amplitude * (121/8) * (t*t - (1/22)*t);
+            if (t < 3/22) return -this.amplitude * (121/8) * (t*t - (2/11)*t + (3/484));
+            if (t < 7/22) return -this.amplitude * (121/8) * (t*t - (5/11)*t + (21/484));
+            if (t < 11/22) return -(121/8) * (t*t - t + 0.25) + 0.5;
+            if (t < 15/22) return (121/8) * (t*t - t) + (137/32);
+            if (t < 19/22) return this.amplitude * (121/8) * (t*t - (17/11)*t + (285/484)) + 1;
+            if (t < 21/22) return this.amplitude * (121/8) * (t*t - (20/11)*t + (399/484)) + 1;
+            return this.amplitude * (121/8) * (t*t - (43/22)*t + (21/22)) + 1;
+        case Easing.OutInBounce:
+            if (t < 4/22) return (121/8) * t*t;
+            if (t < 8/22) return -this.amplitude * (121/8) * (t*t - (6/11)*t + (8/121)) + 0.5;
+            if (t < 10/22) return -this.amplitude * (121/8) * (t*t - (9/11)*t + (20/121)) + 0.5;
+            if (t < 11/22) return -this.amplitude * (121/8) * (t*t - (21/22)*t + (5/22)) + 0.5;
+            if (t < 12/22) return this.amplitude * (121/8) * (t*t - (23/22)*t + (3/11)) + 0.5;
+            if (t < 14/22) return this.amplitude * (121/8) * (t*t - (13/11)*t + (42/121)) + 0.5;
+            if (t < 18/22) return this.amplitude * (121/8) * (t*t - (16/11)*t + (63/121)) + 0.5;
+            return -(121/8) * (t*t - 2*t + (117/121)) + 0.5;
+        // Default
+        default:
+            console.log("Unsupported animation type: ", this.type);
+        // Linear
+        case Easing.Linear:
+            return t;
     }
+}
+createProperty({ type: "enum", object: p, name: "type", initialValue: Easing.Linear });
+createProperty({ type: "real", object: p, name: "amplitude", initialValue: 1 });
+createProperty({ type: "real", object: p, name: "overshoot", initialValue: 0.3 });
+createProperty({ type: "real", object: p, name: "period", initialValue: 1.70158 });
+function QMLEasingCurve(parent) {
+    QObject.call(this, parent);
+}
+
+p = QMLPropertyAnimation.prototype = new QMLAnimation();
+createProperty({ type: "int", object: p, name: "duration", initialValue: 250 });
+createProperty({ type: "real", object: p, name: "from" });
+createProperty({ type: "string", object: p, name: "properties", initialValue: "" });
+createProperty({ type: "string", object: p, name: "property" });
+createProperty({ type: "QtObject", object: p, name: "target" });
+createProperty({ type: "list", object: p, name: "targets", initialValue: [] });
+createProperty({ type: "real", object: p, name: "to" });
+function QMLPropertyAnimation(parent) {
+    QMLAnimation.call(this, parent);
+
+    this.easing = new QMLEasingCurve(this);
 
     this.$redoActions = function() {
         this.$actions = [];
@@ -3399,30 +3344,38 @@ function QMLPropertyAnimation(meta) {
             this.$targets.push(this.target);
     }
 
-    this.duration = 250;
-    this.easing.type = Easing.Linear;
-    this.easing.amplitude = 1;
-    this.easing.period = 0.3;
-    this.easing.overshoot = 1.70158;
     this.$props = [];
     this.$targets = [];
     this.$actions = [];
-    this.properties = "";
-    this.targets = [];
 
     this.targetChanged.connect(this, redoTargets);
     this.targetsChanged.connect(this, redoTargets);
     this.propertyChanged.connect(this, redoProperties);
     this.propertiesChanged.connect(this, redoProperties);
 
-    if (meta.object.$on !== undefined) {
-        this.property = meta.object.$on;
-        this.target = this.$parent;
+    this.$setTargetProperty = function(newVal) {
+        this.property = newVal.name;
+        this.target = newVal.obj;
     }
 }
 
-function QMLNumberAnimation(meta) {
-    QMLPropertyAnimation.call(this, meta);
+p = QMLNumberAnimation.prototype = new QMLPropertyAnimation();
+p.complete = function() {
+    for (var i in this.$actions) {
+        var action = this.$actions[i];
+        action.target.$properties[action.property].set(action.to, true);
+    }
+    engine.$requestDraw();
+
+    if (++loop == this.loops)
+        this.running = false;
+    else if (!this.running)
+        this.$actions = [];
+    else
+        startLoop.call(this);
+}
+function QMLNumberAnimation(parent) {
+    QMLPropertyAnimation.call(this, parent);
     var at = 0,
         loop = 0,
         self = this;
@@ -3464,45 +3417,38 @@ function QMLNumberAnimation(meta) {
             this.$actions = [];
         }
     });
-
-    this.complete = function() {
-        for (var i in this.$actions) {
-            var action = this.$actions[i];
-            action.target.$properties[action.property].set(action.to, true);
-        }
-        engine.$requestDraw();
-
-        if (++loop == this.loops)
-            this.running = false;
-        else if (!this.running)
-            this.$actions = [];
-        else
-            startLoop.call(this);
-    }
 }
 
-function QMLBehavior(meta) {
-    QMLBaseObject.call(this, meta);
+p = QMLBehavior.prototype = new QMLBaseObject();
+p.$defaultProperty = "animation";
+createProperty({ type: "Animation", object: p, name: "animation" });
+createProperty({ type: "bool", object: p, name: "enabled", initialValue: true });
+function QMLBehavior(parent) {
+    QMLBaseObject.call(this, parent);
 
-    createSimpleProperty("Animation", this, "animation");
-    this.$defaultProperty = "animation";
-    createSimpleProperty("bool", this, "enabled");
+    this.$targetProperty;
+    this.$setTargetProperty = function(newVal) {
+        this.$targetProperty = newVal;
+        this.$targetProperty.animation = newVal ? this.animation : null;
+    }
 
     this.animationChanged.connect(this, function(newVal) {
-        newVal.target = this.$parent;
-        newVal.property = meta.object.$on;
-        this.$parent.$properties[meta.object.$on].animation = newVal;
+        newVal.target = this.$targetProperty.obj;
+        newVal.property = this.$targetProperty.name;
+        this.$targetProperty.animation = newVal ? this.animation : null;
     });
     this.enabledChanged.connect(this, function(newVal) {
-        this.$parent.$properties[meta.object.$on].animation = newVal ? this.animation : null;
+        this.$targetProperty.animation = newVal ? this.animation : null;
     });
 }
 
 
 //------------DOM-only-Elements------------
 
-function QMLTextInput(meta) {
-    QMLItem.call(this, meta);
+p = QMLTextInput.prototype = new QMLItem();
+createProperty({ type: "string", object: p, name: "text", initialValue: "" });
+function QMLTextInput(parent) {
+    QMLItem.call(this, parent);
 
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("TextInput-type is only supported within the DOM-backend.");
@@ -3520,7 +3466,6 @@ function QMLTextInput(meta) {
     this.dom.firstChild.style.margin = "0";
     this.dom.firstChild.style.width = "100%";
 
-    createSimpleProperty("string", this, "text", "");
     this.accepted = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -3547,21 +3492,22 @@ function QMLTextInput(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
-function QMLButton(meta) {
+p = QMLButton.prototype = new QMLItem();
+createProperty({ type: "string", object: p, name: "text", initialValue: "" });
+function QMLButton(parent) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("Button-type is only supported within the DOM-backend. Use Rectangle + MouseArea instead.");
-        QMLItem.call(this, meta);
+        QMLItem.call(this, parent);
         return;
     }
 
     this.dom = document.createElement("button");
-    QMLItem.call(this, meta);
+    QMLItem.call(this, parent);
     var self = this;
 
     this.dom.style.pointerEvents = "auto";
     this.dom.innerHTML = "<span></span>";
 
-    createSimpleProperty("string", this, "text");
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -3580,8 +3526,10 @@ function QMLButton(meta) {
     }
 }
 
-function QMLTextArea(meta) {
-    QMLItem.call(this, meta);
+p = QMLTextArea.prototype = new QMLItem();
+createProperty({ type: "string", object: p, name: "text", initialValue: "" });
+function QMLTextArea(parent) {
+    QMLItem.call(this, parent);
 
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("TextArea-type is only supported within the DOM-backend.");
@@ -3600,7 +3548,6 @@ function QMLTextArea(meta) {
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
 
-    createSimpleProperty("string", this, "text", "");
 
     this.Component.completed.connect(this, function() {
         this.implicitWidth = this.dom.firstChild.offsetWidth;
@@ -3621,15 +3568,19 @@ function QMLTextArea(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
-function QMLCheckbox(meta) {
+p = QMLCheckbox.prototype = new QMLItem();
+createProperty({ type: "string", object: p, name: "text" });
+createProperty({ type: "bool", object: p, name: "checked" });
+createProperty({ type: "color", object: p, name: "color" });
+function QMLCheckbox(parent) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("CheckBox-type is only supported within the DOM-backend.");
-        QMLItem.call(this, meta);
+        QMLItem.call(this, parent);
         return;
     }
 
     this.dom = document.createElement("label");
-    QMLItem.call(this, meta);
+    QMLItem.call(this, parent);
     var self = this;
 
     this.font = new QMLFont(this);
@@ -3637,10 +3588,6 @@ function QMLCheckbox(meta) {
     this.dom.innerHTML = "<input type=\"checkbox\"><span></span>";
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.verticalAlign = "text-bottom";
-
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("bool", this, "checked");
-    createSimpleProperty("color", this, "color");
 
     this.Component.completed.connect(this, function() {
         this.implicitHeight = this.dom.offsetHeight;
