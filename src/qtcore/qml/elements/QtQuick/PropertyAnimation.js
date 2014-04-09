@@ -7,19 +7,19 @@ registerQmlType({
     var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);
 
-    createProperty({ type: "int", object: this, name: "duration" });
+    createProperty({ type: "int", object: this, name: "duration", initialValue: 250 });
     createProperty({ type: "real", object: this, name: "from" });
-    createProperty({ type: "string", object: this, name: "properties" });
+    createProperty({ type: "string", object: this, name: "properties", initialValue: "" });
     createProperty({ type: "string", object: this, name: "property" });
     createProperty({ type: "QtObject", object: this, name: "target" });
-    createProperty({ type: "list", object: this, name: "targets" });
+    createProperty({ type: "list", object: this, name: "targets", initialValue: [] });
     createProperty({ type: "real", object: this, name: "to" });
 
     this.easing = new QObject(this);
-    createProperty({ type: "enum", object: this.easing, name: "type" });
-    createProperty({ type: "real", object: this.easing, name: "amplitude" });
-    createProperty({ type: "real", object: this.easing, name: "overshoot" });
-    createProperty({ type: "real", object: this.easing, name: "period" });
+    createProperty({ type: "enum", object: this.easing, name: "type", initialValue: Easing.Linear });
+    createProperty({ type: "real", object: this.easing, name: "amplitude", initialValue: 1 });
+    createProperty({ type: "real", object: this.easing, name: "overshoot", initialValue: 0.3 });
+    createProperty({ type: "real", object: this.easing, name: "period", initialValue: 1.70158 });
 
     this.easing.$valueForProgress = function(t) {
         switch(this.type) {

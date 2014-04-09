@@ -6,16 +6,16 @@ registerQmlType({
   constructor: function QMLRotation(meta) {
     QMLBaseObject.call(this, meta);
 
-    createProperty({ type: "real", object: this, name: "angle" });
+    createProperty({ type: "real", object: this, name: "angle", initialValue: 0 });
 
     this.axis = new QObject(this);
-    createProperty({ type: "real", object: this.axis, name: "x" });
-    createProperty({ type: "real", object: this.axis, name: "y" });
-    createProperty({ type: "real", object: this.axis, name: "z" });
+    createProperty({ type: "real", object: this.axis, name: "x", initialValue: 0 });
+    createProperty({ type: "real", object: this.axis, name: "y", initialValue: 0 });
+    createProperty({ type: "real", object: this.axis, name: "z", initialValue: 1 });
 
     this.origin = new QObject(this);
-    createProperty({ type: "real", object: this.origin, name: "x" });
-    createProperty({ type: "real", object: this.origin, name: "y" });
+    createProperty({ type: "real", object: this.origin, name: "x", initialValue: 0 });
+    createProperty({ type: "real", object: this.origin, name: "y", initialValue: 0 });
 
     function updateOrigin() {
         this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
@@ -28,12 +28,6 @@ registerQmlType({
     this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.origin.xChanged.connect(this, updateOrigin);
     this.origin.yChanged.connect(this, updateOrigin);
-
-    this.angle = 0;
-    this.axis.x = 0;
-    this.axis.y = 0;
-    this.axis.z = 1;
-    this.origin.x = 0;
-    this.origin.y = 0;
+    this.$parent.$updateTransform();
   }
 });

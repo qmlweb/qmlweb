@@ -20,31 +20,20 @@ function QMLImage(meta) {
     }
 
     // no-op properties
-    createProperty({ type: "bool", object: this, name: "asynchronous" });
-    createProperty({ type: "bool", object: this, name: "cache" });
-    createProperty({ type: "bool", object: this, name: "smooth" });
+    createProperty({ type: "bool", object: this, name: "asynchronous", initialValue: true });
+    createProperty({ type: "bool", object: this, name: "cache", initialValue: true });
+    createProperty({ type: "bool", object: this, name: "smooth", initialValue: true });
 
-    createProperty({ type: "enum", object: this, name: "fillMode" });
-    createProperty({ type: "bool", object: this, name: "mirror" });
-    createProperty({ type: "real", object: this, name: "progress" });
-    createProperty({ type: "url", object: this, name: "source" });
-    createProperty({ type: "enum", object: this, name: "status" });
+    createProperty({ type: "enum", object: this, name: "fillMode", initialValue: this.Image.Stretch });
+    createProperty({ type: "bool", object: this, name: "mirror", initialValue: false });
+    createProperty({ type: "real", object: this, name: "progress", initialValue: 0 });
+    createProperty({ type: "url", object: this, name: "source", initialValue: "" });
+    createProperty({ type: "enum", object: this, name: "status", initialValue: this.Image.Null });
 
     this.sourceSize = new QObject(this);
 
-    createProperty({ type: "int", object: this.sourceSize, name: "width" });
-    createProperty({ type: "int", object: this.sourceSize, name: "height" });
-
-    this.asynchronous = true;
-    this.cache = true;
-    this.smooth = true;
-    this.fillMode = this.Image.Stretch;
-    this.mirror = false;
-    this.progress = 0;
-    this.source = "";
-    this.status = this.Image.Null;
-    this.sourceSize.width = 0;
-    this.sourceSize.height = 0;
+    createProperty({ type: "int", object: this.sourceSize, name: "width", initialValue: 0 });
+    createProperty({ type: "int", object: this.sourceSize, name: "height", initialValue: 0 });
 
     // Bind status to img element
     img.onload = function() {

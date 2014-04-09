@@ -11,9 +11,8 @@ registerQmlType({
         i;
 
     this.Animation = { Infinite: Math.Infinite }
-    createProperty({ type: "list", object: this, name: "animations" });
+    createProperty({ type: "list", object: this, name: "animations", initialValue: [] });
     this.$defaultProperty = "animations";
-    this.animations = [];
     this.$runningAnimations = 0;
 
     this.animationsChanged.connect(this, function() {

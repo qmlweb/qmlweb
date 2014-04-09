@@ -25,7 +25,7 @@ registerQmlType({
 
     this.setupFocusOnDom(this.dom.firstChild);
 
-    createProperty({ type: "string", object: this, name: "text" });
+    createProperty({ type: "string", object: this, name: "text", initialValue: "" });
     createProperty({ type: "int",    object: this, name: "maximumLength" });
     createProperty({ type: "bool",   object: this, name: "readOnly" });
     createProperty({ type: "var",    object: this, name: "validator" });

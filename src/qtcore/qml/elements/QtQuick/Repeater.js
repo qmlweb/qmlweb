@@ -6,8 +6,8 @@ function QMLRepeater(meta) {
     createProperty({ type: "Component", object: this, name: "delegate" });
     this.container = function() { return this.parent; }
     this.$defaultProperty = "delegate";
-    createProperty({ type: "variant", object: this, name: "model" });
-    createProperty({ type: "int", object: this, name: "count" });
+    createProperty({ type: "variant", object: this, name: "model", initialValue: 0 });
+    createProperty({ type: "int", object: this, name: "count", initialValue: 0 });
     this.$completed = false;
     this.$items = []; // List of created items
     this._childrenInserted = Signal();
@@ -15,9 +15,6 @@ function QMLRepeater(meta) {
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
     this.parentChanged.connect(applyModel);
-
-    this.model = 0;
-    this.count = 0;
 
     this.itemAt = function(index) {
         return this.$items[index];

@@ -57,33 +57,32 @@ function QMLItem(meta) {
 
     if (this.$isComponentRoot)
       createProperty({ type: "var", object: this, name: "activeFocus" });
-    createProperty({ type: "real", object: this, name: "x" });
-    createProperty({ type: "real", object: this, name: "y" });
+    createProperty({ type: "real", object: this, name: "x", initialValue: 0 });
+    createProperty({ type: "real", object: this, name: "y", initialValue: 0 });
     createProperty({ type: "real", object: this, name: "width" });
     createProperty({ type: "real", object: this, name: "height" });
-    createProperty({ type: "real", object: this, name: "implicitWidth" });
-    createProperty({ type: "real", object: this, name: "implicitHeight" });
+    createProperty({ type: "real", object: this, name: "implicitWidth", initialValue: 0 });
+    createProperty({ type: "real", object: this, name: "implicitHeight", initialValue: 0 });
     createProperty({ type: "real", object: this, name: "left" });
     createProperty({ type: "real", object: this, name: "right" });
     createProperty({ type: "real", object: this, name: "top" });
     createProperty({ type: "real", object: this, name: "bottom" });
     createProperty({ type: "real", object: this, name: "horizontalCenter" });
     createProperty({ type: "real", object: this, name: "verticalCenter" });
-    createProperty({ type: "real", object: this, name: "rotation" });
-    createProperty({ type: "real", object: this, name: "scale" });
+    createProperty({ type: "real", object: this, name: "rotation", initialValue: 0 });
+    createProperty({ type: "real", object: this, name: "scale", initialValue: 1 });
     createProperty({ type: "real", object: this, name: "z" });
-    createProperty({ type: "list", object: this, name: "transform" });
-    createProperty({ type: "bool", object: this, name: "visible" });
-    createProperty({ type: "real", object: this, name: "opacity" });
+    createProperty({ type: "list", object: this, name: "transform", initialValue: [] });
+    createProperty({ type: "bool", object: this, name: "visible", initialValue: true });
+    createProperty({ type: "real", object: this, name: "opacity", initialValue: 1 });
     createProperty({ type: "bool", object: this, name: "clip" });
-    createProperty({ type: "bool", object: this, name: "focus" });
+    createProperty({ type: "bool", object: this, name: "focus", initialValue: false });
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
-    this.focus = false;
 
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
@@ -121,7 +120,7 @@ function QMLItem(meta) {
     createProperty({ type: "real", object: this.anchors, name: "verticalCenter" });
     createProperty({ type: "real", object: this.anchors, name: "fill" });
     createProperty({ type: "real", object: this.anchors, name: "centerIn" });
-    createProperty({ type: "real", object: this.anchors, name: "margins" });
+    createProperty({ type: "real", object: this.anchors, name: "margins", initialValue: 0 });
     createProperty({ type: "real", object: this.anchors, name: "leftMargin" });
     createProperty({ type: "real", object: this.anchors, name: "rightMargin" });
     createProperty({ type: "real", object: this.anchors, name: "topMargin" });
@@ -145,14 +144,14 @@ function QMLItem(meta) {
 
     // childrenRect property
     this.childrenRect = new QObject(this);
-    createProperty({ type: "real", object: this.childrenRect, name: "x" }); // TODO ro
-    createProperty({ type: "real", object: this.childrenRect, name: "y" }); // TODO ro
-    createProperty({ type: "real", object: this.childrenRect, name: "width" }); // TODO ro
-    createProperty({ type: "real", object: this.childrenRect, name: "height" }); // TODO ro
+    createProperty({ type: "real", object: this.childrenRect, name: "x", initialValue: 0 }); // TODO ro
+    createProperty({ type: "real", object: this.childrenRect, name: "y", initialValue: 0 }); // TODO ro
+    createProperty({ type: "real", object: this.childrenRect, name: "width", initialValue: 0 }); // TODO ro
+    createProperty({ type: "real", object: this.childrenRect, name: "height", initialValue: 0 }); // TODO ro
 
-    createProperty({ type: "list", object: this, name: "states" });
-    createProperty({ type: "string", object: this, name: "state" });
-    createProperty({ type: "list", object: this, name: "transitions" });
+    createProperty({ type: "list", object: this, name: "states", initialValue: [] });
+    createProperty({ type: "string", object: this, name: "state", initialValue: "" });
+    createProperty({ type: "list", object: this, name: "transitions", initialValue: [] });
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
@@ -334,25 +333,10 @@ function QMLItem(meta) {
         this.css.height = newVal ? newVal + "px" : "auto";
     });
 
-    this.implicitHeight = 0;
-    this.implicitWidth = 0;
     this.spacing = 0;
-    this.x = 0;
-    this.y = 0;
-    this.anchors.margins = 0;
-    this.visible = true;
-    this.opacity = 1;
     this.$revertActions = [];
-    this.states = [];
-    this.transitions = [];
-    this.state = "";
-    this.transform = [];
-    this.rotation = 0;
-    this.scale = 1;
-    this.childrenRect.x = 0;
-    this.childrenRect.y = 0;
-    this.childrenRect.width = 0;
-    this.childrenRect.height = 0;
+    this.xChanged(0);
+    this.yChanged(0);
 
     // Init size of root element
     if (this.$parent === null) {

@@ -11,9 +11,8 @@ registerQmlType({
         i,
         self = this;
 
-    createProperty({ type: "list", object: this, name: "animations" });
+    createProperty({ type: "list", object: this, name: "animations", initialValue: [] });
     this.$defaultProperty = "animations";
-    this.animations = [];
 
     function nextAnimation(proceed) {
         var anim;

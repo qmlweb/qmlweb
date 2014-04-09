@@ -9,12 +9,10 @@ registerQmlType({
     firstItem = true;
     var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
 
-    createProperty({ type: "int", object: this, name: "count" });
-    createProperty({ type: "list", object: this, name: "$items" });
+    createProperty({ type: "int", object: this, name: "count", initialValue: 0 });
+    createProperty({ type: "list", object: this, name: "$items", initialValue: [] });
     this.$defaultProperty = "$items";
-    this.$items = [];
     this.$model = new JSItemModel();
-    this.count = 0;
 
     this.$itemsChanged.connect(this, function(newVal) {
         if (firstItem) {

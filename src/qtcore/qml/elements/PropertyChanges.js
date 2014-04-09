@@ -2,11 +2,9 @@ function QMLPropertyChanges(meta) {
     QMLBaseObject.call(this, meta);
 
     createProperty({ type: "QtObject", object: this, name: "target" });
-    createProperty({ type: "bool", object: this, name: "explicit" });
-    createProperty({ type: "bool", object: this, name: "restoreEntryValues" });
+    createProperty({ type: "bool", object: this, name: "explicit", initialValue: false });
+    createProperty({ type: "bool", object: this, name: "restoreEntryValues", initialValue: true });
 
-    this.explicit = false;
-    this.restoreEntryValues = true;
     this.$actions = [];
 
     this.$setCustomData = function(propName, value) {
