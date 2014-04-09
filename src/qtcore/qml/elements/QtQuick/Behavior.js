@@ -8,7 +8,7 @@ registerQmlType({
 
     createProperty("Animation", this, "animation");
     this.$defaultProperty = "animation";
-    createProperty("bool", this, "enabled");
+    createProperty("bool", this, "enabled", {initialValue: true});
 
     this.animationChanged.connect(this, function(newVal) {
         newVal.target = this.$parent;

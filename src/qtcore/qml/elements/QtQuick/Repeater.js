@@ -6,7 +6,7 @@ function QMLRepeater(meta) {
     createProperty("Component", this, "delegate");
     this.container = function() { return this.parent; }
     this.$defaultProperty = "delegate";
-    createProperty("variant", this, "model");
+    createProperty("variant", this, "model", {initialValue: 0});
     createProperty("int", this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
@@ -15,9 +15,6 @@ function QMLRepeater(meta) {
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
     this.parentChanged.connect(applyModel);
-
-    this.model = 0;
-    this.count = 0;
 
     this.itemAt = function(index) {
         return this.$items[index];

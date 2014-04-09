@@ -8,13 +8,10 @@ registerQmlType({
 
     createProperty("list", this, "animations");
     this.$defaultProperty = "animations";
-    createProperty("string", this, "from");
-    createProperty("string", this, "to");
+    createProperty("string", this, "from", {initialValue: '*'});
+    createProperty("string", this, "to", {initialValue: '*'});
     createProperty("bool", this, "reversible");
-    this.animations = [];
     this.$item = this.$parent;
-    this.from = "*";
-    this.to = "*";
 
     this.$start = function(actions) {
         for (var i = 0; i < this.animations.length; i++) {

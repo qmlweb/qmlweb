@@ -26,13 +26,11 @@ registerQmlType({
     this.setupFocusOnDom(this.dom.firstChild);
 
     createProperty("string", this, "text");
-    createProperty("int",    this, "maximumLength");
+    createProperty("int", this, "maximumLength", {initialValue: -1});
     createProperty("bool",   this, "readOnly");
     createProperty("var",    this, "validator");
     createProperty("enum",   this, "echoMode");
     this.accepted = Signal();
-    this.readOnly = false;
-    this.maximumLength = -1;
     this.dom.firstChild.disabled = false;
 
     this.Component.completed.connect(this, function() {

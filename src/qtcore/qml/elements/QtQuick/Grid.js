@@ -16,15 +16,13 @@ function QMLGrid(meta) {
 
     createProperty("int", this, "columns");
     createProperty("int", this, "rows");
-    createProperty("enum", this, "flow");
-    createProperty("enum", this, "layoutDirection");
+    createProperty("enum", this, "flow", {initialValue: 0});
+    createProperty("enum", this, "layoutDirection", {initialValue: 0});
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
-
-    this.flow = 0;
-    this.layoutDirection = 0;
+    this.layoutChildren();
 }
 
 QMLGrid.prototype.layoutChildren = function() {

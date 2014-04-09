@@ -7,7 +7,7 @@ function QMLButton(meta) {
     this.dom.innerHTML = "<span></span>";
 
     createProperty("string", this, "text");
-    createProperty("bool", this, "enabled");
+    createProperty("bool", this, "enabled", {initialValue: true});
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {

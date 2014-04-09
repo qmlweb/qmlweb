@@ -8,15 +8,10 @@ registerQmlType({
     var prevTrigger,
         self = this;
 
-    createProperty("int", this, "interval");
+    createProperty("int", this, "interval", {interval: 1000});
     createProperty("bool", this, "repeat");
     createProperty("bool", this, "running");
     createProperty("bool", this, "triggeredOnStart");
-
-    this.interval = 1000;
-    this.repeat = false;
-    this.running = false;
-    this.triggeredOnStart = false;
 
     // Create trigger as simple property. Reading the property triggers
     // the function!

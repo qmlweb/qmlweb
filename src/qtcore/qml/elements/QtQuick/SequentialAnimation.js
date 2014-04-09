@@ -13,7 +13,6 @@ registerQmlType({
 
     createProperty("list", this, "animations");
     this.$defaultProperty = "animations";
-    this.animations = [];
 
     function nextAnimation(proceed) {
         var anim;

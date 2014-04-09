@@ -20,23 +20,14 @@ registerQmlType({
     }
 
     createProperty("url", this, "source");
-    createProperty("enum", this, "status");
+    createProperty("enum", this, "status", {initialValue: this.BorderImage.Null});
     this.border = new QObject(this);
     createProperty("int", this.border, "left");
     createProperty("int", this.border, "right");
     createProperty("int", this.border, "top");
     createProperty("int", this.border, "bottom");
-    createProperty("enum", this, "horizontalTileMode");
-    createProperty("enum", this, "verticalTileMode");
-
-    this.source = "";
-    this.status = this.BorderImage.Null;
-    this.border.left = 0;
-    this.border.right = 0;
-    this.border.top = 0;
-    this.border.bottom = 0;
-    this.horizontalTileMode = this.BorderImage.Stretch;
-    this.verticalTileMode = this.BorderImage.Stretch;
+    createProperty("enum", this, "horizontalTileMode", {initialValue: this.BorderImage.Stretch});
+    createProperty("enum", this, "verticalTileMode", {initialValue: this.BorderImage.Stretch});
 
     this.sourceChanged.connect(this, function() {
         this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";

@@ -6,12 +6,12 @@ registerQmlType({
   constructor: function QMLRectangle(meta) {
     QMLItem.call(this, meta);
 
-    createProperty("color", this, "color");
+    createProperty("color", this, "color", {initialValue: 'white'});
     createProperty("real", this, "radius");
 
     this.border = new QObject(this);
-    createProperty("color", this.border, "color");
-    createProperty("int", this.border, "width");
+    createProperty("color", this.border, "color", {initialValue: 'black'});
+    createProperty("int", this.border, "width", {initialValue: 1});
 
     this.border.color = 'black';
     this.border.width = 1;
@@ -30,8 +30,7 @@ registerQmlType({
         this.css.borderWidth = newVal + 'px';
     });
 
-    this.color = "white";
-    this.radius = 0;
+    this.colorChanged(this.color);
     this.css.borderWidth ='0px';
     this.css.borderStyle = 'solid';
     this.css.borderColor = 'black';

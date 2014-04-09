@@ -3,10 +3,8 @@ function QMLPropertyChanges(meta) {
 
     createProperty("QtObject", this, "target");
     createProperty("bool", this, "explicit");
-    createProperty("bool", this, "restoreEntryValues");
+    createProperty("bool", this, "restoreEntryValues", {initialValue: true});
 
-    this.explicit = false;
-    this.restoreEntryValues = true;
     this.$actions = [];
 
     this.$setCustomData = function(propName, value) {

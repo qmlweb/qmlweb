@@ -7,14 +7,9 @@ function QMLAnimation(meta) {
     };
 
     createProperty("bool", this, "alwaysRunToEnd");
-    createProperty("int", this, "loops");
+    createProperty("int", this, "loops", {initialValue: 1});
     createProperty("bool", this, "paused");
     createProperty("bool", this, "running");
-
-    this.alwaysRunToEnd = false;
-    this.loops = 1;
-    this.paused = false;
-    this.running = false;
 
     // Methods
     this.restart = function() {

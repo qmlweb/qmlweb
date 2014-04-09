@@ -15,26 +15,20 @@ registerQmlType({
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
 
-    createProperty("variant", this, "acceptedButtons");
-    createProperty("bool", this, "enabled");
+    createProperty("variant", this, "acceptedButtons", {initialValue: Qt.LeftButton});
+    createProperty("bool", this, "enabled", {initialValue: true});
     createProperty("bool", this, "hoverEnabled");
     createProperty("real", this, "mouseX");
     createProperty("real", this, "mouseY");
     createProperty("bool", this, "pressed");
     createProperty("bool", this, "containsMouse");
-    createProperty("variant", this, "pressedButtons");
-    createProperty("enum", this, "cursorShape");
+    createProperty("variant", this, "pressedButtons", {initialValue: 0});
+    createProperty("enum", this, "cursorShape", {initialValue: Qt.ArrowCursor});
 
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
     this.positionChanged = Signal([{type: "variant", name: "mouse"}]);
-
-    this.acceptedButtons = Qt.LeftButton;
-    this.enabled = true;
-    this.hoverEnabled = false;
-    this.containsMouse = false;
-    this.cursorShape = Qt.ArrowCursor;
 
     function eventToMouse(e) {
         return {

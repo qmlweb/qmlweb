@@ -12,9 +12,7 @@ registerQmlType({
     createProperty("int", this, "count");
     createProperty("list", this, "$items");
     this.$defaultProperty = "$items";
-    this.$items = [];
     this.$model = new JSItemModel();
-    this.count = 0;
 
     this.$itemsChanged.connect(this, function(newVal) {
         if (firstItem) {

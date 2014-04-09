@@ -6,7 +6,7 @@ function QMLPositioner(meta) {
     this.childrenChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
 
-    this.spacing = 0;
+    this.layoutChildren();
 }
 
 QMLPositioner.slotChildrenChanged = function() {

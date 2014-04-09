@@ -11,7 +11,7 @@ registerQmlType({
     this.axis = new QObject(this);
     createProperty("real", this.axis, "x");
     createProperty("real", this.axis, "y");
-    createProperty("real", this.axis, "z");
+    createProperty("real", this.axis, "z", {initialValue: 1});
 
     this.origin = new QObject(this);
     createProperty("real", this.origin, "x");
@@ -28,12 +28,6 @@ registerQmlType({
     this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.origin.xChanged.connect(this, updateOrigin);
     this.origin.yChanged.connect(this, updateOrigin);
-
-    this.angle = 0;
-    this.axis.x = 0;
-    this.axis.y = 0;
-    this.axis.z = 1;
-    this.origin.x = 0;
-    this.origin.y = 0;
+    this.$parent.$updateTransform();
   }
 });

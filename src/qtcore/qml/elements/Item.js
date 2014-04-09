@@ -69,11 +69,11 @@ function QMLItem(meta) {
     createProperty("real", this, "horizontalCenter");
     createProperty("real", this, "verticalCenter");
     createProperty("real", this, "rotation");
-    createProperty("real", this, "scale");
+    createProperty("real", this, "scale", {initialValue: 1});
     createProperty("real", this, "z");
     createProperty("list", this, "transform");
-    createProperty("bool", this, "visible");
-    createProperty("real", this, "opacity");
+    createProperty("bool", this, "visible", {initialValue: true});
+    createProperty("real", this, "opacity", {initialValue: 1});
     createProperty("bool", this, "clip");
     createProperty("bool", this, "focus");
     this.xChanged.connect(this, updateHGeometry);
@@ -82,7 +82,6 @@ function QMLItem(meta) {
     this.heightChanged.connect(this, updateVGeometry);
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
-    this.focus = false;
 
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
@@ -333,25 +332,10 @@ function QMLItem(meta) {
         this.css.height = newVal ? newVal + "px" : "auto";
     });
 
-    this.implicitHeight = 0;
-    this.implicitWidth = 0;
     this.spacing = 0;
-    this.x = 0;
-    this.y = 0;
-    this.anchors.margins = 0;
-    this.visible = true;
-    this.opacity = 1;
     this.$revertActions = [];
-    this.states = [];
-    this.transitions = [];
-    this.state = "";
-    this.transform = [];
-    this.rotation = 0;
-    this.scale = 1;
-    this.childrenRect.x = 0;
-    this.childrenRect.y = 0;
-    this.childrenRect.width = 0;
-    this.childrenRect.height = 0;
+    this.css.left = this.x + 'px';
+    this.css.top = this.y + 'px';
 
     // Init size of root element
     if (this.$parent === null) {

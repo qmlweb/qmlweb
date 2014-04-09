@@ -6,14 +6,13 @@ function QMLFlow(meta) {
         TopToBottom: 1
     }
 
-    createProperty("enum", this, "flow");
-    createProperty("enum", this, "layoutDirection");
+    createProperty("enum", this, "flow", {initialValue: this.Flow.LeftToRight});
+    createProperty("enum", this, "layoutDirection", {initialValue: 0});
+
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
-
-    this.flow = this.Flow.LeftToRight;
-    this.layoutDirection = 0;
+    this.layoutChildren();
 }
 
 QMLFlow.prototype.layoutChildren = function() {

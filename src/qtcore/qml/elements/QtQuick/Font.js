@@ -6,12 +6,12 @@ registerQmlType({
   constructor: function QMLFont(parent) {
     QObject.call(this);
     createProperty("bool", this, "bold");
-    createProperty("enum", this, "capitalization");
-    createProperty("string", this, "family");
+    createProperty("enum", this, "capitalization", {initialValue: 0});
+    createProperty("string", this, "family", {initialValue: 'sans-serif'});
     createProperty("bool", this, "italic");
     createProperty("real", this, "letterSpacing");
     createProperty("int", this, "pixelSize");
-    createProperty("real", this, "pointSize");
+    createProperty("real", this, "pointSize", {initialValue: 10});
     createProperty("bool", this, "strikeout");
     createProperty("bool", this, "underline");
     createProperty("enum", this, "weight");

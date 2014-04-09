@@ -20,31 +20,20 @@ function QMLImage(meta) {
     }
 
     // no-op properties
-    createProperty("bool", this, "asynchronous");
-    createProperty("bool", this, "cache");
-    createProperty("bool", this, "smooth");
+    createProperty("bool", this, "asynchronous", {initialValue: true});
+    createProperty("bool", this, "cache", {initialValue: true});
+    createProperty("bool", this, "smooth", {initialValue: true});
 
-    createProperty("enum", this, "fillMode");
+    createProperty("enum", this, "fillMode", {initialValue: this.Image.Stretch});
     createProperty("bool", this, "mirror");
     createProperty("real", this, "progress");
     createProperty("url", this, "source");
-    createProperty("enum", this, "status");
+    createProperty("enum", this, "status", {initialValue: this.Image.Null});
 
     this.sourceSize = new QObject(this);
 
     createProperty("int", this.sourceSize, "width");
     createProperty("int", this.sourceSize, "height");
-
-    this.asynchronous = true;
-    this.cache = true;
-    this.smooth = true;
-    this.fillMode = this.Image.Stretch;
-    this.mirror = false;
-    this.progress = 0;
-    this.source = "";
-    this.status = this.Image.Null;
-    this.sourceSize.width = 0;
-    this.sourceSize.height = 0;
 
     // Bind status to img element
     img.onload = function() {

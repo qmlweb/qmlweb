@@ -11,7 +11,6 @@ registerQmlType({
     this.$defaultProperty = "changes";
     createProperty("string", this, "extend");
     createProperty("bool", this, "when");
-    this.changes = [];
     this.$item = this.$parent;
 
     this.whenChanged.connect(this, function(newVal) {
