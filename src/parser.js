@@ -1334,8 +1334,10 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         function qmldefaultprop() {
             next();
             expect_token("name", "property");
+            var tree = qmlpropdef();
+            tree[0] = "qmldefaultprop";
 
-            return as("qmldefaultprop", qmlpropdef());
+            return tree;
         }
 
         function qmlsignaldef() {
