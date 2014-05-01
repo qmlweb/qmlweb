@@ -413,7 +413,8 @@ function createProperty(data) {
             }
             if (this.$updateDirtyProperty)
                 this.$updateDirtyProperty(data.name, newVal);
-            this[data.name + "Changed"](newVal, oldVal, newVal);
+            if (this.$changeSignals[data.name])
+                this.$changeSignals[data.name](newVal, oldVal, newVal);
         }
     }
 
@@ -428,7 +429,7 @@ function createProperty(data) {
     setupGetter(data.object, data.name + "Changed",
         function() {
             if (!(data.name in this.$changeSignals)) {
-                console.warn(data.name + " property object did not exist while asking for changed signal. Creating it.");
+                console.warn(data.name + "Changed signal did not exist while asking for it. Creating it.");
                 this.$changeSignals[data.name] = Signal();
             }
             return this.$changeSignals[data.name];
@@ -1178,6 +1179,22 @@ p.$setHeight = function(newVal) {
     this.$properties.height = newVal;
     this.$updateVGeometry();
 }
+p.$setImplicitWidth = function(newVal) {
+    this.$properties.implicitWidth = newVal;
+    if (!this.$properties.width) {
+        if (this.$changeSignals.width)
+            this.widthChanged();
+        this.$updateHGeometry();
+    }
+}
+p.$setImplicitHeight = function(newVal) {
+    this.$properties.implicitHeight = newVal;
+    if (!this.$properties.height) {
+        if (this.$changeSignals.height)
+            this.heightChanged();
+        this.$updateVGeometry();
+    }
+}
 p.$setParent = function(newVal) {
     if (this.$properties.parent) {
         oldParent.children.splice(oldParent.children.indexOf(this), 1);
@@ -1554,8 +1571,8 @@ createProperty({ type: "list", object: p, name: "data", initialValue: [] });
 createProperty({ type: "list", object: p, name: "children", initialValue: [] });
 createProperty({ type: "list", object: p, name: "resources", initialValue: [] });
 createProperty({ type: "Item", object: p, name: "parent", initialValue: null, set: p.$setParent });
-createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0 });
-createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0 });
+createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0, set: p.$setImplicitWidth });
+createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0, set: p.$setImplicitHeight });
 createProperty({ type: "real", object: p, name: "left" });
 createProperty({ type: "real", object: p, name: "right" });
 createProperty({ type: "real", object: p, name: "top" });
@@ -2045,8 +2062,7 @@ function QMLText(parent) {
         this.dom.firstChild.style.height = "100%";
     }
 
-//     this.Component.completed.connect(this, updateImplicitHeight);
-//     this.Component.completed.connect(this, updateImplicitWidth);
+    this.Component.completed.connect(this, this.$updateImplicitSize);
 }
 
 p.Text = {
@@ -2066,14 +2082,6 @@ p.Text = {
     Outline: 1,
     Raised: 2,
     Sunken: 3
-}
-p.$setImplicitWidth = function(newVal) {
-    this.$properties.width = newVal;
-    this.widthChanged();
-}
-p.$setImplicitHeight = function(newVal) {
-    this.$properties.implicitHeight = newVal;
-    this.heightChanged();
 }
 p.$updateImplicitSize = function() {
     var height = 0,
@@ -2287,8 +2295,6 @@ function fontCss(font) {
 }
 createProperty({ type: "color", object: p, name: "color", initialValue: "black" });
 createProperty({ type: "font", object: p, name: "font" });
-createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0, set: p.$setImplicitWidth });
-createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0, set: p.$setImplicitHeight });
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 createProperty({ type: "real", object: p, name: "lineHeight", initialValue: 1 });
 createProperty({ type: "enum", object: p, name: "wrapMode", initialValue: p.Text.NoWrap });
