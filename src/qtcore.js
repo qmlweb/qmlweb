@@ -158,15 +158,6 @@
             CheckBox: QMLCheckbox
         }
 
-/**
- * Inheritance helper
- */
-Object.create = function (o) {
-    function F() {}
-    F.prototype = o;
-    return new F();
-};
-
 // Helper. Ought to do absolutely nothing.
 function noop(){};
 
@@ -1083,8 +1074,8 @@ function QMLPen(val, obj, name) {
 
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState,
-        context = Object.create(this.$context);
-    context.$properties = Object.create(context.$properties);
+        context = this.$context ? Object.create(this.$context) : {};
+    context.$properties = context.$properties ? Object.create(context.$properties) : {};
     engine.operationState = QMLOperationState.Init;
 
     var item = construct({
@@ -1133,7 +1124,7 @@ function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
-    this.$properties = Object.create(this.$properties);
+    this.$properties = this.$properties ? Object.create(this.$properties) : {};
     this.$changeSignals = {};
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
