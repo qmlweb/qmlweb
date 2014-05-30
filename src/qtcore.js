@@ -244,28 +244,21 @@ QMLBinding.prototype.update = function() {
  */
 function construct(meta) {
     var item,
-        cTree;
+        component;
 
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta.parent);
-    } else if (cTree = engine.loadComponent(meta.object.$class)) {
-        if (cTree.$children.length !== 1)
-            console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+    } else if (component = engine.loadComponent(meta.object.$class)) {
+        item = component.createObject(meta.parent);
+        item.$innerContext = item.$context;
 
-        // Recall QMLBaseObject with the meta of the instance in order to get property
-        // definitions, etc. from the instance
-        QMLBaseObject.call(item, meta);
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
-        var dProp; // Handle default properties
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
     }
 
-    if (!item.$isComponentRoot)
-        item.$isComponentRoot = meta.isComponentRoot;
     // scope
     item.$context = meta.context;
 
@@ -355,15 +348,14 @@ function Signal(params, options) {
  */
 function createProperty(data) {
     function getAlias() {
-        var alias = this.$properties[data.name];
-        var obj = _executionContext[alias.objectName];
-        return alias.propertyName ? obj[alias.propertyName] : obj;
+        var obj = data.targetObj || _executionContext[data.targetObjName];
+        return data.targetPropName ? obj[data.targetPropName] : obj;
     }
     function setAlias(newVal) {
-        var alias = this.$properties[data.name];
-        if (!alias.propertyName)
+        if (!data.targetPropName)
             throw "Cannot set alias property pointing to an QML object.";
-        _executionContext[alias.objectName][alias.propertyName] = newVal;
+        var obj = data.targetObj || _executionContext[data.targetObjName];
+        obj[data.targetPropName] = newVal;
     }
     function getProperty() {
         // If this call to the getter is due to a property that is dependant on this
@@ -381,7 +373,7 @@ function createProperty(data) {
             newVal = QMLList(newVal, this, data.name);
         } else if (newVal instanceof QMLMetaElement) {
             if (constructors[newVal.$class] == QMLComponent || constructors[data.type] == QMLComponent)
-                newVal = new QMLComponent({ object: newVal, parent: this, context: _executionContext });
+                newVal = new QMLComponent(newVal);
             else
                 newVal = construct({ object: newVal, parent: this, context: _executionContext });
         } else if (newVal instanceof Object || newVal === undefined) {
@@ -409,13 +401,17 @@ function createProperty(data) {
         }
     }
 
+    if (data.object.$innerContext) {
+        createProperty({ type: "alias", object: data.object.$innerContext, name: data.name,
+                         targetObj: data.object, targetPropName: data.name });
+    }
 
-    if (data.type == "alias")
+    if (data.type == "alias") {
         setupGetterSetter(data.object, data.name, getAlias, setAlias);
-    else
+    } else {
         setupGetterSetter(data.object, data.name, getProperty, setProperty);
-
-    data.object.$properties[data.name] = data.initialValue;
+        data.object.$properties[data.name] = data.initialValue;
+    }
 
     setupGetter(data.object, data.name + "Changed",
         function() {
@@ -520,20 +516,22 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         if (value instanceof Object) {
             if (value instanceof QMLSignalDefinition) {
                 item[i] = Signal(value.parameters);
-                if (item.$isComponentRoot)
+                if (item.$innerContext)
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLMethod) {
                 value.compile();
                 item[i] = value.eval(objectScope, componentScope);
-                if (item.$isComponentRoot)
+                if (item.$innerContext)
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
-                createProperty({ type: "alias", object: item, name: i, initialValue: value });
+                createProperty({ type: "alias", object: item, name: i,
+                                 targetObjName: value.objectName, targetPropName: value.propertyName });
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
-                createProperty({ type: value.type, object: item, name: i, initialValue: value.value });
+                createProperty({ type: value.type, object: item, name: i });
+                item[i] = value.value;
                 continue;
             } else if (i in item && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
@@ -691,7 +689,7 @@ var engine = new (function () {
 //         }
 
         // Create and initialize objects
-        var component = new QMLComponent({ object: tree, parent: null });
+        var component = new QMLComponent(tree);
         doc = component.createObject(null);
         this.$initializePropertyBindings();
 
@@ -742,7 +740,7 @@ var engine = new (function () {
         var src = getUrlContents(file);
         if (src=="")
             return undefined;
-        var tree = parseQML(src);
+        var tree = new QMLComponent(parseQML(src));
         this.components[name] = tree;
         return tree;
     }
@@ -1087,18 +1085,23 @@ QMLComponent.prototype.createObject = function(parent, properties) {
 
     for (var i in item)
         if (i[0] !== '$')
-            createProperty({ type: "alias", object: context, name: i, initialValue: new QMLAliasDefinition(item, i) });
+            createProperty({ type: "alias", object: context, name: i, targetObj: item, targetPropName: i });
 
     engine.operationState = oldState;
 
     return item;
 }
 function QMLComponent(meta) {
-    if (constructors[meta.object.$class] == QMLComponent)
-        this.$metaObject = meta.object.$children[0];
-    else
-        this.$metaObject = meta.object;
-    this.$context = meta.context;
+    if (constructors[meta.$class] == QMLComponent) {
+        if (meta.$children.length > 1)
+            console.error("A QML component must only contain one root element!");
+
+        this.$metaObject = meta.$children[0];
+    } else {
+        this.$metaObject = meta;
+    }
+
+    this.$context = _executionContext;
 }
 
 // Base object for all qml thingies
