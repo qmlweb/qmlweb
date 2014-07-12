@@ -1431,17 +1431,37 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         function qmlimport() {
             // todo
             next();
+            var moduleName = S.token.value;
             next();
-            next();
+            while (is("punc", ".")) {
+                next();
+                moduleName += "." + S.token.value;
+                next();
+            }
+            if (is("num")) {
+                var version = S.token.value
+                next();
+            }
+            var namespace = "";
+            if (is("name", "as")) {
+                next();
+                namespace = S.token.value;
+                next();
+            }
+            return as("qmlimport", moduleName, version, namespace);
         }
 
         function qmldocument() {
-            // Skip imports
+            var imports = [];
             while (is("name", "import")) {
-                qmlimport();
+                imports.push(qmlimport());
             }
-            return qmlstatement();
-        };
+            var root = qmlstatement();
+            if (!is("eof"))
+                unexpected();
+
+            return as("toplevel", imports, root);
+        }
 
         function amIn(s) {
             console && console.log(s, clone(S), S.token.type, S.token.value);
@@ -1451,12 +1471,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
         }
 
-        return as("toplevel", (function(a){
-                while (!is("eof"))
-                        a.push(qmldocument());
-//                        a.push(statement());
-                return a;
-        })([]));
+        return qmldocument();
 
 };
 
@@ -1585,10 +1600,10 @@ function convertToEngine(tree) {
     }
 
     var walkers = {
-        "toplevel": function(statements) {
+        "toplevel": function(imports, statement) {
             var item = { $class: "QMLDocument" };
-            // todo: imports etc
-            item.$children = [ walk(statements[0]) ];
+            item.$imports = imports;
+            item.$children = [ walk(statement) ];
             return item;
         },
         "qmlelem": function(elem, onProp, statements) {

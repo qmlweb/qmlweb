@@ -1,5 +1,8 @@
 // Importing was not supported while writing this example
 import Qt 4.7
+import QQuick.Controls 1.0 as Controls
+import QQuick.Dialogs 1.0
+
 Rectangle {
     id: main
     property int value: 5
