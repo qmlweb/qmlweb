@@ -22,14 +22,10 @@ function QMLComponent(meta) {
 
     var jsImports = [];
 
-    var loadJsImport = (function(importDesc) {
-      jsImports.push(importDesc);
-    }).bind(this);
-
-    this.finalizeImports = (function() {
+    this.finalizeImports = (function($context) {
       for (var i = 0 ; i < jsImports.length ; ++i) {
         var importDesc = jsImports[i];
-        var src = importDesc.subject;
+        var src = importDesc[1];
         var js;
 
         if (typeof qmlEngine.basePath != 'undefined')
@@ -37,31 +33,22 @@ function QMLComponent(meta) {
         if (typeof qrc[src] != 'undefined')
           js = qrc[src];
         else
-          js = jsparse(getUrlContents(src));
-        var $context = qmlEngine.rootContext();
-        $context[importDesc.alias] = {};
-        importJavascriptInContext(js, $context[importDesc.alias]);
+          js = global.jsparse(getUrlContents(src));
+        if (importDesc[3] !== "") {
+          $context[importDesc[3]] = {};
+          importJavascriptInContext(js, $context[importDesc[3]]);
+        }
+        else
+          importJavascriptInContext(js, $context);
       }
     }).bind(this);
-
-    var loadQmlImport = (function(importDesc) {
-      var src = importDesc.subject;
-      var qml;
-
-      if (typeof qmlEngine.basePath != 'undefined')
-        src = qmlEngine.basePath + src;
-      qml = getUrlContents(src);
-      qmlEngine.loadQML(qml);
-    });
 
     if (meta.object.$imports instanceof Array)
     {
       var moduleImports = [];
       var loadImport    = (function(importDesc) {
-        if (/\.js$/.test(importDesc.subject))
-          loadJsImport(importDesc);
-        else if (/\.qml$/.test(importDesc.subject))
-          loadQmlImport(importDesc);
+        if (/\.js$/.test(importDesc[1]))
+          jsImports.push(importDesc);
         else
           moduleImports.push(importDesc);
       }).bind(this);
@@ -70,6 +57,8 @@ function QMLComponent(meta) {
         loadImport(meta.object.$imports[i]);
       }
       loadImports(this, moduleImports);
+      if (typeof this.$context != 'undefined' && this.$context != null)
+        this.finalizeImports(this.$context);
     }
 }
 

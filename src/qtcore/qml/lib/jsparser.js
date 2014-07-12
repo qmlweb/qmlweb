@@ -7,7 +7,7 @@
     uglify_parse = parse;
 
   global.importJavascriptInContext = function (jsData, $context) {
-    with(qmlEngine.rootContext()) {
+    with($context) {
       eval(jsData.source);
       for (var i = 0 ; i < jsData.exports.length ; ++i) {
         var symbolName = jsData.exports[i];

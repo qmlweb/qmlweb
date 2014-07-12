@@ -673,8 +673,6 @@ var ATOMIC_START_TOKEN = array_to_hash([ "atom", "num", "string", "regexp", "nam
 
 /* -----[ Parser ]----- */
 
-var imports = [];
-
 function NodeWithToken(str, start, end) {
         this.name = str;
         this.start = start;
@@ -1428,46 +1426,39 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         }
 
         function qmlimport() {
-          var subject = null,
-              version = null,
-              alias = null;
-          var gettingAlias = false;
-          var gettingNameSubPart = false;
-          var currentLine = S.token.line;
-
-          next();
-          while ((S.token.type != 'punc' || S.token.value == '.') && S.token.line == currentLine) {
-            if (S.token.type == 'punc' && S.token.value == '.')
-              gettingNameSubPart = true;
-            else if (gettingNameSubPart == true) {
-              subject += '.' + S.token.value;
-              gettingNameSubPart = false;
-            }
-            else if (subject == null)
-              subject = S.token.value;
-            else if (gettingAlias == false) {
-              if (S.token.value == 'as')
-                gettingAlias = true;
-              else if (version == null)
-                version = S.token.value;
-            }
-            else
-              alias = S.token.value;
+            // todo
             next();
-          }
-          while (S.token.type == 'punc') { next(); }
-          imports.push({ subject: subject, version: version, alias: alias });
+            var moduleName = S.token.value;
+            next();
+            while (is("punc", ".")) {
+                next();
+                moduleName += "." + S.token.value;
+                next();
+            }
+            if (is("num")) {
+                var version = S.token.value
+                next();
+            }
+            var namespace = "";
+            if (is("name", "as")) {
+                next();
+                namespace = S.token.value;
+                next();
+            }
+            return as("qmlimport", moduleName, version, namespace);
         }
 
         function qmldocument() {
-            imports = [];
-            while (is("name", "import"))
-              qmlimport();
-            var statement =  qmlstatement();
-            statement.push('imports');
-            statement.push(imports);
-            return statement;
-        };
+            var imports = [];
+            while (is("name", "import")) {
+                imports.push(qmlimport());
+            }
+            var root = qmlstatement();
+            if (!is("eof"))
+                unexpected();
+
+            return as("toplevel", imports, root);
+        }
 
         function amIn(s) {
             console && console.log(s, clone(S), S.token.type, S.token.value);
@@ -1477,12 +1468,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
         }
 
-        return as("toplevel", (function(a){
-                while (!is("eof"))
-                        a.push(qmldocument());
-//                        a.push(statement());
-                return a;
-        })([]));
+        return qmldocument();
 
 };
 
@@ -1586,16 +1572,10 @@ function convertToEngine(tree) {
     }
 
     var walkers = {
-        "toplevel": function(statements) {
+        "toplevel": function(imports, statement) {
             var item = { $class: "QMLDocument" };
-
-            for (var i = 0 ; i < statements[0].length ; ++i) {
-              if (statements[0][i] == 'imports') {
-                item.$imports = statements[0][i + 1];
-                break ;
-              }
-            }
-            item.$children = [ walk(statements[0]) ];
+            item.$imports = imports;
+            item.$children = [ walk(statement) ];
             return item;
         },
         "qmlelem": function(elem, onProp, statements) {

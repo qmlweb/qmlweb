@@ -102,13 +102,15 @@ global.perContextConstructors = {};
 global.loadImports = function (self, imports) {
   constructors = mergeObjects(modules.Main, null);
   for (var i = 0 ; i < imports.length ; ++i) {
-    var importDesc         = imports[i];
-    var moduleConstructors = collectConstructorsForModule(importDesc.subject, importDesc.version);
+    var moduleName = imports[i][1],
+        moduleVersion = imports[i][2],
+        moduleAlias = imports[i][3],
+        moduleConstructors = collectConstructorsForModule(moduleName, moduleVersion);
 
-    if (importDesc.alias != null)
-      constructors[importDesc.alias] = mergeObjects(constructors[importDesc.alias], moduleConstructors);
+    if (moduleAlias !== "")
+      constructors[moduleAlias] = mergeObjects(constructors[moduleAlias], moduleConstructors);
     else
-      constructors                   = mergeObjects(constructors,                   moduleConstructors);
+      constructors = mergeObjects(constructors, moduleConstructors);
   }
   perContextConstructors[self.objectId] = constructors;
 }

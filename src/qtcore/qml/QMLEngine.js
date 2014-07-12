@@ -107,7 +107,7 @@ QMLEngine = function (element, options) {
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
         doc = component.createObject(null);
-        component.finalizeImports();
+        component.finalizeImports(this.rootContext());
         this.$initializePropertyBindings();
 
         this.start();
