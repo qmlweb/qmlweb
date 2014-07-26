@@ -1151,6 +1151,17 @@ function QMLBaseObject(parent) {
 p = QMLItem.prototype = new QMLBaseObject();
 p.$defaultProperty = "data";
 
+p.$setData = function(newVal) {
+    for (var i in newVal) {
+        var child = newVal[i];
+        if (child instanceof QMLItem)
+            child.$setParentInternal(this); // This will also add it to children.
+        else
+            this.resources.push(child);
+    }
+    this.resourcesChanged();
+    this.childrenChanged();
+}
 p.$setX = function(newVal) {
     this.$properties.x = newVal;
     this.$updateHGeometry();
@@ -1190,16 +1201,21 @@ p.$setImplicitHeight = function(newVal) {
     }
 }
 p.$setParent = function(newVal) {
+    var oldParent = this.$properties.parent;
+    this.$setParentInternal(newVal);
+    if (oldParent)
+        oldParent.childrenChanged();
+    this.$properties.parent.childrenChanged();
+}
+p.$setParentInternal = function(newVal) {
     if (this.$properties.parent) {
         oldParent.children.splice(oldParent.children.indexOf(this), 1);
-        oldParent.childrenChanged();
         if (engine.renderMode == QMLRenderMode.DOM)
             oldParent.dom.removeChild(this.dom);
     }
     this.$properties.parent = newVal;
     if (newVal && newVal.children.indexOf(this) == -1) {
         newVal.children.push(this);
-        newVal.childrenChanged();
     }
     if (newVal && engine.renderMode == QMLRenderMode.DOM)
         newVal.dom.appendChild(this.dom);
@@ -1561,7 +1577,7 @@ p.$updateDirtyProperty = function(name, newVal) {
 }
 
 createProperty({ type: "anchors", object: p, name: "anchors", initialValue: [] });
-createProperty({ type: "list", object: p, name: "data", initialValue: [] });
+createProperty({ type: "list", object: p, name: "data", initialValue: [], set: p.$setData });
 createProperty({ type: "list", object: p, name: "children", initialValue: [] });
 createProperty({ type: "list", object: p, name: "resources", initialValue: [] });
 createProperty({ type: "Item", object: p, name: "parent", initialValue: null, set: p.$setParent });
@@ -1577,7 +1593,7 @@ createProperty({ type: "real", object: p, name: "rotation", initialValue: 0 });
 createProperty({ type: "real", object: p, name: "scale", initialValue: 1 });
 createProperty({ type: "real", object: p, name: "z", initialValue: 0 });
 createProperty({ type: "list", object: p, name: "transform", initialValue: [] });
-createProperty({ type: "bool", object: p, name: "visible", initialValue: false });
+createProperty({ type: "bool", object: p, name: "visible", initialValue: true });
 createProperty({ type: "real", object: p, name: "opacity", initialValue: 1 });
 createProperty({ type: "bool", object: p, name: "clip", initialValue: false });
 createProperty({ type: "list", object: p, name: "states", initialValue: [] });
@@ -1624,15 +1640,6 @@ function QMLItem(parent) {
         this.dom.className = "Item";
         this.css = this.dom.style;
     }
-    this.dataChanged.connect(this, function(newData) {
-        for (var i in newData) {
-            var child = newData[i];
-            if (child instanceof QMLItem)
-                child.parent = this; // This will also add it to children.
-            else
-                this.resources.push(child);
-        }
-    });
 
     // Init size of root element
     if (engine.renderMode == QMLRenderMode.DOM
@@ -1678,22 +1685,22 @@ createProperty({ type: "int", object: p, name: "spacing", initialValue: 0 });
 function QMLPositioner(parent) {
     QMLItem.call(this, parent);
 
-//     this.spacingChanged.connect(this, this.layoutChildren);
-//     this.childrenChanged.connect(this, this.layoutChildren);
-//     this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
+    this.spacingChanged.connect(this, this.layoutChildren);
+    this.childrenChanged.connect(this, this.layoutChildren);
+    this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
 }
 QMLPositioner.slotChildrenChanged = function() {
-//     for (var i = 0; i < this.children.length; i++) {
-//         var child = this.children[i];
-//         if (!child.widthChanged.isConnected(this, this.layoutChildren))
-//             child.widthChanged.connect(this, this.layoutChildren);
-//         if (!child.heightChanged.isConnected(this, this.layoutChildren))
-//             child.heightChanged.connect(this, this.layoutChildren);
-//         if (!child.visibleChanged.isConnected(this, this.layoutChildren))
-//             child.visibleChanged.connect(this, this.layoutChildren);
-//         if (!child.opacityChanged.isConnected(this, this.layoutChildren))
-//             child.opacityChanged.connect(this, this.layoutChildren);
-//     }
+    for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        if (!child.widthChanged.isConnected(this, this.layoutChildren))
+            child.widthChanged.connect(this, this.layoutChildren);
+        if (!child.heightChanged.isConnected(this, this.layoutChildren))
+            child.heightChanged.connect(this, this.layoutChildren);
+        if (!child.visibleChanged.isConnected(this, this.layoutChildren))
+            child.visibleChanged.connect(this, this.layoutChildren);
+        if (!child.opacityChanged.isConnected(this, this.layoutChildren))
+            child.opacityChanged.connect(this, this.layoutChildren);
+    }
 }
 
 // ========== Row ==========
@@ -2425,7 +2432,11 @@ p.$insertChildren = function(startIndex, endIndex) {
             newItem[roleName] = model.data(index, roleName);
 
             // TODO: use prototypes for components and add this to the delegate component
-            setupGetterSetter(newItem.$context, roleName, function() { return newItem[roleName] }, function(newVal) { newItem[roleName] = newVal; });
+            (function(model, index, roleName) {
+                setupGetter(newItem.$context, roleName, function() {
+                    return model.data(index, roleName);
+                });
+            })(model, index, roleName);
         }
 
         this.parent.children.splice(this.parent.children.indexOf(this) - this.$items.length + index, 0, newItem);
