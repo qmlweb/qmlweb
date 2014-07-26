@@ -1316,18 +1316,18 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     var propName = S.token.value;
                     next();
                 }
-                return as("qmlaliasdef", name, objName, propName);
+                return as("qmlaliasdef", name, false, objName, propName);
             }
             if (is("punc", ":")) {
                 next();
                 var from = S.token.pos,
                     stat = statement(),
                     to = S.token.pos;
-                return as("qmlpropdef", name, type, stat,
+                return as("qmlpropdef", name, false, type, stat,
                         $TEXT.substr(from, to - from));
             } else if (is("punc", ";"))
                 next();
-            return as("qmlpropdef", name, type);
+            return as("qmlpropdef", name, false, type);
 
         }
 
@@ -1335,7 +1335,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
             expect_token("name", "property");
             var tree = qmlpropdef();
-            tree[0] = "qmldefaultprop";
+            tree[2] = true;
 
             return tree;
         }
@@ -1527,16 +1527,19 @@ function QMLMethod(src) {
  * Create an object representing a QML property definition.
  * @param {String} type The type of the property
  * @param {Array} value The default value of the property
+ * @param {Bool} isDefault whether this is the default property
  * @return {Object} Object representing the defintion
  */
-function QMLPropertyDefinition(type, value) {
+function QMLPropertyDefinition(type, value, isDefault) {
     this.type = type;
     this.value = value;
+    this.isDefault = isDefault;
 }
 
-function QMLAliasDefinition(objName, propName) {
+function QMLAliasDefinition(objName, propName, isDefault) {
     this.objectName = objName;
     this.propertyName = propName;
+    this.isDefault = isDefault;
 }
 
 /**
@@ -1596,14 +1599,14 @@ function convertToEngine(tree) {
                     name = statement[1],
                     val = walk(statement);
                 switch (statement[0]) {
-                    case "qmldefaultprop":
-                        item.$defaultProperty = name;
                     case "qmlprop":
                     case "qmlpropdef":
                     case "qmlaliasdef":
                     case "qmlmethod":
                     case "qmlsignaldef":
                         item[name] = val;
+                        if (val.isDefault)
+                            item.$defaultProperty = name;
                         break;
                     case "qmlelem":
                         item.$children.push(val);
@@ -1656,17 +1659,14 @@ function convertToEngine(tree) {
         "qmlmethod": function(name, tree, src) {
             return new QMLMethod(src);
         },
-        "qmlpropdef": function(name, type, tree, src) {
-            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");
+        "qmlpropdef": function(name, isDefault, type, tree, src) {
+            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "", isDefault);
         },
-        "qmlaliasdef": function(name, objName, propName) {
-            return new QMLAliasDefinition(objName, propName);
+        "qmlaliasdef": function(name, isDefault, objName, propName) {
+            return new QMLAliasDefinition(objName, propName, isDefault);
         },
         "qmlsignaldef": function(name, params) {
             return new QMLSignalDefinition(params);
-        },
-        "qmldefaultprop": function(tree) {
-            return walk(tree);
         },
         "name": function(src) {
             return bindout(tree, src);
