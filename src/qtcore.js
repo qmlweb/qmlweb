@@ -348,13 +348,13 @@ function Signal(params, options) {
  */
 function createProperty(data) {
     function getAlias() {
-        var obj = data.targetObj || _executionContext[data.targetObjName];
+        var obj = data.targetObj || data.context[data.targetObjName];
         return data.targetPropName ? obj[data.targetPropName] : obj;
     }
     function setAlias(newVal) {
         if (!data.targetPropName)
             throw "Cannot set alias property pointing to an QML object.";
-        var obj = data.targetObj || _executionContext[data.targetObjName];
+        var obj = data.targetObj || data.context[data.targetObjName];
         obj[data.targetPropName] = newVal;
     }
     function getProperty() {
@@ -384,15 +384,15 @@ function createProperty(data) {
         data.set ? data.set.call(this, newVal, data.name) : (this.$properties[data.name] = newVal);
 
         if (newVal !== oldVal) {
-            if (this.animation && !fromAnimation) {
-                this.animation.running = false;
-                this.animation.$actions = [{
-                    target: this.animation.target || this,
-                    property: this.animation.property || this.name,
-                    from: this.animation.from || oldVal,
-                    to: this.animation.to || newVal
+            if (data.animation && !fromAnimation) {
+                data.animation.running = false;
+                data.animation.$actions = [{
+                    target: data.animation.target || this,
+                    property: data.animation.property || this.name,
+                    from: data.animation.from || oldVal,
+                    to: data.animation.to || newVal
                 }];
-                this.animation.running = true;
+                data.animation.running = true;
             }
             if (this.$updateDirtyProperty)
                 this.$updateDirtyProperty(data.name, newVal);
@@ -526,8 +526,8 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
-                createProperty({ type: "alias", object: item, name: i,
-                                 targetObjName: value.objectName, targetPropName: value.propertyName });
+                createProperty({ type: "alias", object: item, name: i, targetObjName: value.objectName,
+                                 targetPropName: value.propertyName, context: _executionContext });
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createProperty({ type: value.type, object: item, name: i });
@@ -3576,16 +3576,15 @@ createProperty({ type: "bool", object: p, name: "running", initialValue: false, 
 
 p = QMLBehavior.prototype = new QMLBaseObject();
 p.$defaultProperty = "animation";
+p.$targetProperty = null;
+p.$setTargetProperty = function(newVal) {
+    this.$targetProperty = newVal;
+    this.$targetProperty.animation = newVal ? this.animation : null;
+}
 createProperty({ type: "Animation", object: p, name: "animation" });
 createProperty({ type: "bool", object: p, name: "enabled", initialValue: true });
 function QMLBehavior(parent) {
     QMLBaseObject.call(this, parent);
-
-    this.$targetProperty;
-    this.$setTargetProperty = function(newVal) {
-        this.$targetProperty = newVal;
-        this.$targetProperty.animation = newVal ? this.animation : null;
-    }
 
     this.animationChanged.connect(this, function(newVal) {
         newVal.target = this.$targetProperty.obj;
