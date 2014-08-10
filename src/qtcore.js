@@ -100,6 +100,7 @@
         InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
         InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
     },
+    AssignmentMode = { Normal: 0, FromAnimation: 1, FromBinding: 2 },
     // Simple shortcuts to getter & setter functions, coolness with minifier
     GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
@@ -110,6 +111,7 @@
     evaluatingProperty = undefined,
     // context in which a QML slot/function is executed or a binding is evaluated.
     _executionContext = null,
+    _assignmentMode = AssignmentMode.Normal,
     // All object constructors
     constructors = {
             'int': QMLInteger,
@@ -335,9 +337,13 @@ function createProperty(data) {
 
         return data.get ? data.get.call(this, name) : this.$properties[data.name].value;
     }
-    function setProperty(newVal, fromAnimation) {
+    function setProperty(newVal) {
         var i,
-            oldVal = this.$properties[data.name].value;
+            prop = this.$properties[data.name],
+            assignmentMode = _assignmentMode,
+            oldVal = prop.value;
+
+        _assignmentMode = AssignmentMode.Normal;
 
         if (newVal instanceof QMLMetaElement) {
             if (constructors[newVal.$class] == QMLComponent || constructors[data.type] == QMLComponent)
@@ -350,27 +356,30 @@ function createProperty(data) {
             newVal = constructors[data.type](newVal, this, data.name);
         }
 
+        if (assignmentMode !== AssignmentMode.FromBinding)
+            prop.binding = null;
+
         if (data.type == "list") {
             if (newVal instanceof Array) {
                 for (var i in newVal) {
                     if (data.append)
                         data.append.call(this, construct({object: newVal[i], parent: this, context: _executionContext }));
                     else
-                        data.object.$properties[data.name].value.push(construct({object: newVal[i], parent: this, context: _executionContext }));
+                        prop.value.push(construct({object: newVal[i], parent: this, context: _executionContext }));
                 }
             } else if (newVal instanceof QMLBaseObject) {
                 if (data.append)
                     data.append.call(this, newVal);
                 else
-                    data.object.$properties[data.name].value.push(newVal);
+                    prop.value.push(newVal);
             }
         } else {
-            data.set ? data.set.call(this, newVal, data.name) : (this.$properties[data.name].value = newVal);
+            data.set ? data.set.call(this, newVal, data.name) : (prop.value = newVal);
         }
 
         if (newVal !== oldVal) {
-            if (this.$properties[data.name].animation && !fromAnimation) {
-                var animation = this.$properties[data.name].animation;
+            if (prop.animation && assignmentMode != AssignmentMode.FromAnimation) {
+                var animation = prop.animation;
                 animation.running = false;
                 animation.$actions = [{
                     target: animation.target || this,
@@ -382,8 +391,8 @@ function createProperty(data) {
             }
             if (this.$updateDirtyProperty)
                 this.$updateDirtyProperty(data.name, newVal);
-            if (this.$properties[data.name].changed)
-                this.$properties[data.name].changed(newVal, oldVal, newVal);
+            if (prop.changed)
+                prop.changed(newVal, oldVal, newVal);
         }
     }
 
@@ -423,7 +432,19 @@ p.update = function() {
     var newVal = this.binding.eval(this.objectScope, this.componentScope);
     evaluatingProperty = undefined;
 
+    _assignmentMode = AssignmentMode.FromBinding;
     this.obj[this.name] = newVal;
+}
+p.setBinding = function(binding, objectScope, componentScope) {
+    this.binding = binding;
+    this.objectScope = objectScope;
+    this.componentScope = componentScope;
+
+    if (engine.operationState !== QMLOperationState.Init) {
+        binding.compile();
+        this.update();
+    } else
+        engine.bindedProperties.push(this);
 }
 p.value = undefined;
 p.animation = null;
@@ -549,19 +570,14 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 continue;
             } else if (value instanceof QMLBinding) {
                 if (!item.$properties || !(i in item.$properties)) {
-                    console.error("Can't set binding for non-QML property '" + i + "'.");
+                    if (item.$setCustomData)
+                        item.$setCustomData(i, value);
+                    else
+                        console.error("Can't set binding for non-QML property '" + i + "'.");
                     continue;
                 }
 
-                if (engine.operationState !== QMLOperationState.Init)
-                    value.compile();
-                else
-                    engine.bindedProperties.push(item.$properties[i]);
-
-
-                item.$properties[i].binding = value;
-                item.$properties[i].objectScope = objectScope;
-                item.$properties[i].componentScope = componentScope;
+                item.$properties[i].setBinding(value, objectScope, componentScope);
                 continue;
             }
         }
@@ -1276,7 +1292,7 @@ p.$setImplicitWidth = function(newVal) {
     this.$properties.implicitWidth.value = newVal;
     if (this.$properties.width.value === undefined) {
         if (this.$properties.width.changed)
-            this.$properties.width.changed
+            this.$properties.width.changed();
         this.$updateHGeometry();
         this.$updateDirtyProperty("width", newVal);
     }
@@ -1285,7 +1301,7 @@ p.$setImplicitHeight = function(newVal) {
     this.$properties.implicitHeight.value = newVal;
     if (this.$properties.height.value === undefined) {
         if (this.$properties.height.changed)
-            this.$properties.height.changed
+            this.$properties.height.changed();
         this.$updateVGeometry();
         this.$updateDirtyProperty("height", newVal);
     }
@@ -1539,8 +1555,6 @@ p.$setState = function(newVal) {
                 var action = {
                     target: change.target,
                     property: item.property,
-                    origValue: change.target.$properties[item.property].binding
-                                || change.target.$properties[item.property].value,
                     value: item.value,
                     from: change.target[item.property],
                     to: undefined,
@@ -1586,7 +1600,10 @@ p.$setState = function(newVal) {
     for (i in actions) {
         var action = actions[i];
         _executionContext = newState ? newState.$context: action.target.$context;
-        action.target[action.property] = action.value;
+        if (action.value instanceof QMLBinding)
+            action.target.$properties[action.property].setBinding(action.value, action.target, _executionContext);
+        else
+            action.target[action.property] = action.value;
     }
     for (i in actions) {
         var action = actions[i];
@@ -1691,7 +1708,12 @@ createProperty({ type: "real", object: p, name: "x", initialValue: 0, set: p.$se
 createProperty({ type: "real", object: p, name: "y", initialValue: 0, set: p.$setY });
 createProperty({ type: "real", object: p, name: "width", get: p.$getWidth, set: p.$setWidth });
 createProperty({ type: "real", object: p, name: "height", get: p.$getHeight, set: p.$setHeight });
-engine.globalStylesheet.appendChild(document.createTextNode(".Item { position: absolute; pointerEvents: none }"));
+engine.globalStylesheet.appendChild(document.createTextNode(".Item {\
+    position: absolute;\
+    pointerEvents: none;\
+    top: 0px;\
+    left: 0px;\
+}"));
 // Item qml object
 function QMLItem(parent) {
     QMLBaseObject.call(this, parent);
@@ -2991,6 +3013,7 @@ function QMLState(parent) {
     QMLBaseObject.call(this, parent);
 
     this.$item = this.$parent;
+    this.$properties.changes.value = [];
 
     this.whenChanged.connect(this, function(newVal) {
         if (newVal)
@@ -3038,6 +3061,8 @@ createProperty({ type: "string", object: p, name: "to", initialValue: "*" });
 createProperty({ type: "bool", object: p, name: "reversible", initialValue: false });
 function QMLTransition(parent) {
     QMLBaseObject.call(this, parent);
+
+    this.$properties.animations.value = [];
 
     this.$start = function(actions) {
         for (var i = 0; i < this.animations.length; i++) {
