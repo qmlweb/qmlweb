@@ -363,11 +363,11 @@ function createProperty(data) {
         if (evaluatingBinding && !this[data.name + "Changed"].isConnected(evaluatingBinding, QMLBinding.prototype.update))
             this[data.name + "Changed"].connect(evaluatingBinding, QMLBinding.prototype.update);
 
-        return data.get ? data.get.call(this, name) : this.$properties[data.name];
+        return data.get ? data.get.call(this, name) : this.$properties[data.name].value;
     }
     function setProperty(newVal) {
         var i,
-            oldVal = this.$properties[data.name];
+            oldVal = this.$properties[data.name].value;
 
         if (constructors[data.type] == QMLList) {
             newVal = QMLList(newVal, this, data.name);
@@ -410,7 +410,7 @@ function createProperty(data) {
         setupGetterSetter(data.object, data.name, getAlias, setAlias);
     } else {
         setupGetterSetter(data.object, data.name, getProperty, setProperty);
-        data.object.$properties[data.name] = data.initialValue;
+        data.object.$properties[data.name] = new QMLProperty(data.initialValue);
     }
 
     setupGetter(data.object, data.name + "Changed",
@@ -422,6 +422,14 @@ function createProperty(data) {
             return this.$changeSignals[data.name];
         }
     );
+}
+
+var p = QMLProperty.prototype;
+p.value = undefined;
+p.animation = null;
+p.binding = null;
+function QMLProperty(initialValue) {
+    this.value = initialValue;
 }
 
 /**
@@ -1002,17 +1010,17 @@ function QMLList(val, obj, name) {
     return list;
 }
 
-var p = QMLAnchors.prototype = new QObject();
+p = QMLAnchors.prototype = new QObject();
 p.$setHorizontalAnchorsProperty = function(newVal, name) {
-    this.$properties[name] = newVal;
+    this.$properties[name].value = newVal;
     this.$parent.$updateHGeometry();
 }
 p.$setVerticalAnchorsProperty = function(newVal, name) {
-    this.$properties[name] = newVal;
+    this.$properties[name].value = newVal;
     this.$parent.$updateVGeometry();
 }
 p.$setConvenienceAnchorsProperty = function(newVal, name) {
-    this.$properties[name] = newVal;
+    this.$properties[name].value = newVal;
     this.$parent.$updateHGeometry();
     this.$parent.$updateVGeometry();
 }
@@ -1105,7 +1113,8 @@ function QMLComponent(meta) {
 }
 
 // Base object for all qml thingies
-QObject.prototype.$delete = function() {
+p = QObject.prototype;
+p.$delete = function() {
     while (this.$tidyupList.length > 0) {
         var item = this.$tidyupList[0];
         if (item.$delete) // It's a QObject
@@ -1127,13 +1136,22 @@ function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
-    this.$properties = this.$properties ? Object.create(this.$properties) : {};
+    if (this.$properties) {
+        var protoProperties = this.$properties;
+        this.$properties = {};
+        for (var i in protoProperties) {
+            this.$properties[i] = new QMLProperty(protoProperties[i].value);
+        }
+    } else {
+        this.$properties = {};
+    }
     this.$changeSignals = {};
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
 }
 
 // Base object for all qml elements
+QMLBaseObject.prototype = new QObject();
 function QMLBaseObject(parent) {
     QObject.call(this, parent);
     var i,
@@ -1163,57 +1181,58 @@ p.$setData = function(newVal) {
     this.childrenChanged();
 }
 p.$setX = function(newVal) {
-    this.$properties.x = newVal;
+    this.$properties.x.value = newVal;
     this.$updateHGeometry();
 }
 p.$setY = function(newVal) {
-    this.$properties.y = newVal;
+    this.$properties.y.value = newVal;
     this.$updateVGeometry();
 }
 p.$getWidth = function() {
-    return this.$properties.width || this.$properties.implicitWidth;
+    return this.$properties.width.value || this.$properties.implicitWidth.value;
 }
 p.$setWidth = function(newVal) {
-    this.$properties.width = newVal;
+    this.$properties.width.value = newVal;
     this.$updateHGeometry();
 }
 p.$getHeight = function() {
-    return this.$properties.height || this.$properties.implicitHeight;
+    return this.$properties.height.value || this.$properties.implicitHeight.value;
 }
 p.$setHeight = function(newVal) {
-    this.$properties.height = newVal;
+    this.$properties.height.value = newVal;
     this.$updateVGeometry();
 }
 p.$setImplicitWidth = function(newVal) {
-    this.$properties.implicitWidth = newVal;
-    if (!this.$properties.width) {
+    this.$properties.implicitWidth.value = newVal;
+    if (this.$properties.width.value === undefined) {
         if (this.$changeSignals.width)
             this.widthChanged();
         this.$updateHGeometry();
     }
 }
 p.$setImplicitHeight = function(newVal) {
-    this.$properties.implicitHeight = newVal;
-    if (!this.$properties.height) {
+    this.$properties.implicitHeight.value = newVal;
+    if (this.$properties.height.value === undefined) {
         if (this.$changeSignals.height)
             this.heightChanged();
         this.$updateVGeometry();
     }
 }
 p.$setParent = function(newVal) {
-    var oldParent = this.$properties.parent;
+    var oldParent = this.$properties.parent.value;
     this.$setParentInternal(newVal);
     if (oldParent)
         oldParent.childrenChanged();
-    this.$properties.parent.childrenChanged();
+    this.$properties.parent.value.childrenChanged();
 }
 p.$setParentInternal = function(newVal) {
-    if (this.$properties.parent) {
+    if (this.$properties.parent.value) {
+        var oldParent = this.$properties.parent.value;
         oldParent.children.splice(oldParent.children.indexOf(this), 1);
         if (engine.renderMode == QMLRenderMode.DOM)
             oldParent.dom.removeChild(this.dom);
     }
-    this.$properties.parent = newVal;
+    this.$properties.parent.value = newVal;
     if (newVal && newVal.children.indexOf(this) == -1) {
         newVal.children.push(this);
     }
@@ -1423,8 +1442,8 @@ p.$updateTransform = function() {
 }
 p.$setState = function(newVal) {
     var oldState, newState, i, j, k,
-        oldVal = this.$properties.state;
-    this.$properties.state = newVal;
+        oldVal = this.$properties.state.value;
+    this.$properties.state.value = newVal;
     for (i = 0; i < this.states.length; i++)
         if (this.states[i].name === newVal)
             newState = this.states[i];
@@ -1452,7 +1471,7 @@ p.$setState = function(newVal) {
                     target: change.target,
                     property: item.property,
                     origValue: change.target.$properties[item.property].binding
-                                || change.target.$properties[item.property],
+                                || change.target.$properties[item.property].value,
                     value: item.value,
                     from: change.target[item.property],
                     to: undefined,
@@ -1484,7 +1503,7 @@ p.$setState = function(newVal) {
                         target: change.target,
                         property: item.property,
                         value: change.target.$properties[item.property].binding
-                                    || change.target.$properties[item.property],
+                                    || change.target.$properties[item.property].value,
                         from: undefined,
                         to: change.target[item.property]
                     });
@@ -1610,9 +1629,9 @@ function QMLItem(parent) {
     var child,
         o, i;
 
-    this.data = [];
-    this.children = [];
-    this.resources = [];
+    this.$properties.data.value = [];
+    this.$properties.children.value = [];
+    this.$properties.resources.value = [];
     this.$revertActions = [];
     this.anchors = new QMLAnchors(null, this, "anchors");
 
@@ -1733,7 +1752,7 @@ p.layoutChildren = function() {
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
 p.$setLayoutDirection = function(newVal) {
-    this.$properties.layoutDirection = newVal;
+    this.$properties.layoutDirection.value = newVal;
     this.layoutChildren();
 }
 createProperty({ type: "enum", object: p, name: "layoutDirection", initialValue: 0, set: p.$setLayoutDirection });
@@ -1874,19 +1893,19 @@ p.layoutChildren = function() {
     this.implicitHeight = gridHeight;
 }
 p.$setColumns = function(newVal) {
-    this.$properties.columns = newVal;
+    this.$properties.columns.value = newVal;
     this.layoutChildren();
 }
 p.$setRows = function(newVal) {
-    this.$properties.rows = newVal;
+    this.$properties.rows.value = newVal;
     this.layoutChildren();
 }
 p.$setFlow = function(newVal) {
-    this.$properties.flow = newVal;
+    this.$properties.flow.value = newVal;
     this.layoutChildren();
 }
 p.$setLayoutDirection = function(newVal) {
-    this.$properties.layoutDirection = newVal;
+    this.$properties.layoutDirection.value = newVal;
     this.layoutChildren();
 }
 createProperty({ type: "int", object: p, name: "columns", set: p.$setColumns });
@@ -1950,11 +1969,11 @@ p.layoutChildren = function() {
         this.implicitWidth = curHPos + rowSize;
 }
 p.$setFlow = function(newVal) {
-    this.$properties.flow = newVal;
+    this.$properties.flow.value = newVal;
     this.layoutChildren();
 }
 p.$setLayoutDirection = function(newVal) {
-    this.$properties.layoutDirection = newVal;
+    this.$properties.layoutDirection.value = newVal;
     this.layoutChildren();
 }
 createProperty({ type: "enum", object: p, name: "flow", initialValue: 0, set: p.$setFlow });
@@ -2407,11 +2426,11 @@ p.itemAt = function(index) {
     return this.$items[index];
 }
 p.$setModel = function(newVal) {
-    this.$properties.model = newVal;
+    this.$properties.model.value = newVal;
     this.$applyModel();
 }
 p.$setDelegate = function(newVal) {
-    this.$properties.delegate = newVal;
+    this.$properties.delegate.value = newVal;
     this.$applyModel();
 }
 p.$callOnCompleted = function(child) {
@@ -2674,7 +2693,7 @@ p.Image = {
     Error: 4
 }
 p.$setSource = function(newVal) {
-    this.$properties.source = newVal;
+    this.$properties.source.value = newVal;
     this.progress = 0;
     this.status = this.Image.Loading;
     this.$img.src = engine.$resolvePath(newVal);
@@ -3057,7 +3076,7 @@ p.$trigger = function() {
     if (!this.repeat)
         // We set the value directly in order to be able to emit the runningChanged
         // signal after triggered, like Qt does it.
-        this.$properties.running = false;
+        this.$properties.running.value = false;
 
     // Trigger this.
     this.triggered();
@@ -3479,19 +3498,19 @@ p.$setTargetProperty = function(newVal) {
     this.target = newVal.obj;
 }
 p.$setTarget = function(newVal) {
-    this.$properties.target = newVal;
+    this.$properties.target.value = newVal;
     this.$redoTargets();
 }
 p.$setTargets = function(newVal) {
-    this.$properties.targets = newVal;
+    this.$properties.targets.value = newVal;
     this.$redoTargets();
 }
 p.$setProperty = function(newVal) {
-    this.$properties.property = newVal;
+    this.$properties.property.value = newVal;
     this.$redoProperties();
 }
 p.$setProperties = function(newVal) {
-    this.$properties.properties = newVal;
+    this.$properties.properties.value = newVal;
     this.$redoProperties();
 }
 createProperty({ type: "int", object: p, name: "duration", initialValue: 250 });
@@ -3523,7 +3542,7 @@ function QMLNumberAnimation(parent) {
                 for (var i in self.$actions) {
                     var action = self.$actions[i],
                         newVal = self.easing.$valueForProgress(self.$at) * (action.to - action.from) + action.from;
-                    action.target.$properties[action.property] = newVal;
+                    action.target.$properties[action.property].value = newVal;
                     if (action.target.$updateDirtyProperty)
                         action.target.$updateDirtyProperty(action.property, newVal);
                     action.target[action.property + "Changed"]();
@@ -3537,7 +3556,7 @@ p.$loop = 0,
 p.complete = function() {
     for (var i in this.$actions) {
         var action = this.$actions[i];
-        action.target.$properties[action.property] = action.to;
+        action.target.$properties[action.property].value = action.to;
         if (action.target.$updateDirtyProperty)
             action.target.$updateDirtyProperty(action.property, action.to);
         action.target[action.property + "Changed"]();
@@ -3559,7 +3578,7 @@ p.$startLoop = function() {
     this.$at = 0;
 }
 p.$setRunning = function(newVal) {
-    this.$properties.running = newVal;
+    this.$properties.running.value = newVal;
     if (newVal) {
         this.$startLoop();
         this.paused = false;
