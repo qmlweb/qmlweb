@@ -3482,7 +3482,7 @@ p.$redoActions = function() {
             this.$actions.push({
                 target: this.$targets[i],
                 property: this.$props[j],
-                from: this.from || this.$targets[i][this.$props[j]],
+                from: this.from === undefined ? this.$targets[i][this.$props[j]] : this.from,
                 to: this.to
             });
         }
