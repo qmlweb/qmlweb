@@ -107,7 +107,7 @@
     // Property that is currently beeing evaluated. Used to get the information
     // which property called the getter of a certain other property for
     // evaluation and is thus dependant on it.
-    evaluatingBinding = undefined,
+    evaluatingProperty = undefined,
     // context in which a QML slot/function is executed or a binding is evaluated.
     _executionContext = null,
     // All object constructors
@@ -205,36 +205,6 @@ QMLBinding.prototype.compile = function() {
                     : "(function(o, c) { _executionContext = c;\nwith(c)\nwith(o)\nreturn " + this.src + "\n})";
     this.eval = eval(bindSrc);
 }
-QMLBinding.prototype.bind = function(object, propName, objectScope, componentScope) {
-    if (!objectScope || !componentScope)
-        throw "Internal error: trying to evaluate binding without scope";
-    var binding = Object.create(this);
-    binding.obj = object;
-    binding.propName = propName;
-    binding.objectScope = objectScope;
-    binding.componentScope = componentScope;
-
-    if (engine.operationState !== QMLOperationState.Init) {
-        binding.compile();
-
-        evaluatingBinding = binding;
-        var newVal = binding.eval(objectScope, componentScope);
-        evaluatingBinding = null;
-        return newVal;
-    } else {
-        engine.bindings.push(binding);
-        return;
-    }
-}
-// Update recalculates the value of a binding and resets the propertyit's assigned to.
-// Called when one of the dependencies changes.
-QMLBinding.prototype.update = function() {
-    evaluatingBinding = this;
-    var val = this.eval(this.objectScope, this.componentScope);
-    evaluatingBinding = undefined;
-
-    this.obj[this.propName] = val;
-}
 
 /**
  * QML Object constructor.
@@ -249,7 +219,6 @@ function construct(meta) {
         item = new constructors[meta.object.$class](meta.parent);
     } else if (component = engine.loadComponent(meta.object.$class)) {
         item = component.createObject(meta.parent);
-        item.$innerContext = item.$context;
 
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
@@ -305,6 +274,8 @@ function Signal(params, options) {
                 arguments[0].$tidyupList.push(this);
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
         }
+        if (typeof connectedSlots[connectedSlots.length - 1].slot !== "function")
+            throw "Can't connect undefined slot.";
     }
     signal.disconnect = function() {
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
@@ -359,8 +330,8 @@ function createProperty(data) {
     function getProperty() {
         // If this call to the getter is due to a property that is dependant on this
         // one, we need it to take track of changes
-        if (evaluatingBinding && !this[data.name + "Changed"].isConnected(evaluatingBinding, QMLBinding.prototype.update))
-            this[data.name + "Changed"].connect(evaluatingBinding, QMLBinding.prototype.update);
+        if (evaluatingProperty && !this[data.name + "Changed"].isConnected(evaluatingProperty, QMLProperty.prototype.update))
+            this[data.name + "Changed"].connect(evaluatingProperty, QMLProperty.prototype.update);
 
         return data.get ? data.get.call(this, name) : this.$properties[data.name].value;
     }
@@ -411,8 +382,8 @@ function createProperty(data) {
             }
             if (this.$updateDirtyProperty)
                 this.$updateDirtyProperty(data.name, newVal);
-            if (this.$changeSignals[data.name])
-                this.$changeSignals[data.name](newVal, oldVal, newVal);
+            if (this.$properties[data.name].changed)
+                this.$properties[data.name].changed(newVal, oldVal, newVal);
         }
     }
 
@@ -425,27 +396,43 @@ function createProperty(data) {
         setupGetterSetter(data.object, data.name, getAlias, setAlias);
     } else {
         setupGetterSetter(data.object, data.name, getProperty, setProperty);
-        data.object.$properties[data.name] = new QMLProperty(data.initialValue);
+        data.object.$properties[data.name] = new QMLProperty(data.initialValue, data.object, data.name);
     }
 
     setupGetter(data.object, data.name + "Changed",
         function() {
-            if (!(data.name in this.$changeSignals)) {
+            if (!this.$properties[data.name].changed) {
                 console.warn(data.name + "Changed signal did not exist while asking for it. Creating it.");
-                this.$changeSignals[data.name] = Signal();
+                this.$properties[data.name].changed = Signal();
             }
-            return this.$changeSignals[data.name];
+            return this.$properties[data.name].changed;
         }
     );
 }
 
 var p = QMLProperty.prototype;
+function QMLProperty(initialValue, obj, name) {
+    this.value = initialValue;
+    this.obj = obj;
+    this.name = name;
+}
+// Update recalculates the value of a binding and resets the propertyit's assigned to.
+// Called when one of the dependencies changes.
+p.update = function() {
+    evaluatingProperty = this;
+    var newVal = this.binding.eval(this.objectScope, this.componentScope);
+    evaluatingProperty = undefined;
+
+    this.obj[this.name] = newVal;
+}
 p.value = undefined;
 p.animation = null;
 p.binding = null;
-function QMLProperty(initialValue) {
-    this.value = initialValue;
-}
+p.obj = null;
+p.name = "";
+p.changed = null;
+p.objectScope = null;
+p.componentScope = null;
 
 /**
  * Set up simple getter function for property
@@ -561,7 +548,21 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 applyProperties(value, item[i], objectScope, componentScope);
                 continue;
             } else if (value instanceof QMLBinding) {
-                value = value.bind(item, i, objectScope, componentScope)
+                if (!item.$properties || !(i in item.$properties)) {
+                    console.error("Can't set binding for non-QML property '" + i + "'.");
+                    continue;
+                }
+
+                if (engine.operationState !== QMLOperationState.Init)
+                    value.compile();
+                else
+                    engine.bindedProperties.push(item.$properties[i]);
+
+
+                item.$properties[i].binding = value;
+                item.$properties[i].objectScope = objectScope;
+                item.$properties[i].componentScope = componentScope;
+                continue;
             }
         }
 //         if (item.$properties && i in item.$properties)
@@ -659,7 +660,7 @@ var engine = new (function () {
     this.operationState = 1;
 
     // List of properties whose values are bindings. For internal use only.
-    this.bindings = [];
+    this.bindedProperties = [];
 
 
 //----------Public Methods----------
@@ -736,8 +737,8 @@ var engine = new (function () {
         var value = obj[propName];
 
         function getter() {
-            if (evaluatingBinding && dependantProperties.indexOf(evaluatingBinding) == -1)
-                dependantProperties.push(evaluatingBinding);
+            if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
+                dependantProperties.push(evaluatingProperty);
 
             return value;
         }
@@ -776,10 +777,10 @@ var engine = new (function () {
 
     this.$initializePropertyBindings = function() {
         // Initialize property bindings
-        while (this.bindings.length) {
-            var binding = this.bindings.pop();
-            binding.compile();
-            binding.update();
+        while (this.bindedProperties.length) {
+            var prop = this.bindedProperties.pop();
+            prop.binding.compile();
+            prop.update();
         }
     }
 
@@ -1161,6 +1162,7 @@ QMLComponent.prototype.createObject = function(parent, properties) {
         if (i[0] !== '$')
             createProperty({ type: "alias", object: context, name: i, targetObj: item, targetPropName: i });
 
+    item.$innerContext = item.$context;
     engine.operationState = oldState;
 
     return item;
@@ -1189,11 +1191,11 @@ p.$delete = function() {
             item.disconnect(this);
     }
 
-    for (var i in this.$properties) {
-        var prop = this.$properties[i];
-        while (prop.$tidyupList.length > 0)
-            prop.$tidyupList[0].disconnect(prop);
-    }
+//     for (var i in this.$properties) {
+//         var prop = this.$properties[i];
+//         while (prop.$tidyupList.length > 0)
+//             prop.$tidyupList[0].disconnect(prop);
+//     }
 
     if (this.$parent && this.$parent.$tidyupList)
         this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
@@ -1206,12 +1208,11 @@ function QObject(parent) {
         var protoProperties = this.$properties;
         this.$properties = {};
         for (var i in protoProperties) {
-            this.$properties[i] = new QMLProperty(protoProperties[i].value);
+            this.$properties[i] = new QMLProperty(protoProperties[i].value, this, i);
         }
     } else {
         this.$properties = {};
     }
-    this.$changeSignals = {};
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
 }
@@ -1237,17 +1238,17 @@ p.$defaultProperty = "data";
 
 p.$dataAppend = function(child) {
     if (child instanceof QMLItem)
-        child.$setParentInternal(this); // This will also add it to children.
+        child.$setParent(this); // This will also add it to children.
     else
         this.resources.push(child);
 }
 p.$childrenAppend = function(child) {
-    child.$setParentInternal(this);
+    child.$setParent(this);
 }
 p.$resourcesAppend = function(child) {
     this.resources.push(child);
-    if (this.$changeSignals.resources)
-        this.resourceChanged();
+    if (this.$properties.resources.changed)
+        this.$properties.resources.changed();
 }
 p.$setX = function(newVal) {
     this.$properties.x.value = newVal;
@@ -1274,8 +1275,8 @@ p.$setHeight = function(newVal) {
 p.$setImplicitWidth = function(newVal) {
     this.$properties.implicitWidth.value = newVal;
     if (this.$properties.width.value === undefined) {
-        if (this.$changeSignals.width)
-            this.widthChanged();
+        if (this.$properties.width.changed)
+            this.$properties.width.changed
         this.$updateHGeometry();
         this.$updateDirtyProperty("width", newVal);
     }
@@ -1283,33 +1284,26 @@ p.$setImplicitWidth = function(newVal) {
 p.$setImplicitHeight = function(newVal) {
     this.$properties.implicitHeight.value = newVal;
     if (this.$properties.height.value === undefined) {
-        if (this.$changeSignals.height)
-            this.heightChanged();
+        if (this.$properties.height.changed)
+            this.$properties.height.changed
         this.$updateVGeometry();
         this.$updateDirtyProperty("height", newVal);
     }
 }
 p.$setParent = function(newVal) {
-    var oldParent = this.$properties.parent.value;
-    this.$setParentInternal(newVal);
-    if (oldParent)
-        oldParent.childrenChanged();
-    this.$properties.parent.value.childrenChanged();
-}
-p.$setParentInternal = function(newVal) {
     if (this.$properties.parent.value) {
         var oldParent = this.$properties.parent.value;
         oldParent.children.splice(oldParent.children.indexOf(this), 1);
-        if (oldParent.$changeSignals.children)
-            oldParent.childrenChanged();
+        if (oldParent.$properties.children.changed)
+            oldParent.$properties.children.changed();
         if (engine.renderMode == QMLRenderMode.DOM)
             oldParent.dom.removeChild(this.dom);
     }
     this.$properties.parent.value = newVal;
     if (newVal && newVal.children.indexOf(this) == -1) {
         newVal.children.push(this);
-        if (newVal.$changeSignals.children)
-            newVal.childrenChanged();
+        if (newVal.$properties.children.changed)
+            newVal.$properties.children.changed();
     }
     if (newVal && engine.renderMode == QMLRenderMode.DOM)
         newVal.dom.appendChild(this.dom);
@@ -1779,9 +1773,11 @@ createProperty({ type: "int", object: p, name: "spacing", initialValue: 0 });
 function QMLPositioner(parent) {
     QMLItem.call(this, parent);
 
-    this.spacingChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
+    if (this.layoutChildren) {
+        this.spacingChanged.connect(this, this.layoutChildren);
+        this.childrenChanged.connect(this, this.layoutChildren);
+        this.childrenChanged.connect(this, QMLPositioner.slotChildrenChanged);
+    }
 }
 QMLPositioner.slotChildrenChanged = function() {
     for (var i = 0; i < this.children.length; i++) {
@@ -2462,11 +2458,11 @@ p.$insertChildren = function(startIndex, endIndex) {
             newItem[roleName] = model.data(index, roleName);
 
             // TODO: use prototypes for components and add this to the delegate component
-            (function(model, index, roleName) {
+            (function(model, newItem, roleName) {
                 setupGetter(newItem.$context, roleName, function() {
-                    return model.data(index, roleName);
+                    return model.data(newItem.index, roleName);
                 });
-            })(model, index, roleName);
+            })(model, newItem, roleName);
         }
 
         this.parent.children.splice(this.parent.children.indexOf(this) - this.$items.length + index, 0, newItem);
@@ -2493,11 +2489,11 @@ p.$applyModel = function() {
         return;
     var model = this.model instanceof QMLListModel ? this.model.$model : this.model;
     if (model instanceof JSItemModel) {
-        model.dataChanged.connect(function(startIndex, endIndex) {
+        model.dataChanged.connect(this, function(startIndex, endIndex) {
             //TODO
         });
-        model.rowsInserted.connect(this.$insertChildren);
-        model.rowsMoved.connect(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
+        model.rowsInserted.connect(this, this.$insertChildren);
+        model.rowsMoved.connect(this, function(sourceStartIndex, sourceEndIndex, destinationIndex) {
             var vals = this.$items.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
             for (var i = 0; i < vals.length; i++) {
                 this.$items.splice(destinationIndex + i, 0, vals[i]);
@@ -2509,7 +2505,7 @@ p.$applyModel = function() {
             }
             engine.$requestDraw();
         });
-        model.rowsRemoved.connect(function(startIndex, endIndex) {
+        model.rowsRemoved.connect(this, function(startIndex, endIndex) {
             this.$removeChildren(startIndex, endIndex);
             for (var i = startIndex; i < this.$items.length; i++) {
                 this.$items[i].index = i;
@@ -2517,7 +2513,7 @@ p.$applyModel = function() {
             this.count = this.$items.length;
             engine.$requestDraw();
         });
-        model.modelReset.connect(function() {
+        model.modelReset.connect(this, function() {
             this.$removeChildren(0, this.$items.length);
             this.$insertChildren(0, model.rowCount());
             engine.$requestDraw();
@@ -2532,10 +2528,11 @@ p.$applyModel = function() {
 p.$removeChildren = function(startIndex, endIndex) {
     var removed = this.$items.splice(startIndex, endIndex - startIndex);
     for (var index in removed) {
-        removed[index].$delete();
         removed[index].parent = undefined;
         this.$removeChildProperties(removed[index]);
+        removed[index].$delete();
     }
+    _executionContext = this.$context;
 }
 p.$removeChildProperties = function(child) {
     if (engine.renderMode == QMLRenderMode.Canvas && child instanceof QMLMouseArea)
