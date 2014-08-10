@@ -364,7 +364,7 @@ function createProperty(data) {
 
         return data.get ? data.get.call(this, name) : this.$properties[data.name].value;
     }
-    function setProperty(newVal) {
+    function setProperty(newVal, fromAnimation) {
         var i,
             oldVal = this.$properties[data.name].value;
 
@@ -398,15 +398,16 @@ function createProperty(data) {
         }
 
         if (newVal !== oldVal) {
-            if (data.animation && !fromAnimation) {
-                data.animation.running = false;
-                data.animation.$actions = [{
-                    target: data.animation.target || this,
-                    property: data.animation.property || this.name,
-                    from: data.animation.from || oldVal,
-                    to: data.animation.to || newVal
+            if (this.$properties[data.name].animation && !fromAnimation) {
+                var animation = this.$properties[data.name].animation;
+                animation.running = false;
+                animation.$actions = [{
+                    target: animation.target || this,
+                    property: animation.property || data.name,
+                    from: animation.from || oldVal,
+                    to: animation.to || newVal
                 }];
-                data.animation.running = true;
+                animation.running = true;
             }
             if (this.$updateDirtyProperty)
                 this.$updateDirtyProperty(data.name, newVal);
@@ -572,6 +573,9 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
+    if (metaObject.$on) {
+        item.$setTargetProperty(item.$parent, metaObject.$on);
+    }
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
             item[item.$defaultProperty] = metaObject.$children;
@@ -582,6 +586,9 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     // instanciations of this component, but not for its internal children
     if (metaObject.$defaultProperty)
         item.$defaultProperty = metaObject.$defaultProperty;
+
+    if (item.$finishInit)
+        item.$finishInit();
 }
 
 // ItemModel. EXPORTED.
@@ -3170,20 +3177,21 @@ function QMLAnimation(parent) {
 
 p = QMLSequentialAnimation.prototype = new QMLAnimation();
 p.$defaultProperty = "animations";
-p.start = function() {
-    if (!this.running) {
-        this.running = true;
-        curIndex = -1;
-        passedLoops = 0;
-        nextAnimation();
+p.$setRunning = function(newVal) {
+    if (this.running != newVal) {
+        this.$properties.running.value = newVal;
+        if (newVal) {
+            curIndex = -1;
+            passedLoops = 0;
+            this.$nextAnimation();
+        } else if (curIndex < this.animations.length) {
+            this.animations[curIndex].stop();
+        }
     }
 }
 p.stop = function() {
     if (this.running) {
         this.running = false;
-        if (curIndex < this.animations.length) {
-            this.animations[curIndex].stop();
-        }
     }
 }
 p.complete = function() {
@@ -3195,7 +3203,26 @@ p.complete = function() {
         this.running = false;
     }
 }
+p.$nextAnimation = function(proceed) {
+    var anim;
+    if (this.running && !proceed) {
+        curIndex++;
+        if (curIndex < this.animations.length) {
+            anim = this.animations[curIndex];
 
+            anim.start();
+        } else {
+            passedLoops++;
+            if (passedLoops >= this.loops) {
+                this.complete();
+            } else {
+                curIndex = -1;
+                nextAnimation();
+            }
+        }
+    }
+}
+createProperty({ type: "bool", object: p, name: "running", initialValue: false, set: p.$setRunning });
 createProperty({ type: "list", object: p, name: "animations", initialValue: [] });
 function QMLSequentialAnimation(parent) {
     QMLAnimation.call(this, parent);
@@ -3204,31 +3231,10 @@ function QMLSequentialAnimation(parent) {
         i,
         self = this;
 
-    function nextAnimation(proceed) {
-        var anim;
-        if (self.running && !proceed) {
-            curIndex++;
-            if (curIndex < self.animations.length) {
-                anim = self.animations[curIndex];
-                console.log("nextAnimation", self, curIndex, anim);
-                descr("", anim, ["target"]);
-                anim.start();
-            } else {
-                passedLoops++;
-                if (passedLoops >= self.loops) {
-                    self.complete();
-                } else {
-                    curIndex = -1;
-                    nextAnimation();
-                }
-            }
-        }
-    }
-
     this.animationsChanged.connect(this, function() {
         for (i = 0; i < this.animations.length; i++) {
-            if (!this.animations[i].runningChanged.isConnected(nextAnimation))
-                this.animations[i].runningChanged.connect(nextAnimation);
+            if (!this.animations[i].runningChanged.isConnected(this, this.$nextAnimation))
+                this.animations[i].runningChanged.connect(this, this.$nextAnimation);
         }
     });
 
@@ -3474,7 +3480,7 @@ p.$redoActions = function() {
             this.$actions.push({
                 target: this.$targets[i],
                 property: this.$props[j],
-                from: this.from,
+                from: this.from || this.$targets[i][this.$props[j]],
                 to: this.to
             });
         }
@@ -3503,9 +3509,9 @@ p.$redoTargets = function() {
     if (this.target && this.$targets.indexOf(this.target) === -1)
         this.$targets.push(this.target);
 }
-p.$setTargetProperty = function(newVal) {
-    this.property = newVal.name;
-    this.target = newVal.obj;
+p.$setTargetProperty = function(obj, prop) {
+    this.property = prop;
+    this.target = obj;
 }
 p.$setTarget = function(newVal) {
     this.$properties.target.value = newVal;
@@ -3605,21 +3611,20 @@ createProperty({ type: "bool", object: p, name: "running", initialValue: false, 
 
 p = QMLBehavior.prototype = new QMLBaseObject();
 p.$defaultProperty = "animation";
-p.$targetProperty = null;
-p.$setTargetProperty = function(newVal) {
-    this.$targetProperty = newVal;
-    this.$targetProperty.animation = newVal ? this.animation : null;
+p.$targetProperty = "";
+p.$target = null;
+p.$setTargetProperty = function(obj, prop) {
+    this.$target = obj;
+    this.$targetProperty = prop;
+}
+p.$finishInit = function() {
+    this.$target.$properties[this.$targetProperty].animation = this.enabled ? this.animation : null;
 }
 createProperty({ type: "Animation", object: p, name: "animation" });
 createProperty({ type: "bool", object: p, name: "enabled", initialValue: true });
 function QMLBehavior(parent) {
     QMLBaseObject.call(this, parent);
 
-    this.animationChanged.connect(this, function(newVal) {
-        newVal.target = this.$targetProperty.obj;
-        newVal.property = this.$targetProperty.name;
-        this.$targetProperty.animation = newVal ? this.animation : null;
-    });
     this.enabledChanged.connect(this, function(newVal) {
         this.$targetProperty.animation = newVal ? this.animation : null;
     });
