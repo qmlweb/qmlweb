@@ -1070,11 +1070,67 @@ createProperty({ type: "bool", object: p, name: "underline", initialValue: false
 createProperty({ type: "enum", object: p, name: "weight" });
 createProperty({ type: "real", object: p, name: "wordSpacing", initialValue: 0 });
 p.$updateDirtyProperty = function(name, newVal) {
-    this.$parent.$updateDirtyProperty(this.$name + "." + name, newVal);
+    switch (name) {
+        case "bold":
+            this.$style.fontWeight =
+            this.weight !== Undefined ? this.weight :
+            newVal ? "bold" : "normal";
+            break;
+        case "capitalization":
+            this.$style.fontVariant =
+            newVal == "smallcaps" ? "small-caps" : "normal";
+            newVal = newVal == "smallcaps" ? "none" : newVal;
+            this.$style.textTransform = newVal;
+            break;
+        case "family":
+            this.$style.fontFamily = newVal;
+            break;
+        case "italic":
+            this.$style.fontStyle = newVal ? "italic" : "normal";
+            break;
+        case "letterSpacing":
+            this.$style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+            break;
+        case "pixelSize":
+            var val = newVal !== Undefined ? newVal + "px "
+            : (this.pointSize || 10) + "pt";
+            this.$style.fontSize = val;
+            this.$style.fontSize = val;
+            break;
+        case "pointSize":
+            var val = this.pixelSize !== Undefined ? this.pixelSize + "px "
+            : (newVal || 10) + "pt";
+            this.$style.fontSize = val;
+            this.$style.fontSize = val;
+            break;
+        case "strikeout":
+            this.$style.textDecoration = newVal
+            ? "line-through"
+            : this.underline
+            ? "underline"
+            : "none";
+            break;
+        case "underline":
+            this.$style.textDecoration = this.strikeout
+            ? "line-through"
+            : newVal
+            ? "underline"
+            : "none";
+            break;
+        case "weight":
+            this.$style.fontWeight =
+            newVal !== Undefined ? newVal :
+            this.bold ? "bold" : "normal";
+            break;
+        case "wordSpacing":
+            this.$style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+            break;
+    }
+    this.$parent.$updateImplicitSize();
 }
 function QMLFont(val, obj, name) {
     QObject.call(this, obj);
-    this.$name = name;
+    this.$style = null;
 }
 
 p = QMLPen.prototype = new QObject();
@@ -2099,6 +2155,7 @@ function QMLText(parent) {
         this.dom.innerHTML = "<span></span>";
         this.dom.firstChild.style.width = "100%";
         this.dom.firstChild.style.height = "100%";
+        this.font.$style = this.dom.firstChild.style;
     }
 
     this.Component.completed.connect(this, this.$updateImplicitSize);
@@ -2158,71 +2215,6 @@ p.$updateDirtyProperty = function(name, newVal) {
     switch (name) {
         case "color":
             this.dom.firstChild.style.color = newVal;
-            break;
-        case "font.bold":
-            this.dom.firstChild.style.fontWeight =
-                this.font.weight !== Undefined ? this.font.weight :
-                newVal ? "bold" : "normal";
-            this.$updateImplicitSize();
-            break;
-        case "font.capitalization":
-            this.dom.firstChild.style.fontVariant =
-                newVal == "smallcaps" ? "small-caps" : "normal";
-            newVal = newVal == "smallcaps" ? "none" : newVal;
-            this.dom.firstChild.style.textTransform = newVal;
-            this.$updateImplicitSize();
-            break;
-        case "font.family":
-            this.dom.firstChild.style.fontFamily = newVal;
-            this.$updateImplicitSize();
-            break;
-        case "font.italic":
-            this.dom.firstChild.style.fontStyle = newVal ? "italic" : "normal";
-            this.$updateImplicitSize();
-            break;
-        case "font.letterSpacing":
-            this.dom.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
-            this.$updateImplicitSize();
-            break;
-        case "font.pixelSize":
-            var val = newVal !== Undefined ? newVal + "px "
-                : (this.font.pointSize || 10) + "pt";
-            this.dom.style.fontSize = val;
-            this.dom.firstChild.style.fontSize = val;
-            this.$updateImplicitSize();
-            break;
-        case "font.pointSize":
-            var val = this.font.pixelSize !== Undefined ? this.font.pixelSize + "px "
-                : (newVal || 10) + "pt";
-            this.dom.style.fontSize = val;
-            this.dom.firstChild.style.fontSize = val;
-            this.$updateImplicitSize();
-            break;
-        case "font.strikeout":
-            this.dom.firstChild.style.textDecoration = newVal
-                ? "line-through"
-                : this.font.underline
-                ? "underline"
-                : "none";
-            this.$updateImplicitSize();
-            break;
-        case "font.underline":
-            this.dom.firstChild.style.textDecoration = this.font.strikeout
-                ? "line-through"
-                : newVal
-                ? "underline"
-                : "none";
-            this.$updateImplicitSize();
-            break;
-        case "font.weight":
-            this.dom.firstChild.style.fontWeight =
-                newVal !== Undefined ? newVal :
-                this.font.bold ? "bold" : "normal";
-            this.$updateImplicitSize();
-            break;
-        case "font.wordSpacing":
-            this.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
-            this.$updateImplicitSize();
             break;
         case "horizontalAlignment":
             this.dom.style.textAlign = newVal;
@@ -3636,6 +3628,10 @@ function QMLBehavior(parent) {
 //------------DOM-only-Elements------------
 
 p = QMLTextInput.prototype = new QMLItem();
+p.$updateImplicitSize = function() {
+    this.implicitHeight = this.dom.offsetHeight;
+    this.implicitWidth = this.dom.offsetWidth;
+}
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextInput(parent) {
     QMLItem.call(this, parent);
@@ -3647,7 +3643,8 @@ function QMLTextInput(parent) {
 
     var self = this;
 
-    this.font = new QMLFont(this);
+    this.font = new QMLFont(null, this, "font");
+    this.font.$style = this.dom.style;
 
     this.dom.innerHTML = "<input type=\"text\"/>"
     this.dom.firstChild.style.pointerEvents = "auto";
@@ -3658,10 +3655,7 @@ function QMLTextInput(parent) {
 
     this.accepted = Signal();
 
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.firstChild.offsetWidth;
-        this.implicitHeight = this.dom.firstChild.offsetHeight;
-    });
+    this.Component.completed.connect(this, this.$updateImplicitSize);
 
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
@@ -3681,8 +3675,28 @@ function QMLTextInput(parent) {
     this.dom.firstChild.oninput = updateValue;
     this.dom.firstChild.onpropertychanged = updateValue;
 }
+p.$updateDirtyProperty = function(name, newVal) {
+    if (engine.renderMode == QMLRenderMode.Canvas) {
+        engine.$requestDraw();
+        return;
+    }
+
+    switch (name) {
+        case "text":
+            this.dom.style.backgroundColor = newVal;
+            break;
+        default:
+            QMLItem.prototype.$updateDirtyProperty.call(this, name, newVal);
+
+    }
+}
 
 p = QMLButton.prototype = new QMLItem();
+p.$updateImplicitSize = function() {
+    //TODO: Replace those statically sized borders
+    this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
+    this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+}
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLButton(parent) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
@@ -3695,20 +3709,18 @@ function QMLButton(parent) {
     QMLItem.call(this, parent);
     var self = this;
 
+    this.font = new QMLFont(null, this, "font");
+    this.font.$style = this.dom.style;
+
     this.dom.style.pointerEvents = "auto";
     this.dom.innerHTML = "<span></span>";
 
     this.clicked = Signal();
 
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
-        this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
-    });
+    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
-        //TODO: Replace those statically sized borders
-        this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
-        this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+        this.$updateImplicitSize();
     });
 
     this.dom.onclick = function(e) {
@@ -3717,6 +3729,10 @@ function QMLButton(parent) {
 }
 
 p = QMLTextArea.prototype = new QMLItem();
+p.$updateImplicitSize = function() {
+    this.implicitHeight = this.dom.offsetHeight;
+    this.implicitWidth = this.dom.offsetWidth;
+}
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextArea(parent) {
     QMLItem.call(this, parent);
@@ -3728,7 +3744,8 @@ function QMLTextArea(parent) {
 
     var self = this;
 
-    this.font = new QMLFont(this);
+    this.font = new QMLFont(null, this, "font");
+    this.font.$style = this.dom.style;
 
     this.dom.innerHTML = "<textarea></textarea>"
     this.dom.firstChild.style.pointerEvents = "auto";
@@ -3759,6 +3776,10 @@ function QMLTextArea(parent) {
 }
 
 p = QMLCheckbox.prototype = new QMLItem();
+p.$updateImplicitSize = function() {
+    this.implicitHeight = this.dom.offsetHeight;
+    this.implicitWidth = this.dom.offsetWidth;
+}
 createProperty({ type: "string", object: p, name: "text" });
 createProperty({ type: "bool", object: p, name: "checked" });
 createProperty({ type: "color", object: p, name: "color" });
@@ -3773,20 +3794,17 @@ function QMLCheckbox(parent) {
     QMLItem.call(this, parent);
     var self = this;
 
-    this.font = new QMLFont(this);
+    this.font = new QMLFont(null, this, "font");
+    this.font.$style = this.dom.style;
 
     this.dom.innerHTML = "<input type=\"checkbox\"><span></span>";
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.verticalAlign = "text-bottom";
 
-    this.Component.completed.connect(this, function() {
-        this.implicitHeight = this.dom.offsetHeight;
-        this.implicitWidth = this.dom.offsetWidth;
-    });
+    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.children[1].innerHTML = newVal;
-        this.implicitHeight = this.dom.offsetHeight;
-        this.implicitWidth = this.dom.offsetWidth;
+        this.$updateImplicitSize();
     });
     this.colorChanged.connect(this, function(newVal) {
         this.dom.children[1].style.color = newVal;
