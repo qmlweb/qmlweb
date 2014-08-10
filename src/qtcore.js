@@ -1021,6 +1021,13 @@ var engine = new (function () {
 QMLEngine = function(element, options) {
     engine.rootElement = element;
     engine.renderMode = (element && element.nodeName == "CANVAS") ? QMLRenderMode.Canvas : QMLRenderMode.DOM;
+
+    // TODO: Move to module initialization
+    for (i in constructors) {
+        if (constructors[i].getAttachedObject)
+            setupGetter(QMLBaseObject.prototype, i, constructors[i].getAttachedObject);
+    }
+
     return engine
 }
 
@@ -1161,6 +1168,26 @@ function QMLPen(val, obj, name) {
     this.$name = name
 }
 
+function QMLComponent(meta) {
+    if (constructors[meta.$class] == QMLComponent) {
+        if (meta.$children.length > 1)
+            console.error("A QML component must only contain one root element!");
+
+        this.$metaObject = meta.$children[0];
+    } else {
+        this.$metaObject = meta;
+    }
+
+    this.$context = _executionContext;
+}
+QMLComponent.getAttachedObject = function() {
+    if (!this.$properties.Component) {
+        this.$properties.Component = new QObject(this);
+        this.$properties.Component.completed = Signal([]);
+        engine.completedSignals.push(this.$properties.Component.completed);
+    }
+    return this.$properties.Component;
+}
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState,
         context = this.$context ? Object.create(this.$context) : {};
@@ -1182,18 +1209,6 @@ QMLComponent.prototype.createObject = function(parent, properties) {
     engine.operationState = oldState;
 
     return item;
-}
-function QMLComponent(meta) {
-    if (constructors[meta.$class] == QMLComponent) {
-        if (meta.$children.length > 1)
-            console.error("A QML component must only contain one root element!");
-
-        this.$metaObject = meta.$children[0];
-    } else {
-        this.$metaObject = meta;
-    }
-
-    this.$context = _executionContext;
 }
 
 // Base object for all qml thingies
@@ -1242,11 +1257,6 @@ function QMLBaseObject(parent) {
 
     if (!this.$draw)
         this.$draw = noop;
-
-    // Component.onCompleted
-    this.Component = new QObject(this);
-    this.Component.completed = Signal([]);
-    engine.completedSignals.push(this.Component.completed);
 }
 
 p = QMLItem.prototype = new QMLBaseObject();
@@ -2175,8 +2185,6 @@ function QMLText(parent) {
         this.dom.firstChild.style.height = "100%";
         this.font.$style = this.dom.firstChild.style;
     }
-
-    this.Component.completed.connect(this, this.$updateImplicitSize);
 }
 
 p.Text = {
@@ -2227,6 +2235,7 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = height;
     this.implicitWidth = width;
 }
+p.$finishInit = p.$updateImplicitSize;
 p.$updateDirtyProperty = function(name, newVal) {
     if (engine.renderMode !== QMLRenderMode.DOM)
         return;
@@ -3654,6 +3663,7 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = this.dom.offsetHeight;
     this.implicitWidth = this.dom.offsetWidth;
 }
+p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextInput(parent) {
     QMLItem.call(this, parent);
@@ -3676,8 +3686,6 @@ function QMLTextInput(parent) {
     this.dom.firstChild.style.width = "100%";
 
     this.accepted = Signal();
-
-    this.Component.completed.connect(this, this.$updateImplicitSize);
 
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
@@ -3719,6 +3727,7 @@ p.$updateImplicitSize = function() {
     this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
     this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
 }
+p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLButton(parent) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
@@ -3739,7 +3748,6 @@ function QMLButton(parent) {
 
     this.clicked = Signal();
 
-    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
         this.$updateImplicitSize();
@@ -3752,9 +3760,10 @@ function QMLButton(parent) {
 
 p = QMLTextArea.prototype = new QMLItem();
 p.$updateImplicitSize = function() {
-    this.implicitHeight = this.dom.offsetHeight;
-    this.implicitWidth = this.dom.offsetWidth;
+    this.implicitWidth = this.dom.firstChild.offsetWidth;
+    this.implicitHeight = this.dom.firstChild.offsetHeight;
 }
+p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextArea(parent) {
     QMLItem.call(this, parent);
@@ -3777,12 +3786,6 @@ function QMLTextArea(parent) {
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
 
-
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.firstChild.offsetWidth;
-        this.implicitHeight = this.dom.firstChild.offsetHeight;
-    });
-
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
     });
@@ -3802,6 +3805,7 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = this.dom.offsetHeight;
     this.implicitWidth = this.dom.offsetWidth;
 }
+p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text" });
 createProperty({ type: "bool", object: p, name: "checked" });
 createProperty({ type: "color", object: p, name: "color" });
@@ -3823,7 +3827,6 @@ function QMLCheckbox(parent) {
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.verticalAlign = "text-bottom";
 
-    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.children[1].innerHTML = newVal;
         this.$updateImplicitSize();
