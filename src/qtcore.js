@@ -117,7 +117,6 @@
             'double': Number,
             string: String,
             'bool': Boolean,
-            list: QMLList,
             color: QMLColor,
             'enum': QMLVariant,
             url: String,
@@ -369,9 +368,7 @@ function createProperty(data) {
         var i,
             oldVal = this.$properties[data.name].value;
 
-        if (constructors[data.type] == QMLList) {
-            newVal = QMLList(newVal, this, data.name);
-        } else if (newVal instanceof QMLMetaElement) {
+        if (newVal instanceof QMLMetaElement) {
             if (constructors[newVal.$class] == QMLComponent || constructors[data.type] == QMLComponent)
                 newVal = new QMLComponent(newVal);
             else
@@ -381,7 +378,24 @@ function createProperty(data) {
         } else {
             newVal = constructors[data.type](newVal, this, data.name);
         }
-        data.set ? data.set.call(this, newVal, data.name) : (this.$properties[data.name] = newVal);
+
+        if (data.type == "list") {
+            if (newVal instanceof Array) {
+                for (var i in newVal) {
+                    if (data.append)
+                        data.append.call(this, construct({object: newVal[i], parent: this, context: _executionContext }));
+                    else
+                        data.object.$properties[data.name].value.push(construct({object: newVal[i], parent: this, context: _executionContext }));
+                }
+            } else if (newVal instanceof QMLBaseObject) {
+                if (data.append)
+                    data.append.call(this, newVal);
+                else
+                    data.object.$properties[data.name].value.push(newVal);
+            }
+        } else {
+            data.set ? data.set.call(this, newVal, data.name) : (this.$properties[data.name].value = newVal);
+        }
 
         if (newVal !== oldVal) {
             if (data.animation && !fromAnimation) {
@@ -999,17 +1013,6 @@ function QMLColor(val) {
     return val;
 }
 
-function QMLList(val, obj, name) {
-    var list = [];
-    if (val instanceof Array)
-        for (var i in val)
-            list.push(construct({object: val[i], parent: obj, context: _executionContext }));
-    else if (val instanceof QMLMetaElement)
-        list.push(construct({object: val, parent: obj, context: _executionContext }));
-
-    return list;
-}
-
 p = QMLAnchors.prototype = new QObject();
 p.$setHorizontalAnchorsProperty = function(newVal, name) {
     this.$properties[name].value = newVal;
@@ -1169,16 +1172,19 @@ function QMLBaseObject(parent) {
 p = QMLItem.prototype = new QMLBaseObject();
 p.$defaultProperty = "data";
 
-p.$setData = function(newVal) {
-    for (var i in newVal) {
-        var child = newVal[i];
-        if (child instanceof QMLItem)
-            child.$setParentInternal(this); // This will also add it to children.
-        else
-            this.resources.push(child);
-    }
-    this.resourcesChanged();
-    this.childrenChanged();
+p.$dataAppend = function(child) {
+    if (child instanceof QMLItem)
+        child.$setParentInternal(this); // This will also add it to children.
+    else
+        this.resources.push(child);
+}
+p.$childrenAppend = function(child) {
+    child.$setParentInternal(this);
+}
+p.$resourcesAppend = function(child) {
+    this.resources.push(child);
+    if (this.$changeSignals.resources)
+        this.resourceChanged();
 }
 p.$setX = function(newVal) {
     this.$properties.x.value = newVal;
@@ -1229,12 +1235,16 @@ p.$setParentInternal = function(newVal) {
     if (this.$properties.parent.value) {
         var oldParent = this.$properties.parent.value;
         oldParent.children.splice(oldParent.children.indexOf(this), 1);
+        if (oldParent.$changeSignals.children)
+            oldParent.childrenChanged();
         if (engine.renderMode == QMLRenderMode.DOM)
             oldParent.dom.removeChild(this.dom);
     }
     this.$properties.parent.value = newVal;
     if (newVal && newVal.children.indexOf(this) == -1) {
         newVal.children.push(this);
+        if (newVal.$changeSignals.children)
+            newVal.childrenChanged();
     }
     if (newVal && engine.renderMode == QMLRenderMode.DOM)
         newVal.dom.appendChild(this.dom);
@@ -1596,9 +1606,9 @@ p.$updateDirtyProperty = function(name, newVal) {
 }
 
 createProperty({ type: "anchors", object: p, name: "anchors", initialValue: [] });
-createProperty({ type: "list", object: p, name: "data", initialValue: [], set: p.$setData });
-createProperty({ type: "list", object: p, name: "children", initialValue: [] });
-createProperty({ type: "list", object: p, name: "resources", initialValue: [] });
+createProperty({ type: "list", object: p, name: "data", initialValue: [], append: p.$dataAppend });
+createProperty({ type: "list", object: p, name: "children", initialValue: [], append: p.$childrenAppend });
+createProperty({ type: "list", object: p, name: "resources", initialValue: [], append: p.$resourcesAppend });
 createProperty({ type: "Item", object: p, name: "parent", initialValue: null, set: p.$setParent });
 createProperty({ type: "real", object: p, name: "implicitWidth", initialValue: 0, set: p.$setImplicitWidth });
 createProperty({ type: "real", object: p, name: "implicitHeight", initialValue: 0, set: p.$setImplicitHeight });
