@@ -1221,6 +1221,7 @@ p.$setImplicitWidth = function(newVal) {
         if (this.$changeSignals.width)
             this.widthChanged();
         this.$updateHGeometry();
+        this.$updateDirtyProperty("width", newVal);
     }
 }
 p.$setImplicitHeight = function(newVal) {
@@ -1229,6 +1230,7 @@ p.$setImplicitHeight = function(newVal) {
         if (this.$changeSignals.height)
             this.heightChanged();
         this.$updateVGeometry();
+        this.$updateDirtyProperty("height", newVal);
     }
 }
 p.$setParent = function(newVal) {
@@ -1659,12 +1661,12 @@ function QMLItem(parent) {
             var self = this;
             if (engine.rootElement == undefined) {
                 window.onresize = function() {
-                    self.implicitHeight = window.innerHeight;
-                    self.implicitWidth = window.innerWidth;
+                    self.$properties.implicitHeight.value = window.innerHeight;
+                    self.$properties.implicitWidth.value = window.innerWidth;
                 }
             } else {
-                this.implicitHeight = this.dom.offsetHeight;
-                this.implicitWidth = this.dom.offsetWidth;
+                this.$properties.implicitHeight.value = this.dom.offsetHeight;
+                this.$properties.implicitWidth.value = this.dom.offsetWidth;
             }
             this.dom.style.position = "relative"; // Needed to make absolute positioning work
             this.dom.style.top = "0";
