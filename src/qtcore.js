@@ -71,7 +71,45 @@
         KeypadModifier: 16, // Note: Not available in web
         // Layout directions
         LeftToRight: 0,
-        RightToLeft: 1
+        RightToLeft: 1,
+
+        // Keys
+        // misc keys
+        Key_Escape: 0x01000000, Key_Tab: 0x01000001,    Key_Backtab: 0x01000002,Key_Backspace: 0x01000003,
+        Key_Return: 0x01000004, Key_Enter: 0x01000005,  Key_Insert: 0x01000006, Key_Delete: 0x01000007,
+        Key_Pause: 0x01000008,  Key_Print: 0x01000009,  Key_SysReq: 0x0100000a, Key_Clear: 0x0100000b,
+        // cursor movement
+        Key_Home: 0x01000010,   Key_End: 0x01000011,    Key_Left: 0x01000012,   Key_Up: 0x01000013,
+        Key_Right: 0x01000014,  Key_Down: 0x01000015,   Key_PageUp: 0x01000016, Key_PageDown: 0x01000017,
+        // modifiers
+        Key_Shift: 0x01000020,  Key_Control: 0x01000021,Key_Meta: 0x01000022,   Key_Alt: 0x01000023,
+        Key_CapsLock:0x01000024,Key_NumLock: 0x01000025,Key_ScrollLock: 0x01000026,
+        // function keys
+        Key_F1: 0x01000030,     Key_F2: 0x01000031,     Key_F3: 0x01000032,     Key_F4: 0x01000033,
+        Key_F5: 0x01000034,     Key_F6: 0x01000035,     Key_F7: 0x01000036,     Key_F8: 0x01000037,
+        Key_F9: 0x01000038,     Key_F10: 0x01000039,    Key_F11: 0x0100003a,    Key_F12: 0x0100003b,
+        // extra keys
+        Key_Super_L: 0x01000053,Key_Super_R: 0x01000054,Key_Menu: 0x01000055,   Key_Hyper_L: 0x01000056,
+        Key_Hyper_R: 0x01000057,Key_Help: 0x01000058,   Key_Direction_L:0x01000059, Key_Direction_R: 0x01000060,
+        // 7 bit printable ASCII
+        Key_Space: 0x20,        Key_Any: 0x20,          Key_Exclam: 0x21,       Key_QuoteDbl: 0x22,
+        Key_NumberSign: 0x23,   Key_Dollar: 0x24,       Key_Percent: 0x25,      Key_Ampersand: 0x26,
+        Key_Apostrophe: 0x27,   Key_ParenLeft: 0x28,    Key_ParenRight: 0x29,   Key_Asterisk: 0x2a,
+        Key_Plus: 0x2b,         Key_Comma: 0x2c,        Key_Minus: 0x2d,        Key_Period: 0x2e,
+        Key_Slash: 0x2f,        Key_0: 0x30,            Key_1: 0x31,            Key_2: 0x32,
+        Key_3: 0x33,            Key_4: 0x34,            Key_5: 0x35,            Key_6: 0x36,
+        Key_7: 0x37,            Key_8: 0x38,            Key_9: 0x39,            Key_Colon: 0x3a,
+        Key_Semicolon: 0x3b,    Key_Less: 0x3c,         Key_Equal: 0x3d,        Key_Greater: 0x3e,
+        Key_Question: 0x3f,     Key_At: 0x40,           Key_A: 0x41,            Key_B: 0x42,
+        Key_C: 0x43,            Key_D: 0x44,            Key_E: 0x45,            Key_F: 0x46,
+        Key_G: 0x47,            Key_H: 0x48,            Key_I: 0x49,            Key_J: 0x4a,
+        Key_K: 0x4b,            Key_L: 0x4c,            Key_M: 0x4d,            Key_N: 0x4e,
+        Key_O: 0x4f,            Key_P: 0x50,            Key_Q: 0x51,            Key_R: 0x52,
+        Key_S: 0x53,            Key_T: 0x54,            Key_U: 0x55,            Key_V: 0x56,
+        Key_W: 0x57,            Key_X: 0x58,            Key_Y: 0x59,            Key_Z: 0x5a,
+        Key_BracketLeft: 0x5b,  Key_Backslash: 0x5c,    Key_BracketRight: 0x5d, Key_AsciiCircum: 0x5e,
+        Key_Underscore: 0x5f,   Key_QuoteLeft: 0x60,    Key_BraceLeft: 0x7b,    Key_Bar: 0x7c,
+        Key_BraceRight: 0x7d,   Key_AsciiTilde: 0x7e,
     },
     Font = {
         // Capitalization
@@ -133,6 +171,8 @@
             AnimatedImage: QMLAnimatedImage,
             BorderImage: QMLBorderImage,
             Item: QMLItem,
+            Keys: QMLKeys,
+            FocusScope: QMLFocusScope,
             Column: QMLColumn,
             Row: QMLRow,
             Grid: QMLGrid,
@@ -404,7 +444,11 @@ function createProperty(data) {
     if (data.type == "alias") {
         setupGetterSetter(data.object, data.name, getAlias, setAlias);
     } else {
-        setupGetterSetter(data.object, data.name, getProperty, setProperty);
+        if (data.readonly)
+            setupGetter(data.object, data.name, getProperty);
+        else
+            setupGetterSetter(data.object, data.name, getProperty, setProperty);
+
         data.object.$properties[data.name] = new QMLProperty(data.initialValue, data.object, data.name);
     }
 
@@ -1231,6 +1275,15 @@ p.$delete = function() {
     if (this.$parent && this.$parent.$tidyupList)
         this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
 }
+p.$setInternal= function(propName, value) {
+    var prop = this.$properties[propName];
+    if (prop.value === value)
+        return;
+
+    prop.value = value;
+    if (prop.changed)
+        prop.changed();
+}
 function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
@@ -1335,6 +1388,31 @@ p.$setParent = function(newVal) {
         newVal.dom.appendChild(this.dom);
     this.$updateHGeometry();
     this.$updateVGeometry();
+}
+p.$setFocus = function(newVal) {
+    var focusScope = this.parent;
+    while (!focusScope.$isFocusScope)
+        focusScope = focusScope.parent;
+    QMLItem.setFocusInScope(focusScope, newVal ? this : null);
+}
+p.$addActiveFocus = function() {
+    this.$setInternal("activeFocus", true);
+
+    var focusScope = this.parent;
+    while (focusScope && !focusScope.$isFocusScope)
+        focusScope = focusScope.parent;
+
+    if (focusScope) {
+        focusScope.$addActiveFocus();
+
+        if (!this.focus)
+            QMLItem.setFocusInScope(focusScope, this);
+    }
+}
+p.$removeActiveFocus = function() {
+    this.$setInternal("activeFocus", false);
+    if (this.$focusItem)
+        this.$focusItem.$removeActiveFocus();
 }
 p.$updateHGeometry = function() {
     var anchors = this.anchors || this;
@@ -1690,6 +1768,9 @@ p.$updateDirtyProperty = function(name, newVal) {
             break;
     }
 }
+p.forceActiveFocus = function() {
+    this.dom.focus();
+}
 
 createProperty({ type: "anchors", object: p, name: "anchors", initialValue: [] });
 createProperty({ type: "list", object: p, name: "data", initialValue: [], append: p.$dataAppend });
@@ -1711,6 +1792,8 @@ createProperty({ type: "list", object: p, name: "transform", initialValue: [] })
 createProperty({ type: "bool", object: p, name: "visible", initialValue: true });
 createProperty({ type: "real", object: p, name: "opacity", initialValue: 1 });
 createProperty({ type: "bool", object: p, name: "clip", initialValue: false });
+createProperty({ type: "bool", object: p, name: "focus", initialValue: false, set: p.$setFocus });
+createProperty({ type: "bool", object: p, name: "activeFocus", initialValue: false, readonly: true });
 createProperty({ type: "list", object: p, name: "states", initialValue: [] });
 createProperty({ type: "list", object: p, name: "transitions", initialValue: [] });
 createProperty({ type: "string", object: p, name: "state", initialValue: "", set: p.$setState });
@@ -1735,6 +1818,8 @@ function QMLItem(parent) {
     this.$properties.resources.value = [];
     this.$revertActions = [];
     this.anchors = new QMLAnchors(null, this, "anchors");
+    this.$isFocusScope = false;
+    this.$focusItem = null;
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         if (this.$parent === null) { // This is the root element. Initialize it.
@@ -1754,6 +1839,8 @@ function QMLItem(parent) {
             this.dom.style.top = "0";
             this.dom.style.left = "0";
             this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
+            this.$isFocusScope = true; // The root element is always a focus scope
+            this.$properties.activeFocus.value = true;
         } else if (!this.dom) { // Create a dom element for this item.
             this.dom = document.createElement("div");
         }
@@ -1794,6 +1881,200 @@ function QMLItem(parent) {
                 }
             }
         }
+    }
+}
+
+QMLItem.setFocusInScope = function(scope, focusItem) {
+    if (scope.$focusItem) {
+        scope.$focusItem.$setInternal("focus", false);
+        scope.$focusItem.$removeActiveFocus();
+    }
+    if (focusItem) {
+        focusItem.$setInternal("focus", true);
+
+        if (scope.activeFocus && !focusItem.activeFocus) {
+            focusItem.dom.focus();
+        }
+    }
+
+    scope.$focusItem = focusItem;
+}
+
+// ========== QMLKeys ==========
+
+p = QMLKeysAttached.prototype = new QObject();
+function QMLKeysAttached(parent) {
+    QObject.call(this, parent);
+
+    this.asteriskPressed = Signal([{type: "variant", name: "event"}]);
+    this.backPressed = Signal([{type: "variant", name: "event"}]);
+    this.backtabPressed = Signal([{type: "variant", name: "event"}]);
+    this.callPressed = Signal([{type: "variant", name: "event"}]);
+    this.cancelPressed = Signal([{type: "variant", name: "event"}]);
+    this.context1Pressed = Signal([{type: "variant", name: "event"}]);
+    this.context2Pressed = Signal([{type: "variant", name: "event"}]);
+    this.context3Pressed = Signal([{type: "variant", name: "event"}]);
+    this.context4Pressed = Signal([{type: "variant", name: "event"}]);
+    this.deletePressed = Signal([{type: "variant", name: "event"}]);
+    this.digit0Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit1Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit2Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit3Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit4Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit5Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit6Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit7Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit8Pressed = Signal([{type: "variant", name: "event"}]);
+    this.digit9Pressed = Signal([{type: "variant", name: "event"}]);
+    this.downPressed = Signal([{type: "variant", name: "event"}]);
+    this.enterPressed = Signal([{type: "variant", name: "event"}]);
+    this.escapePressed = Signal([{type: "variant", name: "event"}]);
+    this.flipPressed = Signal([{type: "variant", name: "event"}]);
+    this.hangupPressed = Signal([{type: "variant", name: "event"}]);
+    this.leftPressed = Signal([{type: "variant", name: "event"}]);
+    this.menuPressed = Signal([{type: "variant", name: "event"}]);
+    this.noPressed = Signal([{type: "variant", name: "event"}]);
+    this.pressed = Signal([{type: "variant", name: "event"}]);
+    this.released = Signal([{type: "variant", name: "event"}]);
+    this.returnPressed = Signal([{type: "variant", name: "event"}]);
+    this.rightPressed = Signal([{type: "variant", name: "event"}]);
+    this.selectPressed = Signal([{type: "variant", name: "event"}]);
+    this.spacePressed = Signal([{type: "variant", name: "event"}]);
+    this.tabPressed = Signal([{type: "variant", name: "event"}]);
+    this.upPressed = Signal([{type: "variant", name: "event"}]);
+    this.volumeDownPressed = Signal([{type: "variant", name: "event"}]);
+    this.volumeUpPressed = Signal([{type: "variant", name: "event"}]);
+    this.yesPressed = Signal([{type: "variant", name: "event"}]);
+
+    if (engine.renderMode == QMLRenderMode.DOM) {
+        var self = this;
+        this.$parent.dom.tabIndex = 0;
+        this.$parent.dom.addEventListener('keydown', keyPressedDown);
+        this.$parent.dom.addEventListener('keyup', keyReleased);
+        this.$parent.dom.addEventListener('keypress', keyPressed);
+        if (!this.$parent.$isFocusScope) { // FocusScope has it's own focus handling
+            this.$parent.dom.addEventListener("focus", gotFocus);
+            this.$parent.dom.addEventListener("blur", lostFocus);
+        }
+
+        function gotFocus(e) {
+            self.$parent.$addActiveFocus();
+        }
+        function lostFocus(e) {
+            self.$parent.$setInternal("activeFocus", false);
+        }
+        function keyPressedDown(e) {
+            if (!self.enabled)
+                return;
+            var keyEvent = htmlToQMLEvent(e);
+            if (keyEvent.key in keyDownSigs)
+                keyDownSigs[keyEvent.key](keyEvent);
+            if (e.which in QMLKeys.htmlToQMLKeyMap) {
+                keyEvent.key = QMLKeys.htmlToQMLKeyMap[keyEvent.key];
+                self.pressed(keyEvent);
+            }
+            if (keyEvent.accepted)
+                e.stopPropagation();
+        }
+        function keyReleased(e) {
+            if (!self.enabled)
+                return;
+            var keyEvent = htmlToQMLEvent(e);
+            self.released(keyEvent);
+        }
+        function keyPressed(e) {
+            if (!self.enabled)
+                return;
+            var keyEvent = htmlToQMLEvent(e);
+            self.pressed(keyEvent);
+            if (keyEvent.key in keyPressSigs)
+                keyPressSigs[keyEvent.key](keyEvent);
+            if (keyEvent.accepted)
+                e.stopPropagation();
+        }
+        function htmlToQMLEvent(e) {
+            return {
+                accepted: false,
+                count: 1, // TODO:How can more than one key be involved in an event?
+                isAutoRepeat: e.repeat,
+                key: e.which,
+                modifiers:  (e.altKey ? Qt.AltModifier : 0)
+                          | (e.ctrlKey ? Qt.CtrlModifier : 0)
+                          | (e.metaKey ? Qt.MetaModifier : 0)
+                          | (e.shiftKey ? Qt.ShiftModifier : 0),
+                text: String.fromCharCode(e.which)
+            };
+        }
+        var keyDownSigs = {
+            9: this.tabPressed,
+            13: this.returnPressed,
+            27: this.escapePressed,
+            37: this.leftPressed,
+            38: this.upPressed,
+            39: this.rightPressed,
+            40: this.downPressed,
+            46: this.deletePressed,
+            93: this.selectPressed
+        };
+        var keyPressSigs = {
+            32: this.spacePressed,
+            42: this.asteriskPressed,
+            48: this.digit0Pressed,
+            49: this.digit1Pressed,
+            51: this.digit2Pressed,
+            52: this.digit3Pressed,
+            53: this.digit4Pressed,
+            54: this.digit5Pressed,
+            55: this.digit6Pressed,
+            56: this.digit7Pressed,
+            57: this.digit8Pressed,
+            58: this.digit9Pressed,
+        };
+        // TODO: backPressed, backtabPressed, callPressed, cancelPressed, contextXPressed, enterPressed, flipPressed,
+        //       hangupPressed, menuPressed, noPressed, volumeDownPressed, volumeUpPressed, yesPressed
+    }
+}
+createProperty({ type: "bool", object: p, name: "enabled", initialValue: true });
+
+function QMLKeys() {
+    throw "Creating Keys object is not allowed.";
+}
+QMLKeys.getAttachedObject = function() {
+    if (!this.$properties.Keys) {
+        this.$properties.Keys = new QMLKeysAttached(this);
+    }
+    return this.$properties.Keys;
+}
+QMLKeys.htmlToQMLKeyMap = {
+    8: Qt.Key_Backspace, 9: Qt.Key_Tab,    13: Qt.Key_Enter, // 13 also is Key_Return, but we can only map it to one.
+   16: Qt.Key_Shift,    17: Qt.Key_Ctrl,   18: Qt.Key_Alt,         19: Qt.Key_Pause,
+   20: Qt.Key_CapsLock, 27: Qt.Key_Escape, 33: Qt.Key_PageUp,      34: Qt.Key_PageDown,
+   35: Qt.Key_End,      36: Qt.Key_Home,   37: Qt.Key_Left,        38: Qt.Key_Up,
+   39: Qt.Key_Right,    40: Qt.Key_Down,   42: Qt.Key_Print,       45: Qt.Key_Insert,
+   46: Qt.Key_Delete,   91: Qt.Key_Meta,  112: Qt.Key_F1,         113: Qt.Key_F2,
+  114: Qt.Key_F3,      115: Qt.Key_F4,    116: Qt.Key_F5,         117: Qt.Key_F6,
+  118: Qt.Key_F7,      119: Qt.Key_F8,    120: Qt.Key_F9,         121: Qt.Key_F10,
+  122: Qt.Key_F11,     123: Qt.Key_F12,   145: Qt.Key_ScrollLock, 225: Qt.Key_AltGr
+}; // TODO: Backtab, SysReq (==Print!?), Clear, NumLock, Super_L, Super_R,
+ // Menu, Hyper_L, Hyper_R,Help, Direction_L, Direction_R
+
+// ========== QMLFocusScope ==========
+
+p = QMLFocusScope.prototype = new QMLItem();
+function QMLFocusScope(parent) {
+    QMLItem.call(this, parent);
+    this.$isFocusScope = true;
+    this.dom.tabIndex = 0;
+    var self = this;
+
+    this.dom.addEventListener("focus", gotFocus);
+    this.dom.addEventListener("blur", lostFocus);
+
+    function gotFocus(e) {
+        self.$focusItem.dom.focus();
+    }
+    function lostFocus(e) {
+        self.$removeActiveFocus();
     }
 }
 
