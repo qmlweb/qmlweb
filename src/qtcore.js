@@ -2866,24 +2866,11 @@ p.$defaultProperty = "$items";
 
 function QMLListModel(parent) {
     QMLBaseObject.call(this, parent);
-    var self = this,
-        firstItem = true;
+    var self = this;
+    this.$firstItem = true;
 
     this.$model = new JSItemModel();
-
-    this.$itemsChanged.connect(this, function(newVal) {
-        if (firstItem) {
-            firstItem = false;
-            var roleNames = [];
-            var dict = newVal[0];
-            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
-                if (i != "index")
-                    roleNames.push(i);
-            }
-            this.$model.setRoleNames(roleNames);
-        }
-        this.count = this.$items.length;
-    });
+    this.$properties.$items.value = [];
 
     this.$model.data = function(index, role) {
         return self.$items[index][role];
@@ -2906,7 +2893,16 @@ p.get = function(index) {
 }
 p.insert = function(index, dict) {
     this.$items.splice(index, 0, dict);
-    this.$itemsChanged(this.$items);
+    if (this.$firstItem) {
+        this.$firstItem = false;
+        var roleNames = [];
+        for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
+            if (i != "index")
+                roleNames.push(i);
+        }
+        this.$model.setRoleNames(roleNames);
+    }
+    this.count = this.$items.length;
     this.$model.rowsInserted(index, index+1);
 }
 p.move = function(from, to, n) {
@@ -2930,7 +2926,7 @@ p.setProperty = function(index, property, value) {
     engine.$requestDraw();
 }
 createProperty({ type: "int", object: p, name: "count", initialValue: 0 });
-createProperty({ type: "list", object: p, name: "$items", initialValue: [] });
+createProperty({ type: "list", object: p, name: "$items", initialValue: [], append: p.append });
 
 // ========== ListElement ==========
 
