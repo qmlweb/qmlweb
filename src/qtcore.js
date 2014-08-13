@@ -460,10 +460,8 @@ function createProperty(data) {
 
     setupGetter(data.object, data.name + "Changed",
         function() {
-            if (!this.$properties[data.name].changed) {
-                console.warn(data.name + "Changed signal did not exist while asking for it. Creating it.");
+            if (!this.$properties[data.name].changed)
                 this.$properties[data.name].changed = Signal();
-            }
             return this.$properties[data.name].changed;
         }
     );
