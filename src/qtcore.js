@@ -1363,7 +1363,7 @@ p.$setHeight = function(newVal) {
 }
 p.$setImplicitWidth = function(newVal) {
     this.$properties.implicitWidth.value = newVal;
-    if (this.$properties.width.value === undefined) {
+    if (this.$properties.width.value === undefined && this.$properties.width.binding === null) {
         if (this.$properties.width.changed)
             this.$properties.width.changed();
         this.$updateHGeometry();
@@ -1372,7 +1372,7 @@ p.$setImplicitWidth = function(newVal) {
 }
 p.$setImplicitHeight = function(newVal) {
     this.$properties.implicitHeight.value = newVal;
-    if (this.$properties.height.value === undefined) {
+    if (this.$properties.height.value === undefined && this.$properties.height.binding === null) {
         if (this.$properties.height.changed)
             this.$properties.height.changed();
         this.$updateVGeometry();
