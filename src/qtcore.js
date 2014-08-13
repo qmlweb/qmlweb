@@ -399,8 +399,11 @@ function createProperty(data) {
             newVal = constructors[data.type](newVal, this, data.name);
         }
 
-        if (assignmentMode !== AssignmentMode.FromBinding)
+        if (assignmentMode !== AssignmentMode.FromBinding) {
             prop.binding = null;
+            while (prop.$tidyupList.length > 0)
+                prop.$tidyupList[0].disconnect(prop);
+        }
 
         if (data.type == "list") {
             if (newVal instanceof Array) {
@@ -471,6 +474,10 @@ function QMLProperty(initialValue, obj, name) {
     this.value = initialValue;
     this.obj = obj;
     this.name = name;
+
+    // This list contains all signals that hold references to this object.
+    // It is needed when deleting, as we need to tidy up all references to this object.
+    this.$tidyupList = [];
 }
 // Update recalculates the value of a binding and resets the propertyit's assigned to.
 // Called when one of the dependencies changes.
@@ -1268,11 +1275,11 @@ p.$delete = function() {
             item.disconnect(this);
     }
 
-//     for (var i in this.$properties) {
-//         var prop = this.$properties[i];
-//         while (prop.$tidyupList.length > 0)
-//             prop.$tidyupList[0].disconnect(prop);
-//     }
+    for (var i in this.$properties) {
+        var prop = this.$properties[i];
+        while (prop.$tidyupList.length > 0)
+            prop.$tidyupList[0].disconnect(prop);
+    }
 
     if (this.$parent && this.$parent.$tidyupList)
         this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
@@ -2844,9 +2851,9 @@ p.$applyModel = function() {
 p.$removeChildren = function(startIndex, endIndex) {
     var removed = this.$items.splice(startIndex, endIndex - startIndex);
     for (var index in removed) {
+        removed[index].$delete();
         removed[index].parent = undefined;
         this.$removeChildProperties(removed[index]);
-        removed[index].$delete();
     }
     _executionContext = this.$context;
 }
