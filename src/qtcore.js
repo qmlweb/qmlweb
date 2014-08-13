@@ -614,15 +614,16 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 createProperty({ type: "alias", object: item, name: i, targetObjName: value.objectName,
                                  targetPropName: value.propertyName, context: _executionContext });
                 continue;
-            } else if (value instanceof QMLPropertyDefinition) {
-                createProperty({ type: value.type, object: item, name: i });
-                item[i] = value.value;
-                continue;
             } else if (i in item && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
                 applyProperties(value, item[i], objectScope, componentScope);
                 continue;
-            } else if (value instanceof QMLBinding) {
+            } else if (value instanceof QMLPropertyDefinition) {
+                createProperty({ type: value.type, object: item, name: i });
+                value = value.value;
+            }
+
+            if (value instanceof QMLBinding) {
                 if (!item.$properties || !(i in item.$properties)) {
                     if (item.$setCustomData)
                         item.$setCustomData(i, value);
