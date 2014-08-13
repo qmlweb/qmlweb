@@ -185,6 +185,8 @@
             Repeater: QMLRepeater,
             ListModel: QMLListModel,
             ListElement: QMLListElement,
+            XmlListModel: QMLXmlListModel,
+            XmlRole: QMLXmlRole,
             State: QMLState,
             PropertyChanges: QMLPropertyChanges,
             Transition: QMLTransition,
@@ -2762,7 +2764,7 @@ p.$insertChildren = function(startIndex, endIndex) {
         var newItem = this.delegate.createObject(this);
 
         createProperty({ type: "int", object: newItem, name: "index" });
-        var model = this.model instanceof QMLListModel ? this.model.$model : this.model;
+        var model = this.model instanceof QMLListModel || this.model instanceof QMLXmlListModel ? this.model.$model : this.model;
         for (var i in model.roleNames) {
             var roleName = model.roleNames[i];
             createProperty({ type: "variant", object: newItem, name: roleName });
@@ -2799,7 +2801,7 @@ p.$insertChildren = function(startIndex, endIndex) {
 p.$applyModel = function() {
     if (!this.delegate)
         return;
-    var model = this.model instanceof QMLListModel ? this.model.$model : this.model;
+    var model = this.model instanceof QMLListModel || this.model instanceof QMLXmlListModel ? this.model.$model : this.model;
     if (model instanceof JSItemModel) {
         model.dataChanged.connect(this, function(startIndex, endIndex) {
             //TODO
@@ -2940,6 +2942,111 @@ function QMLListElement(parent) {
         createProperty({ type: "variant", object: this, name: propName, initialValue: value });
     }
 }
+
+// ========== XmlListModel ==========
+
+p = QMLXmlListModel.prototype = new QMLBaseObject();
+p.$defaultProperty = "roles";
+
+function QMLXmlListModel(parent) {
+    QMLBaseObject.call(this, parent);
+    var self = this,
+    firstItem = true;
+
+    this.$model = new JSItemModel();
+    this.$dom = null;
+    this.$data = [];
+    this.$properties.roles.value = {};
+    this.$tmpResult = null;
+
+    this.$model.data = function(index, role) {
+        return self.$properties.roles.value[role].$queryNode(self.$data[index], self.$tmpResult);
+    }
+    this.$model.rowCount = function() {
+        return self.$data.length;
+    }
+
+    this.$resolveNS = function(prefix) {
+        var result = self.namespaceDeclarations.match(new RegExp("declare *namespace *"+prefix+" *\\= *([\"'])((?:\\\\?.)*)?\\1 *\\;")); // Matches possibly escaped string in quotes ("string containing \" and '\\")
+        if (result)
+            return result[2];
+    }
+}
+p.$setXml = function(newVal) {
+    this.$properties.xml.value = newVal;
+    this.$dom = (new DOMParser()).parseFromString(newVal, "application/xml");
+    this.reload();
+}
+p.$setSource = function(newVal) {
+    this.$properties.source.value = newVal;
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", newVal, false);
+    xhttp.send();
+    this.$dom = xhttp.responseXML;
+    this.reload();
+}
+p.$setQuery = function(newVal) {
+    this.$properties.query.value = newVal;
+    this.reload();
+}
+p.$setNSDecls = function(newVal) {
+    this.$properties.namespaceDeclarations.value = newVal;
+    var defaultNamespace = this.namespaceDeclarations.match(/declare default element namespace ((["'])(?:\\?.)*?\1)\;/);
+    if (defaultNamespace)
+        console.warn("Webbrowsers' XPath implementations do not support default namespaces. "
+        + "Declare and use a prefix for the namespace instead. (e.g.: declare namespace someNS:" + defaultNamespace[1] + ")");
+    this.reload();
+}
+p.reload = function() {
+    if ((this.xml === "" && this.source === "") || this.query === "" || this.roles.length === 0)
+        return;
+    var dataset = this.$dom.evaluate(this.query, this.$dom, this.$resolveNS, XPathResult.ANY_TYPE, null);
+    this.$data = [];
+    for (var node = dataset.iterateNext(); node; node = dataset.iterateNext()) {
+        this.$data.push(node);
+    }
+    this.$model.modelReset();
+}
+p.$appendRole = function(role) {
+    this.$properties.roles.value[role.name] = role;
+    this.$model.roleNames.push(role.name);
+    this.reload();
+}
+
+createProperty({ type: "int", object: p, name: "count", initialValue: 0, readonly: true });
+createProperty({ type: "string", object: p, name: "source", initialValue: "", set: p.$setSource });
+createProperty({ type: "string", object: p, name: "xml", initialValue: "", set: p.$setXml });
+createProperty({ type: "string", object: p, name: "query", initialValue: "", set: p.$setQuery });
+createProperty({ type: "string", object: p, name: "namespaceDeclarations", initialValue: "", set: p.$setNSDecls });
+createProperty({ type: "list", object: p, name: "roles", initialValue: {}, append: p.$appendRole });
+
+// ========== XMLRole ==========
+
+p = QMLXmlRole.prototype = new QMLBaseObject();
+function QMLXmlRole(parent) {
+    QMLBaseObject.call(this, parent);
+
+    this.$setCustomData = function(propName, value) {
+        createProperty({ type: "variant", object: this, name: propName, initialValue: value });
+    }
+}
+p.$setQuery = function(newVal) {
+    this.$properties.query.value = newVal;
+}
+p.$queryNode = function(node, result) {
+    result = document.evaluate(this.query, node, this.$parent.$resolveNS, XPathResult.ANY_TYPE, result);
+    switch (result.resultType) {
+        case XPathResult.NUMBER_TYPE:
+            return result.numberValue;
+        case XPathResult.STRING_TYPE:
+            return result.stringValue;
+        case XPathResult.BOOLEAN_TYPE:
+            return result.booleanValue;
+    }
+}
+createProperty({ type: "string", object: p, name: "name", initialValue: "" });
+createProperty({ type: "bool", object: p, name: "isKey", initialValue: "" });
+createProperty({ type: "string", object: p, name: "query", initialValue: "", set: p.$setQuery });
 
 // ========== size ==========
 
