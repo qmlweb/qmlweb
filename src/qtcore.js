@@ -2467,6 +2467,9 @@ function QMLText(parent) {
         this.dom.firstChild.style.height = "100%";
         this.font.$style = this.dom.firstChild.style;
     }
+
+    if (this.Component)
+        this.Component.completed.connect(this, this.$updateImplicitSize);
 }
 
 p.Text = {
@@ -2517,7 +2520,6 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = height;
     this.implicitWidth = width;
 }
-p.$finishInit = p.$updateImplicitSize;
 p.$updateDirtyProperty = function(name, newVal) {
     if (engine.renderMode !== QMLRenderMode.DOM)
         return;
@@ -4046,7 +4048,6 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = this.dom.offsetHeight;
     this.implicitWidth = this.dom.offsetWidth;
 }
-p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextInput(parent) {
     QMLItem.call(this, parent);
@@ -4069,6 +4070,8 @@ function QMLTextInput(parent) {
     this.dom.firstChild.style.width = "100%";
 
     this.accepted = Signal();
+
+    this.Component.completed.connect(this, this.$updateImplicitSize);
 
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
@@ -4110,7 +4113,6 @@ p.$updateImplicitSize = function() {
     this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
     this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
 }
-p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLButton(parent) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
@@ -4131,6 +4133,7 @@ function QMLButton(parent) {
 
     this.clicked = Signal();
 
+    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
         this.$updateImplicitSize();
@@ -4146,7 +4149,6 @@ p.$updateImplicitSize = function() {
     this.implicitWidth = this.dom.firstChild.offsetWidth;
     this.implicitHeight = this.dom.firstChild.offsetHeight;
 }
-p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text", initialValue: "" });
 function QMLTextArea(parent) {
     QMLItem.call(this, parent);
@@ -4169,6 +4171,7 @@ function QMLTextArea(parent) {
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
 
+    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
     });
@@ -4188,7 +4191,6 @@ p.$updateImplicitSize = function() {
     this.implicitHeight = this.dom.offsetHeight;
     this.implicitWidth = this.dom.offsetWidth;
 }
-p.$finishInit = p.$updateImplicitSize;
 createProperty({ type: "string", object: p, name: "text" });
 createProperty({ type: "bool", object: p, name: "checked" });
 createProperty({ type: "color", object: p, name: "color" });
@@ -4210,6 +4212,7 @@ function QMLCheckbox(parent) {
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.verticalAlign = "text-bottom";
 
+    this.Component.completed.connect(this, this.$updateImplicitSize);
     this.textChanged.connect(this, function(newVal) {
         this.dom.children[1].innerHTML = newVal;
         this.$updateImplicitSize();
