@@ -2472,11 +2472,9 @@ function QMLText(parent) {
     this.font = new QMLFont(null, this, "font");
 
     if (engine.renderMode == QMLRenderMode.DOM) {
-        // We create another span inside the text to distinguish the actual
+        // We create another p inside the text to distinguish the actual
         // (possibly html-formatted) text from child elements
-        this.dom.innerHTML = "<span></span>";
-        this.dom.firstChild.style.width = "100%";
-        this.dom.firstChild.style.height = "100%";
+        this.dom.innerHTML = '<p></p>';
         this.font.$style = this.dom.firstChild.style;
     }
 
@@ -2672,6 +2670,9 @@ engine.globalStylesheet.appendChild(document.createTextNode(".Text {\
     word-wrap: normal; \
     word-break: normal;\
     word-spacing: normal;\
+}\
+.Text p {\
+    margin: 0;\
 }"));
 
 // ========== Rectangle ==========
