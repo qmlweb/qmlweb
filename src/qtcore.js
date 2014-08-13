@@ -1826,6 +1826,9 @@ function QMLItem(parent) {
     this.$properties.data.value = [];
     this.$properties.children.value = [];
     this.$properties.resources.value = [];
+    this.$properties.states.value = [];
+    this.$properties.transitions.value = [];
+    this.$properties.transform.value = [];
     this.$revertActions = [];
     this.anchors = new QMLAnchors(null, this, "anchors");
     this.$isFocusScope = false;
