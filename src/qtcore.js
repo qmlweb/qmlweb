@@ -138,6 +138,7 @@
         InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
         InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
     },
+    XmlListModel = { Null: 0, Ready: 1, Loading: 2, Error: 3 },
     AssignmentMode = { Normal: 0, FromAnimation: 1, FromBinding: 2 },
     // Simple shortcuts to getter & setter functions, coolness with minifier
     GETTER = "__defineGetter__",
@@ -2952,6 +2953,10 @@ function QMLXmlListModel(parent) {
 
     this.$model = new JSItemModel();
     this.$dom = null;
+    this.$xhttp = new XMLHttpRequest();
+    this.$xhttp.addEventListener("load", xhttpGotResponse, false);
+    this.$xhttp.addEventListener("error", xhttpError, false);
+    this.$xhttp.addEventListener("abort", xhttpError, false);
     this.$data = [];
     this.$properties.roles.value = {};
     this.$tmpResult = null;
@@ -2968,6 +2973,14 @@ function QMLXmlListModel(parent) {
         if (result)
             return result[2];
     }
+
+    function xhttpGotResponse(e) {
+        self.$dom = self.$xhttp.responseXML;
+        self.reload();
+    }
+    function xhttpError(e) {
+        self.$setInternal("status", XmlListModel.Error);
+    }
 }
 p.$setXml = function(newVal) {
     this.$properties.xml.value = newVal;
@@ -2975,12 +2988,10 @@ p.$setXml = function(newVal) {
     this.reload();
 }
 p.$setSource = function(newVal) {
+    this.$setInternal("status", XmlListModel.Loading);
     this.$properties.source.value = newVal;
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", newVal, false);
-    xhttp.send();
-    this.$dom = xhttp.responseXML;
-    this.reload();
+    this.$xhttp.open("GET", newVal, true);
+    this.$xhttp.send();
 }
 p.$setQuery = function(newVal) {
     this.$properties.query.value = newVal;
@@ -3003,6 +3014,7 @@ p.reload = function() {
         this.$data.push(node);
     }
     this.$model.modelReset();
+    this.$setInternal("status", XmlListModel.Ready);
 }
 p.$appendRole = function(role) {
     this.$properties.roles.value[role.name] = role;
@@ -3015,6 +3027,7 @@ createProperty({ type: "string", object: p, name: "source", initialValue: "", se
 createProperty({ type: "string", object: p, name: "xml", initialValue: "", set: p.$setXml });
 createProperty({ type: "string", object: p, name: "query", initialValue: "", set: p.$setQuery });
 createProperty({ type: "string", object: p, name: "namespaceDeclarations", initialValue: "", set: p.$setNSDecls });
+createProperty({ type: "enum", object: p, name: "status", initialValue: XmlListModel.Null, readonly: true });
 createProperty({ type: "list", object: p, name: "roles", initialValue: {}, append: p.$appendRole });
 
 // ========== XMLRole ==========
