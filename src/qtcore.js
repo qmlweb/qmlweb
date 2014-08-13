@@ -264,7 +264,7 @@ function construct(meta) {
     } else if (component = engine.loadComponent(meta.object.$class)) {
         item = component.createObject(meta.parent);
 
-        if (engine.renderMode == QMLRenderMode.DOM)
+        if (engine.renderMode == QMLRenderMode.DOM && item.dom)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
     } else {
         console.log("No constructor found for " + meta.object.$class);
