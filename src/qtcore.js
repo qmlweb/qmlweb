@@ -1223,8 +1223,6 @@ function QMLComponent(meta) {
     } else {
         this.$metaObject = meta;
     }
-
-    this.$context = _executionContext;
 }
 QMLComponent.getAttachedObject = function() {
     if (!this.$properties.Component) {
@@ -1236,9 +1234,10 @@ QMLComponent.getAttachedObject = function() {
 }
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState,
-        context = this.$context ? Object.create(this.$context) : {};
+    context = _executionContext ? Object.create(_executionContext) : {};
     context.$properties = context.$properties ? Object.create(context.$properties) : {};
     engine.operationState = QMLOperationState.Init;
+    _executionContext = context;
 
     var item = construct({
         object: this.$metaObject,
