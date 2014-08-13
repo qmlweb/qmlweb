@@ -3018,7 +3018,7 @@ p.$setNSDecls = function(newVal) {
 p.reload = function() {
     if ((this.xml === "" && this.source === "") || this.query === "" || this.roles.length === 0)
         return;
-    var dataset = this.$dom.evaluate(this.query, this.$dom, this.$resolveNS, XPathResult.ANY_TYPE, null);
+    var dataset = this.$dom.evaluate(this.query, this.$dom, this.$resolveNS, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     this.$data = [];
     for (var node = dataset.iterateNext(); node; node = dataset.iterateNext()) {
         this.$data.push(node);
