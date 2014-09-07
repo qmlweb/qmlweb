@@ -684,6 +684,7 @@ NodeWithToken.prototype.toString = function() { return this.name; };
 function qmlparse($TEXT, exigent_mode, embed_tokens) {
 
         var S = {
+                text        : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/^\uFEFF/, ''),
                 input       : typeof $TEXT == "string" ? tokenizer($TEXT, true) : $TEXT,
                 token       : null,
                 prev        : null,
@@ -1323,7 +1324,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                     to = S.token.pos;
                 S.in_function--;
                 return as("qmlpropdef", name, type, stat,
-                        $TEXT.substr(from, to - from));
+                        S.text.substr(from, to - from));
             } else if (is("punc", ";"))
                 next();
             return as("qmlpropdef", name, type);
@@ -1370,7 +1371,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 var to = S.token.pos;
                 var name = stat[1];
                 return as("qmlmethod", name, stat,
-                    $TEXT.substr(from, to - from));
+                    S.text.substr(from, to - from));
             } else if (is("name", "signal")) {
                 return qmlsignaldef();
             } else if (S.token.type == "name") {
@@ -1403,7 +1404,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                             to = S.token.pos;
                         S.in_function--;
                         return as("qmlobjdef", propname, subname, stat,
-                            $TEXT.substr(from, to - from));
+                            S.text.substr(from, to - from));
                     } else if (is("punc", "{")) {
                         return as("qmlobj", propname, qmlblock());
                     } else {
@@ -1415,7 +1416,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                             to = S.token.pos;
                         S.in_function--;
                         return as("qmlprop", propname, stat,
-                            $TEXT.substr(from, to - from));
+                            S.text.substr(from, to - from));
                     }
                 }
             } else if (is("keyword", "default")) {
