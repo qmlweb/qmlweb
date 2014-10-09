@@ -68,8 +68,14 @@ registerQmlType({
             return;
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
-            model.dataChanged.connect(function(startIndex, endIndex) {
-                //TODO
+            model.dataChanged.connect(function(startIndex, endIndex, roles) {
+                if (!roles)
+                    roles = model.roleNames;
+                for (var index = startIndex; index <= endIndex; index++) {
+                    for (var i in roles) {
+                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), true, self.$items[index], self.model.$context);
+                    }
+                }
             });
             model.rowsInserted.connect(insertChildren);
             model.rowsMoved.connect(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
