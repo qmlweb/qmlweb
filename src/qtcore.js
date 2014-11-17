@@ -2634,13 +2634,6 @@ function QMLImage(meta) {
     var img = new Image(),
         self = this;
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        img.style.width = "100%";
-        img.style.height = "100%";
-        img.style.position = "absolute";
-        this.dom.appendChild(img);
-    }
-
     // Exports.
     this.Image = {
         // fillMode
@@ -2703,7 +2696,17 @@ function QMLImage(meta) {
     this.sourceChanged.connect(this, function(val) {
         this.progress = 0;
         this.status = this.Image.Loading;
+        this.dom.style.backgroundImage="url('" + engine.$resolvePath(val) + "')";
         img.src = engine.$resolvePath(val);
+    });
+
+    this.fillModeChanged.connect(this, function(val) {
+      switch (val) {
+        case this.Image.Stretch:
+          break ;
+        case this.Image.Tile:
+          break ;
+      }
     });
 
     this.$drawItem = function(c) {
@@ -2712,6 +2715,7 @@ function QMLImage(meta) {
         if (this.fillMode != this.Image.Stretch) {
             console.log("Images support only Image.Stretch fillMode currently");
         }
+
         if (this.status == this.Image.Ready) {
             c.save();
             c.drawImage(img, this.left, this.top, this.width, this.height);

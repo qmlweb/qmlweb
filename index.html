@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>QmlWeb Demo</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <script type="text/javascript" src="/src/parser.js"></script>
+      <script type="text/javascript" src="/src/process.js"></script>
+      <script type="text/javascript" src="/src/import.js"></script>
+      <script type="text/javascript" src="/src/qtcore.js"></script>
+    </head>
+    <body style="margin: 0;">
+    <script type="text/javascript">
+      var qmlEngine = new QMLEngine();
+      qmlEngine.loadFile("main.qml");
+      qmlEngine.start();
+    </script>
+  </body>
+</html>
