@@ -667,6 +667,9 @@ QMLEngine = function (element, options) {
     // List of properties whose values are bindings. For internal use only.
     this.bindedProperties = [];
 
+    // Root object of the engine
+    this.rootObject = null;
+
 
 //----------Public Methods----------
     // Start the engine
@@ -724,7 +727,7 @@ QMLEngine = function (element, options) {
 
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
-        doc = component.createObject(null);
+        this.rootObject = component.createObject(null);
         this.$initializePropertyBindings();
 
         this.start();
@@ -828,7 +831,7 @@ QMLEngine = function (element, options) {
 
     this.size = function()
     {
-        return { width: doc.getWidth(), height: doc.getHeight() };
+        return { width: this.rootObject.getWidth(), height: this.rootObject.getHeight() };
     }
 
     // Requests draw in case something has probably changed.
@@ -840,7 +843,7 @@ QMLEngine = function (element, options) {
     // Performance measurements
     this.$perfDraw = function(canvas)
     {
-        doc.$draw(canvas);
+        this.rootObject.$draw(canvas);
     }
 
     this.$draw = function()
@@ -849,14 +852,14 @@ QMLEngine = function (element, options) {
             return;
         var time = new Date();
 
-        element.height = doc.height;
-        element.width = doc.width;
+        element.height = this.rootObject.height;
+        element.width = this.rootObject.width;
 
         // Pixel-perfect size
 //         canvasEl.style.height = canvasEl.height + "px";
 //         canvasEl.style.width = canvasEl.width + "px";
 
-        doc.$draw(canvas);
+        this.rootObject.$draw(canvas);
 
         if (options.drawStat) {
             options.drawStat((new Date()).getTime() - time.getTime());
@@ -939,9 +942,7 @@ QMLEngine = function (element, options) {
     if (this.renderMode == QMLRenderMode.Canvas)
         var canvas = element.getContext('2d');
 
-    var // Root document of the engine
-        doc,
-        // Callbacks for stopping or starting the engine
+    var // Callbacks for stopping or starting the engine
         whenStop = [],
         whenStart = [],
         // Ticker resource id and ticker callbacks
