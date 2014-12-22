@@ -1,36 +1,3 @@
-/* @license
-
-  Copyright (c) 2011 Lauri Paimen <lauri@paimen.info>
-  Copyright (c) 2013 Anton Kreuzkamp <akreuzkamp@web.de>
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-      * Redistributions of source code must retain the above
-        copyright notice, this list of conditions and the following
-        disclaimer.
-
-      * Redistributions in binary form must reproduce the above
-        copyright notice, this list of conditions and the following
-        disclaimer in the documentation and/or other materials
-        provided with the distribution.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
-  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
-  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
-  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-  SUCH DAMAGE.
-*/
-
-
 /*
  * QML engine and elements.
  *
@@ -47,61 +14,7 @@
  *   For further reference, see testpad and qml viewer applications.
  */
 
-(function() {
-
-    var Qt = {
-        rgba: function(r,g,b,a) {
-            var rgba = "rgba("
-                + Math.round(r * 255) + ","
-                + Math.round(g * 255) + ","
-                + Math.round(b * 255) + ","
-                + a + ")";
-            return rgba;
-        },
-        // Buttons masks
-        LeftButton: 1,
-        RightButton: 2,
-        MiddleButton: 4,
-        // Modifiers masks
-        NoModifier: 0,
-        ShiftModifier: 1,
-        ControlModifier: 2,
-        AltModifier: 4,
-        MetaModifier: 8,
-        KeypadModifier: 16, // Note: Not available in web
-        // Layout directions
-        LeftToRight: 0,
-        RightToLeft: 1
-    },
-    Font = {
-        // Capitalization
-        MixedCase: "none",
-        AllUppercase: "uppercase",
-        AllLowercase: "lowercase",
-        SmallCaps: "smallcaps",
-        Capitalize: "capitalize",
-        // Weight
-        Light: "lighter",
-        Normal: "normal",
-        DemiBold: "600",
-        Bold: "bold",
-        Black: "bolder",
-    },
-    Easing = {
-        Linear: 1,
-        InQuad: 2,          OutQuad: 3,     InOutQuad: 4,           OutInQuad: 5,
-        InCubic: 6,         OutCubic: 7,    InOutCubic: 8,          OutInCubic: 9,
-        InQuart: 10,        OutQuart: 11,   InOutQuart: 12,         OutInQuart: 13,
-        InQuint: 14,        OutQuint: 15,   InOutQuint: 16,         OutInQuint: 17,
-        InSine: 18,         OutSine: 19,    InOutSine: 20,          OutInSine: 21,
-        InExpo: 22,         OutExpo: 23,    InOutExpo: 24,          OutInExpo: 25,
-        InCirc: 26,         OutCirc: 27,    InOutCirc: 28,          OutInCirc: 29,
-        InElastic: 30,      OutElastic: 31, InOutElastic: 32,       OutInElastic: 33,
-        InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
-        InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
-    },
-    // Simple shortcuts to getter & setter functions, coolness with minifier
-    GETTER = "__defineGetter__",
+    var GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
     Undefined = undefined,
     // Property that is currently beeing evaluated. Used to get the information
@@ -110,21 +23,20 @@
     evaluatingProperty = undefined,
     // All object constructors
     constructors = {
-            int: QMLInteger,
-            real: Number,
-            double: Number,
-            string: String,
-            bool: Boolean,
-            list: QMLList,
-            color: QMLColor,
-            enum: Number,
-            url: String,
-            variant: QMLVariant,
-            'var': QMLVariant,
-            Component: QMLComponent,
-            QMLDocument: QMLComponent,
-            MouseArea: QMLMouseArea,
-            Image: QMLImage,
+            int:           QMLInteger,
+            real:          Number,
+            double:        Number,
+            string:        String,
+            bool:          Boolean,
+            list:          QMLList,
+            color:         QMLColor,
+            enum:          Number,
+            url:           String,
+            variant:       QMLVariant,
+            'var':         QMLVariant,
+            Component:     QMLComponent,
+            QMLDocument:   QMLComponent,
+            MouseArea:     QMLMouseArea,
             AnimatedImage: QMLAnimatedImage,
             BorderImage: QMLBorderImage,
             Item: QMLItem,
@@ -248,71 +160,6 @@ function construct(meta) {
     applyProperties(meta.object, item, item, meta.context);
 
     return item;
-}
-
-/**
- * Creates and returns a signal with the parameters specified in @p params.
- *
- * @param params Array with the parameters of the signal. Each element has to be
- *               an object with the two properties "type" and "name" specifying
- *               the datatype of the parameter and its name. The type is
- *               currently ignored.
- * @param options Options that allow finetuning of the signal.
- */
-function Signal(params, options) {
-    options = options || {};
-    var connectedSlots = [];
-    var obj = options.obj
-
-    var signal = function() {
-        for (var i in connectedSlots)
-            connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
-    };
-    signal.parameters = params || [];
-    signal.connect = function() {
-        if (arguments.length == 1)
-            connectedSlots.push({thisObj: window, slot: arguments[0]});
-        else if (typeof arguments[1] == 'string' || arguments[1] instanceof String) {
-            if (arguments[0].$tidyupList && arguments[0] !== obj)
-                arguments[0].$tidyupList.push(this);
-            connectedSlots.push({thisObj: arguments[0], slot: arguments[0][arguments[1]]});
-        } else {
-            if (arguments[0].$tidyupList && (!obj || (arguments[0] !== obj && arguments[0] !== obj.$parent)))
-                arguments[0].$tidyupList.push(this);
-            connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
-        }
-    }
-    signal.disconnect = function() {
-        var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
-                       : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 3 : 4;
-        for (var i = 0; i < connectedSlots.length; i++) {
-            var item = connectedSlots[i];
-            if ((callType == 1 && item.slot == arguments[0])
-                || (callType == 2 && item.thisObj == arguments[0])
-                || (callType == 3 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
-                || (item.thisObj == arguments[0] && item.slot == arguments[1])
-            ) {
-                if (item.thisObj)
-                    item.thisObj.$tidyupList.splice(item.thisObj.$tidyupList.indexOf(this), 1);
-                connectedSlots.splice(i, 1);
-                i--; // We have removed an item from the list so the indexes shifted one backwards
-            }
-        }
-    }
-    signal.isConnected = function() {
-        var callType = arguments.length == 1 ? 1
-                       : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 2 : 3;
-        for (var i in connectedSlots) {
-            var item = connectedSlots[i];
-            if ((callType == 1 && item.slot == arguments[0])
-                || (callType == 2 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
-                || (item.thisObj == arguments[0] && item.slot == arguments[1])
-            )
-                return true;
-        }
-        return false;
-    }
-    return signal;
 }
 
 /**
@@ -2629,133 +2476,6 @@ function QMLListElement(meta) {
     applyProperties(meta.object, this, this, this.$context);
 }
 
-function QMLImage(meta) {
-    QMLItem.call(this, meta);
-    var img = new Image(),
-        self = this;
-
-    // Exports.
-    this.Image = {
-        // fillMode
-        Stretch: 1,
-        PreserveAspectFit: 2,
-        PreserveAspectCrop: 3,
-        Tile: 4,
-        TileVertically: 5,
-        TileHorizontally: 6,
-        // status
-        Null: 1,
-        Ready: 2,
-        Loading: 3,
-        Error: 4
-    }
-
-    // no-op properties
-    createSimpleProperty("bool", this, "asynchronous");
-    createSimpleProperty("bool", this, "cache");
-    createSimpleProperty("bool", this, "smooth");
-
-    createSimpleProperty("enum", this, "fillMode");
-    createSimpleProperty("bool", this, "mirror");
-    createSimpleProperty("real", this, "progress");
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
-
-    this.sourceSize = new QObject(this);
-
-    createSimpleProperty("int", this.sourceSize, "width");
-    createSimpleProperty("int", this.sourceSize, "height");
-
-    this.asynchronous = true;
-    this.cache = true;
-    this.smooth = true;
-    this.fillMode = this.Image.Stretch;
-    this.mirror = false;
-    this.progress = 0;
-    this.source = "";
-    this.status = this.Image.Null;
-    this.sourceSize.width = 0;
-    this.sourceSize.height = 0;
-
-    // Bind status to img element
-    img.onload = function() {
-        self.progress = 1;
-        self.status = self.Image.Ready;
-
-        var w = img.naturalWidth;
-        var h = img.naturalHeight;
-        self.sourceSize.width = w;
-        self.sourceSize.height = h;
-        self.implicitWidth = w;
-        self.implicitHeight = h;
-    }
-    img.onerror = function() {
-        self.status = self.Image.Error;
-    }
-
-    var updateFillMode = function(val) {
-      if (typeof val == 'undefined')
-        val = this.fillMode;
-      switch (val) {
-        default:
-        case this.Image.Stretch:
-          this.dom.style.backgroundRepeat   = 'auto';
-          this.dom.style.backgroundSize     = '100% 100%';
-          this.dom.style.backgroundPosition = 'auto';
-          break ;
-        case this.Image.Tile:
-          this.dom.style.backgroundRepeat   = 'auto';
-          this.dom.style.backgroundSize     = 'auto';
-          this.dom.style.backgroundPosition = 'auto';
-          break ;
-        case this.Image.PreserveAspectFit:
-          this.dom.style.backgroundRepeat   = 'no-repeat';
-          this.dom.style.backgroundSize     = 'contain';
-          this.dom.style.backgroundPosition = 'center';
-          break ;
-        case this.Image.PreserveAspectCrop:
-          this.dom.style.backgroundRepeat   = 'no-repeat';
-          this.dom.style.backgroundSize     = 'cover';
-          this.dom.style.backgroundPosition = 'center';
-          break ;
-        case this.Image.TileVertically:
-          this.dom.style.backgroundRepeat   = 'repeat-y';
-          this.dom.style.backgroundSize     = '100% auto';
-          this.dom.style.backgroundPosition = 'auto';
-          break ;
-        case this.Image.TileHorizontally:
-          this.dom.style.backgroundRepeat   = 'repeat-x';
-          this.dom.style.backgroundSize     = 'auto 100%';
-          this.dom.style.backgroundPosition = 'auto';
-          break ;
-      }
-    }
-    updateFillMode = updateFillMode.bind(this);
-
-    this.sourceChanged.connect(this, function(val) {
-        this.progress = 0;
-        this.status = this.Image.Loading;
-        this.dom.style.backgroundImage="url('" + engine.$resolvePath(val) + "')";
-        img.src = engine.$resolvePath(val);
-        updateFillMode();
-    });
-
-    this.fillModeChanged.connect(this, updateFillMode);
-    this.$drawItem = function(c) {
-        //descr("draw image", this, ["left", "top", "width", "height", "source"]);
-
-        updateFillMode();
-
-        if (this.status == this.Image.Ready) {
-            c.save();
-            c.drawImage(img, this.left, this.top, this.width, this.height);
-            c.restore();
-        } else {
-            console.log("Waiting for image to load");
-        }
-    }
-}
-
 function QMLAnimatedImage(meta) {
     QMLImage.call(this, meta);
 }
@@ -3797,5 +3517,3 @@ function QMLCheckbox(meta) {
         self.checked = this.checked;
     };
 }
-
-})();
