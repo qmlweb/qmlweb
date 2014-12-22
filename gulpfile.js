@@ -10,7 +10,8 @@ var qtcoreSources = [
   './src/qtcore/signal.js',
   './src/qtcore/font.js',
   './src/qtcore/easing.js',
-  './src/qtcore/objects/*.js',
+  './src/qtcore/qml/*.js',
+  './src/qtcore/qml/*/**.js',
   './src/helpers/encapsulate.end.js'
 ];
 
