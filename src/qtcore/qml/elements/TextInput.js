@@ -5,7 +5,7 @@ function QMLTextInput(meta) {
 
     this.font = new QMLFont(this);
 
-    this.dom.innerHTML = "<input type=\"text\"/>"
+    this.dom.innerHTML = "<input type=\"text\" disabled/>"
     this.dom.firstChild.style.pointerEvents = "auto";
     // In some browsers text-inputs have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
@@ -13,6 +13,8 @@ function QMLTextInput(meta) {
     this.dom.firstChild.style.width = "100%";
 
     createSimpleProperty("string", this, "text", "");
+    createSimpleProperty("int",    this, "maximumLength", -1);
+    createSimpleProperty("bool",   this, "readOnly", false);
     this.accepted = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -24,9 +26,24 @@ function QMLTextInput(meta) {
         this.dom.firstChild.value = newVal;
     });
 
+    this.maximumLengthChanged.connect(this, function(newVal) {
+        if (newVal < 0)
+          newVal = null;
+        this.dom.firstChild.maxLength = newVal;
+    });
+
+    this.readOnlyChanged.connect(this, function(newVal) {
+        this.dom.firstChild.disabled = newVal;
+    });
+
     this.dom.firstChild.onkeydown = function(e) {
-        if (e.keyCode == 13) //Enter pressed
+        if (e.keyCode == 13 && testValidator()) //Enter pressed
             self.accepted();
+    }
+
+    function testValidator() {
+      // TODO implement validator here
+      return true;
     }
 
     function updateValue(e) {
