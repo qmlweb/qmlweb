@@ -12,26 +12,24 @@ function QMLRotation(meta) {
     createSimpleProperty("real", this.origin, "x");
     createSimpleProperty("real", this.origin, "y");
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        function updateOrigin() {
-            this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
-            this.$parent.dom.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
-            this.$parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
-        }
-        this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
-        this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);
-        this.axis.yChanged.connect(this.$parent, this.$parent.$updateTransform);
-        this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
-        this.origin.xChanged.connect(this, updateOrigin);
-        this.origin.yChanged.connect(this, updateOrigin);
-
-        this.angle = 0;
-        this.axis.x = 0;
-        this.axis.y = 0;
-        this.axis.z = 1;
-        this.origin.x = 0;
-        this.origin.y = 0;
+    function updateOrigin() {
+        this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
+        this.$parent.dom.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";    // Firefox
+        this.$parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px"; // Chrome, Safari and Opera
     }
+    this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
+    this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);
+    this.axis.yChanged.connect(this.$parent, this.$parent.$updateTransform);
+    this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
+    this.origin.xChanged.connect(this, updateOrigin);
+    this.origin.yChanged.connect(this, updateOrigin);
+
+    this.angle = 0;
+    this.axis.x = 0;
+    this.axis.y = 0;
+    this.axis.z = 1;
+    this.origin.x = 0;
+    this.origin.y = 0;
 }
 
 constructors['Rotation'] = QMLRotation;

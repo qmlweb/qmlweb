@@ -47,7 +47,6 @@ function QMLNumberAnimation(meta) {
             var action = this.$actions[i];
             action.target.$properties[action.property].set(action.to, true);
         }
-        engine.$requestDraw();
 
         if (++loop == this.loops)
             this.running = false;

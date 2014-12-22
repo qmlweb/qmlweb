@@ -55,8 +55,6 @@ function QMLTimer(meta) {
         // Trigger this.
         self.triggered();
 
-        engine.$requestDraw();
-
         if (!self.repeat)
             // Emit changed signal manually after setting the value manually above.
             self.runningChanged();

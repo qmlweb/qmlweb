@@ -1,10 +1,4 @@
 function QMLButton(meta) {
-    if (engine.renderMode == QMLRenderMode.Canvas) {
-        console.log("Button-type is only supported within the DOM-backend. Use Rectangle + MouseArea instead.");
-        QMLItem.call(this, meta);
-        return;
-    }
-
     this.dom = document.createElement("button");
     QMLItem.call(this, meta);
     var self = this;

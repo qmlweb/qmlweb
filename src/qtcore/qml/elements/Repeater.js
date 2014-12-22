@@ -74,7 +74,6 @@ function QMLRepeater(meta) {
                 for (var i = smallestChangedIndex; i < self.$items.length; i++) {
                     self.$items[i].index = i;
                 }
-                engine.$requestDraw();
             });
             model.rowsRemoved.connect(function(startIndex, endIndex) {
                 removeChildren(startIndex, endIndex);
@@ -82,12 +81,10 @@ function QMLRepeater(meta) {
                     self.$items[i].index = i;
                 }
                 self.count = self.$items.length;
-                engine.$requestDraw();
             });
             model.modelReset.connect(function() {
                 removeChildren(0, self.$items.length);
                 insertChildren(0, model.rowCount());
-                engine.$requestDraw();
             });
 
             insertChildren(0, model.rowCount());
@@ -106,8 +103,6 @@ function QMLRepeater(meta) {
         }
     }
     function removeChildProperties(child) {
-        if (engine.renderMode == QMLRenderMode.Canvas && child instanceof QMLMouseArea)
-            engine.mouseAreas.splice(engine.mouseAreas.indexOf(child), 1);
         engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed), 1);
         for (var i = 0; i < child.children.length; i++)
             removeChildProperties(child.children[i])

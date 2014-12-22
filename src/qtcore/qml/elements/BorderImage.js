@@ -2,9 +2,6 @@ function QMLBorderImage(meta) {
     QMLItem.call(this, meta);
     var self = this;
 
-    if (engine.renderMode == QMLRenderMode.Canvas)
-        var img = new Image();
-
     this.BorderImage = {
         // tileMode
         Stretch: "stretch",
@@ -36,31 +33,15 @@ function QMLBorderImage(meta) {
     this.horizontalTileMode = this.BorderImage.Stretch;
     this.verticalTileMode = this.BorderImage.Stretch;
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.sourceChanged.connect(this, function() {
-            this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        });
-        this.border.leftChanged.connect(this, updateBorder);
-        this.border.rightChanged.connect(this, updateBorder);
-        this.border.topChanged.connect(this, updateBorder);
-        this.border.bottomChanged.connect(this, updateBorder);
-        this.horizontalTileModeChanged.connect(this, updateBorder);
-        this.verticalTileModeChanged.connect(this, updateBorder);
-    } else {
-        this.sourceChanged.connect(this, function(val) {
-            this.progress = 0;
-            this.status = this.BorderImage.Loading;
-            img.src = engine.$resolvePath(val);
-        });
-        img.onload = function() {
-            self.progress = 1;
-            self.status = self.BorderImage.Ready;
-            engine.$requestDraw();
-        }
-        img.onerror = function() {
-            self.status = self.BorderImage.Error;
-        }
-    }
+    this.sourceChanged.connect(this, function() {
+        this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+    });
+    this.border.leftChanged.connect(this, updateBorder);
+    this.border.rightChanged.connect(this, updateBorder);
+    this.border.topChanged.connect(this, updateBorder);
+    this.border.bottomChanged.connect(this, updateBorder);
+    this.horizontalTileModeChanged.connect(this, updateBorder);
+    this.verticalTileModeChanged.connect(this, updateBorder);
 
     function updateBorder() {
         this.dom.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";

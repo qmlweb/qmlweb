@@ -12,7 +12,6 @@ function QMLFont(parent) {
     createSimpleProperty("enum", this, "weight");
     createSimpleProperty("real", this, "wordSpacing");
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
         this.pointSizeChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontSize = newVal + "pt";
         });
@@ -70,7 +69,6 @@ function QMLFont(parent) {
         this.wordSpacingChanged.connect(function(newVal) {
             parent.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
         });
-    }
 }
 
 

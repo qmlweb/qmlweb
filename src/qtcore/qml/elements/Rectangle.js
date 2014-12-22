@@ -8,24 +8,22 @@ function QMLRectangle(meta) {
     createSimpleProperty("color", this.border, "color");
     createSimpleProperty("int", this.border, "width");
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(this, function(newVal) {
-            this.dom.style.backgroundColor = newVal;
-        });
-        this.radiusChanged.connect(this, function(newVal) {
-            this.dom.style.borderRadius = newVal + "px";
-        });
-        this.border.colorChanged.connect(this, function(newVal) {
-            this.dom.style.borderColor = newVal;
-            this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
-                                                ? "none" : "solid";
-        });
-        this.border.widthChanged.connect(this, function(newVal) {
-            this.dom.style.borderWidth = newVal + "px";
-            this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
-                                                ? "none" : "solid";
-        });
-    }
+    this.colorChanged.connect(this, function(newVal) {
+        this.dom.style.backgroundColor = newVal;
+    });
+    this.radiusChanged.connect(this, function(newVal) {
+        this.dom.style.borderRadius = newVal + "px";
+    });
+    this.border.colorChanged.connect(this, function(newVal) {
+        this.dom.style.borderColor = newVal;
+        this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
+                                            ? "none" : "solid";
+    });
+    this.border.widthChanged.connect(this, function(newVal) {
+        this.dom.style.borderWidth = newVal + "px";
+        this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
+                                            ? "none" : "solid";
+    });
 
     this.color = "white";
     this.border.color = "transparent";

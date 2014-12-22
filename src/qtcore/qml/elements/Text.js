@@ -1,14 +1,12 @@
 function QMLText(meta) {
     QMLItem.call(this, meta);
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        // We create another span inside the text to distinguish the actual
-        // (possibly html-formatted) text from child elements
-        this.dom.innerHTML = "<span></span>";
-        this.dom.style.pointerEvents = "auto";
-        this.dom.firstChild.style.width = "100%";
-        this.dom.firstChild.style.height = "100%";
-    }
+    // We create another span inside the text to distinguish the actual
+    // (possibly html-formatted) text from child elements
+    this.dom.innerHTML = "<span></span>";
+    this.dom.style.pointerEvents = "auto";
+    this.dom.firstChild.style.width = "100%";
+    this.dom.firstChild.style.height = "100%";
 
     // Creates font css description
     function fontCss(font) {
@@ -57,82 +55,80 @@ function QMLText(meta) {
     createSimpleProperty("enum", this, "style");
     createSimpleProperty("color", this, "styleColor");
 
-    if (engine.renderMode == QMLRenderMode.DOM) {
-        this.colorChanged.connect(this, function(newVal) {
-            this.dom.firstChild.style.color = newVal;
-        });
-        this.textChanged.connect(this, function(newVal) {
-            this.dom.firstChild.innerHTML = newVal;
-        });
-        this.lineHeightChanged.connect(this, function(newVal) {
-            this.dom.firstChild.style.lineHeight = newVal + "px";
-        });
-        this.wrapModeChanged.connect(this, function(newVal) {
-            switch (newVal) {
-                case 0:
-                    this.dom.firstChild.style.whiteSpace = "pre";
-                    break;
-                case 1:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    break;
-                case 2:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    this.dom.firstChild.style.wordBreak = "break-all";
-                    break;
-                case 3:
-                    this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                    this.dom.firstChild.style.wordWrap = "break-word";
-            };
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (this.horizontalAlignment == "justify")
-                this.dom.firstChild.style.whiteSpace = "normal";
-        });
-        this.horizontalAlignmentChanged.connect(this, function(newVal) {
-            this.dom.style.textAlign = newVal;
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
-            if (newVal == "justify")
-                this.dom.firstChild.style.whiteSpace = "normal";
-        });
-        this.styleChanged.connect(this, function(newVal) {
-            switch (newVal) {
-                case 0:
-                    this.dom.firstChild.style.textShadow = "none";
-                    break;
-                case 1:
-                    var color = this.styleColor;
-                    this.dom.firstChild.style.textShadow = "1px 0 0 " + color
-                        + ", -1px 0 0 " + color
-                        + ", 0 1px 0 " + color
-                        + ", 0 -1px 0 " + color;
-                    break;
-                case 2:
-                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
-                    break;
-                case 3:
-                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
-            };
-        });
-        this.styleColorChanged.connect(this, function(newVal) {
-            switch (this.style) {
-                case 0:
-                    this.dom.firstChild.style.textShadow = "none";
-                    break;
-                case 1:
-                    this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
-                        + ", -1px 0 0 " + newVal
-                        + ", 0 1px 0 " + newVal
-                        + ", 0 -1px 0 " + newVal;
-                    break;
-                case 2:
-                    this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
-                    break;
-                case 3:
-                    this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
-            };
-        });
-    }
+    this.colorChanged.connect(this, function(newVal) {
+        this.dom.firstChild.style.color = newVal;
+    });
+    this.textChanged.connect(this, function(newVal) {
+        this.dom.firstChild.innerHTML = newVal;
+    });
+    this.lineHeightChanged.connect(this, function(newVal) {
+        this.dom.firstChild.style.lineHeight = newVal + "px";
+    });
+    this.wrapModeChanged.connect(this, function(newVal) {
+        switch (newVal) {
+            case 0:
+                this.dom.firstChild.style.whiteSpace = "pre";
+                break;
+            case 1:
+                this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                break;
+            case 2:
+                this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                this.dom.firstChild.style.wordBreak = "break-all";
+                break;
+            case 3:
+                this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                this.dom.firstChild.style.wordWrap = "break-word";
+        };
+        // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+        // lesser of the two evils to be ignoring "\n"s inside the text.
+        if (this.horizontalAlignment == "justify")
+            this.dom.firstChild.style.whiteSpace = "normal";
+    });
+    this.horizontalAlignmentChanged.connect(this, function(newVal) {
+        this.dom.style.textAlign = newVal;
+        // AlignJustify doesn't work with pre/pre-wrap, so we decide the
+        // lesser of the two evils to be ignoring "\n"s inside the text.
+        if (newVal == "justify")
+            this.dom.firstChild.style.whiteSpace = "normal";
+    });
+    this.styleChanged.connect(this, function(newVal) {
+        switch (newVal) {
+            case 0:
+                this.dom.firstChild.style.textShadow = "none";
+                break;
+            case 1:
+                var color = this.styleColor;
+                this.dom.firstChild.style.textShadow = "1px 0 0 " + color
+                    + ", -1px 0 0 " + color
+                    + ", 0 1px 0 " + color
+                    + ", 0 -1px 0 " + color;
+                break;
+            case 2:
+                this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                break;
+            case 3:
+                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+        };
+    });
+    this.styleColorChanged.connect(this, function(newVal) {
+        switch (this.style) {
+            case 0:
+                this.dom.firstChild.style.textShadow = "none";
+                break;
+            case 1:
+                this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
+                    + ", -1px 0 0 " + newVal
+                    + ", 0 1px 0 " + newVal
+                    + ", 0 -1px 0 " + newVal;
+                break;
+            case 2:
+                this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                break;
+            case 3:
+                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+        };
+    });
 
     this.font.family = "sans-serif";
     this.font.pointSize = 10;
@@ -161,25 +157,8 @@ function QMLText(meta) {
 
         if (this.text === Undefined || this.text === "") {
             height = 0;
-        } else if (engine.renderMode == QMLRenderMode.DOM) {
-            height = this.dom ? this.dom.firstChild.offsetHeight : 0;
         } else {
-            var el = document.createElement("span");
-            el.style.font = fontCss(this.font);
-            el.innerText = this.text;
-            document.body.appendChild(el);
-            height = el.offsetHeight;
-            document.body.removeChild(el);
-            if (!height) {
-                // Firefox doesn't support getting the height this way,
-                // approximate from point size (full of win) :P
-                if (this.font && this.font.pointSize) {
-                    height = this.font.pointSize * 96 / 72;
-                } else {
-                    height = 10 * 96 / 72;
-                }
-
-            }
+            height = this.dom ? this.dom.firstChild.offsetHeight : 0;
         }
 
         this.implicitHeight = height;
@@ -190,10 +169,8 @@ function QMLText(meta) {
 
         if (this.text === Undefined || this.text === "")
             width = 0;
-        else if (engine.renderMode == QMLRenderMode.DOM)
-            width = this.dom ? this.dom.firstChild.offsetWidth : 0;
         else
-            width = engine.$getTextMetrics(this.text, fontCss(this.font)).width;
+            width = this.dom ? this.dom.firstChild.offsetWidth : 0;
 
         this.implicitWidth = width;
     }

@@ -1,11 +1,6 @@
 function QMLTextArea(meta) {
     QMLItem.call(this, meta);
 
-    if (engine.renderMode == QMLRenderMode.Canvas) {
-        console.log("TextArea-type is only supported within the DOM-backend.");
-        return;
-    }
-
     var self = this;
 
     this.font = new QMLFont(this);

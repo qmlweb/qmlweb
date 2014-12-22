@@ -61,11 +61,9 @@ function QMLListModel(meta) {
     }
     this.set = function(index, dict) {
         this.$items[index] = dict;
-        engine.$requestDraw();
     }
     this.setProperty = function(index, property, value) {
         this.$items[index][property] = value;
-        engine.$requestDraw();
     }
 }
 

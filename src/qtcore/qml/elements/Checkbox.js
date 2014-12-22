@@ -1,10 +1,4 @@
 function QMLCheckbox(meta) {
-    if (engine.renderMode == QMLRenderMode.Canvas) {
-        console.log("CheckBox-type is only supported within the DOM-backend.");
-        QMLItem.call(this, meta);
-        return;
-    }
-
     this.dom = document.createElement("label");
     QMLItem.call(this, meta);
     var self = this;
