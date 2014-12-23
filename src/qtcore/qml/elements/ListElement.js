@@ -9,4 +9,4 @@ function QMLListElement(meta) {
     applyProperties(meta.object, this, this, this.$context);
 }
 
-constructors['ListElement'] = QMLListElement;
+registerQmlType('ListElement', QMLListElement);

@@ -56,4 +56,4 @@ function QMLTextInput(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
-constructors['TextInput'] = QMLTextInput;
+registerQmlType('TextInput', QMLTextInput);

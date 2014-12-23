@@ -22,5 +22,5 @@ function QMLComponent(meta) {
     this.$context = meta.context;
 }
 
-constructor['Component']   = QMLComponent;
-constructor['QMLDocument'] = QMLComponent;
+registerQmlType('Component',   QMLComponent);
+registerQmlType('QMLDocument', QMLComponent);

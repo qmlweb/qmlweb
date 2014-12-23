@@ -57,4 +57,4 @@ QMLFlow.prototype.layoutChildren = function() {
         this.implicitWidth = curHPos + rowSize;
 }
 
-constructors['Flow'] = QMLFlow;
+registerQmlType('Flow', QMLFlow);

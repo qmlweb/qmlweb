@@ -109,4 +109,4 @@ function QMLRepeater(meta) {
     }
 }
 
-constructors['Repeater'] = QMLRepeater;
+registerQmlType('Repeater', QMLRepeater);

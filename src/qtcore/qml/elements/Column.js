@@ -18,4 +18,4 @@ QMLColumn.prototype.layoutChildren = function() {
     this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
 }
 
-constructors['Column'] = QMLColumn;
+registerQmlType('Column', QMLColumn);

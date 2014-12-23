@@ -67,4 +67,4 @@ function QMLListModel(meta) {
     }
 }
 
-constructors['ListModel'] = QMLListModel;
+registerQmlType('ListModel', QMLListModel);

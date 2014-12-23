@@ -15,4 +15,4 @@ function QMLBehavior(meta) {
     });
 }
 
-constructors['Behavior'] = QMLBehavior;
+registerQmlType('Behavior', QMLBehavior);

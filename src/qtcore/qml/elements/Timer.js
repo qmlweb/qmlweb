@@ -72,4 +72,4 @@ function QMLTimer(meta) {
     });
 }
 
-constructors['Timer'] = QMLTimer;
+registerQmlType('Timer', QMLTimer);

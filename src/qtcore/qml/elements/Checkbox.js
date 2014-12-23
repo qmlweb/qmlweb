@@ -31,4 +31,4 @@ function QMLCheckbox(meta) {
     };
 }
 
-constructors['CheckBox'] = QMLCheckbox;
+registerQmlType('CheckBox', QMLCheckbox);

@@ -30,6 +30,11 @@ Object.create = function (o) {
     return new F();
 };
 
+// Helper. Adds a type to the constructor list
+function registerQmlType(name, type) {
+  constructors[name] = type;
+}
+
 // Helper. Ought to do absolutely nothing.
 function noop(){};
 

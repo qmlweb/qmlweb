@@ -57,4 +57,4 @@ function QMLNumberAnimation(meta) {
     }
 }
 
-constructors['NumberAnimation'] = QMLNumberAnimation;
+registerQmlType('NumberAnimation', QMLNumberAnimation);

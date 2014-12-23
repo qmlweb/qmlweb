@@ -32,4 +32,4 @@ function QMLRotation(meta) {
     this.origin.y = 0;
 }
 
-constructors['Rotation'] = QMLRotation;
+registerQmlType('Rotation', QMLRotation);

@@ -11,4 +11,4 @@ function QMLTranslate(meta) {
     this.y = 0;
 }
 
-constructors['Translate'] = QMLTranslate;
+registerQmlType('Translate', QMLTranslate);

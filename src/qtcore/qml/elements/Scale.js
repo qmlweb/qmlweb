@@ -24,4 +24,4 @@ function QMLScale(meta) {
     this.origin.y = 0;
 }
 
-constructors['Scale'] = QMLScale;
+registerQmlType('Scale', QMLScale);

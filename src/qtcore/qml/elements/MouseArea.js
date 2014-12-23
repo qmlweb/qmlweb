@@ -86,4 +86,4 @@ function QMLMouseArea(meta) {
     }
 }
 
-constructors['MouseArea'] = QMLMouseArea;
+registerQmlType('MouseArea', QMLMouseArea);

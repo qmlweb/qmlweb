@@ -34,4 +34,4 @@ function QMLTextArea(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
-constructors['TextArea'] = QMLTextArea;
+registerQmlType('TextArea', QMLTextArea);

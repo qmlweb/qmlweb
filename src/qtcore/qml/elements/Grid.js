@@ -117,4 +117,4 @@ QMLGrid.prototype.layoutChildren = function() {
     this.implicitHeight = gridHeight;
 }
 
-constructors['Grid'] = QMLGrid;
+registerQmlType('Grid', QMLGrid);

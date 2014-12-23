@@ -30,4 +30,4 @@ function QMLTransition(meta) {
     }
 }
 
-constructors['Transition'] = QMLTransition;
+registerQmlType('Transition', QMLTransition);

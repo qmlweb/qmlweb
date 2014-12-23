@@ -26,4 +26,4 @@ function QMLState(meta) {
     }
 }
 
-constructors['State'] = QMLState;
+registerQmlType('State', QMLState);

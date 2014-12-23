@@ -2,4 +2,4 @@ function QMLAnimatedImage(meta) {
     QMLImage.call(this, meta);
 }
 
-constructors['AnimatedImage'] = QMLAnimatedImage;
+registerQmlType('AnimatedImage', QMLAnimatedImage);

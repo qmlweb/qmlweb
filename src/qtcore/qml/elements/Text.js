@@ -188,4 +188,4 @@ function QMLText(meta) {
     }
 }
 
-constructors['Text'] = QMLText;
+registerQmlType('Text', QMLText);

@@ -125,4 +125,4 @@ function QMLImage(meta) {
     }
 }
 
-constructors['Image'] = QMLImage;
+registerQmlType('Image', QMLImage);

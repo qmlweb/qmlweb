@@ -61,4 +61,4 @@ function QMLRectangle(meta) {
     }
 }
 
-constructors['Rectangle'] = QMLRectangle;
+registerQmlType('Rectangle', QMLRectangle);

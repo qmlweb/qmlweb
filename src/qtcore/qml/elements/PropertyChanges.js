@@ -17,4 +17,4 @@ function QMLPropertyChanges(meta) {
     }
 }
 
-constructor['PropertyChanges'] = QMLPropertyChanges;
+registerQmlType('PropertyChanges', QMLPropertyChanges);

@@ -26,4 +26,4 @@ QMLRow.prototype.layoutChildren = function() {
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
 
-constructors['Row'] = QMLRow;
+registerQmlType('Row', QMLRow);

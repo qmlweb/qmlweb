@@ -137,4 +137,4 @@ function QMLBorderImage(meta) {
     }
 }
 
-constructors['BorderImage'] = QMLBorderImage;
+registerQmlType('BorderImage', QMLBorderImage);

@@ -98,4 +98,4 @@ function QMLFontLoader(meta) {
     this.nameChanged.connect(this, loadFont);
 }
 
-constructors['FontLoader'] = QMLFontLoader;
+registerQmlType('FontLoader', QMLFontLoader);

@@ -75,4 +75,4 @@ function QMLSequentialAnimation(meta) {
     });
 };
 
-constructors['SequentialAnimation'] = QMLSequentialAnimation;
+registerQmlType('SequentialAnimation', QMLSequentialAnimation);

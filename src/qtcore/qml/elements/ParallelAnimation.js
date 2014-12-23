@@ -50,4 +50,4 @@ function QMLParallelAnimation(meta) {
     });
 };
 
-constructors['ParallelAnimation'] = QMLParallelAnimation;
+registerQmlType('ParallelAnimation', QMLParallelAnimation);

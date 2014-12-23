@@ -25,4 +25,4 @@ function QMLButton(meta) {
     }
 }
 
-constructors['Button'] = QMLButton;
+registerQmlType('Button', QMLButton);
