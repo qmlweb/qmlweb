@@ -11,7 +11,8 @@ var qtcoreSources = [
   './src/qtcore/font.js',
   './src/qtcore/easing.js',
   './src/qtcore/qml/*.js',
-  './src/qtcore/qml/*/**.js',
+  './src/qtcore/qml/**/*.js',
+  './src/qmlweb/**/*.js',
   './src/helpers/encapsulate.end.js'
 ];
 
