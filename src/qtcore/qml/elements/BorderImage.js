@@ -91,50 +91,6 @@ function QMLBorderImage(meta) {
                                                 + this.border.bottom + "px "
                                                 + this.border.left + "px";
     }
-
-    this.$drawItem = function(c) {
-        if (this.horizontalTileMode != this.BorderImage.Stretch || this.verticalTileMode != this.BorderImage.Stretch) {
-            console.log("BorderImages support only BorderImage.Stretch tileMode currently with the canvas-backend.");
-        }
-        if (this.status == this.BorderImage.Ready) {
-            c.save();
-            c.drawImage(img, 0, 0, this.border.left, this.border.top,
-                        this.left, this.top, this.border.left, this.border.top);
-            c.drawImage(img, img.naturalWidth - this.border.right, 0,
-                        this.border.right, this.border.top,
-                        this.left + this.width - this.border.right, this.top,
-                        this.border.right, this.border.top);
-            c.drawImage(img, 0, img.naturalHeight - this.border.bottom,
-                        this.border.left, this.border.bottom,
-                        this.left, this.top + this.height - this.border.bottom,
-                        this.border.left, this.border.bottom);
-            c.drawImage(img, img.naturalWidth - this.border.right, img.naturalHeight - this.border.bottom,
-                        this.border.right, this.border.bottom,
-                        this.left + this.width - this.border.right,
-                        this.top + this.height - this.border.bottom,
-                        this.border.right, this.border.bottom);
-
-            c.drawImage(img, 0, this.border.top,
-                        this.border.left, img.naturalHeight - this.border.bottom - this.border.top,
-                        this.left, this.top + this.border.top,
-                        this.border.left, this.height - this.border.bottom - this.border.top);
-            c.drawImage(img, this.border.left, 0,
-                        img.naturalWidth - this.border.right - this.border.left, this.border.top,
-                        this.left + this.border.left, this.top,
-                        this.width - this.border.right - this.border.left, this.border.top);
-            c.drawImage(img, img.naturalWidth - this.border.right, this.border.top,
-                        this.border.right, img.naturalHeight - this.border.bottom - this.border.top,
-                        this.right - this.border.right, this.top + this.border.top,
-                        this.border.right, this.height - this.border.bottom - this.border.top);
-            c.drawImage(img, this.border.left, img.naturalHeight - this.border.bottom,
-                        img.naturalWidth - this.border.right - this.border.left, this.border.bottom,
-                        this.left + this.border.left, this.bottom - this.border.bottom,
-                        this.width - this.border.right - this.border.left, this.border.bottom);
-            c.restore();
-        } else {
-            console.log("Waiting for image to load");
-        }
-    }
 }
 
 registerQmlType('BorderImage', QMLBorderImage);
