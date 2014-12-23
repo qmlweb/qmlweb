@@ -103,7 +103,8 @@ function construct(meta) {
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
         QMLBaseObject.call(item, meta);
-        item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+        if (typeof item.dom != 'undefined')
+          item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
     } else {
         console.log("No constructor found for " + meta.object.$class);
