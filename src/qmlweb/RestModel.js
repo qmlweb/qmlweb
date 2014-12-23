@@ -25,6 +25,8 @@ function QMLRestModel(meta) {
   this.fetched = Signal();
   this.saved   = Signal();
 
+  this.runningRequests = 0;
+
   this.fetch = function() {
     ajax({
       method:   'GET',
@@ -34,13 +36,21 @@ function QMLRestModel(meta) {
         self.fetched();
       }
     });
-  }
+  };
+
+  this.create = function() {
+    sendToServer('POST');
+  };
 
   this.save = function() {
+    sendToServer('PUT');
+  };
+
+  function sendToServer(method) {
     var body = generateBodyForPostQuery();
 
     ajax({
-      method:   'POST',
+      method:   method,
       mimeType: self.queryMimeType,
       body:     body,
       success:  function(xhr) {
@@ -49,6 +59,15 @@ function QMLRestModel(meta) {
       }
     });
   }
+
+  this.remove = function() {
+    ajax({
+      method: 'DELETE',
+      success: function(xhr) {
+        self.destroy();
+      }
+    });
+  };
 
   function generateBodyForPostQuery() {
     var object     = {};
@@ -98,6 +117,9 @@ function QMLRestModel(meta) {
           options.success(xhr);
         else
           options.failure(xhr);
+        self.runningRequests -= 1;
+        if (self.runningRequests <= 0)
+          self.isLoading = false;
       }
     }
     xhr.open(options.method, self.url, true);
@@ -107,6 +129,8 @@ function QMLRestModel(meta) {
     }
     else
       xhr.send(null);
+    self.runningRequests += 1;
+    self.isLoading = true;
   }
 
   function xhrReadResponse(xhr) {
