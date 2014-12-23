@@ -75,6 +75,7 @@ registerQmlType('MyTypeName', function (meta) {
 });
 ```
 
+And here's how you would use that component in a regular QML file:
 ```QML
 MyTypeName {
   name: 'el nombre'
