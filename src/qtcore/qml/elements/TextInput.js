@@ -13,9 +13,13 @@ function QMLTextInput(meta) {
     this.dom.firstChild.style.width = "100%";
 
     createSimpleProperty("string", this, "text", "");
-    createSimpleProperty("int",    this, "maximumLength", -1);
-    createSimpleProperty("bool",   this, "readOnly", false);
+    createSimpleProperty("int",    this, "maximumLength");
+    createSimpleProperty("bool",   this, "readOnly");
+    createSimpleProperty("var",    this, "validator");
     this.accepted = Signal();
+    this.readOnly = false;
+    this.maximumLength = -1;
+    this.dom.firstChild.disabled = false;
 
     this.Component.completed.connect(this, function() {
         this.implicitWidth = this.dom.firstChild.offsetWidth;
@@ -42,7 +46,8 @@ function QMLTextInput(meta) {
     }
 
     function testValidator() {
-      // TODO implement validator here
+      if (typeof self.validator != 'undefined' && self.validator != null)
+        return self.validator.validate(self.text);
       return true;
     }
 
