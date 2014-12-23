@@ -249,6 +249,8 @@ function QMLItem(meta) {
                     transform += " scale(" + t.xScale + ", " + t.yScale + ")";
                 else if (t instanceof QMLTranslate)
                     transform += " translate(" + t.x + "px, " + t.y + "px)";
+                else if (typeof t == 'string')
+                    transform += t;
             }
             this.dom.style.transform = transform;
             this.dom.style.MozTransform = transform;    // Firefox

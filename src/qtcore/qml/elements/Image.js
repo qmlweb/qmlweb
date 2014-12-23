@@ -101,6 +101,20 @@ function QMLImage(meta) {
     }
     updateFillMode = updateFillMode.bind(this);
 
+    var updateMirroring = (function(val) {
+      var transformRule = 'scale(-1,1)';
+      if (!val)
+      {
+        var index = this.transform.indexOf(transformRule);
+
+        if (index >= 0)
+          this.transform.splice(index, 1);
+      }
+      else
+        this.transform.push(transformRule);
+      this.$updateTransform();
+    }).bind(this);
+
     this.sourceChanged.connect(this, function(val) {
         this.progress = 0;
         this.status = this.Image.Loading;
@@ -109,6 +123,7 @@ function QMLImage(meta) {
         updateFillMode();
     });
 
+    this.mirrorChanged.connect  (this, updateMirroring);
     this.fillModeChanged.connect(this, updateFillMode);
     this.$drawItem = function(c) {
         //descr("draw image", this, ["left", "top", "width", "height", "source"]);
