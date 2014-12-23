@@ -9,7 +9,7 @@ Rectangle {
    Text {
        id: helloText
        text: "Hello world!"
-       y: 30
+       anchors.verticalCenter: parent.verticalCenter
        anchors.horizontalCenter: parent.horizontalCenter
        font.pointSize: 24; font.bold: true
    }
