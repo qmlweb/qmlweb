@@ -231,7 +231,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 value.function = false;
                 value.compile();
             }
-            console.log(typeof item[signalName]);
             item[signalName].connect(item, value.eval(objectScope, componentScope));
             continue;
         }
