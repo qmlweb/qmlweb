@@ -217,6 +217,10 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 console.warn("No signal called " + signalName + " found!");
                 continue;
             }
+            else if (typeof item[signalName].connect != 'function') {
+                console.warn(signalName + " is not a signal!");
+                continue;
+            }
             if (!value.eval) {
                 var params = "";
                 for (var j in item[signalName].parameters) {
@@ -227,6 +231,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 value.function = false;
                 value.compile();
             }
+            console.log(typeof item[signalName]);
             item[signalName].connect(item, value.eval(objectScope, componentScope));
             continue;
         }
