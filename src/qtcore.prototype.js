@@ -31,7 +31,8 @@ Object.create = function (o) {
 };
 
 // Helper. Adds a type to the constructor list
-function registerQmlType(name, type) {
+window.registerQmlType = function (name, type) {
+  window[type.name]  = type;
   constructors[name] = type;
 }
 

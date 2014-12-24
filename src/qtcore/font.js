@@ -1,4 +1,4 @@
-var Font = {
+window.Font = {
   // Capitalization
   MixedCase: "none",
   AllUppercase: "uppercase",
