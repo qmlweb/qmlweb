@@ -72,15 +72,20 @@ function parseQML(file) {
  * @return {mixed} String of contents or false in errors.
  */
 getUrlContents = function (url) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    xhr.send(null);
-    if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
-        console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
-        return false;
+    if (typeof urlContentCache[url] == 'undefined') {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, false);
+      xhr.send(null);
+      if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
+          console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
+          return false;
+      }
+      urlContentCache[url] = xhr.responseText;
     }
-    return xhr.responseText;
+    return urlContentCache[url];
 }
+if (typeof window.urlContentCache == 'undefined')
+  window.urlContentCache = {};
 
 /**
  * Read qmldir spec file at directory. EXPORTED.
