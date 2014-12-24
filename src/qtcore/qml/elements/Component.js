@@ -23,22 +23,22 @@ function QMLComponent(meta) {
 
     var loadJsImport = (function(importDesc) {
       var src = importDesc.subject;
+      var js;
 
       if (typeof qmlEngine.basePath != 'undefined')
         src = qmlEngine.basePath + src;
-      var js = getUrlContents(src);
-
-      // TODO parse javascript
+      js = getUrlContents(src);
+      eval(js);
     });
 
     var loadQmlImport = (function(importDesc) {
       var src = importDesc.subject;
+      var qml;
 
       if (typeof qmlEngine.basePath != 'undefined')
         src = qmlEngine.basePath + src;
-      var qml = getUrlContents(src);
-
-      qmlEngine.loadFile(qml);
+      qml = getUrlContents(src);
+      qmlEngine.loadQML(qml);
     });
 
     var loadImport = (function(importDesc) {
