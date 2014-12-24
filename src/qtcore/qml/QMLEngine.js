@@ -98,6 +98,10 @@ QMLEngine = function (element, options) {
         }
     }
 
+    this.rootContext = function() {
+      return doc.$context;
+    }
+
     this.registerProperty = function(obj, propName)
     {
         var dependantProperties = [];
