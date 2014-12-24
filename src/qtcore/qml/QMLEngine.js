@@ -66,11 +66,16 @@ QMLEngine = function (element, options) {
         }
     }
 
+    this.pathFromFilepath = function(file) {
+      var basePath = file.split("/");
+      basePath[basePath.length - 1] = "";
+      basePath = basePath.join("/");
+      return basePath;
+    }
+
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
-        basePath = file.split("/");
-        basePath[basePath.length - 1] = "";
-        basePath = basePath.join("/");
+        basePath = this.pathFromFilepath(file);
         var src = getUrlContents(file);
         if (options.debugSrc) {
             options.debugSrc(src);

@@ -10,7 +10,6 @@ QMLComponent.prototype.createObject = function(parent, properties) {
     });
 
     engine.operationState = oldState;
-
     return item;
 }
 
