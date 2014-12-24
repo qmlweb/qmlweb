@@ -1,4 +1,5 @@
-import Qt 4.7
+import Qt 5.4;
+import "jsfile.js" as Logic;
 
 Rectangle {
   id: base
@@ -13,7 +14,7 @@ Rectangle {
     }
     maximumLength: 5
     readOnly: false
-    inputMask: "abcd"
+    validator: RegExpValidator { regExp: /a+/ }
     onAccepted: {
       textinput.readOnly = true;
     }

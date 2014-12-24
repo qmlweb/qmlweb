@@ -676,6 +676,8 @@ var ATOMIC_START_TOKEN = array_to_hash([ "atom", "num", "string", "regexp", "nam
 
 /* -----[ Parser ]----- */
 
+var imports = [];
+
 function NodeWithToken(str, start, end) {
         this.name = str;
         this.start = start;
@@ -1429,17 +1431,35 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         }
 
         function qmlimport() {
-            // todo
+          var subject = null,
+              version = null,
+              alias = null;
+          var gettingAlias = false;
+          var currentLine = S.token.line;
+
+          next();
+          while (S.token.type != 'punc' && S.token.line == currentLine) {
+            if (subject == null)
+              subject = S.token.value;
+            else if (gettingAlias == false)
+            {
+              if (S.token.value == 'as')
+                gettingAlias = true;
+              else if (version == null)
+                version = S.token.value;
+            }
+            else
+              alias = S.token.value;
             next();
-            next();
-            next();
+          }
+          while (S.token.type == 'punc') { next(); }
+          imports.push({ subject: subject, version: version, alias: alias });
         }
 
         function qmldocument() {
-            // Skip imports
-            while (is("name", "import")) {
+            imports = [];
+            while (is("name", "import"))
                 qmlimport();
-            }
             return qmlstatement();
         };
 
@@ -1503,21 +1523,6 @@ function HOP(obj, prop) {
 
 var warn = function() {};
 
-/**
- * Create QML binding.
- * @param {Variant} val Sourcecode or function representing the binding
- * @param {Array} tree Parser tree of the binding
- * @return {Object} Object representing the binding
- */
-function QMLBinding(val, tree) {
-    // this.function states whether the binding is a simple js statement or a function containing a
-    // return statement. We decide this on whether it is a code block or not. If it is, we require a
-    // return statement. If it is a code block it could though also be a object definition, so we
-    // need to check that as well (it is, if the content is labels).
-    this.function = tree && tree[0] == "block" && tree[1][0] && tree[1][0][0] !== "label";
-    this.src = val;
-}
-
 QMLMethod.prototype = new QMLBinding();
 function QMLMethod(src) {
     this.src = src;
@@ -1565,13 +1570,6 @@ function QMLMetaElement(type, onProp) {
     this.$on = onProp;
 }
 
-QMLBinding.prototype.toJSON = function() {
-    return {src: this.src,
-        deps: JSON.stringify(this.deps),
-        tree: JSON.stringify(this.tree) };
-}
-
-
 // Convert parser tree to the format understood by engine
 function convertToEngine(tree) {
 
@@ -1585,6 +1583,7 @@ function convertToEngine(tree) {
         "toplevel": function(statements) {
             var item = { $class: "QMLDocument" };
             // todo: imports etc
+            item.$imports = imports;
             item.$children = [ walk(statements[0]) ];
             return item;
         },

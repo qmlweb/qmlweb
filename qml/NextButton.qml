@@ -9,6 +9,7 @@ Rectangle {
     source: base.source
     fillMode: Image.PreserveAspectFit
     anchors.fill: parent
+    mirror: true
 
     MouseArea {
       anchors.fill: parent

@@ -75,6 +75,7 @@ QMLEngine = function (element, options) {
         if (options.debugSrc) {
             options.debugSrc(src);
         }
+        this.basePath = basePath;
         this.loadQML(src);
     }
     // parse and construct qml

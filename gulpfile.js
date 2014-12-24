@@ -5,6 +5,12 @@ var concat = require('gulp-concat');
 
 var qtcoreSources = [
   './src/helpers/encapsulate.begin.js',
+  './src/qtcore/qml/QMLBinding.js',
+
+  './src/qtcore/lib/parser.js',
+  './src/qtcore/lib/process.js',
+  './src/qtcore/lib/import.js',
+
   './src/qtcore.prototype.js',
   './src/qtcore/qt.js',
   './src/qtcore/signal.js',
@@ -12,23 +18,15 @@ var qtcoreSources = [
   './src/qtcore/easing.js',
   './src/qtcore/qml/*.js',
   './src/qtcore/qml/**/*.js',
+
   './src/qmlweb/**/*.js',
   './src/helpers/encapsulate.end.js'
 ];
 
-var allSources = [
-  './lib/parser.js', './lib/process.js', './lib/import.js', './lib/qtcore.js'
-];
-
-gulp.task('qtcore', function() {
-  return gulp.src(qtcoreSources).pipe(concat('qtcore.js')).pipe(gulp.dest('./lib'));
-});
-
 gulp.task('qt', function() {
-  return gulp.src(allSources).pipe(concat('qt.js')).pipe(gulp.dest('./lib'));
+  return gulp.src(qtcoreSources).pipe(concat('qt.js')).pipe(gulp.dest('./lib'));
 });
 
-gulp.task('default', ['qtcore', 'qt'],function() {
-   gulp.watch(qtcoreSources, ['qtcore']);
-   gulp.watch(allSources,    ['qt']);
+gulp.task('default', ['qt'],function() {
+   gulp.watch(qtcoreSources, ['qt']);
 });
