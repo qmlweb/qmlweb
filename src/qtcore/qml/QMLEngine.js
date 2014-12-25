@@ -75,18 +75,25 @@ QMLEngine = function (element, options) {
 
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
+        var tree;
+
         basePath = this.pathFromFilepath(file);
-        var src = getUrlContents(file);
-        if (options.debugSrc) {
-            options.debugSrc(src);
+        if (!qrc.includesFile(file)) {
+          var src = getUrlContents(file);
+
+          qrc[file] = qmlparse(src);
         }
-        this.basePath = basePath;
-        this.loadQML(src);
+        tree = convertToEngine(qrc[file]);
+        this.loadQMLTree(tree);
     }
+
     // parse and construct qml
     this.loadQML = function(src) {
         engine = this;
-        var tree = parseQML(src);
+        this.loadQMLTree(parseQML(src));
+    }
+
+    this.loadQMLTree = function(tree) {
         if (options.debugTree) {
             options.debugTree(tree);
         }

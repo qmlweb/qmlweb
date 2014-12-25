@@ -74,9 +74,6 @@ function clone(obj){
     return temp;
 }
 
-// dummy javascript console in case it doesn't exist.
-if (!window.console) window.console = { log: function(){} };
-
 /* -----[ Tokenizer (constants) ]----- */
 
 var KEYWORDS = array_to_hash([
@@ -1715,4 +1712,8 @@ function convertToEngine(tree) {
 function parseQML(src) {
     var parsetree = qmlparse(src);
     return convertToEngine(parsetree);
+}
+
+if (typeof global != "undefined") {
+  global.qmlparse = qmlparse;
 }

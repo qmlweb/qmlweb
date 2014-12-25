@@ -1,6 +1,7 @@
 var es = require('event-stream');
 var gutil = require('gulp-util');
-var qml = require('./lib/qt.js');
+require(__dirname + '/src/qtcore/qml/QMLBinding.js');
+require(__dirname + '/src/qtcore/qml/lib/parser.js');
 
 module.exports = function (opt) {
   function modifyFile(file) {
@@ -8,9 +9,14 @@ module.exports = function (opt) {
     if (file.isStream()) return this.emit('error', new Error("gulp-qml: Streaming not supported"));
 
     var data;
-    var str  = file.contents.toString('utf8');
-    var dest = gutil.replaceExtension(file.path, ".js");
     var src;
+    var str      = file.contents.toString('utf8');
+    var dest     = gutil.replaceExtension(file.path, ".js");
+    var gulpPath = __dirname.split('/');
+        gulpPath = gulpPath.splice(0, gulpPath.length - 2).join('/') + '/';
+    var path     = file.path.substr(gulpPath.length, file.path.length);
+
+    console.log(gulpPath, ': ', file.path, 'to', path);
 
     try {
       data = qmlparse(str);
@@ -18,7 +24,7 @@ module.exports = function (opt) {
       return this.emit('error', new Error(file.path + ': ' + err));
     }
 
-    src = "qrc["+file.path+"] = " + JSON.stringify(data);
+    src = "qrc['"+file.path+"'] = " + JSON.stringify(data) + ';';
 
     file.contents = new Buffer(src);
     file.path = dest;

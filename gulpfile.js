@@ -12,6 +12,7 @@ var qtcoreSources = [
   './src/qtcore/lib/import.js',
 
   './src/qtcore.prototype.js',
+  './src/qtcore/qrc.js',
   './src/qtcore/qt.js',
   './src/qtcore/signal.js',
   './src/qtcore/font.js',
