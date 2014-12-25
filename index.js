@@ -22,7 +22,7 @@ module.exports = function (opt) {
       return this.emit('error', new Error(file.path + ': ' + err));
     }
 
-    src = "qrc['"+file.path+"'] = " + JSON.stringify(data) + ';';
+    src = "qrc['"+path+"'] = " + JSON.stringify(data) + ';';
 
     file.contents = new Buffer(src);
     file.path = dest;
