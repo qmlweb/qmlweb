@@ -73,27 +73,31 @@ QMLEngine = function (element, options) {
       return basePath;
     }
 
+    this.ensureFileIsLoadedInQrc = function(file) {
+      if (!qrc.includesFile(file)) {
+        var src = getUrlContents(file);
+
+        qrc[file] = qmlparse(src);
+      }
+    }
+
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
         var tree;
 
         basePath = this.pathFromFilepath(file);
-        if (!qrc.includesFile(file)) {
-          var src = getUrlContents(file);
-
-          qrc[file] = qmlparse(src);
-        }
+        this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.loadQMLTree(tree);
     }
 
     // parse and construct qml
     this.loadQML = function(src) {
-        engine = this;
         this.loadQMLTree(parseQML(src));
     }
 
     this.loadQMLTree = function(tree) {
+        engine = this;
         if (options.debugTree) {
             options.debugTree(tree);
         }
@@ -147,11 +151,10 @@ QMLEngine = function (element, options) {
 
         var file = basePath + name + ".qml";
 
-        var src = getUrlContents(file);
-        if (src=="")
-            return undefined;
-        var tree = parseQML(src);
+        this.ensureFileIsLoadedInQrc(file);
+        tree = convertToEngine(qrc[file]);
         this.components[name] = tree;
+        console.log(file, qrc[file]);
         return tree;
     }
 
