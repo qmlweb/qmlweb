@@ -16,8 +16,6 @@ module.exports = function (opt) {
         gulpPath = gulpPath.splice(0, gulpPath.length - 2).join('/') + '/';
     var path     = file.path.substr(gulpPath.length, file.path.length);
 
-    console.log(gulpPath, ': ', file.path, 'to', path);
-
     try {
       data = qmlparse(str);
     } catch (err) {
