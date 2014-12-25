@@ -4,4 +4,4 @@ global.qrc = {
     return typeof qrc[path] != 'undefined';
   }
 };
-}(typeof window != 'undefined' ? global : window);
+})(typeof window != 'undefined' ? window : global);
