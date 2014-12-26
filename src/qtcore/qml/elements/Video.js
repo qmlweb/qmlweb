@@ -4,6 +4,10 @@ window.MediaPlayer = {
   NoMedia: 0, Loading: 1, Loaded: 2, Buffering: 4, Stalled: 8, EndOfMedia: 16, InvalidMedia: 32, UnknownStatus: 64
 };
 
+window.VideoOutput = {
+  PreserveAspectFit: 0, PreserveAspectCrop: 1, Stretch: 2
+};
+
 registerQmlType("Video", function QMLVideo(meta) {
   var domVideo;
   var runningEventListener = false;
@@ -17,6 +21,7 @@ registerQmlType("Video", function QMLVideo(meta) {
   this.dom.firstChild.style.margin = "0";
 
   createSimpleProperty("bool",   this, "autoPlay");
+  createSimpleProperty("enum",   this, "fillMode");
   createSimpleProperty("int",    this, "duration");
   createSimpleProperty("int",    this, "position");
   createSimpleProperty("bool",   this, "muted");
@@ -28,6 +33,7 @@ registerQmlType("Video", function QMLVideo(meta) {
   createSimpleProperty("enum",   this, "error");
   this.status = MediaPlayer.NoMedia;
   this.error = MediaPlayer.NoError;
+  this.fillMode = VideoOutput.PreserveAspectFit;
   this.volume = domVideo.volume;
   this.duration = domVideo.duration;
   this.playbackState = MediaPlayer.StoppedState;
@@ -177,6 +183,20 @@ registerQmlType("Video", function QMLVideo(meta) {
       this.volume = 0;
     } else {
       this.volume = volumeBackup;
+    }
+  }).bind(this));
+
+  this.fillModeChanged.connect(this, (function(newValue) {
+    switch (newValue) {
+      case VideoOutput.Stretch:
+        domVideo.style.objectFit = 'fill';
+        break ;
+      case VideoOutput.PreserveAspectFit:
+        domVideo.style.objectFit = '';
+        break ;
+      case VideoOutput.PreserveAspectCrop:
+        domVideo.style.objectFit = 'cover';
+        break ;
     }
   }).bind(this));
 });
