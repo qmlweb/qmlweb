@@ -83,12 +83,36 @@ function QMLItem(meta) {
     createSimpleProperty("bool", this, "visible");
     createSimpleProperty("real", this, "opacity");
     createSimpleProperty("bool", this, "clip");
+    createSimpleProperty("bool", this, "focus");
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
+    this.focus = false;
+
+    var focusedElement = null;
+
+    this.setupFocusOnDom = (function(element) {
+      var updateFocus = (function() {
+        var hasFocus = document.activeElement == this.dom.firstChild;
+
+        if (this.focus != hasFocus)
+          this.focus = hasFocus;
+      }).bind(this);
+      element.addEventListener("focus", updateFocus);
+      element.addEventListener("blur",  updateFocus);
+    }).bind(this);
+
+    this.focusChanged.connect(this, (function(newVal) {
+      if (focusedElement != null && document.activeElement == focusedElement) {
+        if (newVal)
+          this.dom.firstChild.focus();
+        else
+          document.getElementsByTagName("BODY")[0].focus();
+      }
+    }).bind(this));
 
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;

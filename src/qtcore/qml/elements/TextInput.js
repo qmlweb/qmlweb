@@ -12,6 +12,8 @@ function QMLTextInput(meta) {
     this.dom.firstChild.style.margin = "0";
     this.dom.firstChild.style.width = "100%";
 
+    this.setupFocusOnDom(this.dom.firstChild);
+
     createSimpleProperty("string", this, "text", "");
     createSimpleProperty("int",    this, "maximumLength");
     createSimpleProperty("bool",   this, "readOnly");
