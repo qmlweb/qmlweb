@@ -88,7 +88,7 @@ gulp.task('application', function() {
 
 Now, you may run the script by running the `gulp` command: the qml files in the `./qml` folder will be directly pre-loaded in your `QtApplication.js` file.
 
-#### How to extend
+## How to extend
 When implementing new features, you may need to get away from QML and create your own QML components from scratch, using directly the engine's API.
 
 ```Javascript
