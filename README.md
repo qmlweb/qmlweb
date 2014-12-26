@@ -22,6 +22,11 @@ This project aims at bringing the power of QML to the web browser.
 
 This is a fork from `git://anongit.kde.org/qmlweb` in [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore)
 
+# Summary
+* [How to use](#how-to-use)
+* [How to use with Gulp](#how-to-use-with-gulp)
+* [How to extend](#how-to-extend)
+
 ## How to use
 #### Add the library to your web page
 Download the file `lib/qt.js` and preload it in an HTML page.
@@ -37,7 +42,7 @@ You may then modify the `<body>` element to specify what QML file to load when t
 <body style="margin: 0;" data-qml="qml/main.qml">
 ````
 
-## Preload QML files
+## How to use with Gulp
 Note that for the following, you need to have `NodeJS` installed.
 #### Gulp
 You can use Gulp to pre-parse your QML files and pre-load them in your javascript file. First, you'll need to install the dependencies. Create a `package.json` file such as this one:
@@ -77,13 +82,13 @@ gulp.task('qml', function() {
 
 // Merge 'qt.js' with your compiled QML files and outputs it in app/QtApplication.js
 gulp.task('application', function() {
-  return gulp.src(jsFiles).pipe(concat('QtApplication.js').pipe(gulp.dest('./app');
+  return gulp.src(jsFiles).pipe(concat('QtApplication.js')).pipe(gulp.dest('./app'));
 });
 ````
 
 Now, you may run the script by running the `gulp` command: the qml files in the `./qml` folder will be directly pre-loaded in your `QtApplication.js` file.
 
-#### Implement new importable modules
+#### How to extend
 When implementing new features, you may need to get away from QML and create your own QML components from scratch, using directly the engine's API.
 
 ```Javascript
