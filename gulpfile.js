@@ -2,6 +2,7 @@ var gulp   = require('gulp');
 var gutil  = require('gulp-util');
 var uglify = require('gulp-uglify');
 var concat = require('gulp-concat');
+var rename = require('gulp-rename');
 
 var qtcoreSources = [
   './src/helpers/encapsulate.begin.js',
@@ -27,6 +28,10 @@ gulp.task('qt', function() {
   return gulp.src(qtcoreSources).pipe(concat('qt.js')).pipe(gulp.dest('./lib'));
 });
 
-gulp.task('default', ['qt'],function() {
-   gulp.watch(qtcoreSources, ['qt']);
+gulp.task('min-qt', function() {
+  return gulp.src('./lib/qt.js').pipe(rename('qt.min.js')).pipe(uglify()).pipe(gulp.dest('./lib'));
+});
+
+gulp.task('default', ['qt', 'min-qt'],function() {
+   gulp.watch(qtcoreSources, ['qt', 'min-qt']);
 });
