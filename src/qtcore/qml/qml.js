@@ -33,14 +33,14 @@ Object.create = function (o) {
 };
 
 // Helper. Adds a type to the constructor list
-window.registerGlobalQmlType = function (name, type) {
-  window[type.name]  = type;
+global.registerGlobalQmlType = function (name, type) {
+  global[type.name]  = type;
   constructors[name] = type;
   modules.Main[name] = type;
 };
 
 // Helper. Register a type to a module
-window.registerQmlType = function(options) {
+global.registerQmlType = function(options) {
   if (typeof options != 'object') {
     registerGlobalQmlType(arguments[0], arguments[1]);
   } else {
@@ -56,7 +56,7 @@ window.registerQmlType = function(options) {
   }
 };
 
-window.getConstructor = function (moduleName, version, name) {
+global.getConstructor = function (moduleName, version, name) {
   if (typeof modules[moduleName] != 'undefined') {
     for (var i = 0 ; i < modules[moduleName].length ; ++i) {
       var type = modules[moduleName][i];
@@ -68,7 +68,7 @@ window.getConstructor = function (moduleName, version, name) {
   return null;
 };
 
-window.collectConstructorsForModule = function (moduleName, version) {
+global.collectConstructorsForModule = function (moduleName, version) {
   var constructors = {};
 
   if (typeof modules[moduleName] == 'undefined') {
@@ -85,7 +85,7 @@ window.collectConstructorsForModule = function (moduleName, version) {
   return constructors;
 };
 
-window.mergeObjects = function (obj1, obj2) {
+global.mergeObjects = function (obj1, obj2) {
   var mergedObject = {};
 
   if (typeof obj1 != 'undefined' && obj1 != null) {
@@ -97,7 +97,7 @@ window.mergeObjects = function (obj1, obj2) {
   return mergedObject;
 }
 
-window.loadImports = function (imports) {
+global.loadImports = function (imports) {
   constructors = mergeObjects(modules.Main, null);
   for (var i = 0 ; i < imports.length ; ++i) {
     var importDesc         = imports[i];

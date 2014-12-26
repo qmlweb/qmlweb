@@ -1,4 +1,4 @@
-window.addEventListener('load', function() {
+global.addEventListener('load', function() {
   var metaTags = document.getElementsByTagName('BODY');
 
   for (var i = 0 ; i < metaTags.length ; ++i) {
@@ -6,7 +6,7 @@ window.addEventListener('load', function() {
     var source  = metaTag.getAttribute('data-qml');
 
     if (source != null) {
-      window.qmlEngine = new QMLEngine();
+      global.qmlEngine = new QMLEngine();
       qmlEngine.loadFile(source);
       qmlEngine.start();
       break ;

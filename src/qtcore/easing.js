@@ -1,4 +1,4 @@
-window.Easing = {
+global.Easing = {
   Linear: 1,
   InQuad: 2,          OutQuad: 3,     InOutQuad: 4,           OutInQuad: 5,
   InCubic: 6,         OutCubic: 7,    InOutCubic: 8,          OutInCubic: 9,

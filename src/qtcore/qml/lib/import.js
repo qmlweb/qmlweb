@@ -84,8 +84,8 @@ getUrlContents = function (url) {
     }
     return urlContentCache[url];
 }
-if (typeof window.urlContentCache == 'undefined')
-  window.urlContentCache = {};
+if (typeof global.urlContentCache == 'undefined')
+  global.urlContentCache = {};
 
 /**
  * Read qmldir spec file at directory. EXPORTED.

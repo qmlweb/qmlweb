@@ -7,7 +7,7 @@
  *               currently ignored.
  * @param options Options that allow finetuning of the signal.
  */
-window.Signal = function Signal(params, options) {
+global.Signal = function Signal(params, options) {
     options = options || {};
     var connectedSlots = [];
     var obj = options.obj
@@ -19,7 +19,7 @@ window.Signal = function Signal(params, options) {
     signal.parameters = params || [];
     signal.connect = function() {
         if (arguments.length == 1)
-            connectedSlots.push({thisObj: window, slot: arguments[0]});
+            connectedSlots.push({thisObj: global, slot: arguments[0]});
         else if (typeof arguments[1] == 'string' || arguments[1] instanceof String) {
             if (arguments[0].$tidyupList && arguments[0] !== obj)
                 arguments[0].$tidyupList.push(this);
