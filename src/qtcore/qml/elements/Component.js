@@ -40,19 +40,23 @@ function QMLComponent(meta) {
       qmlEngine.loadQML(qml);
     });
 
-    var loadImport = (function(importDesc) {
-      if (/\.js$/.test(importDesc.subject))
-        loadJsImport(importDesc);
-      else if (/\.qml$/.test(importDesc.subject))
-        loadQmlImport(importDesc);
-    }).bind(this);
+    if (meta.object.$imports instanceof Array)
+    {
+      var moduleImports = [];
+      var loadImport    = (function(importDesc) {
+        if (/\.js$/.test(importDesc.subject))
+          loadJsImport(importDesc);
+        else if (/\.qml$/.test(importDesc.subject))
+          loadQmlImport(importDesc);
+        else
+          moduleImports.push(importDesc);
+      }).bind(this);
 
-    if (meta.object.$imports instanceof Array) {
       for (var i = 0 ; i < meta.object.$imports.length ; ++i) {
         loadImport(meta.object.$imports[i]);
       }
+      loadImports(moduleImports);
     }
-
 }
 
 registerQmlType('Component',   QMLComponent);

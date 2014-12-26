@@ -266,6 +266,10 @@ function QMLItem(meta) {
             transition.$start(actions);
     });
 
+    var QMLRotation  = getConstructor('QtQuick', '2.0', 'Rotation');
+    var QMLScale     = getConstructor('QtQuick', '2.0', 'Scale');
+    var QMLTranslate = getConstructor('QtQuick', '2.0', 'Translate');
+
     this.$updateTransform = function() {
             var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
             for (var i = 0; i < this.transform.length; i++) {

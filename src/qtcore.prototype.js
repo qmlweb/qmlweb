@@ -20,7 +20,9 @@ var GETTER = "__defineGetter__",
       'var':       QMLVariant,
       QMLDocument: QMLComponent
     };
-
+var modules = {
+    Main: constructors
+  };
 /**
  * Inheritance helper
  */
@@ -31,9 +33,82 @@ Object.create = function (o) {
 };
 
 // Helper. Adds a type to the constructor list
-window.registerQmlType = function (name, type) {
+window.registerGlobalQmlType = function (name, type) {
   window[type.name]  = type;
   constructors[name] = type;
+  modules.Main[name] = type;
+};
+
+// Helper. Register a type to a module
+window.registerQmlType = function(options) {
+  if (typeof options != 'object') {
+    registerGlobalQmlType(arguments[0], arguments[1]);
+  } else {
+    var moduleDescriptor = {
+      name:        options.name,
+      versions:    options.versions,
+      constructor: options.constructor
+    };
+
+    if (typeof modules[options.module] == 'undefined')
+      modules[options.module] = [];
+    modules[options.module].push(moduleDescriptor);
+  }
+};
+
+window.getConstructor = function (moduleName, version, name) {
+  if (typeof modules[moduleName] != 'undefined') {
+    for (var i = 0 ; i < modules[moduleName].length ; ++i) {
+      var type = modules[moduleName][i];
+
+      if (type.name == name && type.versions.test(version))
+        return type.constructor;
+    }
+  }
+  return null;
+};
+
+window.collectConstructorsForModule = function (moduleName, version) {
+  var constructors = {};
+
+  if (typeof modules[moduleName] == 'undefined') {
+    console.warn("module `" + moduleName + "` not found");
+    return constructors;
+  }
+  for (var i = 0 ; i < modules[moduleName].length ; ++i) {
+    var module = modules[moduleName][i];
+
+    if (module.versions.test(version)) {
+      constructors[module.name] = module.constructor;
+    }
+  }
+  return constructors;
+};
+
+window.mergeObjects = function (obj1, obj2) {
+  var mergedObject = {};
+
+  if (typeof obj1 != 'undefined' && obj1 != null) {
+    for (var key in obj1) { mergedObject[key] = obj1[key]; }
+  }
+  if (typeof obj2 != 'undefined' && obj2 != null) {
+    for (var key in obj2) { mergedObject[key] = obj2[key]; }
+  }
+  return mergedObject;
+}
+
+window.loadImports = function (imports) {
+  constructors = mergeObjects(modules.Main, null);
+  for (var i = 0 ; i < imports.length ; ++i) {
+    var importDesc         = imports[i];
+    var moduleConstructors = collectConstructorsForModule(importDesc.subject, importDesc.version);
+
+    if (importDesc.alias != null)
+      constructors[importDesc.alias] = mergeObjects(constructors[importDesc.alias], moduleConstructors);
+    else
+      constructors                   = mergeObjects(constructors,                   moduleConstructors);
+  }
+  console.log('loaded imports', constructors);
 }
 
 // Helper. Ought to do absolutely nothing.

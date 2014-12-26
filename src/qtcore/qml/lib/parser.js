@@ -1456,8 +1456,11 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         function qmldocument() {
             imports = [];
             while (is("name", "import"))
-                qmlimport();
-            return qmlstatement();
+              qmlimport();
+            var statement =  qmlstatement();
+            statement.push('imports');
+            statement.push(imports);
+            return statement;
         };
 
         function amIn(s) {
@@ -1579,8 +1582,14 @@ function convertToEngine(tree) {
     var walkers = {
         "toplevel": function(statements) {
             var item = { $class: "QMLDocument" };
-            // todo: imports etc
-            item.$imports = imports;
+
+            for (var i = 0 ; i < statements[0].length ; ++i) {
+              if (statements[0][i] == 'imports') {
+                console.log("getting imports");
+                item.$imports = statements[0][i + 1];
+                break ;
+              }
+            }
             item.$children = [ walk(statements[0]) ];
             return item;
         },

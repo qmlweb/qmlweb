@@ -97,6 +97,7 @@ QMLEngine = function (element, options) {
     }
 
     this.loadQMLTree = function(tree) {
+        console.log('loadQMLTree', tree);
         engine = this;
         if (options.debugTree) {
             options.debugTree(tree);
