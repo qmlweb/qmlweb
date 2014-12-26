@@ -154,7 +154,6 @@ QMLEngine = function (element, options) {
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.components[name] = tree;
-        console.log(file, qrc[file]);
         return tree;
     }
 

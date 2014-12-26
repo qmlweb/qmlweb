@@ -47,8 +47,6 @@ function QMLComponent(meta) {
         loadQmlImport(importDesc);
     }).bind(this);
 
-    console.log(meta);
-
     if (meta.object.$imports instanceof Array) {
       for (var i = 0 ; i < meta.object.$imports.length ; ++i) {
         loadImport(meta.object.$imports[i]);
