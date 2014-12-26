@@ -108,7 +108,6 @@ window.loadImports = function (imports) {
     else
       constructors                   = mergeObjects(constructors,                   moduleConstructors);
   }
-  console.log('loaded imports', constructors);
 }
 
 // Helper. Ought to do absolutely nothing.
