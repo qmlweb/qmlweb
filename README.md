@@ -2,6 +2,8 @@
 CSS and HTML are boring and lame. And they suck at designing cool, interactive interfaces. Qt came up with a much better answer for its renowned framework: `QML`, a declarative language perfect for designing UIs (and much more). Here's a sample of how QML looks like:
 
 ```QML
+import QtQuick 2.0
+
 Rectangle {
    width: 500; height: 200
    color: "lightgray"
@@ -32,51 +34,100 @@ Download the file `lib/qt.js` and preload it in an HTML page.
 You may then modify the `<body>` element to specify what QML file to load when the page is opened.
 
 ```HTML
-<body style="margin: 0;" data-qml="/qml/main.qml">
+<body style="margin: 0;" data-qml="qml/main.qml">
 ````
 
-#### Create your own QML types
-###### The regular way
-[TODO]
+## Preload QML files
+Note that for the following, you need to have `NodeJS` installed.
+#### Gulp
+You can use Gulp to pre-parse your QML files and pre-load them in your javascript file. First, you'll need to install the dependencies. Create a `package.json` file such as this one:
 
-###### Using Javascript
+```Javascript
+{
+  "name": "QmlWebClient",
+  "devDependencies": {
+    "gulp": "~3.6.0",
+    "gulp-concat": "~2.1.7",
+    "gulp-util": "~2.2.14",
+    "gulp-uglify": "~0.2.1",
+    "gulp-qml": "git://github.com/Plaristote/qmlweb.git"
+  }
+}
+````
+
+Now run the command `npm install` to have node.js install your dependencies, and start writing your `Gulpfile.js` :
+
+```Javascript
+var gulp   = require('gulp');
+var concat = require('gulp-concat');
+var qml    = require('QMLWeb');
+
+var qmlFiles = [ 'qml/**/*.qml' ];
+var jsFiles  = [ 'lib/qt.js', 'lib/**/*.js' ];
+
+gulp.task('default', ['qml', 'application'], function() {
+  gulp.watch(qmlFiles, ['qml']);
+  gulp.watch(jsFiles, ['application']);
+});
+
+// Parses your 'qml' source files
+gulp.task('qml', function() {
+  return gulp.src(qmlFiles).pipe(qml()).pipe(concat('qml.js')).pipe(gulp.dest('./lib'));
+});
+
+// Merge 'qt.js' with your compiled QML files and outputs it in app/QtApplication.js
+gulp.task('application', function() {
+  return gulp.src(jsFiles).pipe(concat('QtApplication.js').pipe(gulp.dest('./app');
+});
+````
+
+Now, you may run the script by running the `gulp` command: the qml files in the `./qml` folder will be directly pre-loaded in your `QtApplication.js` file.
+
+#### Implement new importable modules
 When implementing new features, you may need to get away from QML and create your own QML components from scratch, using directly the engine's API.
 
 ```Javascript
-registerQmlType('MyTypeName', function (meta) {
-  QMLItem.call(this, meta);
+registerQmlType({
+  module:   'MyModule',
+  name:     'MyTypeName',
+  versions: /^1(\.[0-3])?$/, // that regexp must match the version number for the import to work
+  constructor: function(meta) {
+    QMLItem.call(this, meta);
 
-  var self = this;
+    var self = this;
 
-  // Managing properties
-  createSimpleProperty("string", this, "name"); // creates a property 'name' of type string
-  createSimpleProperty("var", this, "data"); // creates a property 'data' of undefined type
-  this.name = 'default name'; // sets a default value for the property 'name'
+    // Managing properties
+    createSimpleProperty("string", this, "name"); // creates a property 'name' of type string
+    createSimpleProperty("var", this, "data"); // creates a property 'data' of undefined type
+    this.name = 'default name'; // sets a default value for the property 'name'
 
-  // Signals
-  this.somethingHappened = Signal(); // creates a signal somethingHappened
+    // Signals
+    this.somethingHappened = Signal(); // creates a signal somethingHappened
 
-  this.somethingHappened.connect(this, function() {
-    console.log('You may also connect to signals in Javascript');
-  });
+    this.somethingHappened.connect(this, function() {
+      console.log('You may also connect to signals in Javascript');
+    });
   
-  // Using the DOM
-  function updateText() {
-    var text = '';
-    for (var i = 0 ; i < self.data.length ; ++i)
-      text += '[' + data[i] + '] ';
-    self.dom.textContent = text; // Updating the dom
-    self.somethingHappened(); // triggers the 'somethingHappened' signal.
-  }
+    // Using the DOM
+    function updateText() {
+      var text = '';
+      for (var i = 0 ; i < self.data.length ; ++i)
+        text += '[' + data[i] + '] ';
+      self.dom.textContent = text; // Updating the dom
+      self.somethingHappened(); // triggers the 'somethingHappened' signal.
+    }
 
-  // Run updateText once, ensure it'll be executed whenever the 'data' property changes.
-  updateText();
-  this.onDataChanged.connect(this, updateText);
+    // Run updateText once, ensure it'll be executed whenever the 'data' property changes.
+    updateText();
+    this.onDataChanged.connect(this, updateText);
+  }
 });
 ```
 
 And here's how you would use that component in a regular QML file:
 ```QML
+import MyModule 1.3
+
 MyTypeName {
   name: 'el nombre'
   data: [ 1, 2, 3 ]
