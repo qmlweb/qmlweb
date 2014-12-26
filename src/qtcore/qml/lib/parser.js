@@ -1432,14 +1432,20 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
               version = null,
               alias = null;
           var gettingAlias = false;
+          var gettingNameSubPart = false;
           var currentLine = S.token.line;
 
           next();
-          while (S.token.type != 'punc' && S.token.line == currentLine) {
-            if (subject == null)
+          while ((S.token.type != 'punc' || S.token.value == '.') && S.token.line == currentLine) {
+            if (S.token.type == 'punc' && S.token.value == '.')
+              gettingNameSubPart = true;
+            else if (gettingNameSubPart == true) {
+              subject += '.' + S.token.value;
+              gettingNameSubPart = false;
+            }
+            else if (subject == null)
               subject = S.token.value;
-            else if (gettingAlias == false)
-            {
+            else if (gettingAlias == false) {
               if (S.token.value == 'as')
                 gettingAlias = true;
               else if (version == null)
