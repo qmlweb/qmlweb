@@ -7,17 +7,16 @@ var qtcoreSources = [
   './src/helpers/encapsulate.begin.js',
   './src/qtcore/qml/QMLBinding.js',
 
-  './src/qtcore/lib/parser.js',
-  './src/qtcore/lib/process.js',
-  './src/qtcore/lib/import.js',
+  './src/qtcore/qml/lib/parser.js',
+  './src/qtcore/qml/lib/process.js',
+  './src/qtcore/qml/lib/import.js',
 
-  './src/qtcore.prototype.js',
   './src/qtcore/qrc.js',
   './src/qtcore/qt.js',
   './src/qtcore/signal.js',
   './src/qtcore/font.js',
   './src/qtcore/easing.js',
-  './src/qtcore/qml/*.js',
+  './src/qtcore/qml/qml.js',
   './src/qtcore/qml/**/*.js',
 
   './src/qmlweb/**/*.js',
