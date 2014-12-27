@@ -26,6 +26,8 @@ This is a fork from `git://anongit.kde.org/qmlweb` in [Webapps written in qml no
 * [How to use](#how-to-use)
 * [How to use with Gulp](#how-to-use-with-gulp)
 * [How to extend](#how-to-extend)
+* [How is this fork different](#how-is-this-fork-different)
+* [Todo](#todo)
 
 ## How to use
 #### Add the library to your web page
@@ -140,3 +142,42 @@ MyTypeName {
   onSomethingHappened: console.log(data)
 }
 ```
+
+## How is this fork different
+#### Implemented 'import'
+- QML Types are now registered into different modules. They're only made available once
+  their module has been required (e.g: can't use Rectangle unless there's an `import QtQuick`).
+  Versions can also be matched by the types when they're registered, to allow people to implement
+  different behaviors for different versions of the same module.
+
+- It is now possible to import javascript files in a QML file.
+
+#### Implemented pre-loading
+Implemented a Gulp module that:
+- parses QML file and store the parsed tree in a `qrc` object.
+- detect symbols from JS files and store the result and source in a `qrc` object.
+- don't use any HTTP request to load qml/js files if they are already in `qrc`.
+
+#### Implemented new types
+- Video           (QtMultimedia)
+- GeoLocation     (QtMobility)
+- RegExpValidator (QtQuick)
+- IntValidator    (QtQuick)
+- DoubleValidator (QtQuick)
+
+#### Improved implementations
+- TextInput
+  Now supports properties focus, maximumLength, readOnly, validator, [partially] echoMode
+- Image
+  Now supports property mirror.
+  Now supports fill modes PreserveAspectFit, PreserveAspectCrop, Tile, TileVertically
+
+
+## Todo
+- Unit Testing for each Components using Jasmine
+- Improve the implementation of `focus`, use it to implements `Keys` and `FocusScope`
+- Implement Gradient and GradientStop using CSS3
+- Implement SystemPalette
+- Implement StateGroup, StateChangeScript, ParentChange, AnchorChange
+- Implement ListView, GridView, PathView
+- Implement QtQuick.Controls (Action, ProgressBar, Label, ComboBox, ExclusiveGroup, GroupBox, Calendar, Button)
