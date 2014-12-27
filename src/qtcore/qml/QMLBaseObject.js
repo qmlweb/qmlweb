@@ -16,5 +16,17 @@ function QMLBaseObject(meta) {
     this.Component = new QObject(this);
     this.Component.completed = Signal([]);
     engine.completedSignals.push(this.Component.completed);
+    this.completed = this.Component.completed;
+
+    // Component get own properties
+    var attributes = [];
+    for (var key in meta.object) {
+      if (meta.object.hasOwnProperty(key) &&
+          typeof meta.object[key] != 'undefined' && meta.object[key] != null &&
+          meta.object[key].__proto__.constructor.name == 'QMLPropertyDefinition') {
+        attributes.push(key);
+      }
+    }
+    this.getAttributes = function() { return (attributes); }
 }
 

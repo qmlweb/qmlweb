@@ -3,18 +3,9 @@ registerQmlType({
   name:     'RestModel',
   versions: /.*/,
   constructor: function QMLRestModel(meta) {
-    var self = this;
-    var attributes = [];
-
-    for (var key in meta.object) {
-      if (meta.object.hasOwnProperty(key) &&
-          typeof meta.object[key] != 'undefined' &&
-          meta.object[key].__proto__.constructor.name == 'QMLPropertyDefinition') {
-        attributes.push(key);
-      }
-    }
-
     QMLItem.call(this, meta);
+    var self = this;
+    var attributes = this.getAttributes();
 
     createSimpleProperty("string", this, "url");
     createSimpleProperty("bool",   this, "isLoading");

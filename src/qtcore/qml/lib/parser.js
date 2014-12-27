@@ -1591,7 +1591,6 @@ function convertToEngine(tree) {
 
             for (var i = 0 ; i < statements[0].length ; ++i) {
               if (statements[0][i] == 'imports') {
-                console.log("getting imports");
                 item.$imports = statements[0][i + 1];
                 break ;
               }
