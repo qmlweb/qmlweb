@@ -2,16 +2,18 @@
 
 global.jsGetGlobalSymbols = getGlobalSymbols;
 
-function getGlobalSymbols(src, context) {
-  eval(src);
-  src = occultAllStrings(src);
-  src = occultSubScopes(src);
+function getGlobalSymbols(src, target) {
+  with (qmlEngine.rootContext()) {
+    eval(src);
+    src = occultAllStrings(src);
+    src = occultSubScopes(src);
 
-  //var variables = getVariables(src);
-  var functions = getFunctions(src);
+    //var variables = getVariables(src);
+    var functions = getFunctions(src);
 
-  for (var i = 0 ; i < functions.length ; ++i) {
-    context[functions[i]] = eval(functions[i]);
+    for (var i = 0 ; i < functions.length ; ++i) {
+      target[functions[i]] = eval(functions[i]);
+    }
   }
 };
 

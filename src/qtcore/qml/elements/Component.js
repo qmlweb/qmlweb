@@ -20,20 +20,28 @@ function QMLComponent(meta) {
         this.$metaObject = meta.object;
     this.$context = meta.context;
 
-    var loadJsImport = (function(importDesc) {
-      var src = importDesc.subject;
-      var js;
+    var jsImports = [];
 
-      if (typeof qmlEngine.basePath != 'undefined')
-        src = qmlEngine.basePath + src;
-      if (typeof qrc[src] != 'undefined')
-        js = qrc[src];
-      else
-        js = getUrlContents(src);
-      if (typeof this.$context == 'undefined' || this.$context == null)
-        this.$context = {};
-      this.$context[importDesc.alias] = {};
-      jsGetGlobalSymbols(js, this.$context[importDesc.alias]);
+    var loadJsImport = (function(importDesc) {
+      jsImports.push(importDesc);
+    }).bind(this);
+
+    this.finalizeImports = (function() {
+      for (var i = 0 ; i < jsImports.length ; ++i) {
+        var importDesc = jsImports[i];
+        var src = importDesc.subject;
+        var js;
+
+        if (typeof qmlEngine.basePath != 'undefined')
+          src = qmlEngine.basePath + src;
+        if (typeof qrc[src] != 'undefined')
+          js = qrc[src];
+        else
+          js = getUrlContents(src);
+        var $context = qmlEngine.rootContext();
+        $context[importDesc.alias] = {};
+        jsGetGlobalSymbols(js, $context[importDesc.alias]);
+      }
     }).bind(this);
 
     var loadQmlImport = (function(importDesc) {

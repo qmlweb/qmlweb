@@ -49,7 +49,8 @@ registerQmlType({
         Sunken: 3
     }
 
-    this.font = new QMLFont(this);
+    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
+    this.font   = new QMLFont(this);
 
     createSimpleProperty("color", this, "color");
     createSimpleProperty("string", this, "text");
