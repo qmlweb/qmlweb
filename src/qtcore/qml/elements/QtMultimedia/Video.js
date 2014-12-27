@@ -144,26 +144,13 @@ registerQmlType({
       return mimetypes[extension];
     };
 
-    this.addSource = (function(src) {
-      var domSource = document.createElement("SOURCE");
-      var parts = src.split('.');
+    this.sourceChanged.connect(this, (function(source) {
+      var parts     = source.split('.');
       var extension = parts[parts.length - 1];
 
-      domSource.src  = src;
-      domSource.type = this.mimetypeFromExtension(extension.toLowerCase());
-      this.dom.firstChild.appendChild(domSource);
-      if (domVideo.canPlayType(domSource.type) == "")
+      domVideo.src = source;
+      if (domVideo.canPlayType(this.mimetypeFromExtension(extension.toLowerCase())) == "")
         this.error |= MediaPlayer.FormatError;
-    }).bind(this);
-
-    this.removeSource = (function() {
-      while (domVideo.childNodes.length)
-        domVideo.removeChild(video.childNodes.item(0));
-    }).bind(this);
-
-    this.sourceChanged.connect(this, (function(source) {
-      this.removeSource();
-      this.addSource(source);
     }).bind(this));
 
     this.positionChanged.connect(this, (function(currentTime) {
