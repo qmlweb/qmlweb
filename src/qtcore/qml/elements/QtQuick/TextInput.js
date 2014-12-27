@@ -1,3 +1,7 @@
+global.TextInput = {
+  Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3
+};
+
 registerQmlType({
   module:   'QtQuick',
   name:     'TextInput',
@@ -22,6 +26,7 @@ registerQmlType({
     createSimpleProperty("int",    this, "maximumLength");
     createSimpleProperty("bool",   this, "readOnly");
     createSimpleProperty("var",    this, "validator");
+    createSimpleProperty("enum",   this, "echoMode");
     this.accepted = Signal();
     this.readOnly = false;
     this.maximumLength = -1;
@@ -35,6 +40,17 @@ registerQmlType({
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
     });
+
+    this.echoModeChanged.connect(this, (function(newVal) {
+        switch (newVal) {
+          case TextInput.Normal:
+            this.dom.firstChild.type = "text";
+            break ;
+          case TextInput.Password:
+            this.dom.firstChild.type = "password";
+            break ;
+        }
+    }).bind(this));
 
     this.maximumLengthChanged.connect(this, function(newVal) {
         if (newVal < 0)
