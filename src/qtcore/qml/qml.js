@@ -97,7 +97,9 @@ global.mergeObjects = function (obj1, obj2) {
   return mergedObject;
 }
 
-global.loadImports = function (imports) {
+global.perContextConstructors = {};
+
+global.loadImports = function (self, imports) {
   constructors = mergeObjects(modules.Main, null);
   for (var i = 0 ; i < imports.length ; ++i) {
     var importDesc         = imports[i];
@@ -108,6 +110,7 @@ global.loadImports = function (imports) {
     else
       constructors                   = mergeObjects(constructors,                   moduleConstructors);
   }
+  perContextConstructors[self.objectId] = constructors;
 }
 
 // Helper. Ought to do absolutely nothing.

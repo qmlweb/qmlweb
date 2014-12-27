@@ -69,7 +69,7 @@ function QMLComponent(meta) {
       for (var i = 0 ; i < meta.object.$imports.length ; ++i) {
         loadImport(meta.object.$imports[i]);
       }
-      loadImports(moduleImports);
+      loadImports(this, moduleImports);
     }
 }
 

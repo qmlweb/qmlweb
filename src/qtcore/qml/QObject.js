@@ -1,4 +1,5 @@
 // Base object for all qml thingies
+var objectIds = 0;
 function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
@@ -9,6 +10,7 @@ function QObject(parent) {
     if (!this.$properties)
         this.$properties = {};
 
+    this.objectId = objectIds++;
     this.$delete = function() {
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
