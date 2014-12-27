@@ -6,6 +6,7 @@ registerQmlType({
     QMLBaseObject.call(this, meta);
     var self = this,
     firstItem = true;
+    var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
 
     createSimpleProperty("int", this, "count");
     createSimpleProperty("list", this, "$items");

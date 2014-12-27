@@ -5,6 +5,7 @@ registerQmlType({
   constructor: function QMLRepeater(meta) {
     QMLItem.call(this, meta);
     var self = this;
+    var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
     createSimpleProperty("Component", this, "delegate");
     this.$defaultProperty = "delegate";
