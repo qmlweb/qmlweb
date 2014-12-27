@@ -67,7 +67,7 @@ var gulp   = require('gulp');
 var concat = require('gulp-concat');
 var qml    = require('QMLWeb');
 
-var qmlFiles = [ 'qml/**/*.qml' ];
+var qmlFiles = [ 'qml/**/*.qml', 'qml/**/*.js' ];
 var jsFiles  = [ 'lib/qt.js', 'lib/**/*.js' ];
 
 gulp.task('default', ['qml', 'application'], function() {
@@ -75,9 +75,9 @@ gulp.task('default', ['qml', 'application'], function() {
   gulp.watch(jsFiles, ['application']);
 });
 
-// Parses your 'qml' source files
+// Parses your qml and javascript source files
 gulp.task('qml', function() {
-  return gulp.src(qmlFiles).pipe(qml()).pipe(concat('qml.js')).pipe(gulp.dest('./lib'));
+  return gulp.src(qmlFiles).pipe(qml()).pipe(concat('qrc.js')).pipe(gulp.dest('./lib'));
 });
 
 // Merge 'qt.js' with your compiled QML files and outputs it in app/QtApplication.js
