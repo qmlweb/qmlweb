@@ -36,7 +36,8 @@ registerQmlType({
             createSimpleProperty("int", newItem, "index");
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             for (var i in model.roleNames) {
-                createSimpleProperty("variant", newItem, model.roleNames[i]);
+                if (typeof newItem.$properties[model.roleNames[i]] == 'undefined')
+                  createSimpleProperty("variant", newItem, model.roleNames[i]);
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
             }
 
