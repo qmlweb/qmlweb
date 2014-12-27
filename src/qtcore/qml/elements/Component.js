@@ -26,9 +26,15 @@ function QMLComponent(meta) {
 
       if (typeof qmlEngine.basePath != 'undefined')
         src = qmlEngine.basePath + src;
-      js = getUrlContents(src);
-      eval(js);
-    });
+      if (typeof qrc[src] != 'undefined')
+        js = qrc[src];
+      else
+        js = getUrlContents(src);
+      if (typeof this.$context == 'undefined' || this.$context == null)
+        this.$context = {};
+      this.$context[importDesc.alias] = {};
+      jsGetGlobalSymbols(js, this.$context[importDesc.alias]);
+    }).bind(this);
 
     var loadQmlImport = (function(importDesc) {
       var src = importDesc.subject;

@@ -16,11 +16,17 @@ module.exports = function (opt) {
         gulpPath = gulpPath.splice(0, gulpPath.length - 2).join('/') + '/';
     var path     = file.path.substr(gulpPath.length, file.path.length);
 
-    try {
-      data = qmlparse(str);
-    } catch (err) {
-      return this.emit('error', new Error(file.path + ': ' + err));
+    if (file.path.match(/\.qml$/) != null) {
+      // QML files are represented as a parse-tree
+      try {
+        data = qmlparse(str);
+      } catch (err) {
+        return this.emit('error', new Error(file.path + ': ' + err));
+      }
+    } else {
+      data = str;
     }
+    // TODO: if javascript, minimize;
 
     src = "qrc['"+path+"'] = " + JSON.stringify(data) + ';';
 

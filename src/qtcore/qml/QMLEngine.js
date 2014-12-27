@@ -86,6 +86,7 @@ QMLEngine = function (element, options) {
         var tree;
 
         basePath = this.pathFromFilepath(file);
+        this.basePath = basePath;
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.loadQMLTree(tree);
