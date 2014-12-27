@@ -164,6 +164,7 @@ Implemented a Gulp module that:
 - RegExpValidator (QtQuick)
 - IntValidator    (QtQuick)
 - DoubleValidator (QtQuick)
+- Settings        (Qt.labs.settings)
 
 #### Improved implementations
 - TextInput
