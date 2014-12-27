@@ -69,16 +69,12 @@ registerQmlType({
         self.pressed = false;
     }
     this.dom.onmouseover = function(e) {
-        if (self.hoverEnabled) {
-            self.containsMouse = true;
-            self.entered();
-        }
+        self.containsMouse = true;
+        self.entered();
     }
     this.dom.onmouseout = function(e) {
-        if (self.hoverEnabled) {
-            self.containsMouse = false;
-            self.exited();
-        }
+        self.containsMouse = false;
+        self.exited();
     }
     this.dom.onmousemove = function(e) {
         if (self.enabled && (self.hoverEnabled || self.pressed)) {
