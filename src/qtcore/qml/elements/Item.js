@@ -272,6 +272,8 @@ function QMLItem(meta) {
 
     this.$updateTransform = function() {
             var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
+            var filter = "";
+
             for (var i = 0; i < this.transform.length; i++) {
                 var t = this.transform[i];
                 if (t instanceof QMLRotation)
@@ -280,6 +282,10 @@ function QMLItem(meta) {
                     transform += " scale(" + t.xScale + ", " + t.yScale + ")";
                 else if (t instanceof QMLTranslate)
                     transform += " translate(" + t.x + "px, " + t.y + "px)";
+                else if (typeof t.transformType != 'undefined') {
+                    if (t.transformType == 'filter')
+                      filter += t.operation + '(' + t.parameters + ') ';
+                }
                 else if (typeof t == 'string')
                     transform += t;
             }
@@ -288,6 +294,10 @@ function QMLItem(meta) {
             this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
             this.dom.style.OTransform = transform;      // Opera
             this.dom.style.msTransform = transform;     // IE
+            this.dom.style.filter = filter;
+            this.dom.style.msFilter = filter;     // IE
+            this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
+            this.dom.style.MozFilter = filter;    // Firefox
     }
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
