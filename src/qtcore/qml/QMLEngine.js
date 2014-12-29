@@ -127,31 +127,7 @@ QMLEngine = function (element, options) {
       return this.rootContext().base;
     }).bind(this);
 
-    function keyCodeToQt(e) {
-      console.log('event', e);
-      if (e.keyCode == 13 || (e.keyCode >= 96 && e.keyCode <= 105)) {
-        e.keypad = true;
-      }
-      if (e.keyCode >= 96 && e.keyCode <= 105)
-        e.keyCode -= (96 - Qt.Key_0);
-      return e.keyCode;
-    }
-
-    function eventToKeyboard(e) {
-        return {
-            accepted: false,
-            count: 1,
-            isAutoRepeat: false,
-            key: keyCodeToQt(e),
-            modifiers: (e.ctrlKey * Qt.CtrlModifier)
-                    | (e.altKey   * Qt.AltModifier)
-                    | (e.shiftKey * Qt.ShiftModifier)
-                    | (e.metaKey  * Qt.MetaModifier)
-                    | (e.keypad   * Qt.KeypadModifier),
-            text: String.fromCharCode(e.charCode)
-        };
-    }
-
+    // KEYBOARD MANAGEMENT
     var keyboardSignals = {};
     keyboardSignals[Qt.Key_Asterisk]   = 'asteriskPressed';
     keyboardSignals[Qt.Key_Back]       = 'backPressed';
@@ -186,17 +162,51 @@ QMLEngine = function (element, options) {
     keyboardSignals[Qt.Key_Down]       = 'downPressed';
     keyboardSignals[Qt.Key_Left]       = 'leftPressed';
 
+    function keyCodeToQt(e) {
+      if (e.keyCode >= 96 && e.keyCode <= 111) {
+        e.keypad = true;
+      }
+      if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
+        e.keyCode = Qt.Key_Backtab;
+      else if (e.keyCode >= 97 && e.keyCode <= 122)
+        e.keyCode += (97 - Qt.Key_A);
+      else if (e.keyCode >= 96 && e.keyCode <= 105)
+        e.keyCode -= (96 - Qt.Key_0);
+      return e.keyCode;
+    }
+
+    function eventToKeyboard(e) {
+        return {
+            accepted: false,
+            count: 1,
+            isAutoRepeat: false,
+            key: keyCodeToQt(e),
+            modifiers: (e.ctrlKey * Qt.CtrlModifier)
+                    | (e.altKey   * Qt.AltModifier)
+                    | (e.shiftKey * Qt.ShiftModifier)
+                    | (e.metaKey  * Qt.MetaModifier)
+                    | (e.keypad   * Qt.KeypadModifier),
+            text: String.fromCharCode(e.charCode)
+        };
+    }
+
     document.onkeypress = (function(e) {
       var focusedElement = this.focusedElement();
       var event          = eventToKeyboard(e || window.event);
       var backup         = focusedElement.$context.event;
       var eventName      = keyboardSignals[event.key];
 
-      focusedElement.$context.event = event;
-      focusedElement.Keys.pressed(event);
-      if (eventName != null)
-        focusedElement.Keys[eventName](event);
-      focusedElement.$context.event = backup;
+      while (event.accepted != true && focusedElement != null) {
+        focusedElement.$context.event = event;
+        focusedElement.Keys.pressed(event);
+        if (eventName != null)
+          focusedElement.Keys[eventName](event);
+        focusedElement.$context.event = backup;
+        if (event.accepted == true)
+          e.preventDefault();
+        else
+          focusedElement = focusedElement.$parent;
+      }
     }).bind(this);
 
     document.onkeyup = (function(e) {
@@ -204,10 +214,17 @@ QMLEngine = function (element, options) {
       var event          = eventToKeyboard(e || window.event);
       var backup         = focusedElement.$context.event;
 
-      focusedElement.$context.event = event;
-      focusedElement.Keys.released(event);
-      focusedElement.$context.event = backup;
+      while (event.accepted != true && focusedElement != null) {
+        focusedElement.$context.event = event;
+        focusedElement.Keys.released(event);
+        focusedElement.$context.event = backup;
+        if (event.accepted == true)
+          e.preventDefault();
+        else
+          focusedElement = focusedElement.$parent;
+      }
     }).bind(this);
+    // END KEYBOARD MANAGEMENT
 
     this.registerProperty = function(obj, propName)
     {
