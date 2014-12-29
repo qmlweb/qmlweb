@@ -4,7 +4,6 @@ function QMLBaseObject(meta) {
     var i,
         prop;
 
-    console.log('Making QMLBaseObject', this, meta);
     if (!this.$draw)
         this.$draw = noop;
 
