@@ -65,6 +65,8 @@ function QMLItem(meta) {
         }
     });
 
+    if (this.$isComponentRoot)
+      createSimpleProperty("var", this, "activeFocus");
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
     createSimpleProperty("real", this, "width");
@@ -95,7 +97,7 @@ function QMLItem(meta) {
 
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
-        var hasFocus = document.activeElement == this.dom.firstChild;
+        var hasFocus = document.activeElement == this.dom || document.activeElement == this.dom.firstChild;
 
         if (this.focus != hasFocus)
           this.focus = hasFocus;
@@ -109,9 +111,11 @@ function QMLItem(meta) {
         if (this.dom.firstChild != null)
           this.dom.firstChild.focus();
         document.qmlFocus = this;
+        this.$context.activeFocus = this;
       } else if (document.qmlFocus == this) {
         document.getElementsByTagName("BODY")[0].focus();
         document.qmlFocus = qmlEngine.rootContext().base;
+        this.$context.activeFocus = null;
       }
     }).bind(this));
 

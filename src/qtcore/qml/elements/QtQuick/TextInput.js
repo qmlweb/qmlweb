@@ -62,10 +62,11 @@ registerQmlType({
         this.dom.firstChild.disabled = newVal;
     });
 
-    this.dom.firstChild.onkeydown = function(e) {
-        if (e.keyCode == 13 && testValidator()) //Enter pressed
-            self.accepted();
-    }
+    this.Keys.pressed.connect(this, (function(e) {
+      if ((e.key == Qt.Key_Return || e.key == Qt.Key_Enter) &&
+          testValidator())
+        self.accepted();
+    }));
 
     function testValidator() {
       if (typeof self.validator != 'undefined' && self.validator != null)

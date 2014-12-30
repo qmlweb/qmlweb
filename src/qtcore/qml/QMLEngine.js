@@ -122,9 +122,7 @@ QMLEngine = function (element, options) {
     }
 
     this.focusedElement = (function() {
-      if (document.qmlFocus != null)
-        return document.qmlFocus;
-      return this.rootContext().base;
+      return this.rootContext().activeFocus;
     }).bind(this);
 
     // KEYBOARD MANAGEMENT
@@ -167,11 +165,9 @@ QMLEngine = function (element, options) {
         e.keypad = true;
       }
       if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
-        e.keyCode = Qt.Key_Backtab;
+        return Qt.Key_Backtab;
       else if (e.keyCode >= 97 && e.keyCode <= 122)
-        e.keyCode += (97 - Qt.Key_A);
-      else if (e.keyCode >= 96 && e.keyCode <= 105)
-        e.keyCode -= (96 - Qt.Key_0);
+        return e.keyCode - (97 - Qt.Key_A);
       return e.keyCode;
     }
 
@@ -193,10 +189,11 @@ QMLEngine = function (element, options) {
     document.onkeypress = (function(e) {
       var focusedElement = this.focusedElement();
       var event          = eventToKeyboard(e || window.event);
-      var backup         = focusedElement.$context.event;
       var eventName      = keyboardSignals[event.key];
 
       while (event.accepted != true && focusedElement != null) {
+        var backup       = focusedElement.$context.event;
+
         focusedElement.$context.event = event;
         focusedElement.Keys.pressed(event);
         if (eventName != null)
@@ -212,9 +209,10 @@ QMLEngine = function (element, options) {
     document.onkeyup = (function(e) {
       var focusedElement = this.focusedElement();
       var event          = eventToKeyboard(e || window.event);
-      var backup         = focusedElement.$context.event;
 
       while (event.accepted != true && focusedElement != null) {
+        var backup       = focusedElement.$context.event;
+
         focusedElement.$context.event = event;
         focusedElement.Keys.released(event);
         focusedElement.$context.event = backup;
