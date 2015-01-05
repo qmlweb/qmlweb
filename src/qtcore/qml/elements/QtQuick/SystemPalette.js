@@ -4,6 +4,15 @@ window.SystemPalette = {
   Disabled: "disabled"
 };
 
+window.platformsDetectors = [
+  //{ name: 'W8',      regexp: /Windows NT 6\.2/ },
+  //{ name: 'W7',      regexp: /Windows NT 6\.1/ },
+  //{ name: 'Windows', regexp: /Windows NT/ },
+  { name: 'OSX',     regexp: /Macintosh/ }
+];
+
+window.systemPalettes = {};
+
 registerQmlType({
   module: 'QtQuick',
   name: 'SystemPalette',
@@ -23,28 +32,22 @@ registerQmlType({
     this.colorGroupChanged.connect(this, (function (newVal) {
       this.$canEditReadOnlyProperties = true;
       for (var i = 0 ; i < attrs.length ; ++i) {
-        this[attrs[i]] = colorGroups[platform][newVal][attrs[i]];
+        this[attrs[i]] = systemPalettes[platform][newVal][attrs[i]];
       }
       delete this.$canEditReadOnlyProperties;
     }).bind(this));
 
     // Detect OS
-    var platformsDetectors = [
-      //{ name: 'W8',      regexp: /Windows NT 6\.2/ },
-      //{ name: 'W7',      regexp: /Windows NT 6\.1/ },
-      //{ name: 'Windows', regexp: /Windows NT/ },
-      { name: 'OSX',     regexp: /Macintosh/ }
-    ];
-
     for (var i = 0 ; i < platformsDetectors.length ; ++i) {
       if (platformsDetectors[i].regexp.test(navigator.userAgent)) {
         platforms = platformsDetectors[i].name;
         break ;
       }
     }
+  }
+});
 
-    var colorGroups = {
-      'OSX': {
+window.systemPalettes['OSX'] = {
         'active': {
           'alternateBase': '#f6f6f6',
           'base':          '#ffffff',
@@ -93,7 +96,4 @@ registerQmlType({
           'window':        '#ededed',
           'windowText':    '#7f7f7f'
         }
-      }
-    };
-  }
-});
+};
