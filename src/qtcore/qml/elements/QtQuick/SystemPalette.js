@@ -27,8 +27,6 @@ registerQmlType({
       delete this.$canEditReadOnlyProperties;
     }).bind(this));
 
-    window.mabite = this;
-
     var colorGroups = {
       'active': {
         'alternateBase': '#f6f6f6',
