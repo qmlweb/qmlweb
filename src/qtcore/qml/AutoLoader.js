@@ -1,4 +1,4 @@
-global.addEventListener('load', function() {
+/*global.addEventListener('load', function() {
   var metaTags = document.getElementsByTagName('BODY');
 
   for (var i = 0 ; i < metaTags.length ; ++i) {
@@ -12,4 +12,4 @@ global.addEventListener('load', function() {
       break ;
     }
   }
-});
+});*/
