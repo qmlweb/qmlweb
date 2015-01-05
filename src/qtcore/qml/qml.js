@@ -205,17 +205,24 @@ function construct(meta) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(type, obj, propName) {
+function createSimpleProperty(type, obj, propName, access) {
     var prop = new QMLProperty(type, obj, propName);
+    var getter, setter;
+    if (typeof access == 'undefined' || access == null)
+      access = 'rw';
 
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
-    var getter = function() {
-        return obj.$properties[propName].get();
-    };
-    var setter = function(newVal) {
+    getter = function()       { return obj.$properties[propName].get(); };
+    if (access == 'rw')
+      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+    else {
+      setter = function(newVal) {
+        if (obj.$canEditReadOnlyProperties != true)
+          throw "property '" + propName + "' has read only access";
         return obj.$properties[propName].set(newVal);
-    };
+      }
+    }
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot)
         setupGetterSetter(obj.$context, propName, getter, setter);
