@@ -64,9 +64,14 @@ registerQmlType({
 
     this.Keys.pressed.connect(this, (function(e) {
       if ((e.key == Qt.Key_Return || e.key == Qt.Key_Enter) &&
-          testValidator())
+          testValidator()) {
         self.accepted();
-    }));
+        e.accepted = true;
+      }
+      else if (e.text != '') {
+        e.accepted = true;
+      }
+    }).bind(this));
 
     function testValidator() {
       if (typeof self.validator != 'undefined' && self.validator != null)
