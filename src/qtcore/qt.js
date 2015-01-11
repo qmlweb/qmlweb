@@ -10,6 +10,26 @@ global.Qt = {
     page = window.open(url, '_blank');
     page.focus();
   },
+  // Load file, parse and construct as Component (.qml)
+  //FIXME: remove the parameter executionContext and get it autonomously.
+  createComponent: function(name, executionContext) {
+    if (name in engine.components)
+        return engine.components[name];
+
+    var file = engine.$basePath + name;
+
+    var src = getUrlContents(file);
+    if (src=="")
+        return undefined;
+    var tree = parseQML(src);
+
+    if (tree.$children.length !== 1)
+        console.error("A QML component must only contain one root element!");
+
+    var component = new QMLComponent({ object: tree, context: executionContext });
+    engine.components[name] = component;
+    return component;
+  },
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,

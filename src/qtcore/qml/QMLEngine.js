@@ -38,6 +38,9 @@ QMLEngine = function (element, options) {
     // Root object of the engine
     this.rootObject = null;
 
+    // Base path of qml engine (used for resource loading)
+    this.$basePath = "";
+
 
 //----------Public Methods----------
     // Start the engine
@@ -89,8 +92,7 @@ QMLEngine = function (element, options) {
     this.loadFile = function(file) {
         var tree;
 
-        basePath = this.pathFromFilepath(file);
-        this.basePath = basePath;
+        this.$basePath = this.pathFromFilepath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.loadQMLTree(tree);
@@ -258,7 +260,7 @@ QMLEngine = function (element, options) {
         if (name in this.components)
             return this.components[name];
 
-        var file = basePath + name + ".qml";
+        var file = qmlEngine.$basePath + name + ".qml";
 
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
@@ -291,7 +293,7 @@ QMLEngine = function (element, options) {
         if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
             return file;
         }
-        return basePath + file;
+        return this.$basePath + file;
     }
 
     this.$registerStart = function(f)
@@ -403,8 +405,6 @@ QMLEngine = function (element, options) {
         tickerId,
         tickers = [],
         lastTick = new Date().getTime(),
-        // Base path of qml engine (used for resource loading)
-        basePath,
         i;
 
 

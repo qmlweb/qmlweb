@@ -114,14 +114,12 @@ global.loadImports = function (self, imports) {
  */
 function construct(meta) {
     var item,
-        cTree;
+        component;
 
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
-    } else if (cTree = engine.loadComponent(meta.object.$class)) {
-        if (cTree.$children.length !== 1)
-            console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+    } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
+        var item = component.createObject(meta.parent);
 
         // Alter objects context to the outer context
         item.$context = meta.$context;
