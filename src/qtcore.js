@@ -49,112 +49,112 @@
 
 (function() {
 
-    var Qt = {
-        rgba: function(r,g,b,a) {
-            var rgba = "rgba("
-                + Math.round(r * 255) + ","
-                + Math.round(g * 255) + ","
-                + Math.round(b * 255) + ","
-                + a + ")";
-            return rgba;
-        },
-        // Buttons masks
-        LeftButton: 1,
-        RightButton: 2,
-        MiddleButton: 4,
-        // Modifiers masks
-        NoModifier: 0,
-        ShiftModifier: 1,
-        ControlModifier: 2,
-        AltModifier: 4,
-        MetaModifier: 8,
-        KeypadModifier: 16, // Note: Not available in web
-        // Layout directions
-        LeftToRight: 0,
-        RightToLeft: 1
+var Qt = {
+    rgba: function(r,g,b,a) {
+        var rgba = "rgba("
+            + Math.round(r * 255) + ","
+            + Math.round(g * 255) + ","
+            + Math.round(b * 255) + ","
+            + a + ")";
+        return rgba;
     },
-    Font = {
-        // Capitalization
-        MixedCase: "none",
-        AllUppercase: "uppercase",
-        AllLowercase: "lowercase",
-        SmallCaps: "smallcaps",
-        Capitalize: "capitalize",
-        // Weight
-        Light: "lighter",
-        Normal: "normal",
-        DemiBold: "600",
-        Bold: "bold",
-        Black: "bolder",
-    },
-    Easing = {
-        Linear: 1,
-        InQuad: 2,          OutQuad: 3,     InOutQuad: 4,           OutInQuad: 5,
-        InCubic: 6,         OutCubic: 7,    InOutCubic: 8,          OutInCubic: 9,
-        InQuart: 10,        OutQuart: 11,   InOutQuart: 12,         OutInQuart: 13,
-        InQuint: 14,        OutQuint: 15,   InOutQuint: 16,         OutInQuint: 17,
-        InSine: 18,         OutSine: 19,    InOutSine: 20,          OutInSine: 21,
-        InExpo: 22,         OutExpo: 23,    InOutExpo: 24,          OutInExpo: 25,
-        InCirc: 26,         OutCirc: 27,    InOutCirc: 28,          OutInCirc: 29,
-        InElastic: 30,      OutElastic: 31, InOutElastic: 32,       OutInElastic: 33,
-        InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
-        InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
-    },
-    // Simple shortcuts to getter & setter functions, coolness with minifier
-    GETTER = "__defineGetter__",
-    SETTER = "__defineSetter__",
-    Undefined = undefined,
-    // Property that is currently beeing evaluated. Used to get the information
-    // which property called the getter of a certain other property for
-    // evaluation and is thus dependant on it.
-    evaluatingProperty = undefined,
-    // All object constructors
-    constructors = {
-            int: QMLInteger,
-            real: Number,
-            double: Number,
-            string: String,
-            bool: Boolean,
-            list: QMLList,
-            color: QMLColor,
-            enum: Number,
-            url: String,
-            variant: QMLVariant,
-            'var': QMLVariant,
-            Component: QMLComponent,
-            QMLDocument: QMLComponent,
-            MouseArea: QMLMouseArea,
-            Image: QMLImage,
-            AnimatedImage: QMLAnimatedImage,
-            BorderImage: QMLBorderImage,
-            Item: QMLItem,
-            Column: QMLColumn,
-            Row: QMLRow,
-            Grid: QMLGrid,
-            Flow: QMLFlow,
-            Rotation: QMLRotation,
-            Scale: QMLScale,
-            Translate: QMLTranslate,
-            FontLoader: QMLFontLoader,
-            Text: QMLText,
-            Rectangle: QMLRectangle,
-            Repeater: QMLRepeater,
-            ListModel: QMLListModel,
-            ListElement: QMLListElement,
-            State: QMLState,
-            PropertyChanges: QMLPropertyChanges,
-            Transition: QMLTransition,
-            Timer: QMLTimer,
-            SequentialAnimation: QMLSequentialAnimation,
-            ParallelAnimation: QMLParallelAnimation,
-            NumberAnimation: QMLNumberAnimation,
-            Behavior: QMLBehavior,
-            TextInput: QMLTextInput,
-            Button: QMLButton,
-            TextArea: QMLTextEdit, // non-standard, to be removed!
-            TextEdit: QMLTextEdit,
-            CheckBox: QMLCheckbox
-        }
+    // Buttons masks
+    LeftButton: 1,
+    RightButton: 2,
+    MiddleButton: 4,
+    // Modifiers masks
+    NoModifier: 0,
+    ShiftModifier: 1,
+    ControlModifier: 2,
+    AltModifier: 4,
+    MetaModifier: 8,
+    KeypadModifier: 16, // Note: Not available in web
+    // Layout directions
+    LeftToRight: 0,
+    RightToLeft: 1
+},
+Font = {
+    // Capitalization
+    MixedCase: "none",
+    AllUppercase: "uppercase",
+    AllLowercase: "lowercase",
+    SmallCaps: "smallcaps",
+    Capitalize: "capitalize",
+    // Weight
+    Light: "lighter",
+    Normal: "normal",
+    DemiBold: "600",
+    Bold: "bold",
+    Black: "bolder",
+},
+Easing = {
+    Linear: 1,
+    InQuad: 2,          OutQuad: 3,     InOutQuad: 4,           OutInQuad: 5,
+    InCubic: 6,         OutCubic: 7,    InOutCubic: 8,          OutInCubic: 9,
+    InQuart: 10,        OutQuart: 11,   InOutQuart: 12,         OutInQuart: 13,
+    InQuint: 14,        OutQuint: 15,   InOutQuint: 16,         OutInQuint: 17,
+    InSine: 18,         OutSine: 19,    InOutSine: 20,          OutInSine: 21,
+    InExpo: 22,         OutExpo: 23,    InOutExpo: 24,          OutInExpo: 25,
+    InCirc: 26,         OutCirc: 27,    InOutCirc: 28,          OutInCirc: 29,
+    InElastic: 30,      OutElastic: 31, InOutElastic: 32,       OutInElastic: 33,
+    InBack: 34,         OutBack: 35,    InOutBack: 36,          OutInBack: 37,
+    InBounce: 38,       OutBounce: 39,  InOutBounce: 40,        OutInBounce: 41
+},
+// Simple shortcuts to getter & setter functions, coolness with minifier
+GETTER = "__defineGetter__",
+SETTER = "__defineSetter__",
+Undefined = undefined,
+// Property that is currently beeing evaluated. Used to get the information
+// which property called the getter of a certain other property for
+// evaluation and is thus dependant on it.
+evaluatingProperty = undefined,
+// All object constructors
+constructors = {
+    int: QMLInteger,
+    real: Number,
+    double: Number,
+    string: String,
+    bool: Boolean,
+    list: QMLList,
+    color: QMLColor,
+    enum: Number,
+    url: String,
+    variant: QMLVariant,
+    'var': QMLVariant,
+    Component: QMLComponent,
+    QMLDocument: QMLComponent,
+    MouseArea: QMLMouseArea,
+    Image: QMLImage,
+    AnimatedImage: QMLAnimatedImage,
+    BorderImage: QMLBorderImage,
+    Item: QMLItem,
+    Column: QMLColumn,
+    Row: QMLRow,
+    Grid: QMLGrid,
+    Flow: QMLFlow,
+    Rotation: QMLRotation,
+    Scale: QMLScale,
+    Translate: QMLTranslate,
+    FontLoader: QMLFontLoader,
+    Text: QMLText,
+    Rectangle: QMLRectangle,
+    Repeater: QMLRepeater,
+    ListModel: QMLListModel,
+    ListElement: QMLListElement,
+    State: QMLState,
+    PropertyChanges: QMLPropertyChanges,
+    Transition: QMLTransition,
+    Timer: QMLTimer,
+    SequentialAnimation: QMLSequentialAnimation,
+    ParallelAnimation: QMLParallelAnimation,
+    NumberAnimation: QMLNumberAnimation,
+    Behavior: QMLBehavior,
+    TextInput: QMLTextInput,
+    Button: QMLButton,
+    TextArea: QMLTextEdit, // non-standard, to be removed!
+    TextEdit: QMLTextEdit,
+    CheckBox: QMLCheckbox
+};
 
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
