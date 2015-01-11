@@ -157,54 +157,6 @@
         }
 
 /**
- * Inheritance helper
- */
-Object.create = function (o) {
-    function F() {}
-    F.prototype = o;
-    return new F();
-};
-
-// Helper. Ought to do absolutely nothing.
-function noop(){};
-
-// Helper to prevent some minimization cases. Ought to do "nothing".
-function tilt() {arguments.length = 0};
-
-// Helper to clone meta-objects for dynamic element creation
-function cloneObject(obj) {
-    if (null == obj || typeof obj != "object")
-        return obj;
-    var copy = new obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) {
-            if (typeof obj[attr] == "object")
-                copy[attr] = cloneObject(obj[attr]);
-            else
-                copy[attr] = obj[attr];
-        }
-    }
-    return copy;
-}
-
-/**
- * Helper function.
- * Prints msg and values of object. Workaround when using getter functions as
- * Chrome (at least) won't show property values for them.
- * @param {String} msg Message
- * @param {Object} obj Object to use (will be "printed", too)
- * @param {Array} vals Values to list from the object.
- */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
-}
-
-/**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
 QMLBinding.prototype.compile = function() {
@@ -1100,7 +1052,7 @@ function QMLBaseObject(meta) {
         prop;
 
     if (!this.$draw)
-        this.$draw = noop;
+        this.$draw = function(){};
 
     if (!this.$isComponentRoot)
         this.$isComponentRoot = meta.isComponentRoot;
@@ -2365,8 +2317,6 @@ function QMLText(meta) {
     }
 
     this.$drawItem = function(c) {
-        //descr("draw text", this, ["x", "y", "text",
-        //                          "implicitWidth", "implicitHeight"]);
         c.save();
         c.font = fontCss(this.font);
         c.fillStyle = this.color;
@@ -2412,8 +2362,6 @@ function QMLRectangle(meta) {
     this.radius = 0;
 
     this.$drawItem = function(c) {
-        //descr("draw rect", this, ["x", "y", "width", "height", "color"]);
-        //descr("draw rect.border", this.border, ["color", "width"]);
         c.save();
         c.fillStyle = this.color;
         c.strokeStyle = this.border.color;
@@ -2724,8 +2672,6 @@ function QMLImage(meta) {
     });
 
     this.$drawItem = function(c) {
-        //descr("draw image", this, ["left", "top", "width", "height", "source"]);
-
         if (this.fillMode != this.Image.Stretch) {
             console.log("Images support only Image.Stretch fillMode currently");
         }
@@ -3209,7 +3155,6 @@ function QMLSequentialAnimation(meta) {
             if (curIndex < self.animations.length) {
                 anim = self.animations[curIndex];
                 console.log("nextAnimation", self, curIndex, anim);
-                descr("", anim, ["target"]);
                 anim.start();
             } else {
                 passedLoops++;
