@@ -132,8 +132,6 @@ registerQmlType({
     this.mirrorChanged.connect  (this, updateMirroring);
     this.fillModeChanged.connect(this, updateFillMode);
     this.$drawItem = function(c) {
-        //descr("draw image", this, ["left", "top", "width", "height", "source"]);
-
         updateFillMode();
 
         if (this.status == this.Image.Ready) {

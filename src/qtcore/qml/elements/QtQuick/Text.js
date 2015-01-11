@@ -181,8 +181,6 @@ registerQmlType({
     }
 
     this.$drawItem = function(c) {
-        //descr("draw text", this, ["x", "y", "text",
-        //                          "implicitWidth", "implicitHeight"]);
         c.save();
         c.font = fontCss(this.font);
         c.fillStyle = this.color;

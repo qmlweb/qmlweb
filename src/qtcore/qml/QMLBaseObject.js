@@ -5,7 +5,7 @@ function QMLBaseObject(meta) {
         prop;
 
     if (!this.$draw)
-        this.$draw = noop;
+        this.$draw = function(){};
 
     if (!this.$isComponentRoot)
         this.$isComponentRoot = meta.isComponentRoot;

@@ -23,14 +23,6 @@ var GETTER = "__defineGetter__",
 var modules = {
     Main: constructors
   };
-/**
- * Inheritance helper
- */
-Object.create = function (o) {
-    function F() {}
-    F.prototype = o;
-    return new F();
-};
 
 // Helper. Adds a type to the constructor list
 global.registerGlobalQmlType = function (name, type) {
@@ -113,45 +105,6 @@ global.loadImports = function (self, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
   }
   perContextConstructors[self.objectId] = constructors;
-}
-
-// Helper. Ought to do absolutely nothing.
-function noop(){};
-
-// Helper to prevent some minimization cases. Ought to do "nothing".
-function tilt() {arguments.length = 0};
-
-// Helper to clone meta-objects for dynamic element creation
-function cloneObject(obj) {
-    if (null == obj || typeof obj != "object")
-        return obj;
-    var copy = new obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) {
-            if (typeof obj[attr] == "object")
-                copy[attr] = cloneObject(obj[attr]);
-            else
-                copy[attr] = obj[attr];
-        }
-    }
-    return copy;
-}
-
-/**
- * Helper function.
- * Prints msg and values of object. Workaround when using getter functions as
- * Chrome (at least) won't show property values for them.
- * @param {String} msg Message
- * @param {Object} obj Object to use (will be "printed", too)
- * @param {Array} vals Values to list from the object.
- */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
 }
 
 /**
