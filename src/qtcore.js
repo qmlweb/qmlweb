@@ -809,7 +809,7 @@ QMLEngine = function (element, options) {
 
     this.$draw = function()
     {
-        if (this.renderMode == QMLRenderMode.DOM)
+        if (this.renderMode != QMLRenderMode.Canvas)
             return;
         var time = new Date();
 
