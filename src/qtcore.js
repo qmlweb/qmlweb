@@ -209,8 +209,8 @@ function descr(msg, obj, vals) {
  */
 QMLBinding.prototype.compile = function() {
     var bindSrc = this.function
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
+                    ? "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + this.src + "})"
+                    : "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
     this.eval = eval(bindSrc);
 }
 
@@ -1030,6 +1030,15 @@ function QMLList(meta) {
     return list;
 }
 
+function QMLContext() {
+    this.nameForObject = function(obj) {
+        for (var name in this) {
+            if (this[name] == obj)
+                return name;
+        }
+    }
+}
+
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
@@ -1037,7 +1046,7 @@ QMLComponent.prototype.createObject = function(parent, properties) {
     var item = construct({
         object: this.$metaObject,
         parent: parent,
-        context: Object.create(this.$context),
+        context: this.$context ? Object.create(this.$context) : new QMLContext(),
         isComponentRoot: true
     });
 
