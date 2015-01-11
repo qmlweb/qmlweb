@@ -151,7 +151,8 @@
             Behavior: QMLBehavior,
             TextInput: QMLTextInput,
             Button: QMLButton,
-            TextArea: QMLTextArea,
+            TextArea: QMLTextEdit, // non-standard, to be removed!
+            TextEdit: QMLTextEdit,
             CheckBox: QMLCheckbox
         }
 
@@ -3691,7 +3692,7 @@ function QMLButton(meta) {
     }
 }
 
-function QMLTextArea(meta) {
+function QMLTextEdit(meta) {
     QMLItem.call(this, meta);
 
     if (engine.renderMode == QMLRenderMode.Canvas) {
