@@ -155,16 +155,6 @@ function descr(msg, obj, vals) {
 }
 
 /**
- * Compile binding. Afterwards you may call binding.eval to evaluate.
- */
-QMLBinding.prototype.compile = function() {
-    var bindSrc = this.function
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
-    this.eval = eval(bindSrc);
-}
-
-/**
  * QML Object constructor.
  * @param {Object} meta Meta information about the object and the creation context
  * @return {Object} New qml object
