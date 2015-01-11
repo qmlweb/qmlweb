@@ -1685,8 +1685,22 @@ function convertToEngine(tree) {
             return walk(tree);
         },
         "name": function(src) {
+            if (src == "true" || src == "false")
+                return src == "true";
             return bindout(tree, src);
-        }
+        },
+        "num": function(src) {
+            return +src;
+        },
+        "string": function(src) {
+            return String(src);
+        },
+        "array": function(src) {
+            var val = [];
+            for (var i in src)
+                val.push(walk(src[i]));
+            return val;
+        },
     };
 
     function walk(tree) {

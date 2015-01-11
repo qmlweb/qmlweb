@@ -8,6 +8,7 @@ Rectangle {
     property int value: 5
     property bool novalue
     width: 600; height: 400
+    property variant arr: [1, 2, "hello world", [1, 2, false]]
     function getSize() {
         return width + "x" + height
     }
@@ -30,7 +31,10 @@ Rectangle {
             margins: 5
         }
         Text {
-            text: "Property is: " + main.value + ", undefined boolean is: " + main.novalue
+            text: "Property is: " + main.value
+                    + ".\nArray is: "+ JSON.stringify(main.arr)
+                    + ".\nUndefined boolean is: " + main.novalue
+                    + ".";
         }
     }
     Component.onCompleted: console.log("Component.onCompleted!");
