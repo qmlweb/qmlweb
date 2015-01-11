@@ -156,6 +156,29 @@ constructors = {
     CheckBox: QMLCheckbox
 };
 
+
+// Load file, parse and construct as Component (.qml)
+//FIXME: remove the parameter executionContext and get it autonomously.
+Qt.createComponent = function(name, executionContext)
+{
+    if (name in engine.components)
+        return engine.components[name];
+
+    var file = engine.$basePath + name;
+
+    var src = getUrlContents(file);
+    if (src=="")
+        return undefined;
+    var tree = parseQML(src);
+
+    if (tree.$children.length !== 1)
+        console.error("A QML component must only contain one root element!");
+
+    var component = new QMLComponent({ object: tree, context: executionContext });
+    engine.components[name] = component;
+    return component;
+}
+
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
@@ -173,14 +196,12 @@ QMLBinding.prototype.compile = function() {
  */
 function construct(meta) {
     var item,
-        cTree;
+        component;
 
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
-    } else if (cTree = engine.loadComponent(meta.object.$class)) {
-        if (cTree.$children.length !== 1)
-            console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+    } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
+        var item = component.createObject(meta.parent);
 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
@@ -623,6 +644,9 @@ QMLEngine = function (element, options) {
     // Root object of the engine
     this.rootObject = null;
 
+    // Base path of qml engine (used for resource loading)
+    this.$basePath = "";
+
 
 //----------Public Methods----------
     // Start the engine
@@ -661,9 +685,9 @@ QMLEngine = function (element, options) {
 
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
-        basePath = file.split("/");
-        basePath[basePath.length - 1] = "";
-        basePath = basePath.join("/");
+        this.$basePath = file.split("/");
+        this.$basePath[this.$basePath.length - 1] = "";
+        this.$basePath = this.$basePath.join("/");
         var src = getUrlContents(file);
         if (options.debugSrc) {
             options.debugSrc(src);
@@ -715,22 +739,6 @@ QMLEngine = function (element, options) {
 
 //Intern
 
-    // Load file, parse and construct as Component (.qml)
-    this.loadComponent = function(name)
-    {
-        if (name in this.components)
-            return this.components[name];
-
-        var file = basePath + name + ".qml";
-
-        var src = getUrlContents(file);
-        if (src=="")
-            return undefined;
-        var tree = parseQML(src);
-        this.components[name] = tree;
-        return tree;
-    }
-
     this.$initializePropertyBindings = function() {
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
@@ -756,7 +764,7 @@ QMLEngine = function (element, options) {
         if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
             return file;
         }
-        return basePath + file;
+        return this.$basePath + file;
     }
 
     this.$registerStart = function(f)
@@ -904,8 +912,6 @@ QMLEngine = function (element, options) {
         lastTick = new Date().getTime(),
         // isDirty tells if we should do redraw
         isDirty = true,
-        // Base path of qml engine (used for resource loading)
-        basePath,
         i;
 
 
