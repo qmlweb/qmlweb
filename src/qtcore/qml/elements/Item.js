@@ -10,15 +10,6 @@ function QMLItem(meta) {
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
-        if (engine.rootElement == undefined) {
-            window.onresize = function() {
-                self.implicitHeight = window.innerHeight;
-                self.implicitWidth = window.innerWidth;
-            }
-        } else {
-            this.implicitHeight = this.dom.offsetHeight;
-            this.implicitWidth = this.dom.offsetWidth;
-        }
         this.dom.style.position = "relative"; // Needed to make absolute positioning work
         this.dom.style.top = "0";
         this.dom.style.left = "0";
@@ -354,8 +345,17 @@ function QMLItem(meta) {
     this.scale = 1;
 
     // Init size of root element
-    if (this.$parent === null && engine.rootElement == undefined) {
-        window.onresize();
+    if (this.$parent === null) {
+        if (engine.rootElement == undefined) {
+            window.onresize = function() {
+                self.implicitHeight = window.innerHeight;
+                self.implicitWidth = window.innerWidth;
+            }
+            window.onresize();
+        } else {
+            this.implicitHeight = this.dom.offsetHeight;
+            this.implicitWidth = this.dom.offsetWidth;
+        }
     }
 
     this.$draw = function(c) {
