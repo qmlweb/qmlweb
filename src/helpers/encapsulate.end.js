@@ -1,1 +1,1 @@
-}).bind(this)(typeof global != 'undefined' ? global : window);
+})(typeof global != 'undefined' ? global : window);

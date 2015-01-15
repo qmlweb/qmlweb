@@ -30,6 +30,7 @@ function QMLItem(meta) {
     }
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
+    this.dom.qml = this;
     this.css = this.dom.style;
 
     createSimpleProperty("list", this, "data");
@@ -64,6 +65,8 @@ function QMLItem(meta) {
         }
     });
 
+    if (this.$isComponentRoot)
+      createSimpleProperty("var", this, "activeFocus");
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
     createSimpleProperty("real", this, "width");
@@ -92,11 +95,9 @@ function QMLItem(meta) {
     this.implicitHeightChanged.connect(this, updateVGeometry);
     this.focus = false;
 
-    var focusedElement = null;
-
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
-        var hasFocus = document.activeElement == this.dom.firstChild;
+        var hasFocus = document.activeElement == this.dom || document.activeElement == this.dom.firstChild;
 
         if (this.focus != hasFocus)
           this.focus = hasFocus;
@@ -106,11 +107,15 @@ function QMLItem(meta) {
     }).bind(this);
 
     this.focusChanged.connect(this, (function(newVal) {
-      if (focusedElement != null && document.activeElement == focusedElement) {
-        if (newVal)
+      if (newVal == true) {
+        if (this.dom.firstChild != null)
           this.dom.firstChild.focus();
-        else
-          document.getElementsByTagName("BODY")[0].focus();
+        document.qmlFocus = this;
+        this.$context.activeFocus = this;
+      } else if (document.qmlFocus == this) {
+        document.getElementsByTagName("BODY")[0].focus();
+        document.qmlFocus = qmlEngine.rootContext().base;
+        this.$context.activeFocus = null;
       }
     }).bind(this));
 

@@ -124,6 +124,8 @@ registerQmlType({
         this.status = this.Image.Loading;
         this.dom.style.backgroundImage="url('" + engine.$resolvePath(val) + "')";
         img.src = engine.$resolvePath(val);
+        if (img.complete)
+          this.status = this.Image.Ready;
         updateFillMode();
     });
 

@@ -165,20 +165,16 @@ Implemented a Gulp module that:
 - IntValidator    (QtQuick)
 - DoubleValidator (QtQuick)
 - Settings        (Qt.labs.settings)
+- SystemPalette   (QtQuick)
 
 #### Improved implementations
-- TextInput
-  Now supports properties focus, maximumLength, readOnly, validator, [partially] echoMode
-- Image
-  Now supports property mirror.
-  Now supports fill modes PreserveAspectFit, PreserveAspectCrop, Tile, TileVertically
-
+* TextInput supports properties focus, maximumLength, readOnly, validator, [partially] echoMode
+* Image supports property mirror, supports fill modes PreserveAspectFit, PreserveAspectCrop, Tile, TileVertically
 
 ## Todo
 - Unit Testing for each Components using Jasmine
 - Improve the implementation of `focus`, use it to implements `Keys` and `FocusScope`
 - Implement Gradient and GradientStop using CSS3
-- Implement SystemPalette
 - Implement StateGroup, StateChangeScript, ParentChange, AnchorChange
 - Implement ListView, GridView, PathView
 - Implement QtQuick.Controls (Action, ProgressBar, Label, ComboBox, ExclusiveGroup, GroupBox, Calendar, Button)

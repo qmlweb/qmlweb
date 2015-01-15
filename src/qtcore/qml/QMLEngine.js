@@ -121,6 +121,109 @@ QMLEngine = function (element, options) {
       return doc.$context;
     }
 
+    this.focusedElement = (function() {
+      return this.rootContext().activeFocus;
+    }).bind(this);
+
+    // KEYBOARD MANAGEMENT
+    var keyboardSignals = {};
+    keyboardSignals[Qt.Key_Asterisk]   = 'asteriskPressed';
+    keyboardSignals[Qt.Key_Back]       = 'backPressed';
+    keyboardSignals[Qt.Key_Backtab]    = 'backtabPressed';
+    keyboardSignals[Qt.Key_Call]       = 'callPressed';
+    keyboardSignals[Qt.Key_Cancel]     = 'cancelPressed';
+    keyboardSignals[Qt.Key_Delete]     = 'deletePressed';
+    keyboardSignals[Qt.Key_0]          = 'digit0Pressed';
+    keyboardSignals[Qt.Key_1]          = 'digit1Pressed';
+    keyboardSignals[Qt.Key_2]          = 'digit2Pressed';
+    keyboardSignals[Qt.Key_3]          = 'digit3Pressed';
+    keyboardSignals[Qt.Key_4]          = 'digit4Pressed';
+    keyboardSignals[Qt.Key_5]          = 'digit5Pressed';
+    keyboardSignals[Qt.Key_6]          = 'digit6Pressed';
+    keyboardSignals[Qt.Key_7]          = 'digit7Pressed';
+    keyboardSignals[Qt.Key_8]          = 'digit8Pressed';
+    keyboardSignals[Qt.Key_9]          = 'digit9Pressed';
+    keyboardSignals[Qt.Key_Escape]     = 'escapePressed';
+    keyboardSignals[Qt.Key_Flip]       = 'flipPressed';
+    keyboardSignals[Qt.Key_Hangup]     = 'hangupPressed';
+    keyboardSignals[Qt.Key_Menu]       = 'menuPressed';
+    keyboardSignals[Qt.Key_No]         = 'noPressed';
+    keyboardSignals[Qt.Key_Return]     = 'returnPressed';
+    keyboardSignals[Qt.Key_Select]     = 'selectPressed';
+    keyboardSignals[Qt.Key_Space]      = 'spacePressed';
+    keyboardSignals[Qt.Key_Tab]        = 'tabPressed';
+    keyboardSignals[Qt.Key_VolumeDown] = 'volumeDownPressed';
+    keyboardSignals[Qt.Key_VolumeUp]   = 'volumeUpPressed';
+    keyboardSignals[Qt.Key_Yes]        = 'yesPressed';
+    keyboardSignals[Qt.Key_Up]         = 'upPressed';
+    keyboardSignals[Qt.Key_Right]      = 'rightPressed';
+    keyboardSignals[Qt.Key_Down]       = 'downPressed';
+    keyboardSignals[Qt.Key_Left]       = 'leftPressed';
+
+    function keyCodeToQt(e) {
+      if (e.keyCode >= 96 && e.keyCode <= 111) {
+        e.keypad = true;
+      }
+      if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
+        return Qt.Key_Backtab;
+      else if (e.keyCode >= 97 && e.keyCode <= 122)
+        return e.keyCode - (97 - Qt.Key_A);
+      return e.keyCode;
+    }
+
+    function eventToKeyboard(e) {
+        return {
+            accepted: false,
+            count: 1,
+            isAutoRepeat: false,
+            key: keyCodeToQt(e),
+            modifiers: (e.ctrlKey * Qt.CtrlModifier)
+                    | (e.altKey   * Qt.AltModifier)
+                    | (e.shiftKey * Qt.ShiftModifier)
+                    | (e.metaKey  * Qt.MetaModifier)
+                    | (e.keypad   * Qt.KeypadModifier),
+            text: String.fromCharCode(e.charCode)
+        };
+    }
+
+    document.onkeypress = (function(e) {
+      var focusedElement = this.focusedElement();
+      var event          = eventToKeyboard(e || window.event);
+      var eventName      = keyboardSignals[event.key];
+
+      while (event.accepted != true && focusedElement != null) {
+        var backup       = focusedElement.$context.event;
+
+        focusedElement.$context.event = event;
+        focusedElement.Keys.pressed(event);
+        if (eventName != null)
+          focusedElement.Keys[eventName](event);
+        focusedElement.$context.event = backup;
+        if (event.accepted == true)
+          e.preventDefault();
+        else
+          focusedElement = focusedElement.$parent;
+      }
+    }).bind(this);
+
+    document.onkeyup = (function(e) {
+      var focusedElement = this.focusedElement();
+      var event          = eventToKeyboard(e || window.event);
+
+      while (event.accepted != true && focusedElement != null) {
+        var backup       = focusedElement.$context.event;
+
+        focusedElement.$context.event = event;
+        focusedElement.Keys.released(event);
+        focusedElement.$context.event = backup;
+        if (event.accepted == true)
+          e.preventDefault();
+        else
+          focusedElement = focusedElement.$parent;
+      }
+    }).bind(this);
+    // END KEYBOARD MANAGEMENT
+
     this.registerProperty = function(obj, propName)
     {
         var dependantProperties = [];
