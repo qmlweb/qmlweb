@@ -3,6 +3,7 @@ registerQmlType({
   name:     'ParallelAnimation',
   versions: /.*/,
   constructor: function QMLParallelAnimation(meta) {
+    var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);
     var curIndex,
         passedLoops,
