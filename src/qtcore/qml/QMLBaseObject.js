@@ -4,12 +4,8 @@ function QMLBaseObject(meta) {
     var i,
         prop;
 
-    if (!this.$draw)
-        this.$draw = function(){};
-
-    if (!this.$isComponentRoot)
-        this.$isComponentRoot = meta.isComponentRoot;
-    // scope
+    this.$draw = function(){};
+    this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
 
     // Component.onCompleted

@@ -123,9 +123,9 @@ function construct(meta) {
             console.error("A QML component must only contain one root element!");
         var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
 
-        // Recall QMLBaseObject with the meta of the instance in order to get property
-        // definitions, etc. from the instance
-        QMLBaseObject.call(item, meta);
+        // Alter objects context to the outer context
+        item.$context = meta.$context;
+
         if (typeof item.dom != 'undefined')
           item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties

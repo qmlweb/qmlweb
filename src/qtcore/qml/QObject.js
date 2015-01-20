@@ -5,10 +5,8 @@ function QObject(parent) {
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
     // List of things to tidy up when deleting this object.
-    if (!this.$tidyupList)
-        this.$tidyupList = [];
-    if (!this.$properties)
-        this.$properties = {};
+    this.$tidyupList = [];
+    this.$properties = {};
 
     this.objectId = objectIds++;
     this.$delete = function() {
