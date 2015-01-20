@@ -203,9 +203,9 @@ function construct(meta) {
     } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
         var item = component.createObject(meta.parent);
 
-        // Recall QMLBaseObject with the meta of the instance in order to get property
-        // definitions, etc. from the instance
-        QMLBaseObject.call(item, meta);
+        // Alter objects context to the outer context
+        item.$context = meta.context;
+
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
@@ -1026,10 +1026,8 @@ function QObject(parent) {
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
     // List of things to tidy up when deleting this object.
-    if (!this.$tidyupList)
-        this.$tidyupList = [];
-    if (!this.$properties)
-        this.$properties = {};
+    this.$tidyupList = [];
+    this.$properties = {};
 
     this.$delete = function() {
         while (this.$tidyupList.length > 0) {
@@ -1057,12 +1055,8 @@ function QMLBaseObject(meta) {
     var i,
         prop;
 
-    if (!this.$draw)
-        this.$draw = function(){};
-
-    if (!this.$isComponentRoot)
-        this.$isComponentRoot = meta.isComponentRoot;
-    // scope
+    this.$draw = function(){};
+    this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
 
     // Component.onCompleted
