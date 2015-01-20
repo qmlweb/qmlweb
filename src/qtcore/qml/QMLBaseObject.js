@@ -8,13 +8,6 @@ function QMLBaseObject(meta) {
     this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
 
-    // Component.onCompleted
-    this.Component = new QObject(this);
-    this.Component.completed = Signal([]);
-    engine.completedSignals.push(this.Component.completed);
-
-    this.Component.destruction = Signal([]);
-
     // Component get own properties
     var attributes = [];
     for (var key in meta.object) {
