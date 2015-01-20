@@ -49,6 +49,13 @@
 
 (function() {
 
+// Helpers
+
+function QW_INHERIT(constructor, baseClass) {
+    constructor.prototype = Object.create(baseClass.prototype);
+    constructor.prototype.constructor = baseClass;
+}
+
 var Qt = {
     rgba: function(r,g,b,a) {
         var rgba = "rgba("
@@ -928,6 +935,12 @@ QMLEngine = function (element, options) {
         };
     }
 
+    // TODO: Move to module initialization
+    for (i in constructors) {
+        if (constructors[i].getAttachedObject)
+            setupGetter(QMLBaseObject.prototype, i, constructors[i].getAttachedObject);
+    }
+
     if (this.renderMode == QMLRenderMode.Canvas) {
         // Register mousehandler for element
         element.onclick = function(e) {
@@ -997,6 +1010,14 @@ function QMLContext() {
     }
 }
 
+QMLComponent.getAttachedObject = function() { // static
+    if (!this.$Component) {
+        this.$Component = new QObject(this);
+        this.$Component.completed = Signal([]);
+        engine.completedSignals.push(this.$Component.completed);
+    }
+    return this.$Component;
+}
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
@@ -1050,6 +1071,7 @@ function QObject(parent) {
 }
 
 // Base object for all qml elements
+QW_INHERIT(QMLBaseObject, QObject);
 function QMLBaseObject(meta) {
     QObject.call(this, meta.parent);
     var i,
@@ -1058,11 +1080,6 @@ function QMLBaseObject(meta) {
     this.$draw = function(){};
     this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
-
-    // Component.onCompleted
-    this.Component = new QObject(this);
-    this.Component.completed = Signal([]);
-    engine.completedSignals.push(this.Component.completed);
 }
 
 function updateHGeometry(newVal, oldVal, propName) {
@@ -1264,6 +1281,7 @@ function updateVGeometry(newVal, oldVal, propName) {
 }
 
 // Item qml object
+QW_INHERIT(QMLItem, QMLBaseObject);
 function QMLItem(meta) {
     QMLBaseObject.call(this, meta);
     var child,
@@ -1614,6 +1632,7 @@ function QMLItem(meta) {
     }
 }
 
+QW_INHERIT(QMLPositioner, QMLItem);
 function QMLPositioner(meta) {
     QMLItem.call(this, meta);
 
@@ -1638,6 +1657,7 @@ QMLPositioner.slotChildrenChanged = function() {
     }
 }
 
+QW_INHERIT(QMLRow, QMLPositioner);
 function QMLRow(meta) {
     QMLPositioner.call(this, meta);
 
@@ -1665,6 +1685,7 @@ QMLRow.prototype.layoutChildren = function() {
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
 
+QW_INHERIT(QMLColumn, QMLPositioner);
 function QMLColumn(meta) {
     QMLPositioner.call(this, meta);
 }
@@ -1684,6 +1705,7 @@ QMLColumn.prototype.layoutChildren = function() {
     this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
 }
 
+QW_INHERIT(QMLGrid, QMLPositioner);
 function QMLGrid(meta) {
     QMLPositioner.call(this, meta);
 
@@ -1802,6 +1824,7 @@ QMLGrid.prototype.layoutChildren = function() {
     this.implicitHeight = gridHeight;
 }
 
+QW_INHERIT(QMLFlow, QMLPositioner);
 function QMLFlow(meta) {
     QMLPositioner.call(this, meta);
 
@@ -1860,6 +1883,7 @@ QMLFlow.prototype.layoutChildren = function() {
         this.implicitWidth = curHPos + rowSize;
 }
 
+QW_INHERIT(QMLRotation, QMLBaseObject);
 function QMLRotation(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -1896,6 +1920,7 @@ function QMLRotation(meta) {
     }
 }
 
+QW_INHERIT(QMLScale, QMLBaseObject);
 function QMLScale(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -1925,6 +1950,7 @@ function QMLScale(meta) {
 
 }
 
+QW_INHERIT(QMLTranslate, QMLBaseObject);
 function QMLTranslate(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -2016,6 +2042,7 @@ function QMLFont(parent) {
     }
 }
 
+QW_INHERIT(QMLFontLoader, QMLBaseObject);
 function QMLFontLoader(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -2116,6 +2143,7 @@ function QMLFontLoader(meta) {
     this.nameChanged.connect(this, loadFont);
 }
 
+QW_INHERIT(QMLText, QMLItem);
 function QMLText(meta) {
     QMLItem.call(this, meta);
 
@@ -2327,6 +2355,7 @@ function QMLText(meta) {
     }
 }
 
+QW_INHERIT(QMLRectangle, QMLItem);
 function QMLRectangle(meta) {
     QMLItem.call(this, meta);
 
@@ -2390,6 +2419,7 @@ function QMLRectangle(meta) {
     }
 }
 
+QW_INHERIT(QMLRepeater, QMLItem);
 function QMLRepeater(meta) {
     QMLItem.call(this, meta);
     var self = this;
@@ -2512,6 +2542,7 @@ function QMLRepeater(meta) {
     }
 }
 
+QW_INHERIT(QMLListModel, QMLBaseObject);
 function QMLListModel(meta) {
     QMLBaseObject.call(this, meta);
     var self = this,
@@ -2583,6 +2614,7 @@ function QMLListModel(meta) {
     }
 }
 
+QW_INHERIT(QMLListElement, QMLBaseObject);
 function QMLListElement(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -2594,6 +2626,7 @@ function QMLListElement(meta) {
     applyProperties(meta.object, this, this, this.$context);
 }
 
+QW_INHERIT(QMLImage, QMLItem);
 function QMLImage(meta) {
     QMLItem.call(this, meta);
     var img = new Image(),
@@ -2685,10 +2718,12 @@ function QMLImage(meta) {
     }
 }
 
+QW_INHERIT(QMLAnimatedImage, QMLImage);
 function QMLAnimatedImage(meta) {
     QMLImage.call(this, meta);
 }
 
+QW_INHERIT(QMLBorderImage, QMLItem);
 function QMLBorderImage(meta) {
     QMLItem.call(this, meta);
     var self = this;
@@ -2847,6 +2882,7 @@ function QMLBorderImage(meta) {
     }
 }
 
+QW_INHERIT(QMLMouseArea, QMLItem);
 function QMLMouseArea(meta) {
     QMLItem.call(this, meta);
     var self = this;
@@ -2942,6 +2978,7 @@ function QMLMouseArea(meta) {
     }
 }
 
+QW_INHERIT(QMLState, QMLBaseObject);
 function QMLState(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -2970,6 +3007,7 @@ function QMLState(meta) {
     }
 }
 
+QW_INHERIT(QMLPropertyChanges, QMLBaseObject);
 function QMLPropertyChanges(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -2989,6 +3027,7 @@ function QMLPropertyChanges(meta) {
     }
 }
 
+QW_INHERIT(QMLTransition, QMLBaseObject);
 function QMLTransition(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -3021,6 +3060,7 @@ function QMLTransition(meta) {
     }
 }
 
+QW_INHERIT(QMLTimer, QMLBaseObject);
 function QMLTimer(meta) {
     QMLBaseObject.call(this, meta);
     var prevTrigger,
@@ -3097,6 +3137,7 @@ function QMLTimer(meta) {
     });
 }
 
+QW_INHERIT(QMLAnimation, QMLBaseObject);
 function QMLAnimation(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -3137,6 +3178,7 @@ function QMLAnimation(meta) {
     this.complete = unboundMethod;
 }
 
+QW_INHERIT(QMLSequentialAnimation, QMLAnimation);
 function QMLSequentialAnimation(meta) {
     QMLAnimation.call(this, meta);
     var curIndex,
@@ -3213,6 +3255,7 @@ function QMLSequentialAnimation(meta) {
     });
 };
 
+QW_INHERIT(QMLParallelAnimation, QMLAnimation);
 function QMLParallelAnimation(meta) {
     QMLAnimation.call(this, meta);
     var curIndex,
@@ -3265,6 +3308,7 @@ function QMLParallelAnimation(meta) {
     });
 };
 
+QW_INHERIT(QMLPropertyAnimation, QMLAnimation);
 function QMLPropertyAnimation(meta) {
     QMLAnimation.call(this, meta);
 
@@ -3487,6 +3531,7 @@ function QMLPropertyAnimation(meta) {
     }
 }
 
+QW_INHERIT(QMLNumberAnimation, QMLPropertyAnimation);
 function QMLNumberAnimation(meta) {
     QMLPropertyAnimation.call(this, meta);
     var at = 0,
@@ -3547,6 +3592,7 @@ function QMLNumberAnimation(meta) {
     }
 }
 
+QW_INHERIT(QMLBehavior, QMLBaseObject);
 function QMLBehavior(meta) {
     QMLBaseObject.call(this, meta);
 
@@ -3567,6 +3613,7 @@ function QMLBehavior(meta) {
 
 //------------DOM-only-Elements------------
 
+QW_INHERIT(QMLTextInput, QMLItem);
 function QMLTextInput(meta) {
     QMLItem.call(this, meta);
 
@@ -3613,6 +3660,7 @@ function QMLTextInput(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
+QW_INHERIT(QMLButton, QMLItem);
 function QMLButton(meta) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("Button-type is only supported within the DOM-backend. Use Rectangle + MouseArea instead.");
@@ -3646,6 +3694,7 @@ function QMLButton(meta) {
     }
 }
 
+QW_INHERIT(QMLTextEdit, QMLItem);
 function QMLTextEdit(meta) {
     QMLItem.call(this, meta);
 
@@ -3687,6 +3736,7 @@ function QMLTextEdit(meta) {
     this.dom.firstChild.onpropertychanged = updateValue;
 }
 
+QW_INHERIT(QMLCheckbox, QMLItem);
 function QMLCheckbox(meta) {
     if (engine.renderMode == QMLRenderMode.Canvas) {
         console.log("CheckBox-type is only supported within the DOM-backend.");
