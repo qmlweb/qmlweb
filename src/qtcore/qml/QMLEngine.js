@@ -632,5 +632,11 @@ QMLEngine = function (element, options) {
             options.debugConsole.apply(undefined, args);
         };
     }
+
+    // TODO: Move to module initialization
+    for (i in constructors) {
+        if (constructors[i].getAttachedObject)
+            setupGetter(QMLBaseObject.prototype, i, constructors[i].getAttachedObject);
+    }
 }
 

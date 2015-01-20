@@ -7,6 +7,17 @@ function QMLContext() {
     }
 }
 
+QMLComponent.getAttachedObject = function() { // static
+    if (!this.$Component) {
+        this.$Component = new QObject(this);
+        this.$Component.completed = Signal([]);
+        engine.completedSignals.push(this.$Component.completed);
+
+        this.$Component.destruction = Signal([]);
+    }
+    return this.$Component;
+}
+
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
