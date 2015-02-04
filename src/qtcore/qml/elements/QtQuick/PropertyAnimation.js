@@ -3,6 +3,7 @@ registerQmlType({
   name:     'PropertyAnimation',
   versions: /.*/,
   constructor: function QMLPropertyAnimation(meta) {
+    var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);
 
     createSimpleProperty("int", this, "duration");

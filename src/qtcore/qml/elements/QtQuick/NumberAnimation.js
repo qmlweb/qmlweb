@@ -3,6 +3,8 @@ registerQmlType({
   name:   'NumberAnimation',
   versions: /.*/,
   constructor: function QMLNumberAnimation(meta) {
+    var QMLPropertyAnimation = getConstructor('QtQuick', '2.0', 'PropertyAnimation');
+
     QMLPropertyAnimation.call(this, meta);
     var at = 0,
         loop = 0,
