@@ -262,6 +262,11 @@ function Signal(params, options) {
                 arguments[0].$tidyupList.push(this);
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
         }
+
+        // Notify object of connect
+        if (options.obj && options.obj.$connectNotify) {
+            options.obj.$connectNotify(options);
+        }
     }
     signal.disconnect = function() {
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
@@ -279,6 +284,11 @@ function Signal(params, options) {
                 i--; // We have removed an item from the list so the indexes shifted one backwards
             }
         }
+
+        // Notify object of disconnect
+        if (options.obj && options.obj.$disconnectNotify) {
+            options.obj.$disconnectNotify(options);
+        }
     }
     signal.isConnected = function() {
         var callType = arguments.length == 1 ? 1
@@ -295,6 +305,7 @@ function Signal(params, options) {
     }
     return signal;
 }
+QMLSignal = Signal; // Export as QMLSignal
 
 /**
  * Create property getters and setters for object.
@@ -423,7 +434,11 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             }];
             this.animation.running = true;
         }
-        this.changed(this.val, oldVal, this.name);
+        if (this.obj.$syncPropertyToRemote instanceof Function && !fromAnimation) { // is a remote object from e.g. a QWebChannel
+            this.obj.$syncPropertyToRemote(this.name, newVal);
+        } else {
+            this.changed(this.val, oldVal, this.name);
+        }
     }
 }
 
@@ -1042,7 +1057,7 @@ function QMLComponent(meta) {
 }
 
 // Base object for all qml thingies
-function QObject(parent) {
+QObject = function(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
@@ -1069,6 +1084,7 @@ function QObject(parent) {
             this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
     }
 }
+QObject.createSimpleProperty = createSimpleProperty;
 
 // Base object for all qml elements
 QW_INHERIT(QMLBaseObject, QObject);
