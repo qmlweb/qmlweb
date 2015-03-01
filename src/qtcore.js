@@ -3640,6 +3640,13 @@ function QMLTextInput(meta) {
 
     var self = this;
 
+    this.TextInput = {
+        Normal: "text",
+        Password: "password",
+        NoEcho: "password", // Not supported, use password, that's nearest
+        PasswordEchoOnEdit: "password" // Not supported, use password, that's nearest
+    }
+
     this.font = new QMLFont(this);
 
     this.dom.innerHTML = "<input type=\"text\"/>"
@@ -3650,6 +3657,7 @@ function QMLTextInput(meta) {
     this.dom.firstChild.style.width = "100%";
 
     createSimpleProperty("string", this, "text", "");
+    createSimpleProperty("enum", this, "echoMode", "text");
     this.accepted = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -3659,6 +3667,10 @@ function QMLTextInput(meta) {
 
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.value = newVal;
+    });
+
+    this.echoModeChanged.connect(this, function(newVal) {
+        this.dom.firstChild.type = newVal;
     });
 
     this.dom.firstChild.onkeydown = function(e) {
