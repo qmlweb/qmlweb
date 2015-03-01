@@ -77,4 +77,8 @@
 {
     "file": "../presentation.qml",
     "title": "* Project introduction"
+},
+{
+    "file": "simpleparsingerror.qml",
+    "title": "* Parser error test"
 } ]
