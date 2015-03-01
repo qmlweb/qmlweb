@@ -269,11 +269,12 @@ function parse_js_number(num) {
         }
 };
 
-function JS_Parse_Error(message, line, col, pos) {
+function JS_Parse_Error(message, line, col, pos, comment) {
         this.message = message;
         this.line = line;
         this.col = col;
         this.pos = pos;
+        this.comment = comment ? comment : "";
         try {
                 ({})();
         } catch(ex) {
@@ -282,16 +283,30 @@ function JS_Parse_Error(message, line, col, pos) {
 };
 
 JS_Parse_Error.prototype.toString = function() {
-        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n\n" + this.stack;
+        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n" + this.comment + "\n" + this.stack;
 };
 
-function js_error(message, line, col, pos) {
-        throw new JS_Parse_Error(message, line, col, pos);
+function js_error(message, line, col, pos, comment) {
+        throw new JS_Parse_Error(message, line, col, pos, comment);
 };
 
 function is_token(token, type, val) {
         return token.type == type && (val == null || token.value == val);
 };
+
+function extractLinesForErrorDiag(text, line)
+{
+  var r = "";
+  var lines = text.split("\n");
+
+  for (var i = line - 3; i <= line + 3; i++)
+  if (i >= 0 && i < lines.length ) {
+      var mark = ( i == line ) ? ">>" : "  ";
+      r += mark + i + "  " + lines[i] + "\n";
+  }
+
+  return r;
+}
 
 var EX_EOF = {};
 
@@ -377,7 +392,7 @@ function tokenizer($TEXT) {
         };
 
         function parse_error(err) {
-                js_error(err, S.tokline, S.tokcol, S.tokpos);
+                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline ) );
         };
 
         function read_num(prefix) {
@@ -719,10 +734,12 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
 
         function croak(msg, line, col, pos) {
                 var ctx = S.input.context();
+                var eLine = (line != null ? line : ctx.tokline);
                 js_error(msg,
-                         line != null ? line : ctx.tokline,
+                         eLine,
                          col != null ? col : ctx.tokcol,
-                         pos != null ? pos : ctx.tokpos);
+                         pos != null ? pos : ctx.tokpos),
+                         extractLinesForErrorDiag( S.text, eLine ) );
         };
 
         function token_error(token, msg) {
