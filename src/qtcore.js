@@ -417,7 +417,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             this.val = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
         else
             this.val = construct({ object: newVal, parent: this.obj, context: componentScope });
-    } else if (newVal instanceof Object || !newVal) {
+    } else if (newVal instanceof Object || newVal === undefined) {
         this.val = newVal;
     } else {
         this.val = constructors[this.type](newVal);

@@ -1124,7 +1124,10 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         };
 
         function array_() {
-                return as("array", expr_list("]", !exigent_mode, true));
+                var from = S.token.pos,
+                    stat = expr_list("]", !exigent_mode, true),
+                    to = S.token.pos;
+                return as("array", stat, "[" + S.text.substr(from, to - from));
         };
 
         function object_() {
@@ -1687,19 +1690,35 @@ function convertToEngine(tree) {
         "name": function(src) {
             if (src == "true" || src == "false")
                 return src == "true";
-            return bindout(tree, src);
+            return new QMLBinding(src, ["name", src]);
         },
-        "num": function(src) {
-            return +src;
+        "num": function(val) {
+            return +val;
         },
-        "string": function(src) {
-            return String(src);
+        "string": function(str) {
+            return String(str);
         },
-        "array": function(src) {
-            var val = [];
-            for (var i in src)
-                val.push(walk(src[i]));
-            return val;
+        "array": function(tree, src) {
+            var a = [];
+            var isList = false;
+            var hasBinding = false;
+            for (var i in tree) {
+                var val = walk(tree[i]);
+                a.push(val);
+
+                if (val instanceof QMLMetaElement)
+                    isList = true;
+                else if (val instanceof QMLBinding)
+                    hasBinding = true;
+            }
+
+            if (hasBinding) {
+                if (isList)
+                    throw new TypeError("An array may either contain bindings or Element definitions.");
+                return new QMLBinding(src, tree);
+            }
+
+            return a;
         },
     };
 
@@ -1718,25 +1737,12 @@ function convertToEngine(tree) {
 
     // Try to bind out tree and return static variable instead of binding
     function bindout(tree, binding) {
-        // Detect booleans
-        if (tree[1][0] == "name"
-            && (tree[1][1] == "true" || tree[1][1] == "false")) {
-            return tree[1][1] == "true";
-        }
-        switch(tree[1][0]) {
-            case "num":
-                return +tree[1][1];
-            case "string":
-                return String(tree[1][1]);
-            case "qmlelem":
-                return walk(tree[1]);
-            case "array":
-                var val = [];
-                for (var i in tree[1][1])
-                    val.push(walk(tree[1][1][i]));
-                return val;
-            default:
-                return new QMLBinding(binding, tree);
+        var type = tree[1][0];
+        var walker = walkers[type];
+        if (walker) {
+            return walker.apply(type, tree[1].slice(1));
+        } else {
+            return new QMLBinding(binding, tree);
         }
     }
 
