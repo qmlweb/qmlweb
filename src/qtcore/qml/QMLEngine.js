@@ -257,7 +257,7 @@ QMLEngine = function (element, options) {
     // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
     this.addImportPath = function( dirpath ) {
-        if (!this.userAddedLibraryPaths) this.userAddedImportPaths = [];
+        if (!this.userAddedImportPaths) this.userAddedImportPaths = [];
         this.userAddedImportPaths.push( dirpath );
     }
 

@@ -21,11 +21,13 @@ global.Qt = {
     var src = getUrlContents(file);
     if (src=="") {
       var moredirs = engine.importPathList();
+
       for (var i=0; i<moredirs.length; i++) {
         file = moredirs[i] + name;
         src = getUrlContents(file);
         if (src != "") break;
       }
+
       if (src == "")
         return undefined;
     }
