@@ -1720,7 +1720,7 @@ function convertToEngine(tree) {
             var isList = false;
             var hasBinding = false;
             for (var i in tree) {
-                var val = walk(tree[i]);
+                var val = bindout(tree[i]);
                 a.push(val);
 
                 if (val instanceof QMLMetaElement)
@@ -1754,10 +1754,12 @@ function convertToEngine(tree) {
 
     // Try to bind out tree and return static variable instead of binding
     function bindout(tree, binding) {
-        var type = tree[1][0];
+        if (tree[0] === "stat") // We want to process the content of the statement
+            tree = tree[1];     // (but still handle the case, we get the content directly)
+        var type = tree[0];
         var walker = walkers[type];
         if (walker) {
-            return walker.apply(type, tree[1].slice(1));
+            return walker.apply(type, tree.slice(1));
         } else {
             return new QMLBinding(binding, tree);
         }

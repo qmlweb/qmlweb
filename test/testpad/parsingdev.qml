@@ -8,8 +8,8 @@ Rectangle {
     property int value: 5
     property bool novalue
     width: 600; height: 400
-    property variant arr: [1, 2, "hello world", [1, 5, false]]
-    property variant bindingArray: [1, 2, "hello world", [1, value, novalue]]
+    property variant arr: [1, 2, "hello world", [1, 2, false]]
+    property variant bindingArray: [1, 2, "hello world", [+1, main.value - 3, novalue]]
     function getSize() {
         return width + "x" + height
     }
@@ -32,7 +32,7 @@ Rectangle {
             margins: 5
         }
         Text {
-            text: "Property is:\t\t\t\t" + main.value
+            text: "Property is:\t\t\t" + main.value
                     + ".\nUndefined boolean is:\t" + main.novalue
                     + ".\nArray is:\t\t\t\t"+ JSON.stringify(main.arr)
                     + ".\nArray with Binding:\t\t"+ JSON.stringify(main.bindingArray)
