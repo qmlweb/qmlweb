@@ -74,10 +74,15 @@ function parseQML(file) {
 getUrlContents = function (url) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", url, false);
+    try {
     xhr.send(null);
     if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
         console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
-        return false;
+        return "";
+    }
+    } catch (e) {
+       console.log("Retrieving " + url + " failed with exception: ", e);
+       return "";
     }
     return xhr.responseText;
 }
