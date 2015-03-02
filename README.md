@@ -1,4 +1,4 @@
-== A QML engine in a web browser ==
+# A QML engine in a web browser
 
 The QML language is well-suited for building web applications. Goal is
 to develop the required technologies for that. This is a runtime
@@ -9,12 +9,12 @@ of any scale, not forgetting the creation of sole web applications.
 QmlWeb is not intended to run native QtQuick applications using QmlWeb
 without migration effort.
 
-=== Get started ===
+### Get started
 
 To use QmlWeb, you need a simple html file to load and start QmlWeb.
 This simple file will do:
 
-`
+```html
 <!DOCTYPE html>
 <html>
     <head>
@@ -32,11 +32,11 @@ This simple file will do:
         </script>
     </body>
 </html>
-`
+```
 
 The next thing you need is a QML-file:
 
-`
+```qml
 import QtQuick 1.1
 
 Item {
@@ -49,7 +49,8 @@ Item {
     }
 
 }
-`
+```
 
 That's it.
+
 _Hint: To get the root Item fill the whole screen, just don't set it's size._
