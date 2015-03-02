@@ -252,6 +252,14 @@ QMLEngine = function (element, options) {
         setupGetterSetter(obj, propName, getter, setter);
     }
 
+    this.addImportPath = function( dirpath ) {
+        if (!this.userAddedLibraryPaths) this.userAddedImportPaths = [];
+        this.userAddedImportPaths.push( dirpath );
+    }
+    this.importPathList = function() {
+        return (this.userAddedImportPaths || []);
+    }
+
 //Intern
 
     // Load file, parse and construct as Component (.qml)

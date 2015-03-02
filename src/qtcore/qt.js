@@ -19,8 +19,16 @@ global.Qt = {
     var file = engine.$basePath + name;
 
     var src = getUrlContents(file);
-    if (src=="")
+    if (src=="") {
+      var moredirs = engine.importPathList();
+      for (var i=0; i<moredirs.length; i++) {
+        file = moredirs[i] + name;
+        src = getUrlContents(file);
+        if (src != "") break;
+      }
+      if (src == "")
         return undefined;
+    }
     var tree = parseQML(src);
 
     if (tree.$children.length !== 1)
