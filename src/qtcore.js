@@ -797,11 +797,21 @@ QMLEngine = function (element, options) {
         }
         return this.$basePath + file;
     }
+    
+    // next 3 methods used in Qt.createComponent for qml files lookup
+    // please open qt site for documentation
+    // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
     this.addImportPath = function( dirpath ) {
       if (!this.userAddedLibraryPaths) this.userAddedImportPaths = [];
       this.userAddedImportPaths.push( dirpath );
     }
+
+    this.setImportPathList = function( arrayOfDirs )
+    {
+      this.userAddedImportPaths = arrayOfDirs;
+    }
+
     this.importPathList = function() {
       return (this.userAddedImportPaths || []);
     }
