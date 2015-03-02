@@ -1,0 +1,14 @@
+QmlWeb is a KDE project.
+
+That means you can contribute like you do to any KDE project:
+
+- Report bugs on https://bugs.kde.org/enter_bug.cgi?product=QmlWeb
+- Send patches to https://reviewboard.kde.org/r/new/
+
+If you have made a few commits and wish to contribute more actively,
+please apply for a KDE contributor account:
+https://techbase.kde.org/Contribute/Get_a_Contributor_Account.
+
+
+Alternatively, if you insist on it, you may fill a pull-request on
+GitHub (https://github.com/akreuzkamp/qmlweb).
