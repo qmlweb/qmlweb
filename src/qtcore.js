@@ -174,8 +174,17 @@ Qt.createComponent = function(name, executionContext)
     var file = engine.$basePath + name;
 
     var src = getUrlContents(file);
-    if (src=="")
-        return undefined;
+    if (src=="") {
+        var moredirs = engine.importPathList();
+        for (var i=0; i<moredirs.length; i++) {
+          file = moredirs[i] + name;
+          src = getUrlContents(file);
+          if (src != "") break;
+        }
+        if (src == "")
+          return undefined;
+    }
+
     var tree = parseQML(src);
 
     if (tree.$children.length !== 1)
@@ -787,6 +796,14 @@ QMLEngine = function (element, options) {
             return file;
         }
         return this.$basePath + file;
+    }
+
+    this.addImportPath = function( dirpath ) {
+      if (!this.userAddedLibraryPaths) this.userAddedImportPaths = [];
+      this.userAddedImportPaths.push( dirpath );
+    }
+    this.importPathList = function() {
+      return (this.userAddedImportPaths || []);
     }
 
     this.$registerStart = function(f)
