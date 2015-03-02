@@ -176,11 +176,13 @@ Qt.createComponent = function(name, executionContext)
     var src = getUrlContents(file,true);
     if (src=="") {
         var moredirs = engine.importPathList();
+   
         for (var i=0; i<moredirs.length; i++) {
           file = moredirs[i] + name;
           src = getUrlContents(file,true);
           if (src != "") break;
         }
+
         if (src == "")
           return undefined;
     }
@@ -803,7 +805,7 @@ QMLEngine = function (element, options) {
     // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
     this.addImportPath = function( dirpath ) {
-      if (!this.userAddedLibraryPaths) this.userAddedImportPaths = [];
+      if (!this.userAddedImportPaths) this.userAddedImportPaths = [];
       this.userAddedImportPaths.push( dirpath );
     }
 
