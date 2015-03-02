@@ -173,12 +173,12 @@ Qt.createComponent = function(name, executionContext)
 
     var file = engine.$basePath + name;
 
-    var src = getUrlContents(file);
+    var src = getUrlContents(file,true);
     if (src=="") {
         var moredirs = engine.importPathList();
         for (var i=0; i<moredirs.length; i++) {
           file = moredirs[i] + name;
-          src = getUrlContents(file);
+          src = getUrlContents(file,true);
           if (src != "") break;
         }
         if (src == "")
