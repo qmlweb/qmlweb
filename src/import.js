@@ -79,11 +79,13 @@ getUrlContents = function (url,skipErrorLogging) {
     if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
         if (!skipErrorLogging)
           console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
-        return "";
+        return false; // which return values is better here? "" or false?
     }
     } catch (e) {
-       if (!skipErrorLogging)
-         console.log("Retrieving " + url + " failed with exception: ", e);
+       // it seems to be good idea to throw exception here in case skipErrorLogging is not set.
+       // because without exception, "" then goes to parser, and it failes with strange errors. 
+       if (!skipErrorLogging) 
+         throw e;
        return "";
     }
     return xhr.responseText;
