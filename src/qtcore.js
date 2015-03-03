@@ -333,7 +333,7 @@ function createSimpleProperty(type, obj, propName) {
         return obj.$properties[propName].get();
     };
     var setter = function(newVal) {
-        return obj.$properties[propName].set(newVal);
+        return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
     };
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot)
@@ -355,6 +355,10 @@ function QMLProperty(type, obj, name) {
     // It is needed when deleting, as we need to tidy up all references to this object.
     this.$tidyupList = [];
 }
+
+QMLProperty.ReasonUser = 0;
+QMLProperty.ReasonInit = 1;
+QMLProperty.ReasonAnimtation = 2;
 
 // Updater recalculates the value of a property if one of the
 // dependencies changed
@@ -392,7 +396,7 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
+QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope) {
     var i,
         oldVal = this.val;
 
@@ -415,7 +419,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             return;
         }
     } else {
-        if (!fromAnimation)
+        if (reason != QMLProperty.ReasonAnimation)
             this.binding = null;
         if (newVal instanceof Array)
             newVal = newVal.slice(); // Copies the array
@@ -435,7 +439,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
     }
 
     if (this.val !== oldVal) {
-        if (this.animation && !fromAnimation) {
+        if (this.animation && reason == QMLProperty.ReasonUser) {
             this.animation.running = false;
             this.animation.$actions = [{
                 target: this.animation.target || this.obj,
@@ -445,7 +449,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             }];
             this.animation.running = true;
         }
-        if (this.obj.$syncPropertyToRemote instanceof Function && !fromAnimation) { // is a remote object from e.g. a QWebChannel
+        if (this.obj.$syncPropertyToRemote instanceof Function && reason == QMLProperty.ReasonUser) { // is a remote object from e.g. a QWebChannel
             this.obj.$syncPropertyToRemote(this.name, newVal);
         } else {
             this.changed(this.val, oldVal, this.name);
@@ -561,15 +565,15 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     var obj = this.componentScope[this.val.objectName];
                     return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
                 }
-                item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
+                item.$properties[i].set = function(newVal, reason, objectScope, componentScope) {
                     if (!this.val.propertyName)
                         throw "Cannot set alias property pointing to an QML object.";
-                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
+                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, reason, objectScope, componentScope);
                 }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createSimpleProperty(value.type, item, i);
-                item.$properties[i].set(value.value, true, objectScope, componentScope);
+                item.$properties[i].set(value.value, QMLProperty.ReasonInit, objectScope, componentScope);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
@@ -578,7 +582,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             }
         }
         if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, true, objectScope, componentScope);
+            item.$properties[i].set(value, QMLProperty.ReasonInit, objectScope, componentScope);
         else if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
@@ -588,7 +592,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+            item.$properties[item.$defaultProperty].set(metaObject.$children, QMLProperty.ReasonInit, objectScope, componentScope);
         else
             throw "Cannot assign to unexistant default property";
     }
@@ -776,6 +780,8 @@ QMLEngine = function (element, options) {
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
+            if (!property.binding)
+                continue; // Probably, the binding was overwritten by an explicit value. Ignore.
             property.binding.compile();
             property.update();
         }
@@ -1520,7 +1526,7 @@ function QMLItem(meta) {
         // before we fetch the values because properties can be interdependent.
         for (i in actions) {
             var action = actions[i];
-            action.target.$properties[action.property].set(action.value, false, action.target,
+            action.target.$properties[action.property].set(action.value, QMLProperty.ReasonUser, action.target,
                                                            newState ? newState.$context: action.target.$context);
         }
         for (i in actions) {
@@ -2499,7 +2505,7 @@ function QMLRepeater(meta) {
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             for (var i in model.roleNames) {
                 createSimpleProperty("variant", newItem, model.roleNames[i]);
-                newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
+                newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), QMLProperty.ReasonInit, newItem, self.model.$context);
             }
 
             self.parent.children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
@@ -2532,7 +2538,7 @@ function QMLRepeater(meta) {
                     roles = model.roleNames;
                 for (var index = startIndex; index <= endIndex; index++) {
                     for (var i in roles) {
-                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), true, self.$items[index], self.model.$context);
+                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), QMLProperty.ReasonInit, self.$items[index], self.model.$context);
                     }
                 }
             });
@@ -3596,7 +3602,7 @@ function QMLNumberAnimation(meta) {
                 for (var i in self.$actions) {
                     var action = self.$actions[i],
                         value = self.easing.$valueForProgress(at) * (action.to - action.from) + action.from;
-                    action.target.$properties[action.property].set(value, true);
+                    action.target.$properties[action.property].set(value, QMLProperty.ReasonAnimation);
                 }
         }
     }
@@ -3624,7 +3630,7 @@ function QMLNumberAnimation(meta) {
     this.complete = function() {
         for (var i in this.$actions) {
             var action = this.$actions[i];
-            action.target.$properties[action.property].set(action.to, true);
+            action.target.$properties[action.property].set(action.to, QMLProperty.ReasonAnimation);
         }
         engine.$requestDraw();
 
