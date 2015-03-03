@@ -193,12 +193,12 @@ function createSimpleProperty(type, obj, propName, options) {
     obj.$properties[propName].set(options.default);
     getter = function()       { return obj.$properties[propName].get(); };
     if (!options.readOnly)
-      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+      setter = function(newVal) { return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
     else {
       setter = function(newVal) {
         if (obj.$canEditReadOnlyProperties != true)
           throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal);
+        return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
@@ -318,15 +318,15 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     var obj = this.componentScope[this.val.objectName];
                     return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
                 }
-                item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
+                item.$properties[i].set = function(newVal, reason, objectScope, componentScope) {
                     if (!this.val.propertyName)
                         throw "Cannot set alias property pointing to an QML object.";
-                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
+                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, reason, objectScope, componentScope);
                 }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createSimpleProperty(value.type, item, i);
-                item.$properties[i].set(value.value, true, objectScope, componentScope);
+                item.$properties[i].set(value.value, QMLProperty.ReasonInit, objectScope, componentScope);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
@@ -335,7 +335,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             }
         }
         if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, true, objectScope, componentScope);
+            item.$properties[i].set(value, QMLProperty.ReasonInit, objectScope, componentScope);
         else if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
@@ -345,7 +345,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+            item.$properties[item.$defaultProperty].set(metaObject.$children, QMLProperty.ReasonInit, objectScope, componentScope);
         else
             throw "Cannot assign to unexistant default property";
     }

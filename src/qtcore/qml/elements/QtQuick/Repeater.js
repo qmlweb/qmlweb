@@ -37,7 +37,7 @@ function QMLRepeater(meta) {
             for (var i in model.roleNames) {
                 if (typeof newItem.$properties[model.roleNames[i]] == 'undefined')
                   createSimpleProperty("variant", newItem, model.roleNames[i]);
-                newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
+                newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), QMLProperty.ReasonInit, newItem, self.model.$context);
             }
 
             self.container().children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
@@ -71,7 +71,7 @@ function QMLRepeater(meta) {
                     roles = model.roleNames;
                 for (var index = startIndex; index <= endIndex; index++) {
                     for (var i in roles) {
-                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), true, self.$items[index], self.model.$context);
+                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), QMLProperty.ReasonInit, self.$items[index], self.model.$context);
                     }
                 }
             });

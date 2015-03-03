@@ -141,7 +141,7 @@ registerQmlType({
     function updatePropertiesFromResponseObject(responseObject) {
       for (var key in responseObject) {
         if (responseObject.hasOwnProperty(key) && self.$hasProperty(key)) {
-          self.$properties[key].set(responseObject[key]);
+          self.$properties[key].set(responseObject[key], QMLProperty.ReasonUser);
         }
       }
     }

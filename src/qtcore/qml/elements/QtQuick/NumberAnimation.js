@@ -24,7 +24,7 @@ registerQmlType({
                 for (var i in self.$actions) {
                     var action = self.$actions[i],
                         value = self.easing.$valueForProgress(at) * (action.to - action.from) + action.from;
-                    action.target.$properties[action.property].set(value, true);
+                    action.target.$properties[action.property].set(value, QMLProperty.ReasonAnimation);
                 }
         }
     }
@@ -52,7 +52,7 @@ registerQmlType({
     this.complete = function() {
         for (var i in this.$actions) {
             var action = this.$actions[i];
-            action.target.$properties[action.property].set(action.to, true);
+            action.target.$properties[action.property].set(action.to, QMLProperty.ReasonAnimation);
         }
 
         if (++loop == this.loops)

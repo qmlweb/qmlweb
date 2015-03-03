@@ -14,6 +14,10 @@ function QMLProperty(type, obj, name) {
     this.$tidyupList = [];
 }
 
+QMLProperty.ReasonUser = 0;
+QMLProperty.ReasonInit = 1;
+QMLProperty.ReasonAnimation = 2;
+
 // Updater recalculates the value of a property if one of the
 // dependencies changed
 QMLProperty.prototype.update = function() {
@@ -50,7 +54,7 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
+QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope) {
     var i,
         oldVal = this.val;
 
@@ -73,7 +77,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             return;
         }
     } else {
-        if (!fromAnimation)
+        if (!reason != QMLProperty.ReasonAnimation)
             this.binding = null;
         if (newVal instanceof Array)
             newVal = newVal.slice(); // Copies the array
@@ -93,7 +97,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
     }
 
     if (this.val !== oldVal) {
-        if (this.animation && !fromAnimation) {
+        if (this.animation && reason == QMLProperty.ReasonUser) {
             this.animation.running = false;
             this.animation.$actions = [{
                 target: this.animation.target || this.obj,
@@ -103,7 +107,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             }];
             this.animation.running = true;
         }
-        if (this.obj.$syncPropertyToRemote instanceof Function && !fromAnimation) { // is a remote object from e.g. a QWebChannel
+        if (this.obj.$syncPropertyToRemote instanceof Function && reason == QMLProperty.ReasonUser) { // is a remote object from e.g. a QWebChannel
             this.obj.$syncPropertyToRemote(this.name, newVal);
         } else {
             this.changed(this.val, oldVal, this.name);

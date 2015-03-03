@@ -223,7 +223,7 @@ function QMLItem(meta) {
         // before we fetch the values because properties can be interdependent.
         for (i in actions) {
             var action = actions[i];
-            action.target.$properties[action.property].set(action.value, false, action.target,
+            action.target.$properties[action.property].set(action.value, QMLProperty.ReasonUser, action.target,
                                                            newState ? newState.$context: action.target.$context);
         }
         for (i in actions) {
