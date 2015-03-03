@@ -9,7 +9,7 @@ Rectangle {
     border.width: greenRect.border.width
     border.color: greenRect.border.color
     default property alias kids: greenRect.children
-    property string txt: "Foo"
+    property string txt: "Fo" + "o"
     signal test(string newColor, int number)
 
     MouseArea {
@@ -35,7 +35,10 @@ Rectangle {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: comp.test("darkred", Math.floor(10 * Math.random()));
+            onClicked:  {
+                comp.test("darkred", Math.floor(10 * Math.random()));
+                console.log(txt);
+            }
         }
     }
 }
