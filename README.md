@@ -174,7 +174,6 @@ Implemented a Gulp module that:
 ## Todo
 - Unit Testing for each Components using Jasmine
 - Improve the implementation of `focus`, use it to implements `Keys` and `FocusScope`
-- Implement aliased properties
 - Implement Gradient and GradientStop using CSS3
 - Implement StateGroup, StateChangeScript, ParentChange, AnchorChange
 - Implement ListView, GridView, PathView
