@@ -22,7 +22,7 @@ registerQmlType({
 
     this.setupFocusOnDom(this.dom.firstChild);
 
-    createSimpleProperty("string", this, "text", "");
+    createSimpleProperty("string", this, "text");
     createSimpleProperty("int",    this, "maximumLength");
     createSimpleProperty("bool",   this, "readOnly");
     createSimpleProperty("var",    this, "validator");
@@ -68,9 +68,6 @@ registerQmlType({
         self.accepted();
         e.accepted = true;
       }
-      else if (e.text != '') {
-        e.accepted = true;
-      }
     }).bind(this));
 
     function testValidator() {
@@ -81,7 +78,9 @@ registerQmlType({
 
     function updateValue(e) {
         if (self.text != self.dom.firstChild.value) {
-            self.text = self.dom.firstChild.value;
+          self.$canEditReadOnlyProperties = true;
+          self.text = self.dom.firstChild.value;
+          self.$canEditReadOnlyProperties = false;
         }
     }
 
