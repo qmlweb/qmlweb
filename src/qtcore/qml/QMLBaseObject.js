@@ -23,7 +23,8 @@ function QMLBaseObject(meta) {
     for (var key in meta.object) {
       if (meta.object.hasOwnProperty(key) &&
           typeof meta.object[key] != 'undefined' && meta.object[key] != null &&
-          meta.object[key].__proto__.constructor.name == 'QMLPropertyDefinition') {
+          (meta.object[key].__proto__.constructor.name == 'QMLPropertyDefinition' ||
+           meta.object[key].__proto__.constructor.name == 'QMLAliasDefinition')) {
         attributes.push(key);
       }
     }
