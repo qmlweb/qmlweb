@@ -16,10 +16,12 @@ global.Qt = {
     if (name in engine.components)
         return engine.components[name];
 
-    var file = engine.$basePath + name;
+    var nameIsUrl = name.indexOf("//") >= 0;
+    var file = nameIsUrl ? name : engine.$basePath + name;
 
     var src = getUrlContents(file);
-    if (src=="") {
+    // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
+    if (src=="" && !nameIsUrl) {
       var moredirs = engine.importPathList();
 
       for (var i=0; i<moredirs.length; i++) {
