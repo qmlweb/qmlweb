@@ -6,6 +6,10 @@ global.Qt = {
       + Math.round(b * 255) + ","
       + a + ")";
   },
+  openUrlExternally: function(url) {
+    page = window.open(url, '_blank');
+    page.focus();
+  },
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,
