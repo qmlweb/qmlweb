@@ -98,7 +98,7 @@ getUrlContents = function (url,skipErrorLogging) {
  *                          and .externals lists qmldir external references.
  */
 readQmlDir = function (url) {
-    var qmldir = getUrlContents(url += "/qmldir"), // Modifies url here!
+    var qmldir = getUrlContents(url + "/qmldir"), // Modifies url here!
         lines,
         line,
         internals = {},
