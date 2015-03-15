@@ -347,14 +347,30 @@ function QMLItem(meta) {
     // Init size of root element
     if (this.$parent === null) {
         if (engine.rootElement == undefined) {
-            window.onresize = function() {
+            // Case 1: Qml scene is placed in body tag
+
+            // event handling by addEventListener is probably better than setting window.onresize
+            var updateQmlGeometry = function() {
                 self.implicitHeight = window.innerHeight;
                 self.implicitWidth = window.innerWidth;
             }
-            window.onresize();
+            window.addEventListener( "resize", updateQmlGeometry );
+            updateQmlGeometry();
         } else {
-            this.implicitHeight = this.dom.offsetHeight;
-            this.implicitWidth = this.dom.offsetWidth;
+            // Case 2: Qml scene is placed in some element tag
+
+            // we have to call `self.implicitHeight =` and `self.implicitWidth =`
+            // each time the rootElement changes it's geometry
+            // to reposition child elements of qml scene
+
+            // it is good to have this as named method of dom element, so we can call it
+            // from outside too, whenever element changes it's geometry (not only on window resize)
+            this.dom.updateQmlGeometry = function() {
+              self.implicitHeight = self.dom.offsetHeight;
+              self.implicitWidth = self.dom.offsetWidth;
+            };
+            window.addEventListener( "resize", this.dom.updateQmlGeometry );
+            this.dom.updateQmlGeometry();
         }
     }
 }
