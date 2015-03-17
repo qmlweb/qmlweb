@@ -199,7 +199,8 @@ QMLEngine = function (element, options) {
                 // resolve name from relative to full dir path
                 // we hope all dirs are relative
                 name = this.removeDotSegments( currentFileDir + name );
-                if (name[ name.length-1 ] == "/") name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir`
+                if (name[ name.length-1 ] == "/")
+                    name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir`
             }
             // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
 
@@ -207,17 +208,28 @@ QMLEngine = function (element, options) {
             if (engine.qmldirsContents[ name ]) continue;
 
             var content = false;
-            var probableDirs = [""];
-            // nameIsUrl => url do not need dirs
-            // nameIsDir => already computed full path
+            if (nameIsQualifiedModuleName && this.userAddedModulePaths && this.userAddedModulePaths[ name ]) {
+                // 1. we have qualified module and user had configured path for that module with engine.addModulePath
+                content = readQmlDir( this.userAddedModulePaths[ name ] );
+            }
+            else if (nameIsUrl || nameIsDir)
+            {
+                // 2. direct load
+                // nameIsUrl => url do not need dirs
+                // nameIsDir => already computed full path above
+                content = readQmlDir( name );
+            }
+            else
+            {
+                // 3. qt-style lookup for qualified module
+                var probableDirs = [currentFileDir].concat( engine.importPathList() )
+                var diredName = name.replace( /\./g,"/" );
 
-            if (nameIsQualifiedModuleName)
-                probableDirs = [currentFileDir].concat( engine.importPathList() )
-
-            for (var k=0; k<probableDirs.length; k++) {
-                var file = probableDirs[k] + name;
-                content = readQmlDir( file );
-                if (content) break;
+                for (var k=0; k<probableDirs.length; k++) {
+                    var file = probableDirs[k] + diredName;
+                    content = readQmlDir( file );
+                    if (content) break;
+                }
             }
 
             if (!content) {
@@ -383,6 +395,21 @@ QMLEngine = function (element, options) {
 
     this.importPathList = function() {
         return (this.userAddedImportPaths || []);
+    }
+
+    // `addModulePath` defines conrete path for module lookup
+    // e.g. addModulePath( "QtQuick.Controls","http://someserver.com/controls" )
+    // will force system to `import QtQuick.Controls` module from `http://someserver.com/controls/qmldir`
+
+    this.addModulePath = function( moduleName, dirPath ) {
+
+        // remove trailing slash as it required for `readQmlDir`
+        if (dirPath[ dirPath.length-1 ] == "/")
+            dirPath = dirPath.substr( 0, dirPath.length-1 );
+
+        // keep the mapping. It will be used in loadImports() function .
+        if (!this.userAddedModulePaths) this.userAddedModulePaths = {};
+        this.userAddedModulePaths[ moduleName ] = dirPath;
     }
 
 //Intern
