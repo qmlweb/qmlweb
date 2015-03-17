@@ -81,4 +81,8 @@
 {
     "file": "simpleparsingerror.qml",
     "title": "* Parser error test"
+},
+{
+    "file": "imports.qml",
+    "title": "* Imports test"
 } ]

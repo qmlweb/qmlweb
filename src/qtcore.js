@@ -172,6 +172,15 @@ Qt.createComponent = function(name, executionContext)
         return engine.components[name];
         
     var nameIsUrl = name.indexOf("//") >= 0;
+
+    // Do not perform path lookups if name starts with @ sign.
+    // This is used when we load components from qmldir files
+    // because in that case we do not need any lookups.
+    if (name.length > 0 && name[0] == "@") {
+      nameIsUrl = true;
+      name = name.substr( 1,name.length-1 );
+    }
+
     var file = nameIsUrl ? name : engine.$basePath + name;
     
     var src = getUrlContents(file,true);
@@ -244,7 +253,7 @@ function construct(meta) {
       var qdirInfo = engine.qmldirs[ meta.object.$class ]; // Are we have info on that component in some imported qmldir files?
       if (qdirInfo) {
           // We have that component in some qmldir, load it from qmldir's url
-          component = Qt.createComponent(qdirInfo.url, meta.context);
+          component = Qt.createComponent( "@" + qdirInfo.url, meta.context);
       }
       else
           component = Qt.createComponent(meta.object.$class + ".qml", meta.context);

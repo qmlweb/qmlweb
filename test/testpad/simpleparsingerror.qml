@@ -1,4 +1,5 @@
 // Error report test
+// You can see report in browser console. Press Ctrl+Shift+J to open it.
 
 Rectangle {
   width: 100
