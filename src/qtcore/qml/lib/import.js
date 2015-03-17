@@ -1,6 +1,8 @@
 /* @license
 
   Copyright (c) 2011 Lauri Paimen <lauri@paimen.info>
+  Copyright (c) 2015 Pavel Vasev <pavel.vasev@gmail.com> - initial
+                     and working import implementation.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -93,8 +95,24 @@ if (typeof global.urlContentCache == 'undefined')
  * @return {Object} Object, where .internals lists qmldir internal references
  *                          and .externals lists qmldir external references.
  */
+
+/*  Note on how importing works.
+
+   * parseQML gives us `tree.$imports` variable, which contains information from `import` statements.
+
+   * After each call to parseQML, we call engine.loadImports(tree.$imports).
+     It in turn invokes readQmlDir() calls for each import, with respect to current component base path and engine.importPathList().
+
+   * We keep all component names from all qmldir files in global variable `engine.qmldir`.
+   
+   * In construct() function, we use `engine.qmldir` for component url lookup.
+
+   Reference import info: http://doc.qt.io/qt-5/qtqml-syntax-imports.html 
+   Also please look at notes and TODO's in qtcore.js::loadImports() and qtcore.js::construct() methods.
+*/
+ 
 readQmlDir = function (url) {
-    var qmldir = getUrlContents(url + "/qmldir"), // Modifies url here!
+    var qmldir = getUrlContents(url + "/qmldir", true), // loading url contents with skipping errors
         lines,
         line,
         internals = {},
