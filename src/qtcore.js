@@ -173,29 +173,35 @@ Qt.createComponent = function(name, executionContext)
         
     var nameIsUrl = name.indexOf("//") >= 0;
     var file = nameIsUrl ? name : engine.$basePath + name;
-
+    
     var src = getUrlContents(file,true);
-
+    
     // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
-    if (src=="" && !nameIsUrl) {
+    if (src===false && !nameIsUrl) {
         var moredirs = engine.importPathList();
    
         for (var i=0; i<moredirs.length; i++) {
           file = moredirs[i] + name;
           src = getUrlContents(file,true);
-          if (src != "") break;
+          if (src !== false) break;
         }
 
-        if (src == "")
+        if (src === false)
           return undefined;
     }
-
+   
     var tree = parseQML(src);
 
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
-
+       
     var component = new QMLComponent({ object: tree, context: executionContext });
+    component.$basePath = engine.extractBasePath( file );
+    component.$imports = tree.$imports;
+    component.$file = file; // just for debugging
+    
+    engine.loadImports( tree.$imports,component.$basePath );
+
     engine.components[name] = component;
     return component;
 }
@@ -219,9 +225,31 @@ function construct(meta) {
     var item,
         component;
 
+    // QtCore.js build-in class?
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
-    } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
+    } 
+    else {
+      // Load component from file. Please look at import.js for main notes.
+
+      // Actually, we have to use that order:
+      // 1) try to load component from current basePath 
+      // 2) from importPathList 
+      // 3) from directories in imports statements and then 
+      // 4) from qmldir files
+
+      // Currently we support only 1,2 and 4 and use order: 4,1,2
+      // TODO: engine.qmldirs is global for all loaded components. That's not qml's original behaviour.
+ 
+      var qdirInfo = engine.qmldirs[ meta.object.$class ]; // Are we have info on that component in some imported qmldir files?
+      if (qdirInfo) {
+          // We have that component in some qmldir, load it from qmldir's url
+          component = Qt.createComponent(qdirInfo.url, meta.context);
+      }
+      else
+          component = Qt.createComponent(meta.object.$class + ".qml", meta.context);
+
+      if (component) {
         var item = component.createObject(meta.parent);
 
         // Alter objects context to the outer context
@@ -230,9 +258,10 @@ function construct(meta) {
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
-    } else {
-        console.log("No constructor found for " + meta.object.$class);
-        return;
+      } else {
+          console.log("No constructor found for " + meta.object.$class);
+          return;
+      }
     }
 
     // id
@@ -723,19 +752,25 @@ QMLEngine = function (element, options) {
         }
     }
 
+    this.extractBasePath = function( file ) {
+        var basePath = file.split(/[\/\\]/); // work both in url ("/") and windows ("\", from file://d:\test\) notation
+        basePath[basePath.length - 1] = "";
+        basePath = basePath.join("/");
+        return basePath;
+    }
+
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
-        this.$basePath = file.split("/");
-        this.$basePath[this.$basePath.length - 1] = "";
-        this.$basePath = this.$basePath.join("/");
+        this.$basePath = this.extractBasePath( file );
+
         var src = getUrlContents(file);
         if (options.debugSrc) {
             options.debugSrc(src);
         }
-        this.loadQML(src);
+        this.loadQML(src,file);
     }
     // parse and construct qml
-    this.loadQML = function(src) {
+    this.loadQML = function(src,file) { // file is not required; only for debug purposes
         engine = this;
         var tree = parseQML(src);
         if (options.debugTree) {
@@ -744,15 +779,131 @@ QMLEngine = function (element, options) {
 
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
+
+        this.loadImports( tree.$imports );
+        component.$basePath = engine.$basePath;
+        component.$imports = tree.$imports; // for later use
+        component.$file = file; // just for debugging
+    
         this.rootObject = component.createObject(null);
+
         this.$initializePropertyBindings();
-
+        
         this.start();
-
+        
         // Call completed signals
         for (var i in this.completedSignals) {
             this.completedSignals[i]();
         }
+    }
+
+/** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
+ *
+ * Removes dot segments in given path component, as described in
+ * RFC 3986, section 5.2.4.
+ *
+ * @param {string} path A non-empty path component.
+ * @return {string} Path component with removed dot segments.
+ */    
+    this.removeDotSegments = function(path) {
+      var leadingSlash = path.startsWith('/');
+      var segments = path.split('/');
+      var out = [];
+
+      for (var pos = 0; pos < segments.length; ) {
+        var segment = segments[pos++];
+
+        if (segment == '.') {
+          if (leadingSlash && pos == segments.length) {
+            out.push('');
+          }
+        } else if (segment == '..') {
+          if (out.length > 1 || out.length == 1 && out[0] != '') {
+            out.pop();
+          }
+          if (leadingSlash && pos == segments.length) {
+            out.push('');
+          }
+        } else {
+          out.push(segment);
+          leadingSlash = true;
+        }
+      }
+
+    return out.join('/');
+    };
+    
+    /* 
+      engine.loadImports() - load qmldir files from `import` statements. Please look at import.js for main notes.
+
+        * `importsArray` is in parser notation, e.g. [import1, import2, ...] where each importN is also array: ["qmlimport","name",version,as,isQualifiedName]
+        * `currentFileDir` is a base dir for imports lookup (it will be used together with importPathList())
+
+      As a result, loadImports stores component names and urls from qmldir files in engine.qmldir variable
+      engine.qmldir is a hash of form: { componentName => { url } }
+      Later, engine.qmldir is used in construct() function for components lookup.
+
+      TODO We have to keep results in component scope. 
+           We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
+    */
+
+    this.loadImports = function(importsArray, currentFileDir) { 
+      if (!importsArray || importsArray.length == 0) return;
+      if (!currentFileDir) currentFileDir = this.$basePath;     // use engine.$basePath by default
+
+      if (!engine.qmldirsContents) engine.qmldirsContents = {}; // cache
+      if (!engine.qmldirs) engine.qmldirs = {};                 // resulting components lookup table
+      
+      for (var i=0; i<importsArray.length; i++) {
+        var entry = importsArray[i];
+        
+        var name = entry[1];
+
+        var nameIsUrl = name.indexOf("//") == 0 || name.indexOf("://") >= 0;  // is it url to remote resource
+        var nameIsQualifiedModuleName = entry[4]; // e.g. QtQuick, QtQuick.Controls, etc
+        var nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl; // local [relative] dir
+
+        if (nameIsDir) {
+            // resolve name from relative to full dir path
+            // we hope all dirs are relative
+            name = this.removeDotSegments( currentFileDir + name );
+            if (name[ name.length-1 ] == "/") name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir` 
+        }
+        // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
+        
+        // check if we have already loaded that qmldir file
+        if (engine.qmldirsContents[ name ]) continue;
+        
+        var content = false; 
+        var probableDirs = [""];
+			  // nameIsUrl => url do not need dirs    
+			  // nameIsDir => already computed full path
+ 
+        if (nameIsQualifiedModuleName) 
+          probableDirs = [currentFileDir].concat( engine.importPathList() )
+        
+        for (var k=0; k<probableDirs.length; k++) {
+          var file = probableDirs[k] + name;
+          content = readQmlDir( file );
+          if (content) break;
+        }
+
+        if (!content) { 
+          console.log("cannot load imports for ",name );
+          // save blank info, meaning that we failed to load import
+          // this prevents repeated lookups
+          engine.qmldirsContents[ name ] = {};
+          continue;
+        }
+        
+        // copy founded externals to global var
+        // TODO actually we have to copy it to current component
+        for (var attrname in content.externals) { engine.qmldirs[attrname] = content.externals[attrname]; }
+
+        // keep already loaded qmldir files
+        engine.qmldirsContents[ name ] = content;
+      }
+
     }
 
     this.registerProperty = function(obj, propName)
@@ -1074,6 +1225,9 @@ QMLComponent.getAttachedObject = function() { // static
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
+    
+    // change base path to current component base path
+    var bp = engine.$basePath; engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
     var item = construct({
         object: this.$metaObject,
@@ -1081,6 +1235,8 @@ QMLComponent.prototype.createObject = function(parent, properties) {
         context: this.$context ? Object.create(this.$context) : new QMLContext(),
         isComponentRoot: true
     });
+    // change base path back
+    engine.$basePath = bp;
 
     engine.operationState = oldState;
 
