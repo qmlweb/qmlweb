@@ -21,24 +21,31 @@ global.Qt = {
 
     var src = getUrlContents(file);
     // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
-    if (src=="" && !nameIsUrl) {
+    if (src==false && !nameIsUrl) {
       var moredirs = engine.importPathList();
 
       for (var i=0; i<moredirs.length; i++) {
         file = moredirs[i] + name;
         src = getUrlContents(file);
-        if (src != "") break;
+        if (src !== false) break;
       }
 
-      if (src == "")
+      if (src === false)
         return undefined;
     }
+
     var tree = parseQML(src);
 
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
 
     var component = new QMLComponent({ object: tree, context: executionContext });
+    component.$basePath = engine.extractBasePath( file );
+    component.$imports = tree.$imports;
+    component.$file = file; // just for debugging
+
+    engine.loadImports( tree.$imports,component.$basePath );
+
     engine.components[name] = component;
     return component;
   },
