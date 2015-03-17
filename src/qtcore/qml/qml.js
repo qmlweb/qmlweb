@@ -118,15 +118,34 @@ function construct(meta) {
 
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
-    } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
-        var item = component.createObject(meta.parent);
+    }
+    else {
+        // Load component from file. Please look at import.js for main notes.
+        // Actually, we have to use that order:
+        // 1) try to load component from current basePath
+        // 2) from importPathList
+        // 3) from directories in imports statements and then
+        // 4) from qmldir files
+        // Currently we support only 1,2 and 4 and use order: 4,1,2
+        // TODO: engine.qmldirs is global for all loaded components. That's not qml's original behaviour.
+        var qdirInfo = engine.qmldirs[meta.object.$class]; // Are we have info on that component in some imported qmldir files?
+        if (qdirInfo) {
+            // We have that component in some qmldir, load it from qmldir's url
+            component = Qt.createComponent(qdirInfo.url, meta.context);
+        }
+        else
+            component = Qt.createComponent(meta.object.$class + ".qml", meta.context);
 
-        if (typeof item.dom != 'undefined')
-          item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
-        var dProp; // Handle default properties
-    } else {
-        console.log("No constructor found for " + meta.object.$class);
-        return;
+        if (component) {
+            var item = component.createObject(meta.parent);
+
+            if (typeof item.dom != 'undefined')
+                item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+            var dProp; // Handle default properties
+        } else {
+            console.log("No constructor found for " + meta.object.$class);
+            return;
+        }
     }
 
     // id
