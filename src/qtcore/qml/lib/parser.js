@@ -1430,7 +1430,9 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             // todo
             next();
             var moduleName = S.token.value;
+            var isDottedNotation = (S.token.type == "name");
             next();
+            
             while (is("punc", ".")) {
                 next();
                 moduleName += "." + S.token.value;
@@ -1446,7 +1448,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 namespace = S.token.value;
                 next();
             }
-            return as("qmlimport", moduleName, version, namespace);
+            return as("qmlimport", moduleName, version, namespace, isDottedNotation);
         }
 
         function qmldocument() {
