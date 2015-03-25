@@ -1544,8 +1544,16 @@ function QMLItem(meta) {
             this.dom.style.left = "0";
             this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
         } else {
-            if (!this.dom) // Create a dom element for this item.
-                this.dom = document.createElement("div");
+            if (!this.dom) { // Create a dom element for this item.
+                /* If some Item-based component want's to hold itself in html tag different than "div",
+                   it can specify desired tag name:
+                   ```
+                   property var htmlTagName: "fieldset"
+                   ```
+                */
+                var tagName = meta.object.htmlTagName ? meta.object.htmlTagName.value : undefined;
+                this.dom = document.createElement( tagName || "div" );
+            }
             this.dom.style.position = "absolute";
         }
         this.dom.style.pointerEvents = "none";
