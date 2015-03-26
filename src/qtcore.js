@@ -857,11 +857,11 @@ QMLEngine = function (element, options) {
     */
 
     this.loadImports = function(importsArray, currentFileDir) { 
-      if (!importsArray || importsArray.length == 0) return;
-      if (!currentFileDir) currentFileDir = this.$basePath;     // use engine.$basePath by default
-
       if (!engine.qmldirsContents) engine.qmldirsContents = {}; // cache
       if (!engine.qmldirs) engine.qmldirs = {};                 // resulting components lookup table
+    
+      if (!importsArray || importsArray.length == 0) return;
+      if (!currentFileDir) currentFileDir = this.$basePath;     // use engine.$basePath by default
       
       for (var i=0; i<importsArray.length; i++) {
         var entry = importsArray[i];
