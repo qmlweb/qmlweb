@@ -58,6 +58,44 @@ global.Qt = {
     engine.components[name] = component;
     return component;
   },
+
+    // Returns url resolved relative to the URL of the caller.
+  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+  resolvedUrl: function(url)
+  {
+    if (!url || !url.substr) // url is not a string object
+      return url;
+
+    // Must check for cases: D:/, file://, http://, or slash at the beginning. 
+    // This means the url is absolute => we have to skip processing (except removing dot segments).
+    if (url == "" || url.indexOf(":/") != -1 || url.indexOf("/") == 0)
+      return engine.removeDotSegments( url );
+
+    // we have $basePath variable placed in context of "current" document
+    // this is done in construct() function
+
+    // let's go to the callers and inspect their arguments
+    // The 2-nd argument of the callers we hope is context object
+    // e.g. see calling signature of bindings and signals
+
+    // Actually Qt cpp code is doing the same; the difference is that they know calling context
+    // https://qt.gitorious.org/qt/qtdeclarative/source/eeaba26596d447c531dfac9d6e6bf5cfe4537813:src/qml/qml/v8/qqmlbuiltinfunctions.cpp#L833
+
+    var detectedBasePath = "";
+    var currentCaller = Qt.resolvedUrl.caller;
+    var maxcount = 10;
+    while (maxcount-- > 0 && currentCaller) {
+      if (currentCaller.arguments[1] && currentCaller.arguments[1]["$basePath"])
+      {
+        detectedBasePath = currentCaller.arguments[1]["$basePath"];
+        break;
+      }
+      currentCaller = currentCaller.caller;
+    }
+
+    return engine.removeDotSegments( detectedBasePath + url )
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,

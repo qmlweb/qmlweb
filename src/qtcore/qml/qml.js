@@ -152,6 +152,9 @@ function construct(meta) {
     if (meta.object.id)
         meta.context[meta.object.id] = item;
 
+    // keep path in item for probale use it later in Qt.resolvedUrl
+    item.$context["$basePath"] = engine.$basePath; //gut
+
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, item.$context);
 
