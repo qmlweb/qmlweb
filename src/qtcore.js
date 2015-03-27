@@ -56,7 +56,11 @@ function QW_INHERIT(constructor, baseClass) {
     constructor.prototype.constructor = baseClass;
 }
 
-var Qt = {
+// var Qt = --> makes Qt not visible for external scripts.
+// But we need it to be visible for some cases.
+// So we declare Qt as global variable.
+
+Qt = {
     rgba: function(r,g,b,a) {
         var rgba = "rgba("
             + Math.round(r * 255) + ","
@@ -215,6 +219,41 @@ Qt.createComponent = function(name, executionContext)
     return component;
 }
 
+// Returns url resolved relative to the URL of the caller.
+// http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+Qt.resolvedUrl = function(url)
+{
+  if (!url.substr) // url is not a string object
+    return url;
+
+  if (url == "" || url.indexOf("://") != -1 || url.indexOf("/") == 0)
+    return engine.removeDotSegments( url );
+    
+  // we have $basePath variable placed in context of "current" document
+  // this is done in construct() function
+
+  // let's go to the callers and inspect their arguments
+  // The 2-nd argument of the callers we hope is context object
+  // e.g. see calling signature of bindings and signals 
+
+  // Actually Qt cpp code is doing the same; the difference is that they know calling context
+  // https://qt.gitorious.org/qt/qtdeclarative/source/eeaba26596d447c531dfac9d6e6bf5cfe4537813:src/qml/qml/v8/qqmlbuiltinfunctions.cpp#L833
+
+  var detectedBasePath = "";
+  var currentCaller = Qt.resolvedUrl.caller;
+  var maxcount = 10;
+  while (maxcount-- > 0 && currentCaller) {
+    if (currentCaller.arguments[1] && currentCaller.arguments[1]["$basePath"])
+    {
+      detectedBasePath = currentCaller.arguments[1]["$basePath"];
+      break;
+    }
+    currentCaller = currentCaller.caller;
+  }
+
+  return engine.removeDotSegments( detectedBasePath + url )
+}
+
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
@@ -276,6 +315,9 @@ function construct(meta) {
     // id
     if (meta.object.id)
         meta.context[meta.object.id] = item;
+
+    // keep path in item for probale use it later in Qt.resolvedUrl 
+    item.$context["$basePath"] = engine.$basePath; //gut
 
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, meta.context);
@@ -815,7 +857,7 @@ QMLEngine = function (element, options) {
  * @return {string} Path component with removed dot segments.
  */    
     this.removeDotSegments = function(path) {
-      var leadingSlash = path.startsWith('/');
+      var leadingSlash = (path && path[0] == "/");   // path.startsWith('/'); -- startsWith seems to be undefined in some browsers
       var segments = path.split('/');
       var out = [];
 
