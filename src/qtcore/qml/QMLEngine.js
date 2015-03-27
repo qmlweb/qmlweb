@@ -140,7 +140,7 @@ QMLEngine = function (element, options) {
      * @return {string} Path component with removed dot segments.
      */
     this.removeDotSegments = function(path) {
-        var leadingSlash = path.startsWith('/');
+        var leadingSlash = (path && path[0] == "/");   // path.startsWith('/'); -- startsWith seems to be undefined in some browsers
         var segments = path.split('/');
         var out = [];
 
