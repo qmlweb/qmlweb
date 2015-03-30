@@ -223,7 +223,7 @@ Qt.createComponent = function(name, executionContext)
 // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
 Qt.resolvedUrl = function(url)
 {
-  if (!url.substr) // url is not a string object
+  if (!url || !url.substr) // url is not a string object
     return url;
 
   if (url == "" || url.indexOf("://") != -1 || url.indexOf("/") == 0)
