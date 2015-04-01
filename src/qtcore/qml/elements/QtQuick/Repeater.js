@@ -25,8 +25,9 @@ function QMLRepeater(meta) {
 
     function callOnCompleted(child) {
         child.Component.completed();
-        for (var i = 0; i < child.children.length; i++)
-            callOnCompleted(child.children[i]);
+        for (var i = 0; i < child.$tidyupList.length; i++)
+            if (child.$tidyupList[i] instanceof QMLBaseObject)
+                callOnCompleted(child.$tidyupList[i]);
     }
     function insertChildren(startIndex, endIndex) {
         for (var index = startIndex; index < endIndex; index++) {
