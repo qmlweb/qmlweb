@@ -18,6 +18,7 @@ registerQmlType({
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
+    this.parentChanged.connect(applyModel);
 
     this.model = 0;
     this.count = 0;
@@ -50,7 +51,8 @@ registerQmlType({
 
             newItem.index = index;
 
-            if (engine.operationState !== QMLOperationState.Init) {
+            // TODO debug this. Without check to Init, Completed sometimes called twice.. But is this check correct?
+            if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
                 engine.$initializePropertyBindings();
@@ -64,7 +66,7 @@ registerQmlType({
     }
 
     function applyModel() {
-        if (!self.delegate)
+        if (!self.delegate || !self.parent)
             return;
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
@@ -103,8 +105,20 @@ registerQmlType({
 
             insertChildren(0, model.rowCount());
         } else if (typeof model == "number") {
-            removeChildren(0, self.$items.length);
-            insertChildren(0, model);
+            // must be more elegant here.. do not delete already created models..
+            //removeChildren(0, self.$items.length);
+            //insertChildren(0, model);
+
+            if (self.$items.length > model) {
+               // have more than we need
+               removeChildren(model,self.$items.length);
+            }
+            else
+            {
+               // need more
+               insertChildren(self.$items.length,model);
+            }
+
         }
     }
 
