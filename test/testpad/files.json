@@ -71,6 +71,10 @@
     "title": "* Repeater test"
 },
 {
+    "file": "repeaterInt.qml",
+    "title": "* Repeater Integer test"
+},
+{
     "file": "behavior.qml",
     "title": "* Behavior test"
 },

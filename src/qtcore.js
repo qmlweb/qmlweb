@@ -2746,6 +2746,7 @@ function QMLRepeater(meta) {
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
+    this.parentChanged.connect(applyModel);
 
     this.model = 0;
     this.count = 0;
@@ -2791,7 +2792,7 @@ function QMLRepeater(meta) {
     }
 
     function applyModel() {
-        if (!self.delegate)
+        if (!self.delegate || !self.parent)
             return;
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
