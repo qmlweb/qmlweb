@@ -2838,8 +2838,20 @@ function QMLRepeater(meta) {
 
             insertChildren(0, model.rowCount());
         } else if (typeof model == "number") {
-            removeChildren(0, self.$items.length);
-            insertChildren(0, model);
+            // must be more elegant here.. do not delete already created models..
+            //removeChildren(0, self.$items.length);
+            //insertChildren(0, model);
+
+            if (self.$items.length > model) {
+               // have more than we need
+               removeChildren(model,self.$items.length);
+            }
+            else
+            {
+               // need more
+               insertChildren(self.$items.length,model);
+            }
+
         }
     }
 
