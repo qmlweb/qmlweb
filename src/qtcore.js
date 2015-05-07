@@ -1359,6 +1359,8 @@ QObject = function(parent) {
 
         if (this.$parent && this.$parent.$tidyupList)
             this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
+
+        this.parent = undefined; // must do this. => 1) parent will be notified and erase object from it's children. 2) DOM node will be removed.
     }
 }
 QObject.createSimpleProperty = createSimpleProperty;
