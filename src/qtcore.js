@@ -1297,6 +1297,7 @@ QMLComponent.getAttachedObject = function() { // static
     if (!this.$Component) {
         this.$Component = new QObject(this);
         this.$Component.completed = Signal([]);
+        this.$Component.destruction = Signal([]);        
         engine.completedSignals.push(this.$Component.completed);
     }
     return this.$Component;
@@ -1339,6 +1340,9 @@ QObject = function(parent) {
     this.$properties = {};
 
     this.$delete = function() {
+        if (this.$Component)
+          this.$Component.destruction();
+        
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
             if (item.$delete) // It's a QObject
@@ -4046,6 +4050,7 @@ function QMLTextEdit(meta) {
     this.Component.completed.connect(this, function() {
         this.implicitWidth = this.dom.firstChild.offsetWidth;
         this.implicitHeight = this.dom.firstChild.offsetHeight;
+        //this.dom.firstChild.style.zIndex = this.z;
     });
 
     this.textChanged.connect(this, function(newVal) {
