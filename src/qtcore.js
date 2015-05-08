@@ -1270,6 +1270,19 @@ function QMLVariant(val) {
 
 // TODO
 function QMLColor(val) {
+    if (typeof(val)==="number")
+    {
+       // we assume it is int value and must be converted to css hex with padding
+       // http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
+       val = "#" + (Math.round(val)+0x1000000).toString(16).substr(-6).toUpperCase();
+    }
+    else
+    if (typeof(val)==="array" && val.length >= 3) {
+       // array like [r,g,b] where r,g,b are in 0..1 range
+       var m = 255;
+       val = "rgb("+Math.round(m*val[0])+","+Math.round(m*val[1])+","+Math.round(m*val[2])+")";
+    }
+
     return val;
 }
 
@@ -2524,6 +2537,7 @@ function QMLText(meta) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
+            newVal = QMLColor(newVal);
             this.dom.firstChild.style.color = newVal;
         });
         this.textChanged.connect(this, function(newVal) {
@@ -2580,6 +2594,7 @@ function QMLText(meta) {
             };
         });
         this.styleColorChanged.connect(this, function(newVal) {
+            newVal = QMLColor(newVal);
             switch (this.style) {
                 case 0:
                     this.dom.firstChild.style.textShadow = "none";
@@ -2687,12 +2702,14 @@ function QMLRectangle(meta) {
 
     if (engine.renderMode == QMLRenderMode.DOM) {
         this.colorChanged.connect(this, function(newVal) {
+            newVal = QMLColor(newVal);
             this.dom.style.backgroundColor = newVal;
         });
         this.radiusChanged.connect(this, function(newVal) {
             this.dom.style.borderRadius = newVal + "px";
         });
         this.border.colorChanged.connect(this, function(newVal) {
+            newVal = QMLColor(newVal);
             this.dom.style.borderColor = newVal;
             this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
                                                 ? "none" : "solid";
@@ -4113,6 +4130,7 @@ function QMLCheckbox(meta) {
         this.implicitWidth = this.dom.offsetWidth;
     });
     this.colorChanged.connect(this, function(newVal) {
+        newVal = QMLColor(newVal);
         this.dom.children[1].style.color = newVal;
     });
 
