@@ -16,13 +16,13 @@ registerQmlType({
     this.border.width = 1;
 
     this.colorChanged.connect(this, function(newVal) {
-        this.css.backgroundColor = newVal;
+        this.css.backgroundColor = QMLColor(newVal);
     });
     this.radiusChanged.connect(this, function(newVal) {
         this.css.borderRadius = newVal + 'px';
     });
     this.border.colorChanged.connect(this, function(newVal) {
-        this.css.borderColor = newVal;
+        this.css.borderColor = QMLColor(newVal);
         this.css.borderWidth = this.border.width + 'px';
     });
     this.border.widthChanged.connect(this, function(newVal) {

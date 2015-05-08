@@ -28,7 +28,7 @@ registerQmlType({
         this.implicitWidth = this.dom.offsetWidth;
     });
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.children[1].style.color = newVal;
+        this.dom.children[1].style.color = QMLColor(newVal);
     });
 
     this.dom.firstChild.onchange = function() {

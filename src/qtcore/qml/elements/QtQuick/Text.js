@@ -61,7 +61,7 @@ registerQmlType({
     createSimpleProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.firstChild.style.color = newVal;
+        this.dom.firstChild.style.color = QMLColor(newVal);
     });
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
@@ -117,6 +117,7 @@ registerQmlType({
         };
     });
     this.styleColorChanged.connect(this, function(newVal) {
+        newVal = QMLColor(newVal);
         switch (this.style) {
             case 0:
                 this.dom.firstChild.style.textShadow = "none";
