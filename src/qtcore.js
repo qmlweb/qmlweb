@@ -226,7 +226,7 @@ Qt.resolvedUrl = function(url)
   if (!url || !url.substr) // url is not a string object
     return url;
 
-  if (url == "" || url.indexOf("://") != -1 || url.indexOf("/") == 0)
+
     return engine.removeDotSegments( url );
     
   // we have $basePath variable placed in context of "current" document
