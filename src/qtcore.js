@@ -223,10 +223,12 @@ Qt.createComponent = function(name, executionContext)
 // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
 Qt.resolvedUrl = function(url)
 {
+
   if (!url || !url.substr) // url is not a string object
     return url;
 
-
+  // must check for cases: D:/, file://, no slash at all. If some of them occurs, keep url.
+  if (url == "" || url.indexOf(":/") != -1 || url.indexOf("://") != -1 || url.indexOf("/") == 0)
     return engine.removeDotSegments( url );
     
   // we have $basePath variable placed in context of "current" document
