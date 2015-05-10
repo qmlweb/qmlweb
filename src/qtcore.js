@@ -3999,7 +3999,11 @@ function QMLTextInput(meta) {
     });
 
     this.textChanged.connect(this, function(newVal) {
-        this.dom.firstChild.value = newVal;
+        // We have to check if value actually changes. 
+        // If we do not have this check, then after user updates text input following occurs:
+        // user update gui text -> updateValue called -> textChanged called -> gui value updates again -> caret position moves to the right!
+        if (this.dom.firstChild.value != newVal)
+          this.dom.firstChild.value = newVal;
     });
 
     this.echoModeChanged.connect(this, function(newVal) {
