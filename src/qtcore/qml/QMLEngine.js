@@ -31,6 +31,9 @@ QMLEngine = function (element, options) {
     // List of properties whose values are bindings. For internal use only.
     this.bindedProperties = [];
 
+    // List of operations to perform later after init. For internal use only.
+    this.pendingOperations = [];
+
     // Root object of the engine
     this.rootObject = null;
 
@@ -478,6 +481,17 @@ QMLEngine = function (element, options) {
             property.update();
         }
         this.bindedProperties = [];
+
+        this.$initializeAliasSignals();
+    }
+
+    this.$initializeAliasSignals = function() {
+        // Perform pending operations. Now we use it only to init alias's "changed" handlers, that's why we have such strange function name.
+        for (var i = 0; i < this.pendingOperations.length; i++) {
+            var op = this.pendingOperations[i];
+            op[0]( op[1] );
+        }
+        this.pendingOperations = [];
     }
 
     // Return a path to load the file
