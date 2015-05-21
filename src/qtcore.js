@@ -643,9 +643,13 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
+                // TODO: 1. Alias must be able to point to prop or id of local object,eg: property alias q: t
+                //       2. Alias may have same name as id it points to: property alias someid: someid
+                //       3. Alias proxy (or property proxy) to proxy prop access to selected incapsulated object. (think twice).
                 createSimpleProperty("alias", item, i);
                 item.$properties[i].componentScope = componentScope;
                 item.$properties[i].val = value;
+
                 item.$properties[i].get = function() {
                     var obj = this.componentScope[this.val.objectName];
                     return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
@@ -655,6 +659,26 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                         throw "Cannot set alias property pointing to an QML object.";
                     this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, reason, objectScope, componentScope);
                 }
+                
+                if (value.propertyName) {
+                  var con = function(prop) {
+                    var obj = prop.componentScope[prop.val.objectName];
+                    if (!obj) {
+                      console.error("qtcore: target object ",prop.val.objectName," not found for alias ",prop );
+                    }
+                    else
+                    {
+                      var targetProp = obj.$properties[prop.val.propertyName];
+                      if (!targetProp) {
+                        console.error("qtcore: target property [",prop.val.objectName,"].",prop.val.propertyName," not found for alias ",prop.name );
+                      }
+                      else
+                        targetProp.changed.connect( prop.changed );
+                     }
+                  }                
+                  engine.pendingOperations.push( [con,item.$properties[i]] );
+                }
+
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createSimpleProperty(value.type, item, i);
@@ -762,6 +786,9 @@ QMLEngine = function (element, options) {
 
     // List of properties whose values are bindings. For internal use only.
     this.bindedProperties = [];
+
+    // List of operations to perform later after init. For internal use only.
+    this.pendingOperations = [];
 
     // Root object of the engine
     this.rootObject = null;
@@ -1006,7 +1033,18 @@ QMLEngine = function (element, options) {
             property.update();
         }
         this.bindedProperties = [];
+        
+        this.$initializeAliasSignals();
     }
+
+    this.$initializeAliasSignals = function() {
+        // Perform pending operations. Now we use it only to init alias's "changed" handlers, that's why we have such strange function name.
+        for (var i = 0; i < this.pendingOperations.length; i++) {
+            var op = this.pendingOperations[i];
+            op[0]( op[1] );
+        }
+        this.pendingOperations = [];
+    }    
 
     this.$getTextMetrics = function(text, fontCss)
     {
@@ -2795,7 +2833,7 @@ function QMLRepeater(meta) {
                 createSimpleProperty("variant", newItem, model.roleNames[i]);
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), QMLProperty.ReasonInit, newItem, self.model.$context);
             }
-
+            
             self.parent.children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
             newItem.parent = self.parent;
             self.parent.childrenChanged();

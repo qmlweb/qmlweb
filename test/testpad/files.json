@@ -89,4 +89,10 @@
 {
     "file": "imports.qml",
     "title": "* Imports test"
-} ]
+},
+{
+    "file": "alias_changes.qml",
+    "title": "* Alias changes test"
+}
+
+]
