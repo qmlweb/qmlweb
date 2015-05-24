@@ -2840,8 +2840,9 @@ function QMLRepeater(meta) {
             self.$items.splice(index, 0, newItem);
 
             newItem.index = index;
-
-            if (engine.operationState !== QMLOperationState.Init) {
+            
+            // TODO debug this. Without check to Init, Completed sometimes called twice.. But is this check correct?
+            if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
                 engine.$initializePropertyBindings();
