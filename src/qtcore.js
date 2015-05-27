@@ -4179,6 +4179,10 @@ function QMLCheckbox(meta) {
         this.dom.children[1].style.color = newVal;
     });
 
+    this.checkedChanged.connect(this, function(newVal) {
+        this.dom.firstChild.checked = self.checked;
+    });    
+
     this.dom.firstChild.onchange = function() {
         self.checked = this.checked;
     };
