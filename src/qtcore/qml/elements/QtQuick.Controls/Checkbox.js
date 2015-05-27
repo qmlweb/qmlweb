@@ -32,6 +32,10 @@ registerQmlType({
         this.dom.children[1].style.color = QMLColor(newVal);
     });
 
+    this.checkedChanged.connect(this, function(newVal) {
+        this.dom.firstChild.checked = self.checked;
+    });
+
     this.dom.firstChild.onchange = function() {
         self.checked = this.checked;
     };
