@@ -125,6 +125,19 @@ if (typeof global.urlContentCache == 'undefined')
 */
  
 readQmlDir = function (url) {
+    if (url.indexOf("https://github.com/") == 0) {
+      // case 1 - if in form github.com/user/repo -> replace with github.com/user/repo/master
+      var q = url.split("https://github.com/");
+      var path = q[1].replace(/\/$/, ""); // no trailing slash
+      var parts = path.split("/");
+      if (parts.length == 2) // user/repo
+         parts.push("master");
+      url = "https://github.com/" + parts.join("/");
+
+      // case 2 - replace github.com/user/repo/tree/master/dir -> github.com/user/repo/master/dir, because we then get files, not tree
+      url = url.replace("/tree/master/", "/master/");
+    }
+
     // in case 'url' is empty, do not attach "/"
     // Q1: when this happen?
     var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";
