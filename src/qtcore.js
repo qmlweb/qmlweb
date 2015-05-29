@@ -834,7 +834,18 @@ QMLEngine = function (element, options) {
 
     this.extractBasePath = function( file ) {
         var basePath = file.split(/[\/\\]/); // work both in url ("/") and windows ("\", from file://d:\test\) notation
-        basePath[basePath.length - 1] = "";
+        if (file.indexOf("https://gist.github.com") >= 0) {
+          // we have next types of urls in gist:
+          // https://gist.github.com/pavelvasev/d41aa7cedaf35d5d5fd1
+          // -> in this case must keep all file url as basePath
+          // https://gist.github.com/pavelvasev/d41aa7cedaf35d5d5fd1#file-apasha2-vl
+          // -> in this case must forget the "#file-apasha2-vl" part
+          basePath[basePath.length - 1] = basePath[basePath.length - 1].split("#")[0];
+          // and then, we have to attach "/raw/"
+          basePath[basePath.length - 1] = basePath[basePath.length - 1] + "/raw/";
+        }
+        else
+          basePath[basePath.length - 1] = ""; // just forget the file part
         basePath = basePath.join("/");
         return basePath;
     }

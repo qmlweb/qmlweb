@@ -117,6 +117,16 @@ getUrlContents = function (url,skipErrorLogging) {
 */
  
 readQmlDir = function (url) {
+
+    if (url.indexOf("https://github.com/") == 0) {
+       var q = url.split( "https://github.com/");
+       var path = q[1].replace(/\/$/, ""); // без оканчивающегося слеша
+       var parts = path.split("/");
+       if (parts.length == 2) // юзер/репо
+          parts.push("master"); 
+       url = "https://github.com/"+parts.join("/");
+    }      
+        
     var qmldir = getUrlContents(url + "/qmldir", true), // loading url contents with skipping errors
         lines,
         line,
