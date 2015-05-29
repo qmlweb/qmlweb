@@ -119,12 +119,16 @@ getUrlContents = function (url,skipErrorLogging) {
 readQmlDir = function (url) {
 
     if (url.indexOf("https://github.com/") == 0) {
+       // case 1 - if in form github.com/user/repo -> replace with github.com/user/repo/master
        var q = url.split( "https://github.com/");
        var path = q[1].replace(/\/$/, ""); // без оканчивающегося слеша
        var parts = path.split("/");
        if (parts.length == 2) // юзер/репо
           parts.push("master"); 
        url = "https://github.com/"+parts.join("/");
+
+       // case 2 - replace github.com/user/repo/tree/master/dir -> github.com/user/repo/master/dir, because we then get files, not tree
+       url = url.replace("/tree/master/","/master/");
     }      
         
     var qmldir = getUrlContents(url + "/qmldir", true), // loading url contents with skipping errors
