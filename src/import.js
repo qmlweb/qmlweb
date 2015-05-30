@@ -143,6 +143,11 @@ readQmlDir = function (url) {
         return false;
     }
 
+    function makeurl( path ) {
+      if (path.indexOf("://") > 0) return path;
+      return url + "/" + path;
+    }
+
     lines = qmldir.split(/\r?\n/);
     for (i = 0; i < lines.length; i++) {
         // trim
@@ -156,12 +161,12 @@ readQmlDir = function (url) {
             if (match[0] == "plugin") {
                 console.log(url + ": qmldir plugins are not supported!");
             } else if (match[0] == "internal") {
-                internals[match[1]] = {url: url + "/" + match[2]};
+                internals[match[1]] = {url: makeurl( match[2] )};
             } else {
                 if (match.length == 2) {
-                    externals[match[0]] = {url: url + "/" + match[1]};
+                    externals[match[0]] = {url: makeurl( match[1] )};
                 } else {
-                    externals[match[0]] = { url: url + "/" + match[2],
+                    externals[match[0]] = { url: makeurl( match[2] ),
                                             version: match[1] };
                 }
             }
