@@ -186,7 +186,7 @@ Qt.createComponent = function(name, executionContext)
     }
 
     var file = nameIsUrl ? name : engine.$basePath + name;
-    
+
     var src = getUrlContents(file,true);
     
     // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
@@ -210,6 +210,7 @@ Qt.createComponent = function(name, executionContext)
        
     var component = new QMLComponent({ object: tree, context: executionContext });
     component.$basePath = engine.extractBasePath( file );
+
     component.$imports = tree.$imports;
     component.$file = file; // just for debugging
     
@@ -1371,7 +1372,11 @@ QMLComponent.prototype.createObject = function(parent, properties) {
     engine.operationState = QMLOperationState.Init;
     
     // change base path to current component base path
-    var bp = engine.$basePath; engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
+
+    var bp = engine.$basePath; // this is old engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
+    
+    // the logic of finding basepath is so interesting ...
+    engine.$basePath = this.$basePath || (this.$context ? this.$context.$basePath : null) || engine.$basePath;
 
     var item = construct({
         object: this.$metaObject,

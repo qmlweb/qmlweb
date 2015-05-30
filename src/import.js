@@ -75,6 +75,7 @@ function parseQML(file) {
  * @return {mixed} String of contents or false in errors.
  */
 getUrlContents = function (url,skipErrorLogging) {
+    //console.log("getUrlContents",url);
     var xhr = new XMLHttpRequest();
     xhr.open("GET", url, false);
     try {
@@ -130,8 +131,11 @@ readQmlDir = function (url) {
        // case 2 - replace github.com/user/repo/tree/master/dir -> github.com/user/repo/master/dir, because we then get files, not tree
        url = url.replace("/tree/master/","/master/");
     }      
-        
-    var qmldir = getUrlContents(url + "/qmldir", true), // loading url contents with skipping errors
+    
+    // in case 'url' is empty, do not attach /
+    var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";
+
+    var qmldir = getUrlContents( qmldirFileUrl, true), // loading url contents with skipping errors
         lines,
         line,
         internals = {},
