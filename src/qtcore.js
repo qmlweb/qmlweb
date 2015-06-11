@@ -118,7 +118,10 @@ Undefined = undefined,
 // Property that is currently beeing evaluated. Used to get the information
 // which property called the getter of a certain other property for
 // evaluation and is thus dependant on it.
-evaluatingProperty = undefined,
+// evaluatingProperty = undefined,
+evaluatingPropertyTop = undefined,
+evaluatingPropertyStack = [],
+evaluatingPropertyPaused = false,
 // All object constructors
 constructors = {
     int: QMLInteger,
@@ -436,6 +439,7 @@ function QMLProperty(type, obj, name) {
     this.value = undefined;
     this.type = type;
     this.animation = null;
+    this.needsUpdate = true;
 
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this object.
@@ -446,16 +450,35 @@ QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimtation = 2;
 
+function pushEvaluatingProperty( prop ) {
+    // TODO say warnings if already on stack. This means binding loop. BTW actually we do not loop because needsUpdate flag is reset before entering update again.
+    evaluatingPropertyTop = prop; 
+    evaluatingPropertyStack.push( prop ); //keep stack of props
+}
+
+function popEvaluatingProperty() {
+
+    evaluatingPropertyStack.pop();
+    if (evaluatingPropertyStack.length == 0)
+      evaluatingPropertyTop = undefined;
+    else
+      evaluatingPropertyTop = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+}
+
 // Updater recalculates the value of a property if one of the
 // dependencies changed
 QMLProperty.prototype.update = function() {
+    this.needsUpdate = false;
+
     if (!this.binding)
         return;
 
     var oldVal = this.val;
-    evaluatingProperty = this;
-    this.val = this.binding.eval(this.objectScope, this.componentScope);
-    evaluatingProperty = undefined;
+    pushEvaluatingProperty(this);
+	    if (!this.binding.eval) 
+	      this.binding.compile();
+	    this.val = this.binding.eval(this.objectScope, this.componentScope);
+    popEvaluatingProperty();
 
     if (this.animation) {
         this.animation.$actions = [{
@@ -473,10 +496,17 @@ QMLProperty.prototype.update = function() {
 
 // Define getter
 QMLProperty.prototype.get = function() {
+    //if (this.needsUpdate && !evaluatingPropertyPaused) {
+    if (this.needsUpdate && engine.operationState !== QMLOperationState.Init) {
+      this.update();
+    }
+
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
-    if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
-        this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
+    if (evaluatingPropertyTop && !this.changed.isConnected(evaluatingPropertyTop, QMLProperty.prototype.update)) {
+        // console.log( this,evaluatingPropertyStack.slice(0),this.val );
+        this.changed.connect(evaluatingPropertyTop, QMLProperty.prototype.update);
+    }
 
     return this.val;
 }
@@ -497,9 +527,11 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
             if (!newVal.eval)
                 newVal.compile();
 
-            evaluatingProperty = this;
+            pushEvaluatingProperty(this);
+            this.needsUpdate = false;
             newVal = this.binding.eval(objectScope, componentScope);
-            evaluatingProperty = null;
+            popEvaluatingProperty();
+
         } else {
             engine.bindedProperties.push(this);
             return;
@@ -606,8 +638,15 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     objectScope = objectScope || item;
     for (i in metaObject) {
         var value = metaObject[i];
+        if (i == "id" || i == "$class") { // keep them
+          item[i] = value;
+          continue;
+          //debugger;
+        } 
+        
         // skip global id's and internal values
         if (i == "id" || i[0] == "$") {
+            
             continue;
         }
         // slots
@@ -1011,10 +1050,11 @@ QMLEngine = function (element, options) {
 
     }
 
-    this.registerProperty = function(obj, propName)
+    this.registerProperty = function(obj, propName) // SEEMS NOT USED
     {
         var dependantProperties = [];
         var value = obj[propName];
+        console.log("!!!!!!!!!!!!!!!!!!!! registerProperty");
 
         function getter() {
             if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
@@ -1037,12 +1077,13 @@ QMLEngine = function (element, options) {
 
     this.$initializePropertyBindings = function() {
         // Initialize property bindings
+
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
             if (!property.binding)
                 continue; // Probably, the binding was overwritten by an explicit value. Ignore.
-            property.binding.compile();
-            property.update();
+            if (property.needsUpdate)
+                property.update();
         }
         this.bindedProperties = [];
         
