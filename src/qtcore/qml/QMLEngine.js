@@ -480,8 +480,8 @@ QMLEngine = function (element, options) {
             var property = this.bindedProperties[i];
             if (!property.binding)
               continue; // Probably, the binding was overwritten by an explicit value. Ignore.
-            property.binding.compile();
-            property.update();
+            if (property.needsUpdate)
+                property.update();
         }
         this.bindedProperties = [];
 
