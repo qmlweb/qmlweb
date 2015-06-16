@@ -211,9 +211,6 @@ function construct(meta) {
     } else if (component = Qt.createComponent(meta.object.$class + ".qml", meta.context)) {
         var item = component.createObject(meta.parent);
 
-        // Alter objects context to the outer context
-        item.$context = meta.context;
-
         if (engine.renderMode == QMLRenderMode.DOM && item.dom)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
@@ -227,7 +224,7 @@ function construct(meta) {
         meta.context[meta.object.id] = item;
 
     // Apply properties (Bindings won't get evaluated, yet)
-    applyProperties(meta.object, item, item, meta.context);
+    applyProperties(meta.object, item, item, item.$context);
 
     return item;
 }
