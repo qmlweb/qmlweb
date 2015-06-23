@@ -1,7 +1,13 @@
 var es = require('event-stream');
 var gutil = require('gulp-util');
+// QML Parser
 require(__dirname + '/src/qtcore/qml/QMLBinding.js');
 require(__dirname + '/src/qtcore/qml/lib/parser.js');
+// JS Parser
+require(__dirname + '/src/uglify/utils.js');
+require(__dirname + '/src/uglify/ast.js');
+require(__dirname + '/src/uglify/parse.js');
+require(__dirname + '/src/qtcore/qml/lib/jsparser.js');
 
 module.exports = function (opt) {
   function modifyFile(file) {
@@ -16,17 +22,16 @@ module.exports = function (opt) {
         gulpPath = gulpPath.splice(0, gulpPath.length - 2).join('/') + '/';
     var path     = file.path.substr(gulpPath.length, file.path.length);
 
-    if (file.path.match(/\.qml$/) != null) {
-      // QML files are represented as a parse-tree
-      try {
+    try {
+      if (file.path.match(/\.qml$/) != null)
         data = qmlparse(str);
-      } catch (err) {
-        return this.emit('error', new Error(file.path + ': ' + err));
-      }
-    } else {
-      data = str;
+      else if (file.path.match(/\.js$/) != null)
+        data = jsparse(str);
+      else
+        data = str;
+    } catch (err) {
+      return this.emit('error', new Error(file.path + ': ' + err));
     }
-    // TODO: if javascript, minimize;
 
     src = "qrc['"+path+"'] = " + JSON.stringify(data) + ';';
 

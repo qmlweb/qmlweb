@@ -9,6 +9,10 @@ var qtcoreSources = [
   './src/helpers/encapsulate.begin.js',
   './src/qtcore/qml/QMLBinding.js',
 
+  './src/uglify/ast.js',
+  './src/uglify/parse.js',
+  './src/uglify/utils.js',
+
   './src/qtcore/qml/lib/parser.js',
   './src/qtcore/qml/lib/process.js',
   './src/qtcore/qml/lib/import.js',

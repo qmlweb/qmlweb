@@ -1,7 +1,7 @@
-var dicksucker;
+var somevar = "hola que tal";
 
 function main() {
-  alert('suck my dick');
+  alert(somevar);
 }
 
 function otherfunc() {

@@ -37,10 +37,10 @@ function QMLComponent(meta) {
         if (typeof qrc[src] != 'undefined')
           js = qrc[src];
         else
-          js = getUrlContents(src);
+          js = jsparse(getUrlContents(src));
         var $context = qmlEngine.rootContext();
         $context[importDesc.alias] = {};
-        jsGetGlobalSymbols(js, $context[importDesc.alias]);
+        importJavascriptInContext(js, $context[importDesc.alias]);
       }
     }).bind(this);
 

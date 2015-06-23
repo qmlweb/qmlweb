@@ -1,4 +1,4 @@
-import Qt 5.4
+import QtQuick 1.0
 
 Rectangle {
   property var    model

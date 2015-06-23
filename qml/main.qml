@@ -1,4 +1,4 @@
-import Qt 5.4;
+import QtQuick 1.0;
 import "jsfile.js" as Logic;
 
 Rectangle {
@@ -16,6 +16,7 @@ Rectangle {
     readOnly: false
     validator: RegExpValidator { regExp: /a+/ }
     onAccepted: {
+      Logic.main();
       textinput.readOnly = true;
     }
   }
