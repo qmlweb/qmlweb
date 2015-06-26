@@ -5,10 +5,20 @@ Rectangle {
   id: base
   color: 'red'
 
+  Menu {
+    id: menu
+    anchors {
+      top: parent.top
+      left: parent.left
+      right: parent.right
+    }
+  }
+
   TextInput {
     id:   textinput
     text: "Placeholder"
     anchors {
+      top: menu.bottom
       left: parent.left
       right: parent.right
     }

@@ -24,6 +24,9 @@ global.Qt = {
   // Layout directions
   LeftToRight: 0,
   RightToLeft: 1,
+  // Orientations
+  Vertical: 0,
+  Horizontal: 1,
   // Keys
   Key_Escape: 27,
   Key_Tab: 9,

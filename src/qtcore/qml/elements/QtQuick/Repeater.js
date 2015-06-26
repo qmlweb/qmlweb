@@ -13,6 +13,7 @@ registerQmlType({
     createSimpleProperty("int", this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
+    this._childrenInserted = Signal();
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
@@ -41,9 +42,9 @@ registerQmlType({
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
             }
 
-            self.parent.children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
-            newItem.parent = self.parent;
-            self.parent.childrenChanged();
+            self.children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
+            newItem.parent = self;
+            self.childrenChanged();
             self.$items.splice(index, 0, newItem);
 
             newItem.index = index;
