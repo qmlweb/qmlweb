@@ -8,6 +8,7 @@ registerQmlType({
     var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
     createSimpleProperty("Component", this, "delegate");
+    this.container = function() { return this.parent; }
     this.$defaultProperty = "delegate";
     createSimpleProperty("variant", this, "model");
     createSimpleProperty("int", this, "count");
@@ -42,9 +43,9 @@ registerQmlType({
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), true, newItem, self.model.$context);
             }
 
-            self.children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
-            newItem.parent = self;
-            self.childrenChanged();
+            self.container().children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
+            newItem.parent = self.container();
+            self.container().childrenChanged();
             self.$items.splice(index, 0, newItem);
 
             newItem.index = index;

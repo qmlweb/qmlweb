@@ -10,6 +10,7 @@ registerQmlType({
     createSimpleProperty("enum", this, "orientation");
     createSimpleProperty("real", this, "spacing");
 
+    this.container = function() { return self; }
     this.modelChanged.connect(styleChanged);
     this.delegateChanged.connect(styleChanged);
     this.orientationChanged.connect(styleChanged);
