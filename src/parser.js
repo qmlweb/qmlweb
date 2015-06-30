@@ -259,6 +259,7 @@ function is_identifier_char(ch) {
                 || is_unicode_connector_punctuation(ch)
                 || ch == "\u200c" // zero-width non-joiner <ZWNJ>
                 || ch == "\u200d" // zero-width joiner <ZWJ> (in my ECMA-262 PDF, this is also 200c)
+                // || ch == "." // PV: identifiers may contain dots
         ;
 };
 
@@ -1294,7 +1295,8 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         };
 
         function qml_is_element(str) {
-            return str[0].toUpperCase() == str[0];
+            return (str[0].toUpperCase() == str[0]);
+            //return str[0].toUpperCase() == str[0] || str.indexOf(".vl") > 0; // PV: if element contains .vl, this is special case
         }
 
         function qmlblock() {

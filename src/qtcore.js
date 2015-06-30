@@ -122,6 +122,7 @@ Undefined = undefined,
 evaluatingPropertyTop = undefined,
 evaluatingPropertyStack = [],
 evaluatingPropertyPaused = false,
+evaluatingPropertyStackOfStacks = [],
 // All object constructors
 constructors = {
     int: QMLInteger,
@@ -346,8 +347,13 @@ function Signal(params, options) {
     var obj = options.obj
 
     var signal = function() {
-        for (var i in connectedSlots)
-            connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+        try {
+          pushEvalStack();
+          for (var i in connectedSlots)
+              connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+        } finally {
+          popEvalStack();
+        }
     };
     signal.parameters = params || [];
     signal.connect = function() {
@@ -450,35 +456,64 @@ QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimtation = 2;
 
+function pushEvalStack() {
+  evaluatingPropertyStackOfStacks.push( evaluatingPropertyStack );
+  evaluatingPropertyStack = [];
+  evaluatingPropertyTop = undefined;
+//  console.log("evaluatingPropertyTop=>undefined due to push stck ");
+}
+
+function popEvalStack() {
+  evaluatingPropertyStack = evaluatingPropertyStackOfStacks.pop() || [];
+  evaluatingPropertyTop = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+}
+
 function pushEvaluatingProperty( prop ) {
     // TODO say warnings if already on stack. This means binding loop. BTW actually we do not loop because needsUpdate flag is reset before entering update again.
+    if (evaluatingPropertyStack.indexOf( prop ) >= 0) {
+      console.error("Property binding loop detected for property ",prop.name, [prop].slice(0));
+      debugger;
+    }
+
     evaluatingPropertyTop = prop; 
     evaluatingPropertyStack.push( prop ); //keep stack of props
+    //console.log("pushed to evaluatingPropertyStack = ",prop.name, evaluatingPropertyStack.slice(0) );
 }
 
 function popEvaluatingProperty() {
 
     evaluatingPropertyStack.pop();
-    if (evaluatingPropertyStack.length == 0)
+    evaluatingPropertyTop = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+    /*
+    //console.log("popped from evaluatingPropertyStack = ",evaluatingPropertyStack.slice(0) );
+    if (evaluatingPropertyStack.length == 0) {
       evaluatingPropertyTop = undefined;
+    }
     else
       evaluatingPropertyTop = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+    */
 }
 
 // Updater recalculates the value of a property if one of the
 // dependencies changed
 QMLProperty.prototype.update = function() {
     this.needsUpdate = false;
-
+    
     if (!this.binding)
         return;
 
     var oldVal = this.val;
-    pushEvaluatingProperty(this);
+    try {
+      pushEvaluatingProperty(this);
+
 	    if (!this.binding.eval) 
 	      this.binding.compile();
 	    this.val = this.binding.eval(this.objectScope, this.componentScope);
-    popEvaluatingProperty();
+
+ 	  } finally {
+      popEvaluatingProperty();
+    }
+
 
     if (this.animation) {
         this.animation.$actions = [{
@@ -492,6 +527,8 @@ QMLProperty.prototype.update = function() {
 
     if (this.val !== oldVal)
         this.changed(this.val, oldVal, this.name);
+        
+
 }
 
 // Define getter
@@ -504,7 +541,7 @@ QMLProperty.prototype.get = function() {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (evaluatingPropertyTop && !this.changed.isConnected(evaluatingPropertyTop, QMLProperty.prototype.update)) {
-        // console.log( this,evaluatingPropertyStack.slice(0),this.val );
+         //console.log( "connecting property to dependency top! this=", this.name, evaluatingPropertyTop.name, "thisobj=",[this].slice(0),"topobj=",evaluatingPropertyStack.slice(0), "this val=",[this.val].slice(0) );
         this.changed.connect(evaluatingPropertyTop, QMLProperty.prototype.update);
     }
 
@@ -526,12 +563,15 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
         if (engine.operationState !== QMLOperationState.Init) {
             if (!newVal.eval)
                 newVal.compile();
-
-            pushEvaluatingProperty(this);
-            this.needsUpdate = false;
-            newVal = this.binding.eval(objectScope, componentScope);
-            popEvaluatingProperty();
-
+                
+            try {
+              pushEvaluatingProperty(this);
+                
+              this.needsUpdate = false;
+              newVal = this.binding.eval(objectScope, componentScope);
+            } finally { // for try
+              popEvaluatingProperty();
+            }
         } else {
             engine.bindedProperties.push(this);
             return;
@@ -573,6 +613,9 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
             this.changed(this.val, oldVal, this.name);
         }
     }
+
+
+    
 }
 
 /**
@@ -2885,6 +2928,8 @@ function QMLRepeater(meta) {
             var newItem = self.delegate.createObject(self);
 
             createSimpleProperty("int", newItem, "index");
+            newItem.index = index;
+
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             for (var i in model.roleNames) {
                 createSimpleProperty("variant", newItem, model.roleNames[i]);
@@ -2895,8 +2940,6 @@ function QMLRepeater(meta) {
             newItem.parent = self.parent;
             self.parent.childrenChanged();
             self.$items.splice(index, 0, newItem);
-
-            newItem.index = index;
             
             // TODO debug this. Without check to Init, Completed sometimes called twice.. But is this check correct?
             if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
