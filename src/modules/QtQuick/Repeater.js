@@ -35,11 +35,9 @@ function QMLRepeater(meta) {
 
         for (var index = startIndex; index < endIndex; index++) {
             var newItem = self.delegate.createObject();
+            createProperty('int', newItem, 'index', {initialValue: index});
             newItem.parent = self.parent;
             self.delegate.finalizeImports(); // To properly import JavaScript in the context of a component
-
-            createProperty("int", newItem, "index");
-            newItem.index = index;
 
             if ( typeof model == "number" || model instanceof Array ) {
                  if (typeof newItem.$properties["modelData"] == 'undefined'){

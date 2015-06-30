@@ -19,8 +19,23 @@ QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimation = 2;
 
+function pushEvalStack() {
+  evaluatingPropertyStackOfStacks.push( evaluatingPropertyStack );
+  evaluatingPropertyStack = [];
+  evaluatingProperty = undefined;
+//  console.log("evaluatingProperty=>undefined due to push stck ");
+}
+
+function popEvalStack() {
+  evaluatingPropertyStack = evaluatingPropertyStackOfStacks.pop() || [];
+  evaluatingProperty = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+}
+
 function pushEvaluatingProperty( prop ) {
     // TODO say warnings if already on stack. This means binding loop. BTW actually we do not loop because needsUpdate flag is reset before entering update again.
+    if (evaluatingPropertyStack.indexOf( prop ) >= 0) {
+      console.error("Property binding loop detected for property ",prop.name, [prop].slice(0));
+    }
     evaluatingProperty = prop;
     evaluatingPropertyStack.push( prop ); //keep stack of props
 }
@@ -28,10 +43,7 @@ function pushEvaluatingProperty( prop ) {
 function popEvaluatingProperty() {
 
     evaluatingPropertyStack.pop();
-    if (evaluatingPropertyStack.length == 0)
-      evaluatingProperty = undefined;
-    else
-      evaluatingProperty = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
+    evaluatingProperty = evaluatingPropertyStack[ evaluatingPropertyStack.length-1 ];
 }
 
 // Updater recalculates the value of a property if one of the
@@ -43,15 +55,17 @@ QMLProperty.prototype.update = function() {
         return;
 
     var oldVal = this.val;
-    pushEvaluatingProperty(this);
-    if (!this.binding.eval)
-      this.binding.compile();
+
     try {
+      pushEvaluatingProperty(this);
+      if (!this.binding.eval)
+        this.binding.compile();
       this.val = this.binding.eval(this.objectScope, this.componentScope);
     } catch (e) {
       console.log("QMLProperty.update binding error:", e, Function.prototype.toString.call(this.binding.eval))
+    } finally {
+      popEvaluatingProperty();
     }
-    popEvaluatingProperty();
 
     if (this.animation) {
         this.animation.$actions = [{
@@ -109,12 +123,14 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
         if (engine.operationState !== QMLOperationState.Init) {
             if (!newVal.eval)
                 newVal.compile();
+            try {
+              pushEvaluatingProperty(this);
 
-            pushEvaluatingProperty(this);
-            this.needsUpdate = false;
-            newVal = this.binding.eval(objectScope, componentScope);
-            popEvaluatingProperty();
-
+              this.needsUpdate = false;
+              newVal = this.binding.eval(objectScope, componentScope);
+            } finally {
+              popEvaluatingProperty();
+            }
         } else {
             engine.bindedProperties.push(this);
             return;

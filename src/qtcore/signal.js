@@ -13,12 +13,14 @@ global.Signal = function Signal(params, options) {
     var obj = options.obj
 
     var signal = function() {
+        pushEvalStack();
         for (var i in connectedSlots)
             try {
                 connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
             } catch(err) {
                 console.log(err.message);
             }
+        popEvalStack();
     };
     signal.parameters = params || [];
     signal.connect = function() {

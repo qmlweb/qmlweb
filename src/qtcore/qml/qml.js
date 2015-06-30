@@ -4,6 +4,7 @@
 var evaluatingProperty;
 var evaluatingPropertyStack = [];
 var evaluatingPropertyPaused = false;
+var evaluatingPropertyStackOfStacks = [];
 
 var _executionContext = null;
 
