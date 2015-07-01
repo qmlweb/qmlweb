@@ -298,11 +298,11 @@ function construct(meta) {
  
       var qdirInfo = engine.qmldirs[ meta.object.$class ]; // Are we have info on that component in some imported qmldir files?
       if (qdirInfo) {
-          // We have that component in some qmldir, load it from qmldir's url
+          // We have that component in some qmldir, load it from qmldir's url // 4
           component = Qt.createComponent( "@" + qdirInfo.url, meta.context);
       }
       else
-          component = Qt.createComponent(meta.object.$class + ".qml", meta.context);
+          component = Qt.createComponent(meta.object.$class + ".qml", meta.context); // 1,2
 
       if (component) {
         var item = component.createObject(meta.parent);
@@ -1040,7 +1040,8 @@ QMLEngine = function (element, options) {
         if (nameIsDir) {
             // resolve name from relative to full dir path
             // we hope all dirs are relative
-            name = this.removeDotSegments( currentFileDir + name );
+            if (currentFileDir && currentFileDir.length > 0)
+              name = this.removeDotSegments( currentFileDir + name );
             if (name[ name.length-1 ] == "/") 
               name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir` 
         }
@@ -1127,6 +1128,17 @@ QMLEngine = function (element, options) {
                 continue; // Probably, the binding was overwritten by an explicit value. Ignore.
             if (property.needsUpdate)
                 property.update();
+            else
+            if (["width","height","fill","x","y","left","right","top","bottom"].indexOf(property.name) >= 0) {
+               // It is possible that bindings with these names was already evaluated during eval of other bindings
+               // but in that case updateHGeometry and updateVGeometry could be blocked during their eval.
+               // So we call them explicitly, just in case.
+
+               if (property.changed.isConnected(property.obj, updateHGeometry))
+                  updateHGeometry.apply( property.obj,[property.val, property.val, property.name] );
+               if (property.changed.isConnected(property.obj, updateVGeometry))
+                  updateVGeometry.apply( property.obj,[property.val, property.val, property.name] );                  
+            }    
         }
         this.bindedProperties = [];
         
@@ -1137,7 +1149,7 @@ QMLEngine = function (element, options) {
         // Perform pending operations. Now we use it only to init alias's "changed" handlers, that's why we have such strange function name.
         for (var i = 0; i < this.pendingOperations.length; i++) {
             var op = this.pendingOperations[i];
-            op[0]( op[1] );
+            op[0]( op[1], op[2], op[3] );
         }
         this.pendingOperations = [];
     }    
@@ -1532,8 +1544,10 @@ function QMLBaseObject(meta) {
 
 function updateHGeometry(newVal, oldVal, propName) {
     var anchors = this.anchors || this;
-    if (this.$updatingGeometry)
+
+    if (this.$updatingGeometry) {
         return;
+    }
     this.$updatingGeometry = true;
 
     var t, w, width, x, left, hC, right,
@@ -1541,6 +1555,7 @@ function updateHGeometry(newVal, oldVal, propName) {
         rM = anchors.rightMargin || anchors.margins;
 
     // Width
+
     if (this.$isUsingImplicitWidth && propName == "implicitWidth")
         width = this.implicitWidth;
     else if (propName == "width")
@@ -1793,7 +1808,7 @@ function QMLItem(meta) {
                 this.resources.push(child);
         }
     });
-
+    
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
     createSimpleProperty("real", this, "width");
