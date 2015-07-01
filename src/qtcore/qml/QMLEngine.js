@@ -236,7 +236,8 @@ QMLEngine = function (element, options) {
             if (nameIsDir) {
                 // resolve name from relative to full dir path
                 // we hope all dirs are relative
-                name = this.removeDotSegments( currentFileDir + name );
+                if (currentFileDir && currentFileDir.length > 0)
+                  name = this.removeDotSegments( currentFileDir + name );
                 if (name[ name.length-1 ] == "/")
                     name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir`
             }
@@ -482,6 +483,16 @@ QMLEngine = function (element, options) {
               continue; // Probably, the binding was overwritten by an explicit value. Ignore.
             if (property.needsUpdate)
                 property.update();
+            else if (["width","height","fill","x","y","left","right","top","bottom"].indexOf(property.name) >= 0) {
+              // It is possible that bindings with these names was already evaluated during eval of other bindings
+              // but in that case updateHGeometry and updateVGeometry could be blocked during their eval.
+              // So we call them explicitly, just in case.
+
+              if (property.changed.isConnected(property.obj, updateHGeometry))
+                updateHGeometry.apply( property.obj,[property.val, property.val, property.name] );
+              if (property.changed.isConnected(property.obj, updateVGeometry))
+                updateVGeometry.apply( property.obj,[property.val, property.val, property.name] );
+            }
         }
         this.bindedProperties = [];
 
@@ -492,7 +503,7 @@ QMLEngine = function (element, options) {
         // Perform pending operations. Now we use it only to init alias's "changed" handlers, that's why we have such strange function name.
         for (var i = 0; i < this.pendingOperations.length; i++) {
             var op = this.pendingOperations[i];
-            op[0]( op[1] );
+            op[0]( op[1], op[2], op[3] );
         }
         this.pendingOperations = [];
     }
