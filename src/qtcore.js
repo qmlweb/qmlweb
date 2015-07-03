@@ -202,10 +202,10 @@ Qt.createComponent = function(name, executionContext)
           src = getUrlContents(file,true);
           if (src !== false) break;
         }
-
-        if (src === false)
-          return undefined;
     }
+
+    if (src === false)
+       return undefined;
    
     var tree = parseQML(src);
 
@@ -320,8 +320,10 @@ function construct(meta) {
     }
 
     // id
-    if (meta.object.id)
+    if (meta.object.id) {
+        /// console.log("meta.context[meta.object.id] = item;",meta.object.id,"prev value=",meta.context[meta.object.id]);
         meta.context[meta.object.id] = item;
+    }
 
     // keep path in item for probale use it later in Qt.resolvedUrl 
     item.$context["$basePath"] = engine.$basePath; //gut
@@ -1133,7 +1135,7 @@ QMLEngine = function (element, options) {
                // It is possible that bindings with these names was already evaluated during eval of other bindings
                // but in that case updateHGeometry and updateVGeometry could be blocked during their eval.
                // So we call them explicitly, just in case.
-
+               
                if (property.changed.isConnected(property.obj, updateHGeometry))
                   updateHGeometry.apply( property.obj,[property.val, property.val, property.name] );
                if (property.changed.isConnected(property.obj, updateVGeometry))
