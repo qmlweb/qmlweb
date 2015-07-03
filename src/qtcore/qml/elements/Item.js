@@ -278,6 +278,7 @@ function QMLItem(meta) {
     this.$updateTransform = function() {
             var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
             var filter = "";
+            var transformStyle = "preserve-3d";
 
             for (var i = 0; i < this.transform.length; i++) {
                 var t = this.transform[i];
@@ -294,9 +295,13 @@ function QMLItem(meta) {
                 else if (typeof t == 'string')
                     transform += t;
             }
+            if (typeof this.z == "number")
+              transform += " translate3d(0, 0, " + this.z + "px)";
             this.dom.style.transform = transform;
+            this.dom.style.transformStyle = transformStyle;
             this.dom.style.MozTransform = transform;    // Firefox
             this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
+            this.dom.style.webkitTransformStyle = transformStyle;
             this.dom.style.OTransform = transform;      // Opera
             this.dom.style.msTransform = transform;     // IE
             this.dom.style.filter = filter;
@@ -317,7 +322,7 @@ function QMLItem(meta) {
         this.dom.style.overflow = newVal ? "hidden" : "visible";
     });
     this.zChanged.connect(this, function(newVal) {
-        this.dom.style.zIndex = newVal;
+        this.$updateTransform();
     });
     this.xChanged.connect(this, function(newVal) {
         this.dom.style.left = newVal + "px";
