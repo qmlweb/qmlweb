@@ -1,4 +1,5 @@
 (function() {
+  var UglifyJS = require('../../../uglify/node.js');
 
   global.importJavascriptInContext = function (jsData, $context) {
     with(qmlEngine.rootContext()) {
@@ -11,7 +12,7 @@
   }
 
   global.jsparse = function (source) {
-    var AST_Tree = parse(source);
+    var AST_Tree = UglifyJS.parse(source);
     var obj = { exports: [], source: source };
 
     for (var i = 0 ; i < AST_Tree.body.length ; ++i) {

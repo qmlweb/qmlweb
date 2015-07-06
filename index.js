@@ -4,9 +4,7 @@ var gutil = require('gulp-util');
 require(__dirname + '/src/qtcore/qml/QMLBinding.js');
 require(__dirname + '/src/qtcore/qml/lib/parser.js');
 // JS Parser
-require(__dirname + '/src/uglify/utils.js');
-require(__dirname + '/src/uglify/ast.js');
-require(__dirname + '/src/uglify/parse.js');
+require(__dirname + '/src/uglify/node.js');
 require(__dirname + '/src/qtcore/qml/lib/jsparser.js');
 
 module.exports = function (opt) {
