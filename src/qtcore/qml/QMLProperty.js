@@ -20,9 +20,9 @@ QMLProperty.prototype.update = function() {
     if (!this.binding)
         return;
 
-    var oldVal = this.val;
+    var oldVal = this.value;
     evaluatingProperty = this;
-    this.val = this.binding.eval(this.objectScope, this.componentScope);
+    this.value = this.binding.eval(this.objectScope, this.componentScope);
     evaluatingProperty = undefined;
 
     if (this.animation) {
@@ -30,13 +30,13 @@ QMLProperty.prototype.update = function() {
             target: this.animation.target || this.obj,
             property: this.animation.property || this.name,
             from: this.animation.from || oldVal,
-            to: this.animation.to || this.val
+            to: this.animation.to || this.value
         }];
         this.animation.restart();
     }
 
-    if (this.val !== oldVal)
-        this.changed(this.val, oldVal, this.name);
+    if (this.value !== oldVal)
+        this.changed(this.value, oldVal, this.name);
 }
 
 // Define getter
@@ -46,13 +46,13 @@ QMLProperty.prototype.get = function() {
     if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
         this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
 
-    return this.val;
+    return this.value;
 }
 
 // Define setter
 QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
     var i,
-        oldVal = this.val;
+        oldVal = this.value;
 
     if (newVal instanceof QMLBinding) {
         if (!objectScope || !componentScope)
@@ -80,30 +80,30 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
     }
 
     if (constructors[this.type] == QMLList) {
-        this.val = QMLList({ object: newVal, parent: this.obj, context: componentScope });
+        this.value = QMLList({ object: newVal, parent: this.obj, context: componentScope });
     } else if (newVal instanceof QMLMetaElement) {
         if (constructors[newVal.$class] == QMLComponent || constructors[this.type] == QMLComponent)
-            this.val = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
+            this.value = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
         else
-            this.val = construct({ object: newVal, parent: this.obj, context: componentScope });
+            this.value = construct({ object: newVal, parent: this.obj, context: componentScope });
     } else if (newVal instanceof Object || !newVal) {
-        this.val = newVal;
+        this.value = newVal;
     } else {
-        this.val = constructors[this.type](newVal);
+        this.value = new constructors[this.type](newVal);
     }
 
-    if (this.val !== oldVal) {
+    if (this.value !== oldVal) {
         if (this.animation && !fromAnimation) {
             this.animation.running = false;
             this.animation.$actions = [{
                 target: this.animation.target || this.obj,
                 property: this.animation.property || this.name,
                 from: this.animation.from || oldVal,
-                to: this.animation.to || this.val
+                to: this.animation.to || this.value
             }];
             this.animation.running = true;
         }
-        this.changed(this.val, oldVal, this.name);
+        this.changed(this.value, oldVal, this.name);
     }
 }
 

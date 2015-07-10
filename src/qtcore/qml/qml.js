@@ -335,15 +335,15 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             } else if (value instanceof QMLAliasDefinition) {
                 createSimpleProperty("alias", item, i);
                 item.$properties[i].componentScope = componentScope;
-                item.$properties[i].val = value;
+                item.$properties[i].value = value;
                 item.$properties[i].get = function() {
-                    var obj = this.componentScope[this.val.objectName];
-                    return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
+                    var obj = this.componentScope[this.value.objectName];
+                    return this.value.propertyName ? obj.$properties[this.value.propertyName].get() : obj;
                 }
                 item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
-                    if (!this.val.propertyName)
+                    if (!this.value.propertyName)
                         throw "Cannot set alias property pointing to an QML object.";
-                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
+                    this.componentScope[this.value.objectName].$properties[this.value.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
                 }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
