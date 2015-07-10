@@ -1,12 +1,13 @@
 registerQmlType({
   module:   'QtQuick.Controls',
   name:     'TextArea',
-  versions: /^[1-2]\./,
+  versions: /.*/,
   constructor: function QMLTextArea(meta) {
     QMLItem.call(this, meta);
 
     var self = this;
 
+    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
 
     this.dom.innerHTML = "<textarea></textarea>"
