@@ -7,6 +7,7 @@ registerQmlType({
     QMLItem.call(this, meta);
     var self = this;
 
+    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
     this.font = new getConstructor('QtQuick', '2.0', 'Font')(this);
 
     this.dom.innerHTML = "<input type=\"checkbox\"><span></span>";
