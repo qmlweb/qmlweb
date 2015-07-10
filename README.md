@@ -70,7 +70,7 @@ var concat = require('gulp-concat');
 var qml    = require('QMLWeb');
 
 var qmlFiles = [ 'qml/**/*.qml', 'qml/**/*.js' ];
-var jsFiles  = [ 'lib/qt.js', 'lib/**/*.js' ];
+var jsFiles  = [ 'lib/qt.js', 'lib/qrc.js' ];
 
 gulp.task('default', ['qml', 'application'], function() {
   gulp.watch(qmlFiles, ['qml']);
