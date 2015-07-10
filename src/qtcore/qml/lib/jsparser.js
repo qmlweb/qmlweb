@@ -1,5 +1,11 @@
 (function() {
-  var UglifyJS = require('../../../uglify/node.js');
+  var UglifyJS;
+  if (typeof window === 'undefined') {
+    UglifyJS = require('../../../uglify/node.js');
+  }
+  else {
+    UglifyJS = this;
+  }
 
   global.importJavascriptInContext = function (jsData, $context) {
     with(qmlEngine.rootContext()) {
