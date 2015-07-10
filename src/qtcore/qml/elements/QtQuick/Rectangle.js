@@ -13,19 +13,19 @@ registerQmlType({
     createSimpleProperty("int", this.border, "width");
 
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.style.backgroundColor = newVal;
+        this.dom.style.backgroundColor = newVal.toString();
     });
     this.radiusChanged.connect(this, function(newVal) {
         this.dom.style.borderRadius = newVal + "px";
     });
     this.border.colorChanged.connect(this, function(newVal) {
-        this.dom.style.borderColor = newVal;
-        this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
+        this.dom.style.borderColor = newVal.toString();
+        this.dom.style.borderStyle = this.border.width == 0 || newVal.A === 0
                                             ? "none" : "solid";
     });
     this.border.widthChanged.connect(this, function(newVal) {
         this.dom.style.borderWidth = newVal + "px";
-        this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
+        this.dom.style.borderStyle = newVal == 0 || this.border.color.A === 0
                                             ? "none" : "solid";
     });
 

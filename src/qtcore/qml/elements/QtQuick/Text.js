@@ -61,7 +61,7 @@ registerQmlType({
     createSimpleProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.firstChild.style.color = newVal;
+        this.dom.firstChild.style.color = newVal.toString();
     });
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
@@ -103,17 +103,17 @@ registerQmlType({
                 this.dom.firstChild.style.textShadow = "none";
                 break;
             case 1:
-                var color = this.styleColor;
+                var color = this.styleColor.tostring();
                 this.dom.firstChild.style.textShadow = "1px 0 0 " + color
                     + ", -1px 0 0 " + color
                     + ", 0 1px 0 " + color
                     + ", 0 -1px 0 " + color;
                 break;
             case 2:
-                this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor.tostring();
                 break;
             case 3:
-                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor.tostring();
         };
     });
     this.styleColorChanged.connect(this, function(newVal) {
@@ -122,13 +122,14 @@ registerQmlType({
                 this.dom.firstChild.style.textShadow = "none";
                 break;
             case 1:
-                this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
-                    + ", -1px 0 0 " + newVal
-                    + ", 0 1px 0 " + newVal
-                    + ", 0 -1px 0 " + newVal;
+                var color = this.styleColor.tostring();
+                this.dom.firstChild.style.textShadow = "1px 0 0 " + color
+                    + ", -1px 0 0 " + color
+                    + ", 0 1px 0 " + color
+                    + ", 0 -1px 0 " + color;
                 break;
             case 2:
-                this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal.tostring();
                 break;
             case 3:
                 this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
