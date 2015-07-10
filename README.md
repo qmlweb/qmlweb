@@ -22,6 +22,11 @@ This project aims at bringing the power of QML to the web browser.
 
 This is a fork from `git://anongit.kde.org/qmlweb` in [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore)
 
+###
+This is a fork of Plaristote/qmlweb, currently just with three minor
+bug fixes and a few additional examples. Demos of these examples
+can be found at the URL [http://arno.encuda.de/qmlA3](http://arno.encuda.de/qmlA3)
+
 # Summary
 * [How to use](#how-to-use)
 * [How to use with Gulp](#how-to-use-with-gulp)
