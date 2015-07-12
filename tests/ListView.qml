@@ -62,7 +62,7 @@ Rectangle {
               anchors.fill: parent
               acceptedButtons: Qt.LeftButton | Qt.RightButton
               onClicked: {
-                info.text = 'clicked in listview/main\nsource = ' + image.source
+                info.text = 'clicked in ListView\nsource = ' + image.source
               }
           }
         }
@@ -82,13 +82,13 @@ Rectangle {
             Text {
                 id: entryCities
                 anchors.centerIn: parent
-                text: Cities.get(index).name + ' ' + Cities.get(index).tz
+                text: Cities.get(index).name
             }
             MouseArea {
                 id: mCity
                 anchors.fill: parent
                 onClicked: {
-                var city =  Cities.get(index)
+                    var city =  Cities.get(index)
                     info.text = 'CITY : ' + city.name +
                                 '\n\ncountry : ' + city.country +
                                 '\nlocale : ' + city.locale +
