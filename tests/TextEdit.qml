@@ -20,6 +20,9 @@ Rectangle {
         height: 400
         anchors.top: title.bottom + 30
         anchors.left: 100
+        color: 'magenta'
+        font.pointSize: 13
+        font.underline: true
 
         text:
 "To be, or not to be: that is the question:
