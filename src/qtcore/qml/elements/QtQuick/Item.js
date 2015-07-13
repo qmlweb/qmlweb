@@ -1,10 +1,7 @@
 function QMLItem(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
     var child,
         o, i;
-
-    this.completed = Signal();
-    this.completedAlreadyCalled = false;
 
     if (this.$parent === null) { // This is the root element. Initialize it.
         this.dom = engine.rootElement || document.body;
@@ -94,6 +91,33 @@ function QMLItem(meta) {
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
     this.focus = false;
+
+    this.Keys = new QObject(this);
+    this.Keys.asteriskPresed = Signal();
+    this.Keys.backPressed = Signal();
+    this.Keys.backtabPressed = Signal();
+    this.Keys.callPressed = Signal();
+    this.Keys.cancelPressed = Signal();
+    this.Keys.deletePressed = Signal();
+    for (var i = 0 ; i < 10 ; ++i)
+      this.Keys['digit'+i+'Pressed'] = Signal();
+    this.Keys.escapePressed = Signal();
+    this.Keys.flipPressed = Signal();
+    this.Keys.hangupPressed = Signal();
+    this.Keys.leftPressed = Signal();
+    this.Keys.menuPressed = Signal();
+    this.Keys.noPressed = Signal();
+    this.Keys.pressed = Signal();
+    this.Keys.released = Signal();
+    this.Keys.returnPressed = Signal();
+    this.Keys.rightPressed = Signal();
+    this.Keys.selectPressed = Signal();
+    this.Keys.spacePressed = Signal();
+    this.Keys.tabPressed = Signal();
+    this.Keys.upPressed = Signal();
+    this.Keys.volumeDownPressed = Signal();
+    this.Keys.volumeUpPressed = Signal();
+    this.Keys.yesPressed = Signal();
 
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
@@ -388,4 +412,9 @@ function QMLItem(meta) {
     }
 }
 
-constructors['Item'] = QMLItem;
+constructors["Item"] = QMLItem
+// registerQmlType({
+//  module: 'QtQuick',
+//  name:   'Rotation',
+//  versions: /.*/,
+//  constructor: QMLItem})

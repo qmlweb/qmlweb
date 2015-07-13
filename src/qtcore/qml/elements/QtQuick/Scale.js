@@ -3,7 +3,7 @@ registerQmlType({
   name:     'Scale',
   versions: /.*/,
   constructor: function QMLScale(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("real", this, "xScale");
     createSimpleProperty("real", this, "yScale");

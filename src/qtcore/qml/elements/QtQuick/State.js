@@ -3,7 +3,7 @@ registerQmlType({
   name:     'State',
   versions: /.*/,
   constructor: function QMLState(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("string", this, "name");
     createSimpleProperty("list", this, "changes");

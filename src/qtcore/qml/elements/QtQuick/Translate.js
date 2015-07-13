@@ -3,7 +3,7 @@ registerQmlType({
   name:     'Translate',
   versions: /.*/,
   constructor: function QMLTranslate(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");

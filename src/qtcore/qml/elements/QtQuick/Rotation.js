@@ -3,7 +3,7 @@ registerQmlType({
   name:   'Rotation',
   versions: /.*/,
   constructor: function QMLRotation(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("real", this, "angle");
 

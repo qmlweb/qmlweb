@@ -1,9 +1,5 @@
-registerQmlType({
-  module:   'QtQuick',
-  name:     'Timer',
-  versions: /.*/,
-  constructor: function QMLTimer(meta) {
-    QMLBaseObject.call(this, meta);
+function QMLTimer(meta) {
+    QMLQtObject.call(this, meta);
     var prevTrigger,
         self = this;
 
@@ -74,5 +70,6 @@ registerQmlType({
     engine.$registerStop(function() {
         self.stop();
     });
-  }
-});
+}
+
+registerQmlType('Timer',   QMLTimer);

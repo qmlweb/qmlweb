@@ -1,7 +1,7 @@
 function QMLPropertyChanges(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
-    createSimpleProperty("QtObject", this, "target");
+    createSimpleProperty("QObject", this, "target");
     createSimpleProperty("bool", this, "explicit");
     createSimpleProperty("bool", this, "restoreEntryValues");
 
@@ -17,4 +17,8 @@ function QMLPropertyChanges(meta) {
     }
 }
 
-registerQmlType('PropertyChanges', QMLPropertyChanges);
+registerQmlType({
+  module:   'QtQuick',
+  name:     'PropertyAnimation',
+  versions: /.*/,
+  constructor: QMLPropertyChanges })

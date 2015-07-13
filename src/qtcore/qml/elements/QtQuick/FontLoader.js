@@ -3,7 +3,7 @@ registerQmlType({
   name:     'FontLoader',
   versions: /.*/,
   constructor: function QMLFontLoader(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     // Exports.
     this.FontLoader = {

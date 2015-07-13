@@ -3,7 +3,7 @@ registerQmlType({
   name:   'Behavior',
   versions: /.*/,
   constructor: function QMLBehavior(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("Animation", this, "animation");
     this.$defaultProperty = "animation";

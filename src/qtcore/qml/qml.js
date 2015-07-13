@@ -13,7 +13,6 @@ var GETTER = "__defineGetter__",
       string:      String,
       bool:        Boolean,
       list:        QMLList,
-      color:       QMLColor,
       enum:        Number,
       url:         String,
       variant:     QMLVariant,
@@ -153,16 +152,6 @@ function descr(msg, obj, vals) {
 }
 
 /**
- * Compile binding. Afterwards you may call binding.eval to evaluate.
- */
-QMLBinding.prototype.compile = function() {
-    var bindSrc = this.function
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
-    this.eval = eval(bindSrc);
-}
-
-/**
  * QML Object constructor.
  * @param {Object} meta Meta information about the object and the creation context
  * @return {Object} New qml object
@@ -178,9 +167,9 @@ function construct(meta) {
             console.error("A QML component must only contain one root element!");
         var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
 
-        // Recall QMLBaseObject with the meta of the instance in order to get property
+        // Recall QMLQtObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
-        QMLBaseObject.call(item, meta);
+        QMLQtObject.call(item, meta);
         if (typeof item.dom != 'undefined')
           item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties

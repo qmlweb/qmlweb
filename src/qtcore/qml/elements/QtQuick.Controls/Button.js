@@ -25,4 +25,8 @@ function QMLButton(meta) {
     }
 }
 
-registerQmlType('Button', QMLButton);
+registerQmlType({
+  module:   'QtQuick.Controls',
+  name:     'CheckBox',
+  versions: /.*/,
+  constructor: QMLButton})

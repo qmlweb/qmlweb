@@ -18,7 +18,7 @@ registerQmlType({
   name: 'SystemPalette',
   versions: /.*/,
   constructor: function QMLSystemPalette(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     createSimpleProperty("enum", this, "colorGroup");
 

@@ -3,7 +3,7 @@ registerQmlType({
   name:     'Animation',
   versions: /.*/,
   constructor: function QMLAnimation(meta) {
-    QMLBaseObject.call(this, meta);
+    QMLQtObject.call(this, meta);
 
     // Exports
     this.Animation = {
