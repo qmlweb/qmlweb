@@ -20,21 +20,29 @@ Rectangle {
         height: 400
         anchors.top: title.bottom + 30
         anchors.left: 100
-        font.bold: true
 
         text:
-'Habe nun, ach! Philosophie,
-Juristerei und Medizin,
-Und leider auch Theologie
-Durchaus studiert, mit heißem Bemühn.
-Da steh ich nun, ich armer Tor!
-Und bin so klug als wie zuvor;
-Heiße Magister, heiße Doktor gar
-Und ziehe schon an die zehen Jahr
-Herauf, herab und quer und krumm
-Meine Schüler an der Nase herum'
+"To be, or not to be: that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And by opposing end them? To die: to sleep;
+No more; and by a sleep to say we end
+The heart-ache and the thousand natural shocks
+That flesh is heir to, 'tis a consummation
+Devoutly to be wish'd. To die, to sleep;
+To sleep: perchance to dream: ay, there's the rub;
+For in that sleep of death what dreams may come"
+        /*
+        Text {
+            id: text
+            anchors.fill: parent
+            color: 'red'
+            font.pointSize: 16
+            text: parent.text
+        }
+        */
     }
-
     Text {
         id: info
         anchors.left: text_edit.left
