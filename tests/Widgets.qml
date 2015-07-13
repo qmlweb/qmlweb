@@ -127,7 +127,9 @@ Rectangle {
         height: 100
         anchors.top: text_area.bottom + 10
         anchors.left: grid.left
-        font.bold: true
+        font.pointSize: 12
+        font.italic: true
+        color: 'red'
 
         text: 'Hi,\nI am a TextEdit in making!\n\nMy char count is '
             + length + '\nI have '
