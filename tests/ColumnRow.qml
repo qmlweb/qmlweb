@@ -33,7 +33,7 @@ Rectangle {
     }
 
     Row {
-        x: col.right - 80
+        x: col.right - 30
         y: 120
         spacing: 20
 
@@ -52,9 +52,10 @@ Rectangle {
                 width: 120
                 height: 32
                 x: 10
-                border.width: 1
-                border.color: 'gray'
-                radius: 3
+                border.width: 2
+                border.color: 'black'
+                radius: 8
+                color: '#111'
                 Rectangle {
                     id: planet_color
                     x: 5
@@ -69,6 +70,7 @@ Rectangle {
                     anchors.left: planet_color.right + 8
                     anchors.verticalCenter: parent.verticalCenter
                     font.pointSize: 16
+                    color: 'white'
                     text: name
                 }
             }

@@ -4,7 +4,8 @@ import QtQuick.Controls 1.0
 Rectangle {
     id: page
     color: 'white'
-    width: 500; height: 500
+    width: 500
+    //height: 500
 
     Text {
         id: title
@@ -57,6 +58,7 @@ Rectangle {
 
         onAccepted: {
             info.text = text;
+            text_edit.text = text;
         }
     }
 
@@ -95,6 +97,7 @@ Rectangle {
     }
 
     TextArea {
+        id: text_area
         x: 280
         y: 280
         width: 200
@@ -103,14 +106,32 @@ Rectangle {
         anchors.left: grid.left
         font.bold: true
 
-        text: 'Hi,\nI am a TextArea!\n\n' + 'The checkbox is ' + (checkbox.checked ? '' : 'not ') + 'checked.'
+        text: 'Hi,\nI am a TextArea!\n\n' + 'The checkbox is '
+            + (checkbox.checked ? '' : 'not ') + 'checked.'
     }
 
     Text {
+        id: final
         anchors.horizontalCenter: page.horizontalCenter
-        anchors.bottom: page.bottom
+        anchors.bottom: page.bottom - 20
         color: 'red'
         font.pointSize: 20
         text: '<u>More Widgets to follow ...</u>'
+    }
+
+    TextEdit {
+        id: text_edit
+        x: 280
+        y: 280
+        width: 200
+        height: 100
+        anchors.top: text_area.bottom + 10
+        anchors.left: grid.left
+        font.bold: true
+
+        text: 'Hi,\nI am a TextEdit in making!\n\nMy char count is '
+            + length + '\nI have '
+            + lineCount + ' lines \nselectByKeyboard ' + selectByKeyboard
+            + '\nselectByMouse ' + selectByMouse
     }
 }
