@@ -377,6 +377,7 @@ function Signal(params, options) {
         }
     }
     signal.disconnect = function() {
+        // 1 = function  2 = string  3 = object with string method  4 = object with function
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
                        : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 3 : 4;
         for (var i = 0; i < connectedSlots.length; i++) {
@@ -1083,6 +1084,16 @@ QMLEngine = function (element, options) {
           // save blank info, meaning that we failed to load import
           // this prevents repeated lookups
           engine.qmldirsContents[ name ] = {};
+
+          // NEW
+          // add that dir to import path list
+          // that means, lookup qml files in that dir by trying to load them directly
+          // this is not the same behavior as in Qt for "url" schemes,
+          // but it is same as for ordirnal disk files. 
+          // So, we do it for experimental purposes.
+          if (nameIsDir) /// || nameIsUrl
+            engine.addImportPath( name + "/" );
+
           continue;
         }
         
