@@ -1,7 +1,11 @@
 node_modules/
-tmp/
 lib/
+tmp/
+build/
 *~
 *.bak
 .*.swp
 .*.swo
+*.kdev4
+*kate-swp
+.idea
