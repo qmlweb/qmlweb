@@ -89,7 +89,7 @@ function DefaultsError(msg, defs) {
 DefaultsError.prototype = Object.create(Error.prototype);
 DefaultsError.prototype.constructor = DefaultsError;
 
-DefaultsError.croak = function(msg, defs) {
+DefaultsError.croak = function (msg, defs) {
     throw new DefaultsError(msg, defs);
 };
 
@@ -97,28 +97,35 @@ function defaults(args, defs, croak) {
     if (args === true)
         args = {};
     var ret = args || {};
-    if (croak) for (var i in ret) if (ret.hasOwnProperty(i) && !defs.hasOwnProperty(i))
-        DefaultsError.croak("`" + i + "` is not a supported option", defs);
-    for (var i in defs) if (defs.hasOwnProperty(i)) {
-        ret[i] = (args && args.hasOwnProperty(i)) ? args[i] : defs[i];
-    }
+    if (croak)
+        for (var i in ret)
+            if (ret.hasOwnProperty(i) && !defs.hasOwnProperty(i))
+                DefaultsError.croak("`" + i + "` is not a supported option", defs);
+    for (var i in defs)
+        if (defs.hasOwnProperty(i)) {
+            ret[i] = (args && args.hasOwnProperty(i)) ? args[i] : defs[i];
+        }
     return ret;
 };
 
 function merge(obj, ext) {
     var count = 0;
-    for (var i in ext) if (ext.hasOwnProperty(i)) {
-        obj[i] = ext[i];
-        count++;
-    }
+    for (var i in ext)
+        if (ext.hasOwnProperty(i)) {
+            obj[i] = ext[i];
+            count++;
+        }
     return count;
 };
 
 function noop() {};
 
-var MAP = (function(){
+var MAP = (function () {
     function MAP(a, f, backwards) {
-        var ret = [], top = [], i;
+        var ret = [],
+            top = [],
+            i;
+
         function doit() {
             var val = f(a[i], i);
             var is_last = val instanceof Last;
@@ -130,8 +137,7 @@ var MAP = (function(){
                 } else {
                     top.push(val);
                 }
-            }
-            else if (val !== skip) {
+            } else if (val !== skip) {
                 if (val instanceof Splice) {
                     ret.push.apply(ret, backwards ? val.v.slice().reverse() : val.v);
                 } else {
@@ -142,25 +148,43 @@ var MAP = (function(){
         };
         if (a instanceof Array) {
             if (backwards) {
-                for (i = a.length; --i >= 0;) if (doit()) break;
+                for (i = a.length; --i >= 0;)
+                    if (doit()) break;
                 ret.reverse();
                 top.reverse();
             } else {
-                for (i = 0; i < a.length; ++i) if (doit()) break;
+                for (i = 0; i < a.length; ++i)
+                    if (doit()) break;
             }
-        }
-        else {
-            for (i in a) if (a.hasOwnProperty(i)) if (doit()) break;
+        } else {
+            for (i in a)
+                if (a.hasOwnProperty(i))
+                    if (doit()) break;
         }
         return top.concat(ret);
     };
-    MAP.at_top = function(val) { return new AtTop(val) };
-    MAP.splice = function(val) { return new Splice(val) };
-    MAP.last = function(val) { return new Last(val) };
+    MAP.at_top = function (val) {
+        return new AtTop(val)
+    };
+    MAP.splice = function (val) {
+        return new Splice(val)
+    };
+    MAP.last = function (val) {
+        return new Last(val)
+    };
     var skip = MAP.skip = {};
-    function AtTop(val) { this.v = val };
-    function Splice(val) { this.v = val };
-    function Last(val) { this.v = val };
+
+    function AtTop(val) {
+        this.v = val
+    };
+
+    function Splice(val) {
+        this.v = val
+    };
+
+    function Last(val) {
+        this.v = val
+    };
     return MAP;
 })();
 
@@ -170,7 +194,7 @@ function push_uniq(array, el) {
 };
 
 function string_template(text, props) {
-    return text.replace(/\{(.+?)\}/g, function(str, p){
+    return text.replace(/\{(.+?)\}/g, function (str, p) {
         return props[p];
     });
 };
@@ -183,21 +207,26 @@ function remove(array, el) {
 
 function mergeSort(array, cmp) {
     if (array.length < 2) return array.slice();
+
     function merge(a, b) {
-        var r = [], ai = 0, bi = 0, i = 0;
+        var r = [],
+            ai = 0,
+            bi = 0,
+            i = 0;
         while (ai < a.length && bi < b.length) {
-            cmp(a[ai], b[bi]) <= 0
-                ? r[i++] = a[ai++]
-                : r[i++] = b[bi++];
+            cmp(a[ai], b[bi]) <= 0 ? r[i++] = a[ai++] : r[i++] = b[bi++];
         }
         if (ai < a.length) r.push.apply(r, a.slice(ai));
         if (bi < b.length) r.push.apply(r, b.slice(bi));
         return r;
     };
+
     function _ms(a) {
         if (a.length <= 1)
             return a;
-        var m = Math.floor(a.length / 2), left = a.slice(0, m), right = a.slice(m);
+        var m = Math.floor(a.length / 2),
+            left = a.slice(0, m),
+            right = a.slice(m);
         left = _ms(left);
         right = _ms(right);
         return merge(left, right);
@@ -206,13 +235,13 @@ function mergeSort(array, cmp) {
 };
 
 function set_difference(a, b) {
-    return a.filter(function(el){
+    return a.filter(function (el) {
         return b.indexOf(el) < 0;
     });
 };
 
 function set_intersection(a, b) {
-    return a.filter(function(el){
+    return a.filter(function (el) {
         return b.indexOf(el) >= 0;
     });
 };
@@ -221,7 +250,8 @@ function set_intersection(a, b) {
 // [1] https://github.com/marijnh/acorn
 function makePredicate(words) {
     if (!(words instanceof Array)) words = words.split(" ");
-    var f = "", cats = [];
+    var f = "",
+        cats = [];
     out: for (var i = 0; i < words.length; ++i) {
         for (var j = 0; j < cats.length; ++j)
             if (cats[j][0].length == words[i].length) {
@@ -230,6 +260,7 @@ function makePredicate(words) {
             }
         cats.push([words[i]]);
     }
+
     function compareTo(arr) {
         if (arr.length == 1) return f += "return str === " + JSON.stringify(arr[0]) + ";";
         f += "switch(str){";
@@ -239,7 +270,9 @@ function makePredicate(words) {
     // When there are more than three length categories, an outer
     // switch first dispatches on the lengths, to save on comparisons.
     if (cats.length > 3) {
-        cats.sort(function(a, b) {return b.length - a.length;});
+        cats.sort(function (a, b) {
+            return b.length - a.length;
+        });
         f += "switch(str.length){";
         for (var i = 0; i < cats.length; ++i) {
             var cat = cats[i];
@@ -266,44 +299,50 @@ function Dictionary() {
     this._size = 0;
 };
 Dictionary.prototype = {
-    set: function(key, val) {
+    set: function (key, val) {
         if (!this.has(key)) ++this._size;
         this._values["$" + key] = val;
         return this;
     },
-    add: function(key, val) {
+    add: function (key, val) {
         if (this.has(key)) {
             this.get(key).push(val);
         } else {
-            this.set(key, [ val ]);
+            this.set(key, [val]);
         }
         return this;
     },
-    get: function(key) { return this._values["$" + key] },
-    del: function(key) {
+    get: function (key) {
+        return this._values["$" + key]
+    },
+    del: function (key) {
         if (this.has(key)) {
             --this._size;
             delete this._values["$" + key];
         }
         return this;
     },
-    has: function(key) { return ("$" + key) in this._values },
-    each: function(f) {
+    has: function (key) {
+        return ("$" + key) in this._values
+    },
+    each: function (f) {
         for (var i in this._values)
             f(this._values[i], i.substr(1));
     },
-    size: function() {
+    size: function () {
         return this._size;
     },
-    map: function(f) {
+    map: function (f) {
         var ret = [];
         for (var i in this._values)
             ret.push(f(this._values[i], i.substr(1)));
         return ret;
     },
-    toObject: function() { return this._values }
+    toObject: function () {
+        return this._values
+    }
 };
-Dictionary.fromObject = function(obj) {
+Dictionary.fromObject = function (obj) {
     var dict = new Dictionary();
     dict._size = merge(dict._values, obj);
     return dict;

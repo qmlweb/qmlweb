@@ -16,7 +16,7 @@ function QMLFlow(meta) {
     this.layoutDirection = 0;
 }
 
-QMLFlow.prototype.layoutChildren = function() {
+QMLFlow.prototype.layoutChildren = function () {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
@@ -33,8 +33,7 @@ QMLFlow.prototype.layoutChildren = function() {
             }
             rowSize = child.height > rowSize ? child.height : rowSize;
 
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
+            child.x = this.layoutDirection == 1 ? this.width - curHPos - child.width : curHPos;
             child.y = curVPos;
             curHPos += child.width + this.spacing;
         } else {
@@ -45,8 +44,7 @@ QMLFlow.prototype.layoutChildren = function() {
             }
             rowSize = child.width > rowSize ? child.width : rowSize;
 
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
+            child.x = this.layoutDirection == 1 ? this.width - curHPos - child.width : curHPos;
             child.y = curVPos;
             curVPos += child.height + this.spacing;
         }
@@ -58,8 +56,8 @@ QMLFlow.prototype.layoutChildren = function() {
 }
 
 registerQmlType({
-  module:      'QtQuick',
-  name:        'Flow',
-  versions:    /.*/,
-  constructor: QMLFlow
+    module: 'QtQuick',
+    name: 'Flow',
+    versions: /.*/,
+    constructor: QMLFlow
 });

@@ -1,8 +1,8 @@
 registerQmlType({
-  module: 'QtQuick',
-  name: 'Grid',
-  versions: /.*/,
-  constructor: QMLGrid
+    module: 'QtQuick',
+    name: 'Grid',
+    versions: /.*/,
+    constructor: QMLGrid
 });
 
 function QMLGrid(meta) {
@@ -26,9 +26,10 @@ function QMLGrid(meta) {
     this.layoutDirection = 0;
 }
 
-QMLGrid.prototype.layoutChildren = function() {
+QMLGrid.prototype.layoutChildren = function () {
     var visibleItems = [],
-        r = 0, c = 0,
+        r = 0,
+        c = 0,
         colWidth = [],
         rowHeight = [],
         gridWidth = -this.spacing,
@@ -59,7 +60,7 @@ QMLGrid.prototype.layoutChildren = function() {
     if (this.flow == 0)
         for (var i = 0; i < r; i++) {
             for (var j = 0; j < c; j++) {
-                var item = visibleItems[i*c+j];
+                var item = visibleItems[i * c + j];
                 if (!item)
                     break;
                 if (!colWidth[j] || item.width > colWidth[j])
@@ -67,11 +68,10 @@ QMLGrid.prototype.layoutChildren = function() {
                 if (!rowHeight[i] || item.height > rowHeight[i])
                     rowHeight[i] = item.height;
             }
-        }
-    else
+        } else
         for (var i = 0; i < c; i++) {
             for (var j = 0; j < r; j++) {
-                var item = visibleItems[i*r+j];
+                var item = visibleItems[i * r + j];
                 if (!item)
                     break;
                 if (!rowHeight[j] || item.height > rowHeight[j])
@@ -94,7 +94,7 @@ QMLGrid.prototype.layoutChildren = function() {
     if (this.flow == 0)
         for (var i = 0; i < r; i++) {
             for (var j = startingPoint; j !== endPoint; j += step) {
-                var item = visibleItems[i*c+j];
+                var item = visibleItems[i * c + j];
                 if (!item)
                     break;
                 item.x = curHPos;
@@ -104,11 +104,10 @@ QMLGrid.prototype.layoutChildren = function() {
             }
             curVPos += rowHeight[i] + this.spacing;
             curHPos = 0;
-        }
-    else
+        } else
         for (var i = startingPoint; i !== endPoint; i += step) {
             for (var j = 0; j < r; j++) {
-                var item = visibleItems[i*r+j];
+                var item = visibleItems[i * r + j];
                 if (!item)
                     break;
                 item.x = curHPos;

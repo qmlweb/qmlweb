@@ -195,5 +195,3 @@ function updateVGeometry(newVal, oldVal, propName) {
 
     this.$updatingGeometry = false;
 }
-
-

@@ -1,4 +1,21 @@
-## Javascript powered QML Engine
+### Notes for this fork
+
+This is a fork of Plaristote/qmlweb with additional examples.
+Demos of these examples can be found at the URL
+[http://arno.encuda.de/qmlA3](http://arno.encuda.de/qmlA3)
+
+As of July 15, 2015 major changes to the original Plaristote code base have been made, namely:
+
+##### Changes (July 15, 2015)
+
++ reformat all Javascript files in subdirectory src with js-beautify
++ eliminate Jasmine testing (unable to install gulp-jasmine-phantom)
++ delete folders **images**, **lib**, **qml**, **test** and **util**
++ add ***Generic.js*** and ***TextView.js*** - Generic.js contains new and migrated(from other elements) functionality that can be used in various contexts.
++ eliminate most comments (to remove clutter and as preparation for more detailed documentation with Doxygen)
++ added folder notes with textual notes culled from Digia documentation. This will be superseded later by proper documentation.
+
+# Javascript powered QML Engine
 CSS and HTML are boring and lame. And they suck at designing cool, interactive interfaces. Qt came up with a much better answer for its renowned framework: `QML`, a declarative language perfect for designing UIs (and much more). Here's a sample of how QML looks like:
 
 ```QML
@@ -21,11 +38,6 @@ Rectangle {
 This project aims at bringing the power of QML to the web browser.
 
 This is a fork from `git://anongit.kde.org/qmlweb` in [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore)
-
-###
-This is a fork of Plaristote/qmlweb, currently just with three minor
-bug fixes and a few additional examples. Demos of these examples
-can be found at the URL [http://arno.encuda.de/qmlA3](http://arno.encuda.de/qmlA3)
 
 # Summary
 * [How to use](#how-to-use)

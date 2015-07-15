@@ -1,8 +1,8 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Row',
-  versions: /.*/,
-  constructor: QMLRow
+    module: 'QtQuick',
+    name: 'Row',
+    versions: /.*/,
+    constructor: QMLRow
 });
 
 function QMLRow(meta) {
@@ -13,7 +13,7 @@ function QMLRow(meta) {
     this.layoutDirection = 0;
 }
 
-QMLRow.prototype.layoutChildren = function() {
+QMLRow.prototype.layoutChildren = function () {
     var curPos = 0,
         maxHeight = 0,
         // When layoutDirection is RightToLeft we need oposite order

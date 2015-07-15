@@ -7,7 +7,8 @@ Rectangle {
     height: 500
 
     Title { id: title ; title: 'Plugins' }
-
+    NotImplemented { anchors.top: title.bottom + 25 }
+/*
     TestPlugin {
         id: plugin
         name: 'Example Plugin'
@@ -43,4 +44,5 @@ Rectangle {
             plugin.data = text;
         }
     }
+    */
 }

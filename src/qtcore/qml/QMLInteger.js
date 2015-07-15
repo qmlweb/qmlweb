@@ -1,3 +1,3 @@
 function QMLInteger(val) {
-    return (val|0);
+    return (val | 0);
 }
