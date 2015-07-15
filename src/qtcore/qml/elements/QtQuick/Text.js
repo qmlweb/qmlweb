@@ -12,24 +12,6 @@ registerQmlType({
     this.dom.firstChild.style.width = "100%";
     this.dom.firstChild.style.height = "100%";
 
-    // Creates font css description
-    function fontCss(font) {
-        var css = "";
-        css += font.italic ? "italic " : "normal ";
-        css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
-        // Canvas seems to only support bold yes or no
-        css += (font.weight == Font.Bold
-            || font.weight == Font.DemiBold
-            || font.weight == Font.Black
-            || font.bold) ? "bold " : "normal ";
-        css += font.pixelSize !== Undefined
-            ? font.pixelSize + "px "
-            : (font.pointSize || 10) + "pt ";
-        css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
-        css += (font.family || "sans-serif") + " ";
-        return css;
-    }
-
     this.Text = {
         // Wrap Mode
         NoWrap: 0,
