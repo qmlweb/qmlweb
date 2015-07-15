@@ -21,7 +21,7 @@ registerQmlType({
             var text = '[';
             for (var i = 0; i < self.data.length; ++i)
                 text += ' ' + self.data[i];
-            text += ' ]'
+            text += ' ]';
             self.dom.textContent = text;
         }
 
