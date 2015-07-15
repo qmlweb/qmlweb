@@ -1,0 +1,5 @@
+*~
+*.kdev4
+*kate-swp
+build/
+.idea
