@@ -5,8 +5,8 @@ Rectangle {
     width: 500
     height: 200
 
-    Title { id: pathview ; title: 'PathView' }
-    NotImplemented { anchors.top: pathview.bottom + 25 }
+    Title { id: title ; title: 'PathView' }
+    NotImplemented { anchors.top: title.bottom + 25 }
 }
 /*
     ListModel {
