@@ -3,6 +3,7 @@ lib/
 coverage/
 tmp/
 build/
+.idea/
 *~
 *.bak
 *.log
@@ -10,5 +11,5 @@ build/
 .*.swo
 *.kdev4
 *kate-swp
-.idea
 .arcconfig
+.project
