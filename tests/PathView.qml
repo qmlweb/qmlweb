@@ -5,18 +5,8 @@ Rectangle {
     width: 500
     height: 200
 
-    Text {
-        anchors {
-            top: parent.top + 10
-            horizontalCenter: parent.horizontalCenter
-        }
-        font.pointSize: 36
-        font.bold: true
-        color: 'blue'
-        text: '<u>PathView</u>'
-    }
-
-    NotImplemented {}
+    Title { id: pathview ; title: 'PathView' }
+    NotImplemented { anchors.top: pathview.bottom + 25 }
 }
 /*
     ListModel {

@@ -1,11 +1,24 @@
-import QtQuick 2.4;
-import QtQuick.Controls 1.4
+import QtQuick 2.0;
+import QtQuick.Controls 1.0
 
 Rectangle {
     id: root
+    color: 'white'
+    x: 50
+    width: page.width
+
+    Title { id: title ; title: 'ListView' }
+
+Rectangle {
+    id: page
     color: '#aab'
+    width: 7 * 130 + 5
     property string source1: 'images/go-next.png'
     property string source2: 'images/go-previous.png'
+
+    anchors.top: title.bottom
+    anchors.topMargin: 30
+    anchors.horizontalCenter: page.horizontalCenter
 
     ListModel {
         id: Cities
@@ -43,6 +56,7 @@ Rectangle {
     }
 
     ListView {
+        id: lv_vertical
         model: Cities
         orientation: Qt.Vertical
         spacing: 5
@@ -54,7 +68,7 @@ Rectangle {
             border.color: 'red'
             Image {
                 id: image
-                source: Cities.get(index).locale[0] == 'e' ? root.source1 : root.source2
+                source: Cities.get(index).locale[0] == 'e' ? page.source1 : page.source2
                 fillMode: Image.PreserveAspectFit
                 anchors.fill: parent
             }
@@ -69,6 +83,7 @@ Rectangle {
     }
 
     ListView {
+        id: lv_horizontal
         model: Cities
         orientation: Qt.Horizontal
         x: 130
@@ -102,7 +117,7 @@ Rectangle {
         id: reporter
         x: 130
         y:  46
-        width:  780
+        width:  page.width - 130
         height: 229
         color: '#aaf'
         Text {
@@ -114,4 +129,5 @@ Rectangle {
             text: 'Your text could be here'
         }
     }
+}
 }

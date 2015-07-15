@@ -4,34 +4,25 @@ import QtQuick.Controls 1.0
 Rectangle {
     id: root
     color: 'white'
-    width: 500
+    width: 600
 
-    Text {
-        id: title
-        y: 20
-        anchors.horizontalCenter: text_edit.horizontalCenter
-        font.pointSize: 28
-        font.bold: true
-        color: '#00a'
-        text: '<b><u>TextEdit</u></b>'
-    }
+    Title { id: title ; title: 'TextEdit' }
     TextEdit {
         id: text_edit
         width: 500
         height: 400
         anchors.top: title.bottom
         anchors.topMargin: 30
-        anchors.left: 100
+        anchors.horizontalCenter: root.horizontalCenter
         color: 'blue'
-        font.pointSize: 13
+        font.pointSize: 13.5
         font.underline: true
         css.backgroundColor: '#efe'
-        css.borderRadius: '50px'
-        css.border: '5px dotted red'
+        css.borderRadius: '25px'
+        css.border: '3px dotted red'
 
         text:
-"
-To be, or not to be: that is the question:
+"To be, or not to be: that is the question:
 Whether 'tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
 Or to take arms against a sea of troubles,

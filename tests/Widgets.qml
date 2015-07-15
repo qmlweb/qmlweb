@@ -2,19 +2,11 @@ import QtQuick 2.0
 import QtQuick.Controls 1.0
 
 Rectangle {
-    id: page
+    id: root
     color: 'white'
     width: 500
 
-    Text {
-        id: title
-        y: 20
-        anchors.horizontalCenter: page.horizontalCenter
-        font.pointSize: 28
-        font.bold: true
-        color: '#00a'
-        text: '<b><u>Widget Gallery</u></b>'
-    }
+    Title { id: title ; title: 'Widgets' }
 
     Rectangle {
         id: grid
@@ -118,8 +110,8 @@ Rectangle {
 
     Text {
         id: final
-        anchors.horizontalCenter: page.horizontalCenter
-        anchors.bottom: page.bottom
+        anchors.horizontalCenter: root.horizontalCenter
+        anchors.bottom: root.bottom
         anchors.bottomMargin: 30
         color: 'red'
         font.pointSize: 20

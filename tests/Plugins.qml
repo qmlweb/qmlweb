@@ -1,18 +1,12 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: page
+    id: root
     color: 'white'
-    width: 500; height: 500
+    width: 500
+    height: 500
 
-    Text {
-        id: title
-        anchors.horizontalCenter: page.horizontalCenter
-        font.pointSize: 28
-        font.bold: true
-        color: '#00a'
-        text: '<b><u>Plugin Example</u></b>'
-    }
+    Title { id: title ; title: 'Plugins' }
 
     TestPlugin {
         id: plugin
@@ -31,7 +25,7 @@ Rectangle {
     Text {
         id: child
         anchors.top: plugin.bottom + 50
-        anchors.horizontalCenter: page.horizontalCenter
+        anchors.horizontalCenter: root.horizontalCenter
         font.pointSize: 20
         font.bold: true
         color: '#a0a'
