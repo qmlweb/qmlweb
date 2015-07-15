@@ -5,8 +5,6 @@ registerQmlType({
   constructor: function QMLText(meta) {
     QMLItem.call(this, meta);
 
-    // We create another span inside the text to distinguish the actual
-    // (possibly html-formatted) text from child elements
     this.dom.innerHTML = "<span></span>";
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.width = "100%";
@@ -67,15 +65,11 @@ registerQmlType({
                 this.dom.firstChild.style.whiteSpace = "pre-wrap";
                 this.dom.firstChild.style.wordWrap = "break-word";
         };
-        // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-        // lesser of the two evils to be ignoring "\n"s inside the text.
         if (this.horizontalAlignment == "justify")
             this.dom.firstChild.style.whiteSpace = "normal";
     });
     this.horizontalAlignmentChanged.connect(this, function(newVal) {
         this.dom.style.textAlign = newVal;
-        // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-        // lesser of the two evils to be ignoring "\n"s inside the text.
         if (newVal == "justify")
             this.dom.firstChild.style.whiteSpace = "normal";
     });
@@ -163,8 +157,6 @@ registerQmlType({
     }
 
     this.$drawItem = function(c) {
-        //descr("draw text", this, ["x", "y", "text",
-        //                          "implicitWidth", "implicitHeight"]);
         c.save();
         c.font = fontCss(this.font);
         c.fillStyle = this.color;
