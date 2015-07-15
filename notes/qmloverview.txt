@@ -1,0 +1,104 @@
+ Controls
+---------
+
+Action                            Abstract user interface action that can be bound to items
+ApplicationWindow                 Provides a top-level application window
+BusyIndicator                     A busy indicator
+Button                            A push button with a text label
+Calendar                          Provides a way to select dates from a calendar
+CheckBox                          A checkbox with a text label
+ComboBox                          Provides a drop-down list functionality
+ExclusiveGroup                    Way to declare several checkable controls as mutually exclusive
+GroupBox                          Group box frame with a title
+Label                             A text label
+Menu                              Provides a menu component for use as a context menu, popup menu, or as part of a menu bar
+MenuBar                           Provides a horizontal menu bar
+MenuItem                          Item to add in a menu or a menu bar
+MenuSeparator                     Separator for items inside a menu
+ProgressBar                       A progress indicator
+RadioButton                       A radio button with a text label
+ScrollView                        Provides a scrolling view within another Item
+Slider                            Provides a vertical or horizontal slider control
+SpinBox                           Provides a spin box control
+SplitView                         Lays out items with a draggable splitter between each item
+Stack                             Provides attached properties for items pushed onto a StackView
+StackView                         Provides a stack-based navigation model
+StackViewDelegate                 A delegate used by StackView for loading transitions
+StatusBar                         Contains status information in your app
+Switch                            A switch
+Tab                               Represents the content of a tab in a TabView
+TabView                           A control that allows the user to select one of multiple stacked items
+TableView                         Provides a list view with scroll bars, styling and header sections
+TableViewColumn                   Used to define columns in a TableView or in a TreeView
+TextArea                          Displays multiple lines of editable formatted text
+TextField                         Displays a single line of editable plain text
+ToolBar                           Contains ToolButton and related controls
+ToolButton                        Provides a button type that is typically used within a ToolBar
+TreeView                          Provides a tree view with scroll bars, styling and header sections
+
+
+Dialogs
+-------
+
+ColorDialog                       Dialog component for choosing a color
+Dialog                            A generic QtQuick dialog wrapper with standard buttons
+FileDialog                        Dialog component for choosing files from a local filesystem
+FontDialog                        Dialog component for choosing a font
+MessageDialog                     Dialog component for displaying popup messages
+
+
+Layouts
+-------
+
+ColumnLayout                      Identical to GridLayout, but having only one column
+GridLayout                        Provides a way of dynamically arranging items in a grid
+Layout                            Provides attached properties for items pushed onto a GridLayout, RowLayout or ColumnLayout
+RowLayout                         Identical to GridLayout, but having only one row
+
+
+Particles
+---------
+
+Affector                          Applies alterations to the attributes of logical particles at any point in their lifetime
+Age                               For altering particle ages
+AngleDirection                    For specifying a direction that varies in angle
+Attractor                         For attracting particles towards a specific point
+CumulativeDirection               For specifying a direction made of other directions
+CustomParticle                    For specifying shaders to paint particles
+Direction                         For specifying a vector space
+EllipseShape                      Represents an ellipse to other particle system elements
+Emitter                           Emits logical particles
+Friction                          For applying friction proportional to the particle's current velocity
+Gravity                           For applying acceleration in an angle
+GroupGoal                         For changing the state of a group of a particle
+ImageParticle                     For visualizing logical particles using an image
+ItemParticle                      For specifying a delegate to paint particles
+LineShape                         Represents a line for affectors and emitters
+MaskShape                         For representing an image as a shape to affectors and emitters
+Particle                          Represents particles manipulated by emitters and affectors
+ParticleGroup                     For setting attributes on a logical particle group
+ParticlePainter                   For specifying how to paint particles
+ParticleSystem                    A system which includes particle painter, emitter, and affector types
+PointDirection                    For specifying a direction that varies in x and y components
+RectangleShape                    For specifying an area for affectors and emitter
+Shape                             For specifying an area for affectors and emitters
+SpriteGoal                        For changing the state of a sprite particle
+TargetDirection                   For specifying a direction towards the target point
+TrailEmitter                      Emits logical particles from other logical particles
+Turbulence                        Provides fluid-like forces from a noise image
+Wander                            For applying random particle trajectory
+
+
+Window
+------
+
+CloseEvent                        Notification that a Window is about to be closed
+Screen                            Attached object provides information about the Screen an Item or Window is displayed on
+Window                            Creates a new top-level window
+
+
+XML
+---
+
+XmlListModel                      For specifying a read-only model using XPath expressions
+XmlRole                           For specifying a role to an XmlListModel

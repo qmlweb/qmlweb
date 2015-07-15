@@ -1,0 +1,128 @@
+AnimatedImage                 Y   Plays animations stored as a series of images
+Animation                     Y   Is the base of all QML animations
+Behavior                      Y   Defines a default animation for a property change
+BorderImage                   Y   Paints a border based on an image
+Column                        Y   Positions its children in a column
+DoubleValidator               Y   Defines a validator for non-integer numbers
+Flow                          Y   Positions its children side by side, wrapping as necessary
+FontLoader                    Y   Allows fonts to be loaded by name or URL
+Grid                          Y   Positions its children in grid formation
+Image                         Y   Displays an image
+IntValidator                  Y   Defines a validator for integer values
+Item                          Y   A basic visual QML type
+ListView                      Y   Provides a list view of items provided by a model
+MouseArea                     Y   Enables simple mouse handling
+NumberAnimation               Y   Animates changes in qreal-type values
+ParallelAnimation             Y   Enables animations to be run in parallel
+PropertyAnimation             Y   Animates changes in property values
+Rectangle                     Y   Paints a filled rectangle with an optional border
+RegExpValidator               Y   Provides a string validator
+Repeater                      Y   Instantiates a number of Item-based components using a provided model
+Rotation                      Y   Provides a way to rotate an Item
+Row                           Y   Positions its children in a row
+Scale                         Y   Provides a way to scale an Item
+SequentialAnimation           Y   Allows animations to be run sequentially
+State                         Y   Defines configurations of objects and properties
+SystemPalette                 Y   Provides access to the Qt palettes
+Text                          Y   Specifies how to add formatted text to a scene
+TextInput                     Y   Displays an editable line of text
+Transition                    Y   Defines animated transitions that occur on state changes
+Translate                     Y   Provides a way to move an Item without changing its x or y properties
+
+
+Accessible                    N   Enables accessibility of QML items
+AnchorAnimation               N   Animates changes in anchor values
+AnchorChanges                 N   Specifies how to change the anchors of an item in a state
+AnimatedSprite                N   Draws a sprite animation
+AnimationController           N   Enables manual control of animations
+Animator                      N   Is the base of all QML animators
+Canvas                        N   Provides a 2D canvas item enabling drawing via JavaScript
+CanvasGradient                N   Provides an opaque CanvasGradient interface
+CanvasImageData               N   Contains image pixel data in RGBA order
+CanvasPixelArray              N   Provides ordered and indexed access to the components of each pixel in image data
+ColorAnimation                N   Animates changes in color values
+Context2D                     N   Provides 2D context for shapes on a Canvas item
+Drag                          N   For specifying drag and drop events for moved Items
+DragEvent                     N   Provides information about a drag event
+DropArea                      N   For specifying drag and drop handling in an area
+Flickable                     N   Provides a surface that can be "flicked"
+Flipable                      N   Provides a surface that can be flipped
+FocusScope                    N   Explicitly creates a focus scope
+FontMetrics                   N   Provides metrics for a given font
+Gradient                      N   Defines a gradient fill
+GradientStop                  N   Defines the color at a position in a Gradient
+GridMesh                      N   Defines a mesh with vertices arranged in a grid
+GridView                      N   For specifying a grid view of items provided by a model
+ItemGrabResult                N   Contains the results from a call to Item::grabToImage()
+KeyEvent                      N   Provides information about a key event
+KeyNavigation                 N   Supports key navigation by arrow keys
+Keys                          N   Provides key handling to Items
+LayoutMirroring               N   Property used to mirror layout behavior
+Loader                        N   Allows dynamic loading of a subtree from a URL or Component
+Matrix4x4                     N   Provides a way to apply a 4x4 tranformation matrix to an Item
+MouseEvent                    N   Provides information about a mouse event
+MultiPointTouchArea           N   Enables handling of multiple touch points
+OpacityAnimator               N   Type animates the opacity of an Item
+OpenGLInfo                    N   Provides information about the used OpenGL version
+ParentAnimation               N   Animates changes in parent values
+ParentChange                  N   Specifies how to reparent an Item in a state change
+Path                          N   Defines a path for use by PathView
+PathAnimation                 N   Animates an item along a path
+PathArc                       N   Defines an arc with the given radius
+PathAttribute                 N   Specifies how to set an attribute at a given position in a Path
+PathCubic                     N   Defines a cubic Bezier curve with two control points
+PathCurve                     N   Defines a point on a Catmull-Rom curve
+PathElement                   N   The base path type
+PathInterpolator              N   Specifies how to manually animate along a path
+PathLine                      N   Defines a straight line
+PathPercent                   N   Manipulates the way a path is interpreted
+PathQuad                      N   Defines a quadratic Bezier curve with a control point
+PathSvg                       N   Defines a path using an SVG path data string
+PathView                      N   Lays out model-provided items on a path
+PauseAnimation                N   Provides a pause for an animation
+PinchArea                     N   Enables simple pinch gesture handling
+PinchEvent                    N   For specifying information about a pinch event
+Positioner                    N   Provides attached properties that contain details on where an item exists in a positioner
+PropertyAction                N   Specifies immediate property changes during animation
+PropertyChanges               N   Describes new property bindings or values for a state
+RotationAnimation             N   Animates changes in rotation values
+RotationAnimator              N   Type animates the rotation of an Item
+ScaleAnimator                 N   Type animates the scale factor of an Item
+ScriptAction                  N   Defines scripts to be run during an animation
+ShaderEffect                  N   Applies custom shaders to a rectangle
+ShaderEffectSource            N   Renders a Qt Quick item into a texture and displays it
+Shortcut                      N   Provides keyboard shortcuts
+SmoothedAnimation             N   Allows a property to smoothly track a value
+SpringAnimation               N   Allows a property to track a value in a spring-like motion
+Sprite                        N   Specifies sprite animations
+SpriteSequence                N   Draws a sprite animation
+StateChangeScript             N   Specifies how to run a script in a state
+StateGroup                    N   Provides built-in state support for non-Item types
+TextEdit                      N   Displays multiple lines of editable formatted text
+TextMetrics                   N   Provides metrics for a given font and text
+TouchPoint                    N   Describes a touch point in a MultiPointTouchArea
+Transform                     N   For specifying advanced transformations on Items
+UniformAnimator               N   Type animates a uniform of a ShaderEffect
+Vector3dAnimation             N   Animates changes in QVector3d values
+ViewTransition                N   Specifies items under transition in a view
+WheelEvent                    N   Provides information about a mouse wheel event
+XAnimator                     N   Type animates the x position of an Item
+YAnimator                     N   Type animates the y position of an Item
+
+
+Checkbox                      U   no description
+FastBlur                      U   no description
+Font                          U   no description
+GeoLocation                   U   no description
+ListElement                   U   no description
+ListModel                     U   no description
+RestModel                     U   no description
+Settings                      U   no description
+TextArea                      U   no description
+Timer                         U   no description
+Video                         U   no description
+
+
+Implemented         30
+Not Implemented     78
+Unknown             11

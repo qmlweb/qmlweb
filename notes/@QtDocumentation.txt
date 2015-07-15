@@ -1,0 +1,35 @@
+anchors group
+-------------
+
+    anchors.top : AnchorLine
+    anchors.bottom : AnchorLine
+    anchors.left : AnchorLine
+    anchors.right : AnchorLine
+    anchors.horizontalCenter : AnchorLine
+    anchors.verticalCenter : AnchorLine
+    anchors.baseline : AnchorLine
+    anchors.fill : Item
+    anchors.centerIn : Item
+    anchors.margins : real
+    anchors.topMargin : real
+    anchors.bottomMargin : real
+    anchors.leftMargin : real
+    anchors.rightMargin : real
+    anchors.horizontalCenterOffset : real
+    anchors.verticalCenterOffset : real
+    anchors.baselineOffset : real
+    anchors.alignWhenCentered : bool
+
+animation types
+---------------
+
+    Animation (base type)
+    AnchorAnimation
+    ParallelAnimation
+    ParentAnimation
+    PathAnimation
+    PauseAnimation
+    PropertyAction
+    PropertyAnimation
+    ScriptAction
+    SequentialAnimation
