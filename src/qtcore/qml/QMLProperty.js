@@ -1,7 +1,9 @@
 function QMLProperty(type, obj, name) {
     this.obj = obj;
     this.name = name;
-    this.changed = Signal([], {obj:obj});
+    this.changed = Signal([], {
+        obj: obj
+    });
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
@@ -16,7 +18,7 @@ function QMLProperty(type, obj, name) {
 
 // Updater recalculates the value of a property if one of the
 // dependencies changed
-QMLProperty.prototype.update = function() {
+QMLProperty.prototype.update = function () {
     if (!this.binding)
         return;
 
@@ -40,7 +42,7 @@ QMLProperty.prototype.update = function() {
 }
 
 // Define getter
-QMLProperty.prototype.get = function() {
+QMLProperty.prototype.get = function () {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
@@ -50,7 +52,7 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
+QMLProperty.prototype.set = function (newVal, fromAnimation, objectScope, componentScope) {
     var i,
         oldVal = this.val;
 
@@ -80,12 +82,24 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
     }
 
     if (constructors[this.type] == QMLList) {
-        this.val = QMLList({ object: newVal, parent: this.obj, context: componentScope });
+        this.val = QMLList({
+            object: newVal,
+            parent: this.obj,
+            context: componentScope
+        });
     } else if (newVal instanceof QMLMetaElement) {
         if (constructors[newVal.$class] == QMLComponent || constructors[this.type] == QMLComponent)
-            this.val = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
+            this.val = new QMLComponent({
+                object: newVal,
+                parent: this.obj,
+                context: componentScope
+            });
         else
-            this.val = construct({ object: newVal, parent: this.obj, context: componentScope });
+            this.val = construct({
+                object: newVal,
+                parent: this.obj,
+                context: componentScope
+            });
     } else if (newVal instanceof Object || !newVal) {
         this.val = newVal;
     } else {
@@ -106,5 +120,3 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
         this.changed(this.val, oldVal, this.name);
     }
 }
-
-

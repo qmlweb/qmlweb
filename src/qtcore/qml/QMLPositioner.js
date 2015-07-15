@@ -9,7 +9,7 @@ function QMLPositioner(meta) {
     this.spacing = 0;
 }
 
-QMLPositioner.slotChildrenChanged = function() {
+QMLPositioner.slotChildrenChanged = function () {
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (!child.widthChanged.isConnected(this, this.layoutChildren))
@@ -22,4 +22,3 @@ QMLPositioner.slotChildrenChanged = function() {
             child.opacityChanged.connect(this, this.layoutChildren);
     }
 }
-

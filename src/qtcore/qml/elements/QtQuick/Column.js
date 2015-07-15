@@ -2,7 +2,7 @@ function QMLColumn(meta) {
     QMLPositioner.call(this, meta);
 }
 
-QMLColumn.prototype.layoutChildren = function() {
+QMLColumn.prototype.layoutChildren = function () {
     var curPos = 0,
         maxWidth = 0;
     for (var i = 0; i < this.children.length; i++) {
@@ -19,8 +19,8 @@ QMLColumn.prototype.layoutChildren = function() {
 }
 
 registerQmlType({
-  module: 'QtQuick',
-  name:   'Column',
-  versions: /.*/,
-  constructor: QMLColumn
+    module: 'QtQuick',
+    name: 'Column',
+    versions: /.*/,
+    constructor: QMLColumn
 });

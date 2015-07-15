@@ -2,4 +2,3 @@
 function QMLColor(val) {
     return val;
 }
-

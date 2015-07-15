@@ -71,24 +71,25 @@ function DEFNODE(type, props, methods, base) {
     if (type) {
         ctor.prototype.TYPE = ctor.TYPE = type;
     }
-    if (methods) for (i in methods) if (methods.hasOwnProperty(i)) {
-        if (/^\$/.test(i)) {
-            ctor[i.substr(1)] = methods[i];
-        } else {
-            ctor.prototype[i] = methods[i];
-        }
-    }
-    ctor.DEFMETHOD = function(name, method) {
+    if (methods)
+        for (i in methods)
+            if (methods.hasOwnProperty(i)) {
+                if (/^\$/.test(i)) {
+                    ctor[i.substr(1)] = methods[i];
+                } else {
+                    ctor.prototype[i] = methods[i];
+                }
+            }
+    ctor.DEFMETHOD = function (name, method) {
         this.prototype[name] = method;
     };
     return ctor;
 };
 
-var AST_Token = DEFNODE("Token", "type value line col pos endline endcol endpos nlb comments_before file", {
-}, null);
+var AST_Token = DEFNODE("Token", "type value line col pos endline endcol endpos nlb comments_before file", {}, null);
 
 var AST_Node = DEFNODE("Node", "start end", {
-    clone: function() {
+    clone: function () {
         return new this.CTOR(this);
     },
     $documentation: "Base class of all AST nodes",
@@ -96,16 +97,16 @@ var AST_Node = DEFNODE("Node", "start end", {
         start: "[AST_Token] The first token of this node",
         end: "[AST_Token] The last token of this node"
     },
-    _walk: function(visitor) {
+    _walk: function (visitor) {
         return visitor._visit(this);
     },
-    walk: function(visitor) {
+    walk: function (visitor) {
         return this._walk(visitor); // not sure the indirection will be any help
     }
 }, null);
 
 AST_Node.warn_function = null;
-AST_Node.warn = function(txt, props) {
+AST_Node.warn = function (txt, props) {
     if (AST_Node.warn_function)
         AST_Node.warn_function(string_template(txt, props));
 };
@@ -134,8 +135,8 @@ var AST_SimpleStatement = DEFNODE("SimpleStatement", "body", {
     $propdoc: {
         body: "[AST_Node] an expression node (should not be instanceof AST_Statement)"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.body._walk(visitor);
         });
     }
@@ -144,8 +145,7 @@ var AST_SimpleStatement = DEFNODE("SimpleStatement", "body", {
 function walk_body(node, visitor) {
     if (node.body instanceof AST_Statement) {
         node.body._walk(visitor);
-    }
-    else node.body.forEach(function(stat){
+    } else node.body.forEach(function (stat) {
         stat._walk(visitor);
     });
 };
@@ -155,8 +155,8 @@ var AST_Block = DEFNODE("Block", "body", {
     $propdoc: {
         body: "[AST_Statement*] an array of statements"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             walk_body(this, visitor);
         });
     }
@@ -168,7 +168,7 @@ var AST_BlockStatement = DEFNODE("BlockStatement", null, {
 
 var AST_EmptyStatement = DEFNODE("EmptyStatement", null, {
     $documentation: "The empty statement (empty block or simply a semicolon)",
-    _walk: function(visitor) {
+    _walk: function (visitor) {
         return visitor._visit(this);
     }
 }, AST_Statement);
@@ -178,8 +178,8 @@ var AST_StatementWithBody = DEFNODE("StatementWithBody", "body", {
     $propdoc: {
         body: "[AST_Statement] the body; this should always be present, even if it's an AST_EmptyStatement"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.body._walk(visitor);
         });
     }
@@ -190,8 +190,8 @@ var AST_LabeledStatement = DEFNODE("LabeledStatement", "label", {
     $propdoc: {
         label: "[AST_Label] a label definition"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.label._walk(visitor);
             this.body._walk(visitor);
         });
@@ -211,8 +211,8 @@ var AST_DWLoop = DEFNODE("DWLoop", "condition", {
 
 var AST_Do = DEFNODE("Do", null, {
     $documentation: "A `do` statement",
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.body._walk(visitor);
             this.condition._walk(visitor);
         });
@@ -221,8 +221,8 @@ var AST_Do = DEFNODE("Do", null, {
 
 var AST_While = DEFNODE("While", null, {
     $documentation: "A `while` statement",
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.condition._walk(visitor);
             this.body._walk(visitor);
         });
@@ -236,8 +236,8 @@ var AST_For = DEFNODE("For", "init condition step", {
         condition: "[AST_Node?] the `for` termination clause, or null if empty",
         step: "[AST_Node?] the `for` update clause, or null if empty"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             if (this.init) this.init._walk(visitor);
             if (this.condition) this.condition._walk(visitor);
             if (this.step) this.step._walk(visitor);
@@ -253,8 +253,8 @@ var AST_ForIn = DEFNODE("ForIn", "init name object", {
         name: "[AST_SymbolRef?] the loop variable, only if `init` is AST_Var",
         object: "[AST_Node] the object that we're looping through"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.init._walk(visitor);
             this.object._walk(visitor);
             this.body._walk(visitor);
@@ -267,8 +267,8 @@ var AST_With = DEFNODE("With", "expression", {
     $propdoc: {
         expression: "[AST_Node] the `with` expression"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
             this.body._walk(visitor);
         });
@@ -296,12 +296,12 @@ var AST_Toplevel = DEFNODE("Toplevel", "globals", {
     $propdoc: {
         globals: "[Object/S] a map of name -> SymbolDef for all undeclared names",
     },
-    wrap_enclose: function(arg_parameter_pairs) {
+    wrap_enclose: function (arg_parameter_pairs) {
         var self = this;
         var args = [];
         var parameters = [];
 
-        arg_parameter_pairs.forEach(function(pair) {
+        arg_parameter_pairs.forEach(function (pair) {
             var splitAt = pair.lastIndexOf(":");
 
             args.push(pair.substr(0, splitAt));
@@ -310,41 +310,47 @@ var AST_Toplevel = DEFNODE("Toplevel", "globals", {
 
         var wrapped_tl = "(function(" + parameters.join(",") + "){ '$ORIG'; })(" + args.join(",") + ")";
         wrapped_tl = parse(wrapped_tl);
-        wrapped_tl = wrapped_tl.transform(new TreeTransformer(function before(node){
+        wrapped_tl = wrapped_tl.transform(new TreeTransformer(function before(node) {
             if (node instanceof AST_Directive && node.value == "$ORIG") {
                 return MAP.splice(self.body);
             }
         }));
         return wrapped_tl;
     },
-    wrap_commonjs: function(name, export_all) {
+    wrap_commonjs: function (name, export_all) {
         var self = this;
         var to_export = [];
         if (export_all) {
             self.figure_out_scope();
-            self.walk(new TreeWalker(function(node){
+            self.walk(new TreeWalker(function (node) {
                 if (node instanceof AST_SymbolDeclaration && node.definition().global) {
-                    if (!find_if(function(n){ return n.name == node.name }, to_export))
+                    if (!find_if(function (n) {
+                            return n.name == node.name
+                        }, to_export))
                         to_export.push(node);
                 }
             }));
         }
         var wrapped_tl = "(function(exports, global){ global['" + name + "'] = exports; '$ORIG'; '$EXPORTS'; }({}, (function(){return this}())))";
         wrapped_tl = parse(wrapped_tl);
-        wrapped_tl = wrapped_tl.transform(new TreeTransformer(function before(node){
+        wrapped_tl = wrapped_tl.transform(new TreeTransformer(function before(node) {
             if (node instanceof AST_SimpleStatement) {
                 node = node.body;
                 if (node instanceof AST_String) switch (node.getValue()) {
-                  case "$ORIG":
+                case "$ORIG":
                     return MAP.splice(self.body);
-                  case "$EXPORTS":
+                case "$EXPORTS":
                     var body = [];
-                    to_export.forEach(function(sym){
+                    to_export.forEach(function (sym) {
                         body.push(new AST_SimpleStatement({
                             body: new AST_Assign({
                                 left: new AST_Sub({
-                                    expression: new AST_SymbolRef({ name: "exports" }),
-                                    property: new AST_String({ value: sym.name }),
+                                    expression: new AST_SymbolRef({
+                                        name: "exports"
+                                    }),
+                                    property: new AST_String({
+                                        value: sym.name
+                                    }),
                                 }),
                                 operator: "=",
                                 right: new AST_SymbolRef(sym),
@@ -366,10 +372,10 @@ var AST_Lambda = DEFNODE("Lambda", "name argnames uses_arguments", {
         argnames: "[AST_SymbolFunarg*] array of function arguments",
         uses_arguments: "[boolean/S] tells whether this function accesses the arguments array"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             if (this.name) this.name._walk(visitor);
-            this.argnames.forEach(function(arg){
+            this.argnames.forEach(function (arg) {
                 arg._walk(visitor);
             });
             walk_body(this, visitor);
@@ -400,8 +406,8 @@ var AST_Exit = DEFNODE("Exit", "value", {
     $propdoc: {
         value: "[AST_Node?] the value returned or thrown by this statement; could be null for AST_Return"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, this.value && function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, this.value && function () {
             this.value._walk(visitor);
         });
     }
@@ -420,8 +426,8 @@ var AST_LoopControl = DEFNODE("LoopControl", "label", {
     $propdoc: {
         label: "[AST_LabelRef?] the label, or null if none",
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, this.label && function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, this.label && function () {
             this.label._walk(visitor);
         });
     }
@@ -443,8 +449,8 @@ var AST_If = DEFNODE("If", "condition alternative", {
         condition: "[AST_Node] the `if` condition",
         alternative: "[AST_Statement?] the `else` part, or null if not present"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.condition._walk(visitor);
             this.body._walk(visitor);
             if (this.alternative) this.alternative._walk(visitor);
@@ -459,8 +465,8 @@ var AST_Switch = DEFNODE("Switch", "expression", {
     $propdoc: {
         expression: "[AST_Node] the `switch` “discriminant”"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
             walk_body(this, visitor);
         });
@@ -480,8 +486,8 @@ var AST_Case = DEFNODE("Case", "expression", {
     $propdoc: {
         expression: "[AST_Node] the `case` expression"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
             walk_body(this, visitor);
         });
@@ -496,8 +502,8 @@ var AST_Try = DEFNODE("Try", "bcatch bfinally", {
         bcatch: "[AST_Catch?] the catch block, or null if not present",
         bfinally: "[AST_Finally?] the finally block, or null if not present"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             walk_body(this, visitor);
             if (this.bcatch) this.bcatch._walk(visitor);
             if (this.bfinally) this.bfinally._walk(visitor);
@@ -510,8 +516,8 @@ var AST_Catch = DEFNODE("Catch", "argname", {
     $propdoc: {
         argname: "[AST_SymbolCatch] symbol for the exception"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.argname._walk(visitor);
             walk_body(this, visitor);
         });
@@ -529,9 +535,9 @@ var AST_Definitions = DEFNODE("Definitions", "definitions", {
     $propdoc: {
         definitions: "[AST_VarDef*] array of variable definitions"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
-            this.definitions.forEach(function(def){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
+            this.definitions.forEach(function (def) {
                 def._walk(visitor);
             });
         });
@@ -552,8 +558,8 @@ var AST_VarDef = DEFNODE("VarDef", "name value", {
         name: "[AST_SymbolVar|AST_SymbolConst] name of the variable",
         value: "[AST_Node?] initializer, or null of there's no initializer"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.name._walk(visitor);
             if (this.value) this.value._walk(visitor);
         });
@@ -568,10 +574,10 @@ var AST_Call = DEFNODE("Call", "expression args", {
         expression: "[AST_Node] expression to invoke as function",
         args: "[AST_Node*] array of arguments"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
-            this.args.forEach(function(arg){
+            this.args.forEach(function (arg) {
                 arg._walk(visitor);
             });
         });
@@ -588,13 +594,13 @@ var AST_Seq = DEFNODE("Seq", "car cdr", {
         car: "[AST_Node] first element in sequence",
         cdr: "[AST_Node] second element in sequence"
     },
-    $cons: function(x, y) {
+    $cons: function (x, y) {
         var seq = new AST_Seq(x);
         seq.car = x;
         seq.cdr = y;
         return seq;
     },
-    $from_array: function(array) {
+    $from_array: function (array) {
         if (array.length == 0) return null;
         if (array.length == 1) return array[0].clone();
         var list = null;
@@ -611,8 +617,9 @@ var AST_Seq = DEFNODE("Seq", "car cdr", {
         }
         return list;
     },
-    to_array: function() {
-        var p = this, a = [];
+    to_array: function () {
+        var p = this,
+            a = [];
         while (p) {
             a.push(p.car);
             if (p.cdr && !(p.cdr instanceof AST_Seq)) {
@@ -623,7 +630,7 @@ var AST_Seq = DEFNODE("Seq", "car cdr", {
         }
         return a;
     },
-    add: function(node) {
+    add: function (node) {
         var p = this;
         while (p) {
             if (!(p.cdr instanceof AST_Seq)) {
@@ -633,8 +640,8 @@ var AST_Seq = DEFNODE("Seq", "car cdr", {
             p = p.cdr;
         }
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.car._walk(visitor);
             if (this.cdr) this.cdr._walk(visitor);
         });
@@ -651,8 +658,8 @@ var AST_PropAccess = DEFNODE("PropAccess", "expression property", {
 
 var AST_Dot = DEFNODE("Dot", null, {
     $documentation: "A dotted property access expression",
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
         });
     }
@@ -660,8 +667,8 @@ var AST_Dot = DEFNODE("Dot", null, {
 
 var AST_Sub = DEFNODE("Sub", null, {
     $documentation: "Index-style property access, i.e. `a[\"foo\"]`",
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
             this.property._walk(visitor);
         });
@@ -674,8 +681,8 @@ var AST_Unary = DEFNODE("Unary", "operator expression", {
         operator: "[string] the operator",
         expression: "[AST_Node] expression that this unary operator applies to"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.expression._walk(visitor);
         });
     }
@@ -696,8 +703,8 @@ var AST_Binary = DEFNODE("Binary", "left operator right", {
         operator: "[string] the operator",
         right: "[AST_Node] right-hand side expression"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.left._walk(visitor);
             this.right._walk(visitor);
         });
@@ -711,8 +718,8 @@ var AST_Conditional = DEFNODE("Conditional", "condition consequent alternative",
         consequent: "[AST_Node]",
         alternative: "[AST_Node]"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.condition._walk(visitor);
             this.consequent._walk(visitor);
             this.alternative._walk(visitor);
@@ -731,9 +738,9 @@ var AST_Array = DEFNODE("Array", "elements", {
     $propdoc: {
         elements: "[AST_Node*] array of elements"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
-            this.elements.forEach(function(el){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
+            this.elements.forEach(function (el) {
                 el._walk(visitor);
             });
         });
@@ -745,9 +752,9 @@ var AST_Object = DEFNODE("Object", "properties", {
     $propdoc: {
         properties: "[AST_ObjectProperty*] array of properties"
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
-            this.properties.forEach(function(prop){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
+            this.properties.forEach(function (prop) {
                 prop._walk(visitor);
             });
         });
@@ -760,8 +767,8 @@ var AST_ObjectProperty = DEFNODE("ObjectProperty", "key value", {
         key: "[string] the property name converted to a string for ObjectKeyVal.  For setters and getters this is an arbitrary AST_Node.",
         value: "[AST_Node] property value.  For setters and getters this is an AST_Function."
     },
-    _walk: function(visitor) {
-        return visitor._visit(this, function(){
+    _walk: function (visitor) {
+        return visitor._visit(this, function () {
             this.value._walk(visitor);
         });
     }
@@ -831,7 +838,7 @@ var AST_Label = DEFNODE("Label", "references", {
     $propdoc: {
         references: "[AST_LoopControl*] a list of nodes referring to this label"
     },
-    initialize: function() {
+    initialize: function () {
         this.references = [];
         this.thedef = this;
     }
@@ -851,7 +858,7 @@ var AST_This = DEFNODE("This", null, {
 
 var AST_Constant = DEFNODE("Constant", null, {
     $documentation: "Base class for all constants",
-    getValue: function() {
+    getValue: function () {
         return this.value;
     }
 });
@@ -889,22 +896,22 @@ var AST_Null = DEFNODE("Null", null, {
 
 var AST_NaN = DEFNODE("NaN", null, {
     $documentation: "The impossible value",
-    value: 0/0
+    value: 0 / 0
 }, AST_Atom);
 
 var AST_Undefined = DEFNODE("Undefined", null, {
     $documentation: "The `undefined` value",
-    value: (function(){}())
+    value: (function () {}())
 }, AST_Atom);
 
 var AST_Hole = DEFNODE("Hole", null, {
     $documentation: "A hole in an array",
-    value: (function(){}())
+    value: (function () {}())
 }, AST_Atom);
 
 var AST_Infinity = DEFNODE("Infinity", null, {
     $documentation: "The `Infinity` value",
-    value: 1/0
+    value: 1 / 0
 }, AST_Atom);
 
 var AST_Boolean = DEFNODE("Boolean", null, {
@@ -928,9 +935,9 @@ function TreeWalker(callback) {
     this.stack = [];
 };
 TreeWalker.prototype = {
-    _visit: function(node, descend) {
+    _visit: function (node, descend) {
         this.stack.push(node);
-        var ret = this.visit(node, descend ? function(){
+        var ret = this.visit(node, descend ? function () {
             descend.call(node);
         } : noop);
         if (!ret && descend) {
@@ -939,39 +946,39 @@ TreeWalker.prototype = {
         this.stack.pop();
         return ret;
     },
-    parent: function(n) {
+    parent: function (n) {
         return this.stack[this.stack.length - 2 - (n || 0)];
     },
     push: function (node) {
         this.stack.push(node);
     },
-    pop: function() {
+    pop: function () {
         return this.stack.pop();
     },
-    self: function() {
+    self: function () {
         return this.stack[this.stack.length - 1];
     },
-    find_parent: function(type) {
+    find_parent: function (type) {
         var stack = this.stack;
         for (var i = stack.length; --i >= 0;) {
             var x = stack[i];
             if (x instanceof type) return x;
         }
     },
-    has_directive: function(type) {
+    has_directive: function (type) {
         return this.find_parent(AST_Scope).has_directive(type);
     },
-    in_boolean_context: function() {
+    in_boolean_context: function () {
         var stack = this.stack;
-        var i = stack.length, self = stack[--i];
+        var i = stack.length,
+            self = stack[--i];
         while (i > 0) {
             var p = stack[--i];
-            if ((p instanceof AST_If           && p.condition === self) ||
-                (p instanceof AST_Conditional  && p.condition === self) ||
-                (p instanceof AST_DWLoop       && p.condition === self) ||
-                (p instanceof AST_For          && p.condition === self) ||
-                (p instanceof AST_UnaryPrefix  && p.operator == "!" && p.expression === self))
-            {
+            if ((p instanceof AST_If && p.condition === self) ||
+                (p instanceof AST_Conditional && p.condition === self) ||
+                (p instanceof AST_DWLoop && p.condition === self) ||
+                (p instanceof AST_For && p.condition === self) ||
+                (p instanceof AST_UnaryPrefix && p.operator == "!" && p.expression === self)) {
                 return true;
             }
             if (!(p instanceof AST_Binary && (p.operator == "&&" || p.operator == "||")))
@@ -979,17 +986,19 @@ TreeWalker.prototype = {
             self = p;
         }
     },
-    loopcontrol_target: function(label) {
+    loopcontrol_target: function (label) {
         var stack = this.stack;
-        if (label) for (var i = stack.length; --i >= 0;) {
-            var x = stack[i];
-            if (x instanceof AST_LabeledStatement && x.label.name == label.name) {
-                return x.body;
-            }
-        } else for (var i = stack.length; --i >= 0;) {
-            var x = stack[i];
-            if (x instanceof AST_Switch || x instanceof AST_IterationStatement)
-                return x;
-        }
+        if (label)
+            for (var i = stack.length; --i >= 0;) {
+                var x = stack[i];
+                if (x instanceof AST_LabeledStatement && x.label.name == label.name) {
+                    return x.body;
+                }
+            } else
+                for (var i = stack.length; --i >= 0;) {
+                    var x = stack[i];
+                    if (x instanceof AST_Switch || x instanceof AST_IterationStatement)
+                        return x;
+                }
     }
 };

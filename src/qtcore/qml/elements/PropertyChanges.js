@@ -9,7 +9,7 @@ function QMLPropertyChanges(meta) {
     this.restoreEntryValues = true;
     this.$actions = [];
 
-    this.$setCustomData = function(propName, value) {
+    this.$setCustomData = function (propName, value) {
         this.$actions.push({
             property: propName,
             value: value

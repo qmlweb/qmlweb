@@ -1,16 +1,16 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'RegExpValidator',
-  versions: /.*/,
-  constructor: function QMLRegExpValidator(meta) {
-    QMLItem.call(this, meta);
+    module: 'QtQuick',
+    name: 'RegExpValidator',
+    versions: /.*/,
+    constructor: function QMLRegExpValidator(meta) {
+        QMLItem.call(this, meta);
 
-    createSimpleProperty("var", this, "regExp");
+        createSimpleProperty("var", this, "regExp");
 
-    this.validate = (function(string) {
-      if (typeof this.regExp == 'undefined' || this.regExp == null)
-        return true;
-      return this.regExp.test(string);
-    }).bind(this);
-  }
+        this.validate = (function (string) {
+            if (typeof this.regExp == 'undefined' || this.regExp == null)
+                return true;
+            return this.regExp.test(string);
+        }).bind(this);
+    }
 });

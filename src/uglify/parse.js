@@ -46,8 +46,7 @@
 
 var KEYWORDS = 'break case catch const continue debugger default delete do else finally for function if in instanceof new return switch throw try typeof var void while with';
 var KEYWORDS_ATOM = 'false null true';
-var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile yield'
-    + " " + KEYWORDS_ATOM + " " + KEYWORDS;
+var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile yield' + " " + KEYWORDS_ATOM + " " + KEYWORDS;
 var KEYWORDS_BEFORE_EXPRESSION = 'return new delete throw else case';
 
 KEYWORDS = makePredicate(KEYWORDS);
@@ -128,9 +127,7 @@ var UNICODE = {
 };
 
 function is_letter(code) {
-    return (code >= 97 && code <= 122)
-        || (code >= 65 && code <= 90)
-        || (code >= 0xaa && UNICODE.letter.test(String.fromCharCode(code)));
+    return (code >= 97 && code <= 122) || (code >= 65 && code <= 90) || (code >= 0xaa && UNICODE.letter.test(String.fromCharCode(code)));
 };
 
 function is_digit(code) {
@@ -163,17 +160,12 @@ function is_identifier_start(code) {
 
 function is_identifier_char(ch) {
     var code = ch.charCodeAt(0);
-    return is_identifier_start(code)
-        || is_digit(code)
-        || code == 8204 // \u200c: zero-width non-joiner <ZWNJ>
+    return is_identifier_start(code) || is_digit(code) || code == 8204 // \u200c: zero-width non-joiner <ZWNJ>
         || code == 8205 // \u200d: zero-width joiner <ZWJ> (in my ECMA-262 PDF, this is also 200c)
-        || is_unicode_combining_mark(ch)
-        || is_unicode_connector_punctuation(ch)
-        || is_unicode_digit(code)
-    ;
+        || is_unicode_combining_mark(ch) || is_unicode_connector_punctuation(ch) || is_unicode_digit(code);
 };
 
-function is_identifier_string(str){
+function is_identifier_string(str) {
     return /^[a-z_$][a-z0-9_$]*$/i.test(str);
 };
 
@@ -196,7 +188,7 @@ function JS_Parse_Error(message, filename, line, col, pos) {
     this.stack = new Error().stack;
 };
 
-JS_Parse_Error.prototype.toString = function() {
+JS_Parse_Error.prototype.toString = function () {
     return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n\n" + this.stack;
 };
 
@@ -213,20 +205,22 @@ var EX_EOF = {};
 function tokenizer($TEXT, filename, html5_comments) {
 
     var S = {
-        text            : $TEXT,
-        filename        : filename,
-        pos             : 0,
-        tokpos          : 0,
-        line            : 1,
-        tokline         : 0,
-        col             : 0,
-        tokcol          : 0,
-        newline_before  : false,
-        regex_allowed   : false,
-        comments_before : []
+        text: $TEXT,
+        filename: filename,
+        pos: 0,
+        tokpos: 0,
+        line: 1,
+        tokline: 0,
+        col: 0,
+        tokcol: 0,
+        newline_before: false,
+        regex_allowed: false,
+        comments_before: []
     };
 
-    function peek() { return S.text.charAt(S.pos); };
+    function peek() {
+        return S.text.charAt(S.pos);
+    };
 
     function next(signal_eof, in_string) {
         var ch = S.text.charAt(S.pos++);
@@ -268,22 +262,23 @@ function tokenizer($TEXT, filename, html5_comments) {
     };
 
     var prev_was_dot = false;
+
     function token(type, value, is_comment) {
         S.regex_allowed = ((type == "operator" && !UNARY_POSTFIX(value)) ||
-                           (type == "keyword" && KEYWORDS_BEFORE_EXPRESSION(value)) ||
-                           (type == "punc" && PUNC_BEFORE_EXPRESSION(value)));
+            (type == "keyword" && KEYWORDS_BEFORE_EXPRESSION(value)) ||
+            (type == "punc" && PUNC_BEFORE_EXPRESSION(value)));
         prev_was_dot = (type == "punc" && value == ".");
         var ret = {
-            type    : type,
-            value   : value,
-            line    : S.tokline,
-            col     : S.tokcol,
-            pos     : S.tokpos,
-            endline : S.line,
-            endcol  : S.col,
-            endpos  : S.pos,
-            nlb     : S.newline_before,
-            file    : filename
+            type: type,
+            value: value,
+            line: S.tokline,
+            col: S.tokcol,
+            pos: S.tokpos,
+            endline: S.line,
+            endcol: S.col,
+            endpos: S.pos,
+            nlb: S.newline_before,
+            file: filename
         };
         if (!is_comment) {
             ret.comments_before = S.comments_before;
@@ -304,7 +299,8 @@ function tokenizer($TEXT, filename, html5_comments) {
     };
 
     function read_while(pred) {
-        var ret = "", ch, i = 0;
+        var ret = "",
+            ch, i = 0;
         while ((ch = peek()) && pred(ch, i++))
             ret += next();
         return ret;
@@ -315,19 +311,24 @@ function tokenizer($TEXT, filename, html5_comments) {
     };
 
     function read_num(prefix) {
-        var has_e = false, after_e = false, has_x = false, has_dot = prefix == ".";
-        var num = read_while(function(ch, i){
+        var has_e = false,
+            after_e = false,
+            has_x = false,
+            has_dot = prefix == ".";
+        var num = read_while(function (ch, i) {
             var code = ch.charCodeAt(0);
             switch (code) {
-              case 120: case 88: // xX
+            case 120:
+            case 88: // xX
                 return has_x ? false : (has_x = true);
-              case 101: case 69: // eE
+            case 101:
+            case 69: // eE
                 return has_x ? true : has_e ? false : (has_e = after_e = true);
-              case 45: // -
+            case 45: // -
                 return after_e || (i == 0 && !prefix);
-              case 43: // +
+            case 43: // +
                 return after_e;
-              case (after_e = false, 46): // .
+            case (after_e = false, 46): // .
                 return (!has_dot && !has_x && !has_e) ? (has_dot = true) : false;
             }
             return is_alphanumeric_char(code);
@@ -344,17 +345,27 @@ function tokenizer($TEXT, filename, html5_comments) {
     function read_escaped_char(in_string) {
         var ch = next(true, in_string);
         switch (ch.charCodeAt(0)) {
-          case 110 : return "\n";
-          case 114 : return "\r";
-          case 116 : return "\t";
-          case 98  : return "\b";
-          case 118 : return "\u000b"; // \v
-          case 102 : return "\f";
-          case 48  : return "\0";
-          case 120 : return String.fromCharCode(hex_bytes(2)); // \x
-          case 117 : return String.fromCharCode(hex_bytes(4)); // \u
-          case 10  : return ""; // newline
-          case 13  :            // \r
+        case 110:
+            return "\n";
+        case 114:
+            return "\r";
+        case 116:
+            return "\t";
+        case 98:
+            return "\b";
+        case 118:
+            return "\u000b"; // \v
+        case 102:
+            return "\f";
+        case 48:
+            return "\0";
+        case 120:
+            return String.fromCharCode(hex_bytes(2)); // \x
+        case 117:
+            return String.fromCharCode(hex_bytes(4)); // \u
+        case 10:
+            return ""; // newline
+        case 13: // \r
             if (peek() == "\n") { // DOS newline
                 next(true, in_string);
                 return "";
@@ -374,29 +385,29 @@ function tokenizer($TEXT, filename, html5_comments) {
         return num;
     };
 
-    var read_string = with_eof_error("Unterminated string constant", function(quote_char){
-        var quote = next(), ret = "";
+    var read_string = with_eof_error("Unterminated string constant", function (quote_char) {
+        var quote = next(),
+            ret = "";
         for (;;) {
             var ch = next(true, true);
             if (ch == "\\") {
                 // read OctalEscapeSequence (XXX: deprecated if "strict mode")
                 // https://github.com/mishoo/UglifyJS/issues/178
-                var octal_len = 0, first = null;
-                ch = read_while(function(ch){
+                var octal_len = 0,
+                    first = null;
+                ch = read_while(function (ch) {
                     if (ch >= "0" && ch <= "7") {
                         if (!first) {
                             first = ch;
                             return ++octal_len;
-                        }
-                        else if (first <= "3" && octal_len <= 2) return ++octal_len;
+                        } else if (first <= "3" && octal_len <= 2) return ++octal_len;
                         else if (first >= "4" && octal_len <= 1) return ++octal_len;
                     }
                     return false;
                 });
                 if (octal_len > 0) ch = String.fromCharCode(parseInt(ch, 8));
                 else ch = read_escaped_char(true);
-            }
-            else if (ch == quote) break;
+            } else if (ch == quote) break;
             ret += ch;
         }
         var tok = token("string", ret);
@@ -406,7 +417,8 @@ function tokenizer($TEXT, filename, html5_comments) {
 
     function skip_line_comment(type) {
         var regex_allowed = S.regex_allowed;
-        var i = find("\n"), ret;
+        var i = find("\n"),
+            ret;
         if (i == -1) {
             ret = S.text.substr(S.pos);
             S.pos = S.text.length;
@@ -420,11 +432,12 @@ function tokenizer($TEXT, filename, html5_comments) {
         return next_token();
     };
 
-    var skip_multiline_comment = with_eof_error("Unterminated multiline comment", function(){
+    var skip_multiline_comment = with_eof_error("Unterminated multiline comment", function () {
         var regex_allowed = S.regex_allowed;
         var i = find("*/", true);
         var text = S.text.substring(S.pos, i);
-        var a = text.split("\n"), n = a.length;
+        var a = text.split("\n"),
+            n = a.length;
         // update stream position
         S.pos = i + 2;
         S.line += n - 1;
@@ -439,14 +452,16 @@ function tokenizer($TEXT, filename, html5_comments) {
     });
 
     function read_name() {
-        var backslash = false, name = "", ch, escaped = false, hex;
+        var backslash = false,
+            name = "",
+            ch, escaped = false,
+            hex;
         while ((ch = peek()) != null) {
             if (!backslash) {
                 if (ch == "\\") escaped = backslash = true, next();
                 else if (is_identifier_char(ch)) name += next();
                 else break;
-            }
-            else {
+            } else {
                 if (ch != "u") parse_error("Expecting UnicodeEscapeSequence -- uXXXX");
                 ch = read_escaped_char();
                 if (!is_identifier_char(ch)) parse_error("Unicode char: " + ch.charCodeAt(0) + " is not valid in identifier");
@@ -461,12 +476,14 @@ function tokenizer($TEXT, filename, html5_comments) {
         return name;
     };
 
-    var read_regexp = with_eof_error("Unterminated regular expression", function(regexp){
-        var prev_backslash = false, ch, in_class = false;
-        while ((ch = next(true))) if (prev_backslash) {
-            regexp += "\\" + ch;
-            prev_backslash = false;
-        } else if (ch == "[") {
+    var read_regexp = with_eof_error("Unterminated regular expression", function (regexp) {
+        var prev_backslash = false,
+            ch, in_class = false;
+        while ((ch = next(true)))
+            if (prev_backslash) {
+                regexp += "\\" + ch;
+                prev_backslash = false;
+            } else if (ch == "[") {
             in_class = true;
             regexp += ch;
         } else if (ch == "]" && in_class) {
@@ -500,10 +517,10 @@ function tokenizer($TEXT, filename, html5_comments) {
     function handle_slash() {
         next();
         switch (peek()) {
-          case "/":
+        case "/":
             next();
             return skip_line_comment("comment1");
-          case "*":
+        case "*":
             next();
             return skip_multiline_comment();
         }
@@ -512,25 +529,20 @@ function tokenizer($TEXT, filename, html5_comments) {
 
     function handle_dot() {
         next();
-        return is_digit(peek().charCodeAt(0))
-            ? read_num(".")
-            : token("punc", ".");
+        return is_digit(peek().charCodeAt(0)) ? read_num(".") : token("punc", ".");
     };
 
     function read_word() {
         var word = read_name();
         if (prev_was_dot) return token("name", word);
-        return KEYWORDS_ATOM(word) ? token("atom", word)
-            : !KEYWORDS(word) ? token("name", word)
-            : OPERATORS(word) ? token("operator", word)
-            : token("keyword", word);
+        return KEYWORDS_ATOM(word) ? token("atom", word) : !KEYWORDS(word) ? token("name", word) : OPERATORS(word) ? token("operator", word) : token("keyword", word);
     };
 
     function with_eof_error(eof_error, cont) {
-        return function(x) {
+        return function (x) {
             try {
                 return cont(x);
-            } catch(ex) {
+            } catch (ex) {
                 if (ex === EX_EOF) parse_error(eof_error);
                 else throw ex;
             }
@@ -556,9 +568,13 @@ function tokenizer($TEXT, filename, html5_comments) {
         if (!ch) return token("eof");
         var code = ch.charCodeAt(0);
         switch (code) {
-          case 34: case 39: return read_string(ch);
-          case 46: return handle_dot();
-          case 47: return handle_slash();
+        case 34:
+        case 39:
+            return read_string(ch);
+        case 46:
+            return handle_dot();
+        case 47:
+            return handle_slash();
         }
         if (is_digit(code)) return read_num();
         if (PUNC_CHARS(ch)) return token("punc", next());
@@ -567,7 +583,7 @@ function tokenizer($TEXT, filename, html5_comments) {
         parse_error("Unexpected character '" + ch + "'");
     };
 
-    next_token.context = function(nc) {
+    next_token.context = function (nc) {
         if (nc) S = nc;
         return S;
     };
@@ -590,11 +606,11 @@ var UNARY_PREFIX = makePredicate([
     "+"
 ]);
 
-var UNARY_POSTFIX = makePredicate([ "--", "++" ]);
+var UNARY_POSTFIX = makePredicate(["--", "++"]);
 
-var ASSIGNMENT = makePredicate([ "=", "+=", "-=", "/=", "*=", "%=", ">>=", "<<=", ">>>=", "|=", "^=", "&=" ]);
+var ASSIGNMENT = makePredicate(["=", "+=", "-=", "/=", "*=", "%=", ">>=", "<<=", ">>>=", "|=", "^=", "&="]);
 
-var PRECEDENCE = (function(a, ret){
+var PRECEDENCE = (function (a, ret) {
     for (var i = 0; i < a.length; ++i) {
         var b = a[i];
         for (var j = 0; j < b.length; ++j) {
@@ -614,39 +630,36 @@ var PRECEDENCE = (function(a, ret){
         [">>", "<<", ">>>"],
         ["+", "-"],
         ["*", "/", "%"]
-    ],
-    {}
+    ], {}
 );
 
-var STATEMENTS_WITH_LABELS = array_to_hash([ "for", "do", "while", "switch" ]);
+var STATEMENTS_WITH_LABELS = array_to_hash(["for", "do", "while", "switch"]);
 
-var ATOMIC_START_TOKEN = array_to_hash([ "atom", "num", "string", "regexp", "name" ]);
+var ATOMIC_START_TOKEN = array_to_hash(["atom", "num", "string", "regexp", "name"]);
 
 /* -----[ Parser ]----- */
 
 function parse($TEXT, options) {
 
     options = defaults(options, {
-        strict         : false,
-        filename       : null,
-        toplevel       : null,
-        expression     : false,
-        html5_comments : true,
-        bare_returns   : false,
+        strict: false,
+        filename: null,
+        toplevel: null,
+        expression: false,
+        html5_comments: true,
+        bare_returns: false,
     });
 
     var S = {
-        input         : (typeof $TEXT == "string"
-                         ? tokenizer($TEXT, options.filename,
-                                     options.html5_comments)
-                         : $TEXT),
-        token         : null,
-        prev          : null,
-        peeked        : null,
-        in_function   : 0,
-        in_directives : true,
-        in_loop       : 0,
-        labels        : []
+        input: (typeof $TEXT == "string" ? tokenizer($TEXT, options.filename,
+            options.html5_comments) : $TEXT),
+        token: null,
+        prev: null,
+        peeked: null,
+        in_function: 0,
+        in_directives: true,
+        in_loop: 0,
+        labels: []
     };
 
     S.token = next();
@@ -655,7 +668,9 @@ function parse($TEXT, options) {
         return is_token(S.token, type, value);
     };
 
-    function peek() { return S.peeked || (S.peeked = S.input()); };
+    function peek() {
+        return S.peeked || (S.peeked = S.input());
+    };
 
     function next() {
         S.prev = S.token;
@@ -678,10 +693,10 @@ function parse($TEXT, options) {
     function croak(msg, line, col, pos) {
         var ctx = S.input.context();
         js_error(msg,
-                 ctx.filename,
-                 line != null ? line : ctx.tokline,
-                 col != null ? col : ctx.tokcol,
-                 pos != null ? pos : ctx.tokpos);
+            ctx.filename,
+            line != null ? line : ctx.tokline,
+            col != null ? col : ctx.tokcol,
+            pos != null ? pos : ctx.tokpos);
     };
 
     function token_error(token, msg) {
@@ -701,7 +716,9 @@ function parse($TEXT, options) {
         token_error(S.token, "Unexpected token " + S.token.type + " «" + S.token.value + "»" + ", expected " + type + " «" + val + "»");
     };
 
-    function expect(punc) { return expect_token("punc", punc); };
+    function expect(punc) {
+        return expect_token("punc", punc);
+    };
 
     function can_insert_semicolon() {
         return !options.strict && (
@@ -722,7 +739,7 @@ function parse($TEXT, options) {
     };
 
     function embed_tokens(parser) {
-        return function() {
+        return function () {
             var start = S.token;
             var expr = parser();
             var end = prev();
@@ -739,124 +756,119 @@ function parse($TEXT, options) {
         }
     };
 
-    var statement = embed_tokens(function() {
+    var statement = embed_tokens(function () {
         var tmp;
         handle_regexp();
         switch (S.token.type) {
-          case "string":
-            var dir = S.in_directives, stat = simple_statement();
+        case "string":
+            var dir = S.in_directives,
+                stat = simple_statement();
             // XXXv2: decide how to fix directives
             if (dir && stat.body instanceof AST_String && !is("punc", ",")) {
                 return new AST_Directive({
-                    start : stat.body.start,
-                    end   : stat.body.end,
-                    quote : stat.body.quote,
-                    value : stat.body.value,
+                    start: stat.body.start,
+                    end: stat.body.end,
+                    quote: stat.body.quote,
+                    value: stat.body.value,
                 });
             }
             return stat;
-          case "num":
-          case "regexp":
-          case "operator":
-          case "atom":
+        case "num":
+        case "regexp":
+        case "operator":
+        case "atom":
             return simple_statement();
 
-          case "name":
-            return is_token(peek(), "punc", ":")
-                ? labeled_statement()
-                : simple_statement();
+        case "name":
+            return is_token(peek(), "punc", ":") ? labeled_statement() : simple_statement();
 
-          case "punc":
+        case "punc":
             switch (S.token.value) {
-              case "{":
+            case "{":
                 return new AST_BlockStatement({
-                    start : S.token,
-                    body  : block_(),
-                    end   : prev()
+                    start: S.token,
+                    body: block_(),
+                    end: prev()
                 });
-              case "[":
-              case "(":
+            case "[":
+            case "(":
                 return simple_statement();
-              case ";":
+            case ";":
                 next();
                 return new AST_EmptyStatement();
-              default:
+            default:
                 unexpected();
             }
 
-          case "keyword":
+        case "keyword":
             switch (tmp = S.token.value, next(), tmp) {
-              case "break":
+            case "break":
                 return break_cont(AST_Break);
 
-              case "continue":
+            case "continue":
                 return break_cont(AST_Continue);
 
-              case "debugger":
+            case "debugger":
                 semicolon();
                 return new AST_Debugger();
 
-              case "do":
+            case "do":
                 return new AST_Do({
-                    body      : in_loop(statement),
-                    condition : (expect_token("keyword", "while"), tmp = parenthesised(), semicolon(), tmp)
+                    body: in_loop(statement),
+                    condition: (expect_token("keyword", "while"), tmp = parenthesised(), semicolon(), tmp)
                 });
 
-              case "while":
+            case "while":
                 return new AST_While({
-                    condition : parenthesised(),
-                    body      : in_loop(statement)
+                    condition: parenthesised(),
+                    body: in_loop(statement)
                 });
 
-              case "for":
+            case "for":
                 return for_();
 
-              case "function":
+            case "function":
                 return function_(AST_Defun);
 
-              case "if":
+            case "if":
                 return if_();
 
-              case "return":
+            case "return":
                 if (S.in_function == 0 && !options.bare_returns)
                     croak("'return' outside of function");
                 return new AST_Return({
-                    value: ( is("punc", ";")
-                             ? (next(), null)
-                             : can_insert_semicolon()
-                             ? null
-                             : (tmp = expression(true), semicolon(), tmp) )
+                    value: (is("punc", ";") ? (next(), null) : can_insert_semicolon() ? null : (tmp = expression(true), semicolon(), tmp))
                 });
 
-              case "switch":
+            case "switch":
                 return new AST_Switch({
-                    expression : parenthesised(),
-                    body       : in_loop(switch_body_)
+                    expression: parenthesised(),
+                    body: in_loop(switch_body_)
                 });
 
-              case "throw":
+            case "throw":
                 if (S.token.nlb)
                     croak("Illegal newline after 'throw'");
                 return new AST_Throw({
                     value: (tmp = expression(true), semicolon(), tmp)
                 });
 
-              case "try":
+            case "try":
                 return try_();
 
-              case "var":
+            case "var":
                 return tmp = var_(), semicolon(), tmp;
 
-              case "const":
+            case "const":
                 return tmp = const_(), semicolon(), tmp;
 
-              case "with":
+            case "with":
                 return new AST_With({
-                    expression : parenthesised(),
-                    body       : statement()
+                    expression: parenthesised(),
+                    body: statement()
                 });
 
-              default:
+            default:
                 unexpected();
             }
         }
@@ -864,7 +876,9 @@ function parse($TEXT, options) {
 
     function labeled_statement() {
         var label = as_symbol(AST_Label);
-        if (find_if(function(l){ return l.name == label.name }, S.labels)) {
+        if (find_if(function (l) {
+                return l.name == label.name
+            }, S.labels)) {
             // ECMA-262, 12.12: An ECMAScript program is considered
             // syntactically incorrect if it contains a
             // LabelledStatement that is enclosed by a
@@ -879,36 +893,45 @@ function parse($TEXT, options) {
             // check for `continue` that refers to this label.
             // those should be reported as syntax errors.
             // https://github.com/mishoo/UglifyJS2/issues/287
-            label.references.forEach(function(ref){
+            label.references.forEach(function (ref) {
                 if (ref instanceof AST_Continue) {
                     ref = ref.label.start;
                     croak("Continue label `" + label.name + "` refers to non-IterationStatement.",
-                          ref.line, ref.col, ref.pos);
+                        ref.line, ref.col, ref.pos);
                 }
             });
         }
-        return new AST_LabeledStatement({ body: stat, label: label });
+        return new AST_LabeledStatement({
+            body: stat,
+            label: label
+        });
     };
 
     function simple_statement(tmp) {
-        return new AST_SimpleStatement({ body: (tmp = expression(true), semicolon(), tmp) });
+        return new AST_SimpleStatement({
+            body: (tmp = expression(true), semicolon(), tmp)
+        });
     };
 
     function break_cont(type) {
-        var label = null, ldef;
+        var label = null,
+            ldef;
         if (!can_insert_semicolon()) {
             label = as_symbol(AST_LabelRef, true);
         }
         if (label != null) {
-            ldef = find_if(function(l){ return l.name == label.name }, S.labels);
+            ldef = find_if(function (l) {
+                return l.name == label.name
+            }, S.labels);
             if (!ldef)
                 croak("Undefined label " + label.name);
             label.thedef = ldef;
-        }
-        else if (S.in_loop == 0)
+        } else if (S.in_loop == 0)
             croak(type.TYPE + " not inside a loop or switch");
         semicolon();
-        var stat = new type({ label: label });
+        var stat = new type({
+            label: label
+        });
         if (ldef) ldef.references.push(stat);
         return stat;
     };
@@ -917,9 +940,7 @@ function parse($TEXT, options) {
         expect("(");
         var init = null;
         if (!is("punc", ";")) {
-            init = is("keyword", "var")
-                ? (next(), var_(true))
-                : expression(true, true);
+            init = is("keyword", "var") ? (next(), var_(true)) : expression(true, true);
             if (is("operator", "in")) {
                 if (init instanceof AST_Var && init.definitions.length > 1)
                     croak("Only one variable declaration allowed in for..in loop");
@@ -937,10 +958,10 @@ function parse($TEXT, options) {
         var step = is("punc", ")") ? null : expression(true);
         expect(")");
         return new AST_For({
-            init      : init,
-            condition : test,
-            step      : step,
-            body      : in_loop(statement)
+            init: init,
+            condition: test,
+            step: step,
+            body: in_loop(statement)
         });
     };
 
@@ -949,14 +970,14 @@ function parse($TEXT, options) {
         var obj = expression(true);
         expect(")");
         return new AST_ForIn({
-            init   : init,
-            name   : lhs,
-            object : obj,
-            body   : in_loop(statement)
+            init: init,
+            name: lhs,
+            object: obj,
+            body: in_loop(statement)
         });
     };
 
-    var function_ = function(ctor) {
+    var function_ = function (ctor) {
         var in_statement = ctor === AST_Defun;
         var name = is("name") ? as_symbol(in_statement ? AST_SymbolDefun : AST_SymbolLambda) : null;
         if (in_statement && !name)
@@ -964,15 +985,16 @@ function parse($TEXT, options) {
         expect("(");
         return new ctor({
             name: name,
-            argnames: (function(first, a){
+            argnames: (function (first, a) {
                 while (!is("punc", ")")) {
-                    if (first) first = false; else expect(",");
+                    if (first) first = false;
+                    else expect(",");
                     a.push(as_symbol(AST_SymbolFunarg));
                 }
                 next();
                 return a;
             })(true, []),
-            body: (function(loop, labels){
+            body: (function (loop, labels) {
                 ++S.in_function;
                 S.in_directives = true;
                 S.in_loop = 0;
@@ -987,15 +1009,17 @@ function parse($TEXT, options) {
     };
 
     function if_() {
-        var cond = parenthesised(), body = statement(), belse = null;
+        var cond = parenthesised(),
+            body = statement(),
+            belse = null;
         if (is("keyword", "else")) {
             next();
             belse = statement();
         }
         return new AST_If({
-            condition   : cond,
-            body        : body,
-            alternative : belse
+            condition: cond,
+            body: body,
+            alternative: belse
         });
     };
 
@@ -1012,30 +1036,31 @@ function parse($TEXT, options) {
 
     function switch_body_() {
         expect("{");
-        var a = [], cur = null, branch = null, tmp;
+        var a = [],
+            cur = null,
+            branch = null,
+            tmp;
         while (!is("punc", "}")) {
             if (is("eof")) unexpected();
             if (is("keyword", "case")) {
                 if (branch) branch.end = prev();
                 cur = [];
                 branch = new AST_Case({
-                    start      : (tmp = S.token, next(), tmp),
-                    expression : expression(true),
-                    body       : cur
+                    start: (tmp = S.token, next(), tmp),
+                    expression: expression(true),
+                    body: cur
                 });
                 a.push(branch);
                 expect(":");
-            }
-            else if (is("keyword", "default")) {
+            } else if (is("keyword", "default")) {
                 if (branch) branch.end = prev();
                 cur = [];
                 branch = new AST_Default({
-                    start : (tmp = S.token, next(), expect(":"), tmp),
-                    body  : cur
+                    start: (tmp = S.token, next(), expect(":"), tmp),
+                    body: cur
                 });
                 a.push(branch);
-            }
-            else {
+            } else {
                 if (!cur) unexpected();
                 cur.push(statement());
             }
@@ -1046,7 +1071,9 @@ function parse($TEXT, options) {
     };
 
     function try_() {
-        var body = block_(), bcatch = null, bfinally = null;
+        var body = block_(),
+            bcatch = null,
+            bfinally = null;
         if (is("keyword", "catch")) {
             var start = S.token;
             next();
@@ -1054,27 +1081,27 @@ function parse($TEXT, options) {
             var name = as_symbol(AST_SymbolCatch);
             expect(")");
             bcatch = new AST_Catch({
-                start   : start,
-                argname : name,
-                body    : block_(),
-                end     : prev()
+                start: start,
+                argname: name,
+                body: block_(),
+                end: prev()
             });
         }
         if (is("keyword", "finally")) {
             var start = S.token;
             next();
             bfinally = new AST_Finally({
-                start : start,
-                body  : block_(),
-                end   : prev()
+                start: start,
+                body: block_(),
+                end: prev()
             });
         }
         if (!bcatch && !bfinally)
             croak("Missing catch/finally blocks");
         return new AST_Try({
-            body     : body,
-            bcatch   : bcatch,
-            bfinally : bfinally
+            body: body,
+            bcatch: bcatch,
+            bfinally: bfinally
         });
     };
 
@@ -1082,10 +1109,10 @@ function parse($TEXT, options) {
         var a = [];
         for (;;) {
             a.push(new AST_VarDef({
-                start : S.token,
-                name  : as_symbol(in_const ? AST_SymbolConst : AST_SymbolVar),
-                value : is("operator", "=") ? (next(), expression(false, no_in)) : null,
-                end   : prev()
+                start: S.token,
+                name: as_symbol(in_const ? AST_SymbolConst : AST_SymbolVar),
+                value: is("operator", "=") ? (next(), expression(false, no_in)) : null,
+                end: prev()
             }));
             if (!is("punc", ","))
                 break;
@@ -1094,26 +1121,27 @@ function parse($TEXT, options) {
         return a;
     };
 
-    var var_ = function(no_in) {
+    var var_ = function (no_in) {
         return new AST_Var({
-            start       : prev(),
-            definitions : vardefs(no_in, false),
-            end         : prev()
+            start: prev(),
+            definitions: vardefs(no_in, false),
+            end: prev()
         });
     };
 
-    var const_ = function() {
+    var const_ = function () {
         return new AST_Const({
-            start       : prev(),
-            definitions : vardefs(false, true),
-            end         : prev()
+            start: prev(),
+            definitions: vardefs(false, true),
+            end: prev()
         });
     };
 
-    var new_ = function() {
+    var new_ = function () {
         var start = S.token;
         expect_token("operator", "new");
-        var newexp = expr_atom(false), args;
+        var newexp = expr_atom(false),
+            args;
         if (is("punc", "(")) {
             next();
             args = expr_list(")");
@@ -1121,44 +1149,62 @@ function parse($TEXT, options) {
             args = [];
         }
         return subscripts(new AST_New({
-            start      : start,
-            expression : newexp,
-            args       : args,
-            end        : prev()
+            start: start,
+            expression: newexp,
+            args: args,
+            end: prev()
         }), true);
     };
 
     function as_atom_node() {
-        var tok = S.token, ret;
+        var tok = S.token,
+            ret;
         switch (tok.type) {
-          case "name":
-          case "keyword":
+        case "name":
+        case "keyword":
             ret = _make_symbol(AST_SymbolRef);
             break;
-          case "num":
-            ret = new AST_Number({ start: tok, end: tok, value: tok.value });
-            break;
-          case "string":
-            ret = new AST_String({
-                start : tok,
-                end   : tok,
-                value : tok.value,
-                quote : tok.quote
+        case "num":
+            ret = new AST_Number({
+                start: tok,
+                end: tok,
+                value: tok.value
             });
             break;
-          case "regexp":
-            ret = new AST_RegExp({ start: tok, end: tok, value: tok.value });
+        case "string":
+            ret = new AST_String({
+                start: tok,
+                end: tok,
+                value: tok.value,
+                quote: tok.quote
+            });
             break;
-          case "atom":
+        case "regexp":
+            ret = new AST_RegExp({
+                start: tok,
+                end: tok,
+                value: tok.value
+            });
+            break;
+        case "atom":
             switch (tok.value) {
-              case "false":
-                ret = new AST_False({ start: tok, end: tok });
+            case "false":
+                ret = new AST_False({
+                    start: tok,
+                    end: tok
+                });
                 break;
-              case "true":
-                ret = new AST_True({ start: tok, end: tok });
+            case "true":
+                ret = new AST_True({
+                    start: tok,
+                    end: tok
+                });
                 break;
-              case "null":
-                ret = new AST_Null({ start: tok, end: tok });
+            case "null":
+                ret = new AST_Null({
+                    start: tok,
+                    end: tok
+                });
                 break;
             }
             break;
@@ -1167,23 +1213,23 @@ function parse($TEXT, options) {
         return ret;
     };
 
-    var expr_atom = function(allow_calls) {
+    var expr_atom = function (allow_calls) {
         if (is("operator", "new")) {
             return new_();
         }
         var start = S.token;
         if (is("punc")) {
             switch (start.value) {
-              case "(":
+            case "(":
                 next();
                 var ex = expression(true);
                 ex.start = start;
                 ex.end = S.token;
                 expect(")");
                 return subscripts(ex, allow_calls);
-              case "[":
+            case "[":
                 return subscripts(array_(), allow_calls);
-              case "{":
+            case "{":
                 return subscripts(object_(), allow_calls);
             }
             unexpected();
@@ -1202,12 +1248,17 @@ function parse($TEXT, options) {
     };
 
     function expr_list(closing, allow_trailing_comma, allow_empty) {
-        var first = true, a = [];
+        var first = true,
+            a = [];
         while (!is("punc", closing)) {
-            if (first) first = false; else expect(",");
+            if (first) first = false;
+            else expect(",");
             if (allow_trailing_comma && is("punc", closing)) break;
             if (is("punc", ",") && allow_empty) {
-                a.push(new AST_Hole({ start: S.token, end: S.token }));
+                a.push(new AST_Hole({
+                    start: S.token,
+                    end: S.token
+                }));
             } else {
                 a.push(expression(false));
             }
@@ -1216,20 +1267,22 @@ function parse($TEXT, options) {
         return a;
     };
 
-    var array_ = embed_tokens(function() {
+    var array_ = embed_tokens(function () {
         expect("[");
         return new AST_Array({
             elements: expr_list("]", !options.strict, true)
         });
     });
 
-    var object_ = embed_tokens(function() {
+    var object_ = embed_tokens(function () {
         expect("{");
-        var first = true, a = [];
+        var first = true,
+            a = [];
         while (!is("punc", "}")) {
-            if (first) first = false; else expect(",");
+            if (first) first = false;
+            else expect(",");
             if (!options.strict && is("punc", "}"))
-                // allow trailing comma
+            // allow trailing comma
                 break;
             var start = S.token;
             var type = start.type;
@@ -1237,48 +1290,50 @@ function parse($TEXT, options) {
             if (type == "name" && !is("punc", ":")) {
                 if (name == "get") {
                     a.push(new AST_ObjectGetter({
-                        start : start,
-                        key   : as_atom_node(),
-                        value : function_(AST_Accessor),
-                        end   : prev()
+                        start: start,
+                        key: as_atom_node(),
+                        value: function_(AST_Accessor),
+                        end: prev()
                     }));
                     continue;
                 }
                 if (name == "set") {
                     a.push(new AST_ObjectSetter({
-                        start : start,
-                        key   : as_atom_node(),
-                        value : function_(AST_Accessor),
-                        end   : prev()
+                        start: start,
+                        key: as_atom_node(),
+                        value: function_(AST_Accessor),
+                        end: prev()
                     }));
                     continue;
                 }
             }
             expect(":");
             a.push(new AST_ObjectKeyVal({
-                start : start,
-                quote : start.quote,
-                key   : name,
-                value : expression(false),
-                end   : prev()
+                start: start,
+                quote: start.quote,
+                key: name,
+                value: expression(false),
+                end: prev()
             }));
         }
         next();
-        return new AST_Object({ properties: a });
+        return new AST_Object({
+            properties: a
+        });
     });
 
     function as_property_name() {
         var tmp = S.token;
         next();
         switch (tmp.type) {
-          case "num":
-          case "string":
-          case "name":
-          case "operator":
-          case "keyword":
-          case "atom":
+        case "num":
+        case "string":
+        case "name":
+        case "operator":
+        case "keyword":
+        case "atom":
             return tmp.value;
-          default:
+        default:
             unexpected();
         }
     };
@@ -1287,22 +1342,22 @@ function parse($TEXT, options) {
         var tmp = S.token;
         next();
         switch (tmp.type) {
-          case "name":
-          case "operator":
-          case "keyword":
-          case "atom":
+        case "name":
+        case "operator":
+        case "keyword":
+        case "atom":
             return tmp.value;
-          default:
+        default:
             unexpected();
         }
     };
 
     function _make_symbol(type) {
         var name = S.token.value;
-        return new (name == "this" ? AST_This : type)({
-            name  : String(name),
-            start : S.token,
-            end   : S.token
+        return new(name == "this" ? AST_This : type)({
+            name: String(name),
+            start: S.token,
+            end: S.token
         });
     };
 
@@ -1316,15 +1371,15 @@ function parse($TEXT, options) {
         return sym;
     };
 
-    var subscripts = function(expr, allow_calls) {
+    var subscripts = function (expr, allow_calls) {
         var start = expr.start;
         if (is("punc", ".")) {
             next();
             return subscripts(new AST_Dot({
-                start      : start,
-                expression : expr,
-                property   : as_name(),
-                end        : prev()
+                start: start,
+                expression: expr,
+                property: as_name(),
+                end: prev()
             }), allow_calls);
         }
         if (is("punc", "[")) {
@@ -1332,25 +1387,25 @@ function parse($TEXT, options) {
             var prop = expression(true);
             expect("]");
             return subscripts(new AST_Sub({
-                start      : start,
-                expression : expr,
-                property   : prop,
-                end        : prev()
+                start: start,
+                expression: expr,
+                property: prop,
+                end: prev()
             }), allow_calls);
         }
         if (allow_calls && is("punc", "(")) {
             next();
             return subscripts(new AST_Call({
-                start      : start,
-                expression : expr,
-                args       : expr_list(")"),
-                end        : prev()
+                start: start,
+                expression: expr,
+                args: expr_list(")"),
+                end: prev()
             }), true);
         }
         return expr;
     };
 
-    var maybe_unary = function(allow_calls) {
+    var maybe_unary = function (allow_calls) {
         var start = S.token;
         if (is("operator") && UNARY_PREFIX(start.value)) {
             next();
@@ -1373,10 +1428,13 @@ function parse($TEXT, options) {
     function make_unary(ctor, op, expr) {
         if ((op == "++" || op == "--") && !is_assignable(expr))
             croak("Invalid use of " + op + " operator");
-        return new ctor({ operator: op, expression: expr });
+        return new ctor({
+            operator: op,
+            expression: expr
+        });
     };
 
-    var expr_op = function(left, min_prec, no_in) {
+    var expr_op = function (left, min_prec, no_in) {
         var op = is("operator") ? S.token.value : null;
         if (op == "in" && no_in) op = null;
         var prec = op != null ? PRECEDENCE[op] : null;
@@ -1384,11 +1442,11 @@ function parse($TEXT, options) {
             next();
             var right = expr_op(maybe_unary(true), prec, no_in);
             return expr_op(new AST_Binary({
-                start    : left.start,
-                left     : left,
-                operator : op,
-                right    : right,
-                end      : right.end
+                start: left.start,
+                left: left,
+                operator: op,
+                right: right,
+                end: right.end
             }), min_prec, no_in);
         }
         return left;
@@ -1398,7 +1456,7 @@ function parse($TEXT, options) {
         return expr_op(maybe_unary(true), 0, no_in);
     };
 
-    var maybe_conditional = function(no_in) {
+    var maybe_conditional = function (no_in) {
         var start = S.token;
         var expr = expr_ops(no_in);
         if (is("operator", "?")) {
@@ -1406,11 +1464,11 @@ function parse($TEXT, options) {
             var yes = expression(false);
             expect(":");
             return new AST_Conditional({
-                start       : start,
-                condition   : expr,
-                consequent  : yes,
-                alternative : expression(false, no_in),
-                end         : prev()
+                start: start,
+                condition: expr,
+                consequent: yes,
+                alternative: expression(false, no_in),
+                end: prev()
             });
         }
         return expr;
@@ -1422,18 +1480,19 @@ function parse($TEXT, options) {
         return (expr instanceof AST_PropAccess || expr instanceof AST_Symbol);
     };
 
-    var maybe_assign = function(no_in) {
+    var maybe_assign = function (no_in) {
         var start = S.token;
-        var left = maybe_conditional(no_in), val = S.token.value;
+        var left = maybe_conditional(no_in),
+            val = S.token.value;
         if (is("operator") && ASSIGNMENT(val)) {
             if (is_assignable(left)) {
                 next();
                 return new AST_Assign({
-                    start    : start,
-                    left     : left,
-                    operator : val,
-                    right    : maybe_assign(no_in),
-                    end      : prev()
+                    start: start,
+                    left: left,
+                    operator: val,
+                    right: maybe_assign(no_in),
+                    end: prev()
                 });
             }
             croak("Invalid assignment");
@@ -1441,16 +1500,16 @@ function parse($TEXT, options) {
         return left;
     };
 
-    var expression = function(commas, no_in) {
+    var expression = function (commas, no_in) {
         var start = S.token;
         var expr = maybe_assign(no_in);
         if (commas && is("punc", ",")) {
             next();
             return new AST_Seq({
-                start  : start,
-                car    : expr,
-                cdr    : expression(true, no_in),
-                end    : peek()
+                start: start,
+                car: expr,
+                cdr: expression(true, no_in),
+                end: peek()
             });
         }
         return expr;
@@ -1467,7 +1526,7 @@ function parse($TEXT, options) {
         return expression(true);
     }
 
-    return (function(){
+    return (function () {
         var start = S.token;
         var body = [];
         while (!is("eof"))
@@ -1478,7 +1537,11 @@ function parse($TEXT, options) {
             toplevel.body = toplevel.body.concat(body);
             toplevel.end = end;
         } else {
-            toplevel = new AST_Toplevel({ start: start, body: body, end: end });
+            toplevel = new AST_Toplevel({
+                start: start,
+                body: body,
+                end: end
+            });
         }
         return toplevel;
     })();

@@ -12,14 +12,17 @@ var engine = null;
 
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
-//----------Public Members----------
+    //----------Public Members----------
     this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
     this.running = false;
 
     // Mouse Handling
     this.mouseAreas = [];
-    this.oldMousePos = {x:0, y:0};
+    this.oldMousePos = {
+        x: 0,
+        y: 0
+    };
 
     // List of available Components
     this.components = {};
@@ -36,10 +39,9 @@ QMLEngine = function (element, options) {
     this.bindedProperties = [];
 
 
-//----------Public Methods----------
+    //----------Public Methods----------
     // Start the engine
-    this.start = function()
-    {
+    this.start = function () {
         engine = this;
         var i;
         if (this.operationState !== QMLOperationState.Running) {
@@ -52,8 +54,7 @@ QMLEngine = function (element, options) {
     }
 
     // Stop the engine
-    this.stop = function()
-    {
+    this.stop = function () {
         var i;
         if (this.operationState == QMLOperationState.Running) {
             element.removeEventListener("touchstart", touchHandler);
@@ -66,24 +67,24 @@ QMLEngine = function (element, options) {
         }
     }
 
-    this.pathFromFilepath = function(file) {
-      var basePath = file.split("/");
-      basePath[basePath.length - 1] = "";
-      basePath = basePath.join("/");
-      return basePath;
+    this.pathFromFilepath = function (file) {
+        var basePath = file.split("/");
+        basePath[basePath.length - 1] = "";
+        basePath = basePath.join("/");
+        return basePath;
     }
 
-    this.ensureFileIsLoadedInQrc = function(file) {
-      if (!qrc.includesFile(file)) {
-        var src = getUrlContents(file);
+    this.ensureFileIsLoadedInQrc = function (file) {
+        if (!qrc.includesFile(file)) {
+            var src = getUrlContents(file);
 
-        console.log('loading file', file);
-        qrc[file] = qmlparse(src);
-      }
+            console.log('loading file', file);
+            qrc[file] = qmlparse(src);
+        }
     }
 
     // Load file, parse and construct (.qml or .qml.js)
-    this.loadFile = function(file) {
+    this.loadFile = function (file) {
         var tree;
 
         basePath = this.pathFromFilepath(file);
@@ -94,18 +95,21 @@ QMLEngine = function (element, options) {
     }
 
     // parse and construct qml
-    this.loadQML = function(src) {
+    this.loadQML = function (src) {
         this.loadQMLTree(parseQML(src));
     }
 
-    this.loadQMLTree = function(tree) {
+    this.loadQMLTree = function (tree) {
         engine = this;
         if (options.debugTree) {
             options.debugTree(tree);
         }
 
         // Create and initialize objects
-        var component = new QMLComponent({ object: tree, parent: null });
+        var component = new QMLComponent({
+            object: tree,
+            parent: null
+        });
         doc = component.createObject(null);
         component.finalizeImports();
         this.$initializePropertyBindings();
@@ -118,58 +122,58 @@ QMLEngine = function (element, options) {
         }
     }
 
-    this.rootContext = function() {
-      return doc.$context;
+    this.rootContext = function () {
+        return doc.$context;
     }
 
-    this.focusedElement = (function() {
-      return this.rootContext().activeFocus;
+    this.focusedElement = (function () {
+        return this.rootContext().activeFocus;
     }).bind(this);
 
     // KEYBOARD MANAGEMENT
     var keyboardSignals = {};
-    keyboardSignals[Qt.Key_Asterisk]   = 'asteriskPressed';
-    keyboardSignals[Qt.Key_Back]       = 'backPressed';
-    keyboardSignals[Qt.Key_Backtab]    = 'backtabPressed';
-    keyboardSignals[Qt.Key_Call]       = 'callPressed';
-    keyboardSignals[Qt.Key_Cancel]     = 'cancelPressed';
-    keyboardSignals[Qt.Key_Delete]     = 'deletePressed';
-    keyboardSignals[Qt.Key_0]          = 'digit0Pressed';
-    keyboardSignals[Qt.Key_1]          = 'digit1Pressed';
-    keyboardSignals[Qt.Key_2]          = 'digit2Pressed';
-    keyboardSignals[Qt.Key_3]          = 'digit3Pressed';
-    keyboardSignals[Qt.Key_4]          = 'digit4Pressed';
-    keyboardSignals[Qt.Key_5]          = 'digit5Pressed';
-    keyboardSignals[Qt.Key_6]          = 'digit6Pressed';
-    keyboardSignals[Qt.Key_7]          = 'digit7Pressed';
-    keyboardSignals[Qt.Key_8]          = 'digit8Pressed';
-    keyboardSignals[Qt.Key_9]          = 'digit9Pressed';
-    keyboardSignals[Qt.Key_Escape]     = 'escapePressed';
-    keyboardSignals[Qt.Key_Flip]       = 'flipPressed';
-    keyboardSignals[Qt.Key_Hangup]     = 'hangupPressed';
-    keyboardSignals[Qt.Key_Menu]       = 'menuPressed';
-    keyboardSignals[Qt.Key_No]         = 'noPressed';
-    keyboardSignals[Qt.Key_Return]     = 'returnPressed';
-    keyboardSignals[Qt.Key_Select]     = 'selectPressed';
-    keyboardSignals[Qt.Key_Space]      = 'spacePressed';
-    keyboardSignals[Qt.Key_Tab]        = 'tabPressed';
+    keyboardSignals[Qt.Key_Asterisk] = 'asteriskPressed';
+    keyboardSignals[Qt.Key_Back] = 'backPressed';
+    keyboardSignals[Qt.Key_Backtab] = 'backtabPressed';
+    keyboardSignals[Qt.Key_Call] = 'callPressed';
+    keyboardSignals[Qt.Key_Cancel] = 'cancelPressed';
+    keyboardSignals[Qt.Key_Delete] = 'deletePressed';
+    keyboardSignals[Qt.Key_0] = 'digit0Pressed';
+    keyboardSignals[Qt.Key_1] = 'digit1Pressed';
+    keyboardSignals[Qt.Key_2] = 'digit2Pressed';
+    keyboardSignals[Qt.Key_3] = 'digit3Pressed';
+    keyboardSignals[Qt.Key_4] = 'digit4Pressed';
+    keyboardSignals[Qt.Key_5] = 'digit5Pressed';
+    keyboardSignals[Qt.Key_6] = 'digit6Pressed';
+    keyboardSignals[Qt.Key_7] = 'digit7Pressed';
+    keyboardSignals[Qt.Key_8] = 'digit8Pressed';
+    keyboardSignals[Qt.Key_9] = 'digit9Pressed';
+    keyboardSignals[Qt.Key_Escape] = 'escapePressed';
+    keyboardSignals[Qt.Key_Flip] = 'flipPressed';
+    keyboardSignals[Qt.Key_Hangup] = 'hangupPressed';
+    keyboardSignals[Qt.Key_Menu] = 'menuPressed';
+    keyboardSignals[Qt.Key_No] = 'noPressed';
+    keyboardSignals[Qt.Key_Return] = 'returnPressed';
+    keyboardSignals[Qt.Key_Select] = 'selectPressed';
+    keyboardSignals[Qt.Key_Space] = 'spacePressed';
+    keyboardSignals[Qt.Key_Tab] = 'tabPressed';
     keyboardSignals[Qt.Key_VolumeDown] = 'volumeDownPressed';
-    keyboardSignals[Qt.Key_VolumeUp]   = 'volumeUpPressed';
-    keyboardSignals[Qt.Key_Yes]        = 'yesPressed';
-    keyboardSignals[Qt.Key_Up]         = 'upPressed';
-    keyboardSignals[Qt.Key_Right]      = 'rightPressed';
-    keyboardSignals[Qt.Key_Down]       = 'downPressed';
-    keyboardSignals[Qt.Key_Left]       = 'leftPressed';
+    keyboardSignals[Qt.Key_VolumeUp] = 'volumeUpPressed';
+    keyboardSignals[Qt.Key_Yes] = 'yesPressed';
+    keyboardSignals[Qt.Key_Up] = 'upPressed';
+    keyboardSignals[Qt.Key_Right] = 'rightPressed';
+    keyboardSignals[Qt.Key_Down] = 'downPressed';
+    keyboardSignals[Qt.Key_Left] = 'leftPressed';
 
     function keyCodeToQt(e) {
-      if (e.keyCode >= 96 && e.keyCode <= 111) {
-        e.keypad = true;
-      }
-      if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
-        return Qt.Key_Backtab;
-      else if (e.keyCode >= 97 && e.keyCode <= 122)
-        return e.keyCode - (97 - Qt.Key_A);
-      return e.keyCode;
+        if (e.keyCode >= 96 && e.keyCode <= 111) {
+            e.keypad = true;
+        }
+        if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
+            return Qt.Key_Backtab;
+        else if (e.keyCode >= 97 && e.keyCode <= 122)
+            return e.keyCode - (97 - Qt.Key_A);
+        return e.keyCode;
     }
 
     function eventToKeyboard(e) {
@@ -178,55 +182,50 @@ QMLEngine = function (element, options) {
             count: 1,
             isAutoRepeat: false,
             key: keyCodeToQt(e),
-            modifiers: (e.ctrlKey * Qt.CtrlModifier)
-                    | (e.altKey   * Qt.AltModifier)
-                    | (e.shiftKey * Qt.ShiftModifier)
-                    | (e.metaKey  * Qt.MetaModifier)
-                    | (e.keypad   * Qt.KeypadModifier),
+            modifiers: (e.ctrlKey * Qt.CtrlModifier) | (e.altKey * Qt.AltModifier) | (e.shiftKey * Qt.ShiftModifier) | (e.metaKey * Qt.MetaModifier) | (e.keypad * Qt.KeypadModifier),
             text: String.fromCharCode(e.charCode)
         };
     }
 
-    document.onkeypress = (function(e) {
-      var focusedElement = this.focusedElement();
-      var event          = eventToKeyboard(e || window.event);
-      var eventName      = keyboardSignals[event.key];
+    document.onkeypress = (function (e) {
+        var focusedElement = this.focusedElement();
+        var event = eventToKeyboard(e || window.event);
+        var eventName = keyboardSignals[event.key];
 
-      while (event.accepted != true && focusedElement != null) {
-        var backup       = focusedElement.$context.event;
+        while (event.accepted != true && focusedElement != null) {
+            var backup = focusedElement.$context.event;
 
-        focusedElement.$context.event = event;
-        focusedElement.Keys.pressed(event);
-        if (eventName != null)
-          focusedElement.Keys[eventName](event);
-        focusedElement.$context.event = backup;
-        if (event.accepted == true)
-          e.preventDefault();
-        else
-          focusedElement = focusedElement.$parent;
-      }
+            focusedElement.$context.event = event;
+            focusedElement.Keys.pressed(event);
+            if (eventName != null)
+                focusedElement.Keys[eventName](event);
+            focusedElement.$context.event = backup;
+            if (event.accepted == true)
+                e.preventDefault();
+            else
+                focusedElement = focusedElement.$parent;
+        }
     }).bind(this);
 
-    document.onkeyup = (function(e) {
-      var focusedElement = this.focusedElement();
-      var event          = eventToKeyboard(e || window.event);
+    document.onkeyup = (function (e) {
+        var focusedElement = this.focusedElement();
+        var event = eventToKeyboard(e || window.event);
 
-      while (event.accepted != true && focusedElement != null) {
-        var backup       = focusedElement.$context.event;
+        while (event.accepted != true && focusedElement != null) {
+            var backup = focusedElement.$context.event;
 
-        focusedElement.$context.event = event;
-        focusedElement.Keys.released(event);
-        focusedElement.$context.event = backup;
-        if (event.accepted == true)
-          e.preventDefault();
-        else
-          focusedElement = focusedElement.$parent;
-      }
+            focusedElement.$context.event = event;
+            focusedElement.Keys.released(event);
+            focusedElement.$context.event = backup;
+            if (event.accepted == true)
+                e.preventDefault();
+            else
+                focusedElement = focusedElement.$parent;
+        }
     }).bind(this);
     // END KEYBOARD MANAGEMENT
 
-    this.registerProperty = function(obj, propName)
-    {
+    this.registerProperty = function (obj, propName) {
         var dependantProperties = [];
         var value = obj[propName];
 
@@ -247,11 +246,10 @@ QMLEngine = function (element, options) {
         setupGetterSetter(obj, propName, getter, setter);
     }
 
-//Intern
+    //Intern
 
     // Load file, parse and construct as Component (.qml)
-    this.loadComponent = function(name)
-    {
+    this.loadComponent = function (name) {
         if (name in this.components)
             return this.components[name];
 
@@ -263,7 +261,7 @@ QMLEngine = function (element, options) {
         return tree;
     }
 
-    this.$initializePropertyBindings = function() {
+    this.$initializePropertyBindings = function () {
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
@@ -273,8 +271,7 @@ QMLEngine = function (element, options) {
         this.bindedProperties = [];
     }
 
-    this.$getTextMetrics = function(text, fontCss)
-    {
+    this.$getTextMetrics = function (text, fontCss) {
         canvas.save();
         canvas.font = fontCss;
         var metrics = canvas.measureText(text);
@@ -283,57 +280,52 @@ QMLEngine = function (element, options) {
     }
 
     // Return a path to load the file
-    this.$resolvePath = function(file)
-    {
+    this.$resolvePath = function (file) {
         if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
             return file;
         }
         return basePath + file;
     }
 
-    this.$registerStart = function(f)
-    {
+    this.$registerStart = function (f) {
         whenStart.push(f);
     }
 
-    this.$registerStop = function(f)
-    {
+    this.$registerStop = function (f) {
         whenStop.push(f);
     }
 
-    this.$addTicker = function(t)
-    {
+    this.$addTicker = function (t) {
         tickers.push(t);
     }
 
-    this.$removeTicker = function(t)
-    {
+    this.$removeTicker = function (t) {
         var index = tickers.indexOf(t);
         if (index != -1) {
             tickers.splice(index, 1);
         }
     }
 
-    this.size = function()
-    {
-        return { width: doc.getWidth(), height: doc.getHeight() };
+    this.size = function () {
+        return {
+            width: doc.getWidth(),
+            height: doc.getHeight()
+        };
     }
 
     // Performance measurements
-    this.$perfDraw = function(canvas)
-    {
+    this.$perfDraw = function (canvas) {
         doc.$draw(canvas);
     }
 
-//----------Private Methods----------
+    //----------Private Methods----------
     // In JS we cannot easily access public members from
     // private members so self acts as a bridge
     var self = this;
 
     // Listen also to touchstart events on supporting devices
     // Makes clicks more responsive (do not wait for click event anymore)
-    function touchHandler(e)
-    {
+    function touchHandler(e) {
         // preventDefault also disables pinching and scrolling while touching
         // on qml application
         e.preventDefault();
@@ -346,41 +338,25 @@ QMLEngine = function (element, options) {
 
     }
 
-    function mousemoveHandler(e)
-    {
+    function mousemoveHandler(e) {
         var i;
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
-            if (l && l.hoverEnabled
-                  && (self.oldMousePos.x >= l.left
-                      && self.oldMousePos.x <= l.right
-                      && self.oldMousePos.y >= l.top
-                      && self.oldMousePos.y <= l.bottom)
-                  && !(e.pageX - element.offsetLeft >= l.left
-                       && e.pageX - element.offsetLeft <= l.right
-                       && e.pageY - element.offsetTop >= l.top
-                       && e.pageY - element.offsetTop <= l.bottom) )
+            if (l && l.hoverEnabled && (self.oldMousePos.x >= l.left && self.oldMousePos.x <= l.right && self.oldMousePos.y >= l.top && self.oldMousePos.y <= l.bottom) && !(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom))
                 l.exited();
         }
         for (i in self.mouseAreas) {
             var l = self.mouseAreas[i];
-            if (l && l.hoverEnabled
-                  && (e.pageX - element.offsetLeft >= l.left
-                      && e.pageX - element.offsetLeft <= l.right
-                      && e.pageY - element.offsetTop >= l.top
-                      && e.pageY - element.offsetTop <= l.bottom)
-                  && !(self.oldMousePos.x >= l.left
-                       && self.oldMousePos.x <= l.right
-                       && self.oldMousePos.y >= l.top
-                       && self.oldMousePos.y <= l.bottom))
+            if (l && l.hoverEnabled && (e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom) && !(self.oldMousePos.x >= l.left && self.oldMousePos.x <= l.right && self.oldMousePos.y >= l.top && self.oldMousePos.y <= l.bottom))
                 l.entered();
         }
-        self.oldMousePos = { x: e.pageX - element.offsetLeft,
-                            y: e.pageY - element.offsetTop };
+        self.oldMousePos = {
+            x: e.pageX - element.offsetLeft,
+            y: e.pageY - element.offsetTop
+        };
     }
 
-    function tick()
-    {
+    function tick() {
         var i,
             now = (new Date).getTime(),
             elapsed = now - lastTick;
@@ -391,7 +367,7 @@ QMLEngine = function (element, options) {
     }
 
 
-//----------Private Members----------
+    //----------Private Members----------
     // Target canvas
     var // Root document of the engine
         doc,
@@ -407,17 +383,16 @@ QMLEngine = function (element, options) {
         i;
 
 
-//----------Construct----------
+    //----------Construct----------
 
     options = options || {};
 
     if (options.debugConsole) {
         // Replace QML-side console.log
         console = {};
-        console.log = function() {
+        console.log = function () {
             var args = Array.prototype.slice.call(arguments);
             options.debugConsole.apply(Undefined, args);
         };
     }
 }
-

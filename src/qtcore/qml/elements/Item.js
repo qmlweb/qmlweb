@@ -11,7 +11,7 @@ function QMLItem(meta) {
         this.dom.innerHTML = "";
         var self = this;
         if (engine.rootElement == undefined) {
-            window.onresize = function() {
+            window.onresize = function () {
                 self.implicitHeight = window.innerHeight;
                 self.implicitWidth = window.innerWidth;
             }
@@ -40,7 +40,7 @@ function QMLItem(meta) {
     createSimpleProperty("Item", this, "parent");
     this.children = [];
     this.resources = [];
-    this.parentChanged.connect(this, function(newParent, oldParent) {
+    this.parentChanged.connect(this, function (newParent, oldParent) {
         if (oldParent) {
             oldParent.children.splice(oldParent.children.indexOf(this), 1);
             oldParent.childrenChanged();
@@ -55,7 +55,7 @@ function QMLItem(meta) {
     });
     this.parentChanged.connect(this, updateHGeometry);
     this.parentChanged.connect(this, updateVGeometry);
-    this.dataChanged.connect(this, function(newData) {
+    this.dataChanged.connect(this, function (newData) {
         for (var i in newData) {
             var child = newData[i];
             if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
@@ -66,7 +66,7 @@ function QMLItem(meta) {
     });
 
     if (this.$isComponentRoot)
-      createSimpleProperty("var", this, "activeFocus");
+        createSimpleProperty("var", this, "activeFocus");
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
     createSimpleProperty("real", this, "width");
@@ -95,28 +95,28 @@ function QMLItem(meta) {
     this.implicitHeightChanged.connect(this, updateVGeometry);
     this.focus = false;
 
-    this.setupFocusOnDom = (function(element) {
-      var updateFocus = (function() {
-        var hasFocus = document.activeElement == this.dom || document.activeElement == this.dom.firstChild;
+    this.setupFocusOnDom = (function (element) {
+        var updateFocus = (function () {
+            var hasFocus = document.activeElement == this.dom || document.activeElement == this.dom.firstChild;
 
-        if (this.focus != hasFocus)
-          this.focus = hasFocus;
-      }).bind(this);
-      element.addEventListener("focus", updateFocus);
-      element.addEventListener("blur",  updateFocus);
+            if (this.focus != hasFocus)
+                this.focus = hasFocus;
+        }).bind(this);
+        element.addEventListener("focus", updateFocus);
+        element.addEventListener("blur", updateFocus);
     }).bind(this);
 
-    this.focusChanged.connect(this, (function(newVal) {
-      if (newVal == true) {
-        if (this.dom.firstChild != null)
-          this.dom.firstChild.focus();
-        document.qmlFocus = this;
-        this.$context.activeFocus = this;
-      } else if (document.qmlFocus == this) {
-        document.getElementsByTagName("BODY")[0].focus();
-        document.qmlFocus = qmlEngine.rootContext().base;
-        this.$context.activeFocus = null;
-      }
+    this.focusChanged.connect(this, (function (newVal) {
+        if (newVal == true) {
+            if (this.dom.firstChild != null)
+                this.dom.firstChild.focus();
+            document.qmlFocus = this;
+            this.$context.activeFocus = this;
+        } else if (document.qmlFocus == this) {
+            document.getElementsByTagName("BODY")[0].focus();
+            document.qmlFocus = qmlEngine.rootContext().base;
+            this.$context.activeFocus = null;
+        }
     }).bind(this));
 
     this.$isUsingImplicitWidth = true;
@@ -156,19 +156,19 @@ function QMLItem(meta) {
     createSimpleProperty("list", this, "states");
     createSimpleProperty("string", this, "state");
     createSimpleProperty("list", this, "transitions");
-    this.stateChanged.connect(this, function(newVal, oldVal) {
+    this.stateChanged.connect(this, function (newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
             if (this.states[i].name === newVal)
                 newState = this.states[i];
             else if (this.states[i].name === oldVal)
-                oldState = this.states[i];
+            oldState = this.states[i];
 
         var actions = this.$revertActions.slice();
 
         // Get current values for revert actions
         for (i in actions) {
-            var action  = actions[i];
+            var action = actions[i];
             action.from = action.target[action.property];
         }
         if (newState) {
@@ -184,8 +184,7 @@ function QMLItem(meta) {
                     var action = {
                         target: change.target,
                         property: item.property,
-                        origValue: change.target.$properties[item.property].binding
-                                    || change.target.$properties[item.property].val,
+                        origValue: change.target.$properties[item.property].binding || change.target.$properties[item.property].val,
                         value: item.value,
                         from: change.target[item.property],
                         to: undefined,
@@ -193,8 +192,7 @@ function QMLItem(meta) {
                     };
                     var found = false;
                     for (k in actions)
-                        if (actions[k].target == action.target
-                            && actions[k].property == action.property) {
+                        if (actions[k].target == action.target && actions[k].property == action.property) {
                             found = true;
                             actions[k] = action;
                             break;
@@ -205,8 +203,7 @@ function QMLItem(meta) {
                     // Look for existing revert action, else create it
                     var found = false;
                     for (k = 0; k < this.$revertActions.length; k++)
-                        if (this.$revertActions[k].target == change.target
-                            && this.$revertActions[k].property == item.property) {
+                        if (this.$revertActions[k].target == change.target && this.$revertActions[k].property == item.property) {
                             if (!change.restoreEntryValues)
                                 this.$revertActions.splice(k, 1); // We don't want to revert, so remove it
                             found = true;
@@ -216,8 +213,7 @@ function QMLItem(meta) {
                         this.$revertActions.push({
                             target: change.target,
                             property: item.property,
-                            value: change.target.$properties[item.property].binding
-                                        || change.target.$properties[item.property].val,
+                            value: change.target.$properties[item.property].binding || change.target.$properties[item.property].val,
                             from: undefined,
                             to: change.target[item.property]
                         });
@@ -231,7 +227,7 @@ function QMLItem(meta) {
         for (i in actions) {
             var action = actions[i];
             action.target.$properties[action.property].set(action.value, false, action.target,
-                                                           newState ? newState.$context: action.target.$context);
+                newState ? newState.$context : action.target.$context);
         }
         for (i in actions) {
             var action = actions[i];
@@ -247,7 +243,7 @@ function QMLItem(meta) {
             rating = 0;
         for (var i = 0; i < this.transitions.length; i++) {
             this.transitions[i].$stop(); // We need to stop running transitions, so let's do
-                                        // it while iterating through the transitions anyway
+            // it while iterating through the transitions anyway
             var curTransition = this.transitions[i],
                 curRating = 0;
             if (curTransition.from == oldVal || curTransition.reversible && curTransition.from == newVal)
@@ -271,69 +267,68 @@ function QMLItem(meta) {
             transition.$start(actions);
     });
 
-    var QMLRotation  = getConstructor('QtQuick', '2.0', 'Rotation');
-    var QMLScale     = getConstructor('QtQuick', '2.0', 'Scale');
+    var QMLRotation = getConstructor('QtQuick', '2.0', 'Rotation');
+    var QMLScale = getConstructor('QtQuick', '2.0', 'Scale');
     var QMLTranslate = getConstructor('QtQuick', '2.0', 'Translate');
 
-    this.$updateTransform = function() {
-            var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
-            var filter = "";
-            var transformStyle = "preserve-3d";
+    this.$updateTransform = function () {
+        var transform = "rotate(" + this.rotation + "deg) scale(" + this.scale + ")";
+        var filter = "";
+        var transformStyle = "preserve-3d";
 
-            for (var i = 0; i < this.transform.length; i++) {
-                var t = this.transform[i];
-                if (t instanceof QMLRotation)
-                    transform += " rotate3d(" + t.axis.x + ", " + t.axis.y + ", " + t.axis.z + ", " + t.angle + "deg)";
-                else if (t instanceof QMLScale)
-                    transform += " scale(" + t.xScale + ", " + t.yScale + ")";
-                else if (t instanceof QMLTranslate)
-                    transform += " translate(" + t.x + "px, " + t.y + "px)";
-                else if (typeof t.transformType != 'undefined') {
-                    if (t.transformType == 'filter')
-                      filter += t.operation + '(' + t.parameters + ') ';
-                }
-                else if (typeof t == 'string')
-                    transform += t;
-            }
-            if (typeof this.z == "number")
-              transform += " translate3d(0, 0, " + this.z + "px)";
-            this.dom.style.transform = transform;
-            this.dom.style.transformStyle = transformStyle;
-            this.dom.style.MozTransform = transform;    // Firefox
-            this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
-            this.dom.style.webkitTransformStyle = transformStyle;
-            this.dom.style.OTransform = transform;      // Opera
-            this.dom.style.msTransform = transform;     // IE
-            this.dom.style.filter = filter;
-            this.dom.style.msFilter = filter;     // IE
-            this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
-            this.dom.style.MozFilter = filter;    // Firefox
+        for (var i = 0; i < this.transform.length; i++) {
+            var t = this.transform[i];
+            if (t instanceof QMLRotation)
+                transform += " rotate3d(" + t.axis.x + ", " + t.axis.y + ", " + t.axis.z + ", " + t.angle + "deg)";
+            else if (t instanceof QMLScale)
+                transform += " scale(" + t.xScale + ", " + t.yScale + ")";
+            else if (t instanceof QMLTranslate)
+                transform += " translate(" + t.x + "px, " + t.y + "px)";
+            else if (typeof t.transformType != 'undefined') {
+                if (t.transformType == 'filter')
+                    filter += t.operation + '(' + t.parameters + ') ';
+            } else if (typeof t == 'string')
+                transform += t;
+        }
+        if (typeof this.z == "number")
+            transform += " translate3d(0, 0, " + this.z + "px)";
+        this.dom.style.transform = transform;
+        this.dom.style.transformStyle = transformStyle;
+        this.dom.style.MozTransform = transform; // Firefox
+        this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
+        this.dom.style.webkitTransformStyle = transformStyle;
+        this.dom.style.OTransform = transform; // Opera
+        this.dom.style.msTransform = transform; // IE
+        this.dom.style.filter = filter;
+        this.dom.style.msFilter = filter; // IE
+        this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
+        this.dom.style.MozFilter = filter; // Firefox
     }
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
     this.transformChanged.connect(this, this.$updateTransform);
-    this.visibleChanged.connect(this, function(newVal) {
+    this.visibleChanged.connect(this, function (newVal) {
         this.dom.style.visibility = newVal ? "inherit" : "hidden";
     });
-    this.opacityChanged.connect(this, function(newVal) {
+    this.opacityChanged.connect(this, function (newVal) {
         this.dom.style.opacity = newVal;
     });
-    this.clipChanged.connect(this, function(newVal) {
+    this.clipChanged.connect(this, function (newVal) {
         this.dom.style.overflow = newVal ? "hidden" : "visible";
     });
-    this.zChanged.connect(this, function(newVal) {
+    this.zChanged.connect(this, function (newVal) {
         this.$updateTransform();
     });
-    this.xChanged.connect(this, function(newVal) {
+    this.xChanged.connect(this, function (newVal) {
         this.dom.style.left = newVal + "px";
     });
-    this.yChanged.connect(this, function(newVal) {
+    this.yChanged.connect(this, function (newVal) {
         this.dom.style.top = newVal + "px";
     });
-    this.widthChanged.connect(this, function(newVal) {
+    this.widthChanged.connect(this, function (newVal) {
         this.dom.style.width = newVal ? newVal + "px" : "auto";
     });
-    this.heightChanged.connect(this, function(newVal) {
+    this.heightChanged.connect(this, function (newVal) {
         this.dom.style.height = newVal ? newVal + "px" : "auto";
     });
 
@@ -358,10 +353,10 @@ function QMLItem(meta) {
         window.onresize();
     }
 
-    this.$draw = function(c) {
+    this.$draw = function (c) {
         var i;
         if (this.visible !== false) { // Undefined means inherit, means true
-            if (this.$drawItem ) {
+            if (this.$drawItem) {
                 var rotRad = (this.rotation || 0) / 180 * Math.PI,
                     rotOffsetX = Math.sin(rotRad) * this.width,
                     rotOffsetY = Math.sin(rotRad) * this.height;
@@ -379,8 +374,7 @@ function QMLItem(meta) {
                 c.restore();
             }
             for (i = 0; i < this.children.length; i++) {
-                if (this.children[i]
-                    && this.children[i].$draw) {
+                if (this.children[i] && this.children[i].$draw) {
                     this.children[i].$draw(c);
                 }
             }

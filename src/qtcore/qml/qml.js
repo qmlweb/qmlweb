@@ -7,22 +7,22 @@ var GETTER = "__defineGetter__",
     evaluatingProperty = undefined,
     // All object constructors
     constructors = {
-      int:         QMLInteger,
-      real:        Number,
-      double:      Number,
-      string:      String,
-      bool:        Boolean,
-      list:        QMLList,
-      color:       QMLColor,
-      enum:        Number,
-      url:         String,
-      variant:     QMLVariant,
-      'var':       QMLVariant,
-      QMLDocument: QMLComponent
+        int: QMLInteger,
+        real: Number,
+        double: Number,
+        string: String,
+        bool: Boolean,
+        list: QMLList,
+        color: QMLColor,
+        enum: Number,
+        url: String,
+        variant: QMLVariant,
+        'var': QMLVariant,
+        QMLDocument: QMLComponent
     };
 var modules = {
     Main: constructors
-  };
+};
 /**
  * Inheritance helper
  */
@@ -34,90 +34,96 @@ Object.create = function (o) {
 
 // Helper. Adds a type to the constructor list
 global.registerGlobalQmlType = function (name, type) {
-  global[type.name]  = type;
-  constructors[name] = type;
-  modules.Main[name] = type;
+    global[type.name] = type;
+    constructors[name] = type;
+    modules.Main[name] = type;
 };
 
 // Helper. Register a type to a module
-global.registerQmlType = function(options) {
-  if (typeof options != 'object') {
-    registerGlobalQmlType(arguments[0], arguments[1]);
-  } else {
-    var moduleDescriptor = {
-      name:        options.name,
-      versions:    options.versions,
-      constructor: options.constructor
-    };
+global.registerQmlType = function (options) {
+    if (typeof options != 'object') {
+        registerGlobalQmlType(arguments[0], arguments[1]);
+    } else {
+        var moduleDescriptor = {
+            name: options.name,
+            versions: options.versions,
+            constructor: options.constructor
+        };
 
-    if (typeof modules[options.module] == 'undefined')
-      modules[options.module] = [];
-    modules[options.module].push(moduleDescriptor);
-  }
+        if (typeof modules[options.module] == 'undefined')
+            modules[options.module] = [];
+        modules[options.module].push(moduleDescriptor);
+    }
 };
 
 global.getConstructor = function (moduleName, version, name) {
-  if (typeof modules[moduleName] != 'undefined') {
-    for (var i = 0 ; i < modules[moduleName].length ; ++i) {
-      var type = modules[moduleName][i];
+    if (typeof modules[moduleName] != 'undefined') {
+        for (var i = 0; i < modules[moduleName].length; ++i) {
+            var type = modules[moduleName][i];
 
-      if (type.name == name && type.versions.test(version))
-        return type.constructor;
+            if (type.name == name && type.versions.test(version))
+                return type.constructor;
+        }
     }
-  }
-  return null;
+    return null;
 };
 
 global.collectConstructorsForModule = function (moduleName, version) {
-  var constructors = {};
+    var constructors = {};
 
-  if (typeof modules[moduleName] == 'undefined') {
-    console.warn("module `" + moduleName + "` not found");
-    return constructors;
-  }
-  for (var i = 0 ; i < modules[moduleName].length ; ++i) {
-    var module = modules[moduleName][i];
-
-    if (module.versions.test(version)) {
-      constructors[module.name] = module.constructor;
+    if (typeof modules[moduleName] == 'undefined') {
+        console.warn("module `" + moduleName + "` not found");
+        return constructors;
     }
-  }
-  return constructors;
+    for (var i = 0; i < modules[moduleName].length; ++i) {
+        var module = modules[moduleName][i];
+
+        if (module.versions.test(version)) {
+            constructors[module.name] = module.constructor;
+        }
+    }
+    return constructors;
 };
 
 global.mergeObjects = function (obj1, obj2) {
-  var mergedObject = {};
+    var mergedObject = {};
 
-  if (typeof obj1 != 'undefined' && obj1 != null) {
-    for (var key in obj1) { mergedObject[key] = obj1[key]; }
-  }
-  if (typeof obj2 != 'undefined' && obj2 != null) {
-    for (var key in obj2) { mergedObject[key] = obj2[key]; }
-  }
-  return mergedObject;
+    if (typeof obj1 != 'undefined' && obj1 != null) {
+        for (var key in obj1) {
+            mergedObject[key] = obj1[key];
+        }
+    }
+    if (typeof obj2 != 'undefined' && obj2 != null) {
+        for (var key in obj2) {
+            mergedObject[key] = obj2[key];
+        }
+    }
+    return mergedObject;
 }
 
 global.perContextConstructors = {};
 
 global.loadImports = function (self, imports) {
-  constructors = mergeObjects(modules.Main, null);
-  for (var i = 0 ; i < imports.length ; ++i) {
-    var importDesc         = imports[i];
-    var moduleConstructors = collectConstructorsForModule(importDesc.subject, importDesc.version);
+    constructors = mergeObjects(modules.Main, null);
+    for (var i = 0; i < imports.length; ++i) {
+        var importDesc = imports[i];
+        var moduleConstructors = collectConstructorsForModule(importDesc.subject, importDesc.version);
 
-    if (importDesc.alias != null)
-      constructors[importDesc.alias] = mergeObjects(constructors[importDesc.alias], moduleConstructors);
-    else
-      constructors                   = mergeObjects(constructors,                   moduleConstructors);
-  }
-  perContextConstructors[self.objectId] = constructors;
+        if (importDesc.alias != null)
+            constructors[importDesc.alias] = mergeObjects(constructors[importDesc.alias], moduleConstructors);
+        else
+            constructors = mergeObjects(constructors, moduleConstructors);
+    }
+    perContextConstructors[self.objectId] = constructors;
 }
 
 // Helper. Ought to do absolutely nothing.
-function noop(){};
+function noop() {};
 
 // Helper to prevent some minimization cases. Ought to do "nothing".
-function tilt() {arguments.length = 0};
+function tilt() {
+    arguments.length = 0
+};
 
 // Helper to clone meta-objects for dynamic element creation
 function cloneObject(obj) {
@@ -155,10 +161,8 @@ function descr(msg, obj, vals) {
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
-QMLBinding.prototype.compile = function() {
-    var bindSrc = this.function
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
+QMLBinding.prototype.compile = function () {
+    var bindSrc = this.function ? "(function(o, c) { with(c) with(o) " + this.src + "})" : "(function(o, c) { with(c) with(o) return " + this.src + "})";
     this.eval = eval(bindSrc);
 }
 
@@ -176,13 +180,16 @@ function construct(meta) {
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+        var item = (new QMLComponent({
+            object: cTree,
+            context: meta.context
+        })).createObject(meta.parent);
 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
         QMLBaseObject.call(item, meta);
         if (typeof item.dom != 'undefined')
-          item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+            item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
     } else {
         console.log("No constructor found for " + meta.object.$class);
@@ -209,19 +216,23 @@ function createSimpleProperty(type, obj, propName, access) {
     var prop = new QMLProperty(type, obj, propName);
     var getter, setter;
     if (typeof access == 'undefined' || access == null)
-      access = 'rw';
+        access = 'rw';
 
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
-    getter = function()       { return obj.$properties[propName].get(); };
+    getter = function () {
+        return obj.$properties[propName].get();
+    };
     if (access == 'rw')
-      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+        setter = function (newVal) {
+            return obj.$properties[propName].set(newVal);
+        };
     else {
-      setter = function(newVal) {
-        if (obj.$canEditReadOnlyProperties != true)
-          throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal);
-      }
+        setter = function (newVal) {
+            if (obj.$canEditReadOnlyProperties != true)
+                throw "property '" + propName + "' has read only access";
+            return obj.$properties[propName].set(newVal);
+        }
     }
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot)
@@ -234,16 +245,16 @@ function createSimpleProperty(type, obj, propName, access) {
 var setupGetter,
     setupSetter,
     setupGetterSetter;
-(function() {
+(function () {
 
-// todo: What's wrong with Object.defineProperty on some browsers?
-// Object.defineProperty is the standard way to setup getters and setters.
-// However, the following way to use Object.defineProperty don't work on some
-// webkit-based browsers, namely Safari, iPad, iPhone and Nokia N9 browser.
-// Chrome, firefox and opera still digest them fine.
+    // todo: What's wrong with Object.defineProperty on some browsers?
+    // Object.defineProperty is the standard way to setup getters and setters.
+    // However, the following way to use Object.defineProperty don't work on some
+    // webkit-based browsers, namely Safari, iPad, iPhone and Nokia N9 browser.
+    // Chrome, firefox and opera still digest them fine.
 
-// So, if the deprecated __defineGetter__ is available, use those, and if not
-// use the standard Object.defineProperty (IE for example).
+    // So, if the deprecated __defineGetter__ is available, use those, and if not
+    // use the standard Object.defineProperty (IE for example).
 
     var useDefineProperty = !(Object[GETTER] && Object[SETTER]);
 
@@ -253,26 +264,36 @@ var setupGetter,
             console.log("No __defineGetter__ or defineProperty available!");
         }
 
-        setupGetter = function(obj, propName, func) {
-            Object.defineProperty(obj, propName,
-                { get: func, configurable: true, enumerable: true } );
+        setupGetter = function (obj, propName, func) {
+            Object.defineProperty(obj, propName, {
+                get: func,
+                configurable: true,
+                enumerable: true
+            });
         }
-        setupSetter = function(obj, propName, func) {
-            Object.defineProperty(obj, propName,
-                { set: func, configurable: true, enumerable: false });
+        setupSetter = function (obj, propName, func) {
+            Object.defineProperty(obj, propName, {
+                set: func,
+                configurable: true,
+                enumerable: false
+            });
         }
-        setupGetterSetter = function(obj, propName, getter, setter) {
-            Object.defineProperty(obj, propName,
-                {get: getter, set: setter, configurable: true, enumerable: false });
+        setupGetterSetter = function (obj, propName, getter, setter) {
+            Object.defineProperty(obj, propName, {
+                get: getter,
+                set: setter,
+                configurable: true,
+                enumerable: false
+            });
         }
     } else {
-        setupGetter = function(obj, propName, func) {
+        setupGetter = function (obj, propName, func) {
             obj[GETTER](propName, func);
         }
-        setupSetter = function(obj, propName, func) {
+        setupSetter = function (obj, propName, func) {
             obj[SETTER](propName, func);
         }
-        setupGetterSetter = function(obj, propName, getter, setter) {
+        setupGetterSetter = function (obj, propName, getter, setter) {
             obj[GETTER](propName, getter);
             obj[SETTER](propName, setter);
         }
@@ -297,19 +318,18 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         }
         // slots
         if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
-            var signalName =  i[2].toLowerCase() + i.slice(3);
+            var signalName = i[2].toLowerCase() + i.slice(3);
             if (!item[signalName]) {
                 console.warn("No signal called " + signalName + " found!");
                 continue;
-            }
-            else if (typeof item[signalName].connect != 'function') {
+            } else if (typeof item[signalName].connect != 'function') {
                 console.warn(signalName + " is not a signal!");
                 continue;
             }
             if (!value.eval) {
                 var params = "";
                 for (var j in item[signalName].parameters) {
-                    params += j==0 ? "" : ", ";
+                    params += j == 0 ? "" : ", ";
                     params += item[signalName].parameters[j].name;
                 }
                 value.src = "(function(" + params + ") {" + value.src + "})";
@@ -336,11 +356,11 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 createSimpleProperty("alias", item, i);
                 item.$properties[i].componentScope = componentScope;
                 item.$properties[i].val = value;
-                item.$properties[i].get = function() {
+                item.$properties[i].get = function () {
                     var obj = this.componentScope[this.val.objectName];
                     return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
                 }
-                item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
+                item.$properties[i].set = function (newVal, fromAnimation, objectScope, componentScope) {
                     if (!this.val.propertyName)
                         throw "Cannot set alias property pointing to an QML object.";
                     this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
@@ -376,35 +396,62 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     if (metaObject.$defaultProperty)
         item.$defaultProperty = metaObject.$defaultProperty;
     if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
-      item.completedAlreadyCalled = true;
-      item.completed();
+        item.completedAlreadyCalled = true;
+        item.completed();
     }
 }
 
 // ItemModel. EXPORTED.
-JSItemModel = function() {
+JSItemModel = function () {
     this.roleNames = [];
 
-    this.setRoleNames = function(names) {
+    this.setRoleNames = function (names) {
         this.roleNames = names;
     }
 
     this.dataChanged = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
+        {
+            type: "int",
+            name: "startIndex"
+        },
+        {
+            type: "int",
+            name: "endIndex"
+        }
     ]);
     this.rowsInserted = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
+        {
+            type: "int",
+            name: "startIndex"
+        },
+        {
+            type: "int",
+            name: "endIndex"
+        }
     ]);
     this.rowsMoved = Signal([
-        {type:"int", name:"sourceStartIndex"},
-        {type:"int", name:"sourceEndIndex"},
-        {type:"int", name:"destinationIndex"}
+        {
+            type: "int",
+            name: "sourceStartIndex"
+        },
+        {
+            type: "int",
+            name: "sourceEndIndex"
+        },
+        {
+            type: "int",
+            name: "destinationIndex"
+        }
     ]);
     this.rowsRemoved = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
+        {
+            type: "int",
+            name: "startIndex"
+        },
+        {
+            type: "int",
+            name: "endIndex"
+        }
     ]);
     this.modelReset = Signal();
 }
