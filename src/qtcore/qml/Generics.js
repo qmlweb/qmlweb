@@ -33,3 +33,23 @@ function updateCss(self) {
         }
     }
 }
+
+// Create list of strings of object properties
+function objList(obj, title) {
+    var out = [title];
+    for (o in obj) {
+        var ov = obj[o];
+        if (ov)
+            out.push(o + ' : ' + ov);
+    }
+    return out;
+}
+
+// Temporary utility function
+function logCss() {
+    var out0 = objList(self.dom.style);
+    console.log(out0.join('\n'));
+
+    var out1 = objList(self.dom.firstChild.style);
+    console.log(out1.join('\n'));
+}

@@ -201,6 +201,7 @@
 
           this.Component.completed.connect(this, function() {
               this.selectByKeyboard = !this.readOnly;
+              //logCss();
               updateValue();
           });
 
