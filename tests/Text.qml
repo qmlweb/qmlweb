@@ -9,7 +9,7 @@ Rectangle {
     Rectangle {
         id: page
         width: 610
-        height: 200
+        height: 220
         x: root.left + 45
         y: title.bottom + 25
         color: '#cfc'
@@ -17,7 +17,7 @@ Rectangle {
         border.color: 'blue'
         Text {
             id: inner1
-            anchors.centerIn: root
+            anchors.centerIn: page
             font.pointSize: 18
             text:
 '<b>Gallia</b> est omnis divisa <i>in partes tres</i>,

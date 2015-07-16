@@ -126,7 +126,7 @@ Rectangle {
             color: '777'
             font.pointSize: 18
             font.bold: true
-            text: 'Your text could be here'
+            text: 'Your text could be here\nNot working with MS Edge'
         }
     }
 }
