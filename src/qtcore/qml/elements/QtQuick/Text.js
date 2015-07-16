@@ -5,25 +5,10 @@ registerQmlType({
     constructor: function QMLText(meta) {
         QMLItem.call(this, meta);
 
-        // We create another span inside the text to distinguish the actual
-        // (possibly html-formatted) text from child elements
         this.dom.innerHTML = "<span></span>";
         this.dom.style.pointerEvents = "auto";
         this.dom.firstChild.style.width = "100%";
         this.dom.firstChild.style.height = "100%";
-
-        // Creates font css description
-        function fontCss(font) {
-            var css = "";
-            css += font.italic ? "italic " : "normal ";
-            css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
-            // Canvas seems to only support bold yes or no
-            css += (font.weight == Font.Bold || font.weight == Font.DemiBold || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
-            css += font.pixelSize !== Undefined ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
-            css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
-            css += (font.family || "sans-serif") + " ";
-            return css;
-        }
 
         this.Text = {
             // Wrap Mode
@@ -80,15 +65,11 @@ registerQmlType({
                 this.dom.firstChild.style.whiteSpace = "pre-wrap";
                 this.dom.firstChild.style.wordWrap = "break-word";
             };
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
             if (this.horizontalAlignment == "justify")
                 this.dom.firstChild.style.whiteSpace = "normal";
         });
         this.horizontalAlignmentChanged.connect(this, function (newVal) {
             this.dom.style.textAlign = newVal;
-            // AlignJustify doesn't work with pre/pre-wrap, so we decide the
-            // lesser of the two evils to be ignoring "\n"s inside the text.
             if (newVal == "justify")
                 this.dom.firstChild.style.whiteSpace = "normal";
         });
@@ -170,8 +151,6 @@ registerQmlType({
         }
 
         this.$drawItem = function (c) {
-            //descr("draw text", this, ["x", "y", "text",
-            //                          "implicitWidth", "implicitHeight"]);
             c.save();
             c.font = fontCss(this.font);
             c.fillStyle = this.color;

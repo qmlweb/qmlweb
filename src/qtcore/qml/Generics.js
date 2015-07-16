@@ -16,11 +16,12 @@ function fontCss(font) {
 // then clear corresponding dom style
 function updateCss(self) {
     var supported = [
-    'border',
-    'borderRadius',
-    'borderWidth',
-    'borderColor',
-    'backgroundColor', ];
+        'border',
+        'borderRadius',
+        'borderWidth',
+        'borderColor',
+        'backgroundColor',
+    ];
 
     var child_style = self.dom.firstChild.style;
     for (n = 0; n < supported.length; n++) {

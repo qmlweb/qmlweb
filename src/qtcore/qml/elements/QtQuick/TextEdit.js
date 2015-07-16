@@ -2,7 +2,7 @@
       module: 'QtQuick',
       name: 'TextEdit',
       versions: /.*/,
-      constructor: function (meta) {
+      constructor: function(meta) {
           QMLItem.call(this, meta);
 
           var self = this;
@@ -102,155 +102,108 @@
           this.linkActivated = Signal([{
               type: 'string',
               name: 'link'
-      }]);
+          }]);
           this.linkHovered = Signal([{
               type: 'string',
               name: 'link'
-      }]);
+          }]);
 
           // Methods
-          var append = (function append(text) {
+          this.append = function append(text) {
               this.text += text;
-          }).bind(this);
+          };
 
-          var copy = (function copy() {
+          this.copy = function copy() {
               // TODO
-              // copyToClipboard(this.selectedText);
-          }).bind(this);
+          };
 
-          var cut = (function cut() {
+          this.cut = function cut() {
               this.text =
                   this.text(0, this.selectionStart) + this.text(this.selectionEnd, this.text.length);
               // TODO
-              // moveToClipboard(this.selectedTex);
-          }).bind(this);
+          };
 
-          var deselect = (function deselect() {
+          this.deselect = function deselect() {
               //this.selectionStart = -1;
               //this.selectionEnd = -1;
               //this.selectedText = null;
-          }).bind(this);
+          };
 
-          var getFormattedText = (function getFormattedText(start, end) {
-              var text = this.text.slice(start, end);
+          this.getFormattedText = function getFormattedText(start, end) {
+              this.text = this.text.slice(start, end);
               // TODO
               // process text
               return text;
-          }).bind(this);
+          };
 
-          var getText = (function getText(start, end) {
+          this.getText = function getText(start, end) {
               return this.text.slice(start, end);
-          }).bind(this);
+          };
 
-          var insert = (function getText(position, text) {
+          this.insert = function getText(position, text) {
               // TODO
-          }).bind(this);
+          };
 
-          var isRightToLeft = (function isRightToLeft(start, end) {
+          this.isRightToLeft = function isRightToLeft(start, end) {
               // TODO
-          }).bind(this);
+          };
 
-          var linkAt = (function linkAt(x, y) {
+          this.linkAt = function linkAt(x, y) {
               // TODO
-          }).bind(this);
+          };
 
-          var moveCursorSelection = (function moveCursorSelection(x, y) {
+          this.moveCursorSelection = function moveCursorSelection(x, y) {
               // TODO
-          }).bind(this);
+          };
 
-          var paste = (function paste() {
+          this.paste = function paste() {
               // TODO
-          }).bind(this);
+          };
 
-          var positionAt = (function positionAt(x, y) {
+          this.positionAt = function positionAt(x, y) {
               // TODO
-              // return cursor value
-          }).bind(this);
+          };
 
-          var positionToRectangle = (function positionToRectangle(position) {
+          this.positionToRectangle = function positionToRectangle(position) {
               // TODO
-              // return rectangle
-          }).bind(this);
+          };
 
-          var redo = (function redo() {
+          this.redo = function redo() {
               // TODO
-          }).bind(this);
+          };
 
-          var remove = (function remove(start, end) {
+          this.remove = function remove(start, end) {
               // TODO
-              // return text from start to end
-          }).bind(this);
+          };
 
-          var select = (function select(start, end) {
+          this.select = function select(start, end) {
               // TODO
-          }).bind(this);
+          };
 
-          var selectAll = (function selectAll() {
-              //this.selectionStart = 0;
-              //this.selectionEnd = this.text.length;
-              //this.selectedText = this.text;
-          }).bind(this);
-
-          var selectWord = (function selectWord() {
+          this.selectAll = function selectAll() {
               // TODO
-              // return text from start to end
-          }).bind(this);
+          };
 
-          var undo = (function undo() {
+          this.selectWord = function selectWord() {
               // TODO
-          }).bind(this);
+          };
+
+          this.undo = function undo() {
+              // TODO
+          };
 
           this.dom.firstChild.oninput = updateValue;
           this.dom.firstChild.onpropertychanged = updateValue;
 
-          var getLineCount = function (self) {
+          var getLineCount = function(self) {
               return self.text.split(/\n/).length;
           }
 
-          function objList(obj, title) {
-              var out = [title];
-              for (o in obj) {
-                  var ov = obj[o];
-                  if (ov)
-                      out.push(o + ' : ' + ov);
-              }
-              return out;
-          }
-
-          function logCss() {
-              var out0 = objList(self.dom.style);
-              console.log(out0.join('\n'));
-
-              var out1 = objList(self.dom.firstChild.style);
-              console.log(out1.join('\n'));
-          }
-
-          this.Component.completed.connect(this, function () {
+          this.Component.completed.connect(this, function() {
               this.selectByKeyboard = !this.readOnly;
               //logCss();
               updateValue();
           });
-
-          function updateCss(self) {
-              var supported = [
-          'border',
-          'borderRadius',
-          'borderWidth',
-          'borderColor',
-          'backgroundColor', ];
-
-              // transfer dom style to firstChild
-              // and clear dom style
-              var child_style = self.dom.firstChild.style;
-              for (n = 0; n < supported.length; n++) {
-                  var o = supported[n];
-                  var v = self.css[o];
-                  if (v) {
-                      child_style[o] = v;
-                      self.css[o] = null;
-                  }
-              }
-          }
 
           function updateValue(e) {
               if (self.text != self.dom.firstChild.value) {
@@ -261,16 +214,16 @@
               updateCss(self);
           }
 
-          this.colorChanged.connect(this, function (newVal) {
+          this.colorChanged.connect(this, function(newVal) {
               this.dom.firstChild.style.color = newVal;
           });
 
-          this.textChanged.connect(this, function (newVal) {
+          this.textChanged.connect(this, function(newVal) {
               this.dom.firstChild.value = newVal;
           });
 
-          // The twofunctions below are taken from QMLText
-          this.$drawItem = function (c) {
+          // The function below is from QMLText
+          this.$drawItem = function(c) {
               c.save();
               c.font = fontCss(this.font);
               c.fillStyle = this.color;
@@ -278,31 +231,6 @@
               c.textBaseline = "top";
               c.fillText(this.text, this.left, this.top);
               c.restore();
-          }
-
-          // Creates font css description
-          function fontCss(font) {
-              var css = "";
-              css += font.italic ? "italic " : "normal ";
-              css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
-              // Canvas seems to only support bold yes or no
-              css += (font.weight == Font.Bold || font.weight == Font.DemiBold || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
-              css += font.pixelSize !== Undefined ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
-              css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
-              css += (font.family || "sans-serif") + " ";
-              return css;
-          }
-          // Creates font css description
-          function fontCss(font) {
-              var css = "";
-              css += font.italic ? "italic " : "normal ";
-              css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
-              // Canvas seems to only support bold yes or no
-              css += (font.weight == Font.Bold || font.weight == Font.DemiBold || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
-              css += font.pixelSize !== Undefined ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
-              css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
-              css += (font.family || "sans-serif") + " ";
-              return css;
           }
       }
   });

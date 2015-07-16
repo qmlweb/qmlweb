@@ -2,7 +2,7 @@ registerQmlType({
     module: 'QtQuick',
     name: 'TestPlugin',
     versions: /.*/,
-    constructor: function (meta) {
+    constructor: function(meta) {
         QMLItem.call(this, meta);
 
         var self = this;
