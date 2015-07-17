@@ -1,4 +1,9 @@
-// Base object for all qml elements
+/**
+ *
+ * Base of all QML objects
+ *
+ */
+
 function QMLBaseObject(meta) {
     QObject.call(this, meta.parent);
     var i,
@@ -9,16 +14,13 @@ function QMLBaseObject(meta) {
 
     if (!this.$isComponentRoot)
         this.$isComponentRoot = meta.isComponentRoot;
-    // scope
     this.$context = meta.context;
 
-    // Component.onCompleted
     this.Component = new QObject(this);
     this.Component.completed = Signal([]);
     engine.completedSignals.push(this.Component.completed);
     this.completed = this.Component.completed;
 
-    // Component get own properties
     var attributes = [];
     for (var key in meta.object) {
         if (meta.object.hasOwnProperty(key) &&

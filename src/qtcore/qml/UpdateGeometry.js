@@ -1,3 +1,16 @@
+/**
+ * Update the geometry TODO
+ *
+ */
+
+/**
+ * Create QML property
+ *
+ * @param   newVal      TODO
+ * @param   oldVal      TODO
+ * @param   propName    TODO
+ *
+ */
 function updateHGeometry(newVal, oldVal, propName) {
     var anchors = this.anchors || this;
     if (this.$updatingGeometry)
@@ -8,13 +21,12 @@ function updateHGeometry(newVal, oldVal, propName) {
         lM = anchors.leftMargin || anchors.margins,
         rM = anchors.rightMargin || anchors.margins;
 
-    // Width
     if (this.$isUsingImplicitWidth && propName == "implicitWidth")
         width = this.implicitWidth;
     else if (propName == "width")
         this.$isUsingImplicitWidth = false;
 
-    // Position TODO: Layouts
+    // TODO: Layouts
     if ((t = anchors.fill) !== undefined) {
         if (!t.$properties.left.changed.isConnected(this, updateHGeometry))
             t.$properties.left.changed.connect(this, updateHGeometry);

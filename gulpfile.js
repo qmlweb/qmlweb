@@ -29,8 +29,6 @@ var qtcoreSources = [
   './src/helpers/encapsulate.end.js'
 ];
 
-var tests = [ './lib/qt.js', './spec/**/*.js' ];
-
 gulp.task('qt', function() {
   return gulp.src(qtcoreSources)
     .pipe(g_changed('./lib/qt.js'))

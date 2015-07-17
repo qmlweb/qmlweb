@@ -1,3 +1,16 @@
+/**
+ * Create QML property
+ *
+ */
+
+/**
+ * Create QML property
+ *
+ * @param   type    property type
+ * @param   obj     object for property
+ * @param   name    name of property
+ *
+ */
 function QMLProperty(type, obj, name) {
     this.obj = obj;
     this.name = name;
@@ -11,13 +24,9 @@ function QMLProperty(type, obj, name) {
     this.type = type;
     this.animation = null;
 
-    // This list contains all signals that hold references to this object.
-    // It is needed when deleting, as we need to tidy up all references to this object.
     this.$tidyupList = [];
 }
 
-// Updater recalculates the value of a property if one of the
-// dependencies changed
 QMLProperty.prototype.update = function () {
     if (!this.binding)
         return;
@@ -41,17 +50,13 @@ QMLProperty.prototype.update = function () {
         this.changed(this.val, oldVal, this.name);
 }
 
-// Define getter
 QMLProperty.prototype.get = function () {
-    // If this call to the getter is due to a property that is dependant on this
-    // one, we need it to take track of changes
     if (evaluatingProperty && !this.changed.isConnected(evaluatingProperty, QMLProperty.prototype.update))
         this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
 
     return this.val;
 }
 
-// Define setter
 QMLProperty.prototype.set = function (newVal, fromAnimation, objectScope, componentScope) {
     var i,
         oldVal = this.val;

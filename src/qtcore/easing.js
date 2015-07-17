@@ -1,3 +1,8 @@
+/**
+ *
+ * Defines the Easing enumeration values
+ *
+ */
 global.Easing = {
     Linear: 1,
     InQuad: 2,

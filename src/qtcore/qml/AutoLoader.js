@@ -1,3 +1,10 @@
+/**
+ *
+ * HTML QML file loader
+ *
+ * TODO ? can there be more than one body tag ?
+ *
+ */
 global.addEventListener('load', function () {
     var metaTags = document.getElementsByTagName('BODY');
 

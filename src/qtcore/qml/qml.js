@@ -1,11 +1,13 @@
+/**
+ *
+ * Basic QML related functions (too many to list individually)
+ *
+ */
+
 var GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
     Undefined = undefined,
-    // Property that is currently beeing evaluated. Used to get the information
-    // which property called the getter of a certain other property for
-    // evaluation and is thus dependant on it.
     evaluatingProperty = undefined,
-    // All object constructors
     constructors = {
         int: QMLInteger,
         real: Number,
@@ -20,11 +22,15 @@ var GETTER = "__defineGetter__",
         'var': QMLVariant,
         QMLDocument: QMLComponent
     };
+
 var modules = {
     Main: constructors
 };
+
 /**
- * Inheritance helper
+ *
+ * TODO ? is this needed ? should be part of the language
+ *
  */
 Object.create = function (o) {
     function F() {}
@@ -32,14 +38,12 @@ Object.create = function (o) {
     return new F();
 };
 
-// Helper. Adds a type to the constructor list
 global.registerGlobalQmlType = function (name, type) {
     global[type.name] = type;
     constructors[name] = type;
     modules.Main[name] = type;
 };
 
-// Helper. Register a type to a module
 global.registerQmlType = function (options) {
     if (typeof options != 'object') {
         registerGlobalQmlType(arguments[0], arguments[1]);
@@ -117,15 +121,12 @@ global.loadImports = function (self, imports) {
     perContextConstructors[self.objectId] = constructors;
 }
 
-// Helper. Ought to do absolutely nothing.
 function noop() {};
 
-// Helper to prevent some minimization cases. Ought to do "nothing".
 function tilt() {
     arguments.length = 0
 };
 
-// Helper to clone meta-objects for dynamic element creation
 function cloneObject(obj) {
     if (null == obj || typeof obj != "object")
         return obj;
@@ -142,34 +143,26 @@ function cloneObject(obj) {
 }
 
 /**
- * Helper function.
- * Prints msg and values of object. Workaround when using getter functions as
- * Chrome (at least) won't show property values for them.
- * @param {String} msg Message
- * @param {Object} obj Object to use (will be "printed", too)
- * @param {Array} vals Values to list from the object.
- */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
-}
-
-/**
- * Compile binding. Afterwards you may call binding.eval to evaluate.
+ *
+ * Compile binding. Afterwards you may call
+ * binding.eval to evaluate.
+ *
  */
 QMLBinding.prototype.compile = function () {
-    var bindSrc = this.function ? "(function(o, c) { with(c) with(o) " + this.src + "})" : "(function(o, c) { with(c) with(o) return " + this.src + "})";
+    var bindSrc = this.function ? "(function(o, c) { with(c) with(o) "
+        + this.src + "})" : "(function(o, c) { with(c) with(o) return "
+        + this.src + "})";
     this.eval = eval(bindSrc);
 }
 
 /**
+ *
  * QML Object constructor.
- * @param {Object} meta Meta information about the object and the creation context
- * @return {Object} New qml object
+ *
+ * @param   meta    Meta information about the object
+ *                  and the creation context
+ * @return  new qml object
+ *
  */
 function construct(meta) {
     var item,
@@ -179,38 +172,39 @@ function construct(meta) {
         item = new constructors[meta.object.$class](meta);
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
-            console.error("A QML component must only contain one root element!");
+            console.error("QML components may contain only one root element!");
         var item = (new QMLComponent({
             object: cTree,
             context: meta.context
         })).createObject(meta.parent);
 
-        // Recall QMLBaseObject with the meta of the instance in order to get property
-        // definitions, etc. from the instance
         QMLBaseObject.call(item, meta);
         if (typeof item.dom != 'undefined')
-            item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
-        var dProp; // Handle default properties
+            item.dom.className += " " + meta.object.$class
+                + (meta.object.id ? " " + meta.object.id : "");
+        var dProp;
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
     }
 
-    // id
     if (meta.object.id)
         meta.context[meta.object.id] = item;
 
-    // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, meta.context);
 
     return item;
 }
 
 /**
+ *
  * Create property getters and setters for object.
- * @param {Object} obj Object for which gsetters will be set
- * @param {String} propName Property name
- * @param {Object} [options] Options that allow finetuning of the property
+ *
+ * @param   type        TODO
+ * @param   obj         object for which to create a property
+ * @param   propName    property name
+ * @param   access      access mode of property (default: read-write)
+ *
  */
 function createSimpleProperty(type, obj, propName, access) {
     var prop = new QMLProperty(type, obj, propName);
@@ -239,23 +233,12 @@ function createSimpleProperty(type, obj, propName, access) {
         setupGetterSetter(obj.$context, propName, getter, setter);
 }
 
-/**
- * Set up simple getter function for property
- */
 var setupGetter,
     setupSetter,
     setupGetterSetter;
 (function () {
 
     // todo: What's wrong with Object.defineProperty on some browsers?
-    // Object.defineProperty is the standard way to setup getters and setters.
-    // However, the following way to use Object.defineProperty don't work on some
-    // webkit-based browsers, namely Safari, iPad, iPhone and Nokia N9 browser.
-    // Chrome, firefox and opera still digest them fine.
-
-    // So, if the deprecated __defineGetter__ is available, use those, and if not
-    // use the standard Object.defineProperty (IE for example).
-
     var useDefineProperty = !(Object[GETTER] && Object[SETTER]);
 
     if (useDefineProperty) {
@@ -300,12 +283,15 @@ var setupGetter,
     }
 
 })();
+
 /**
  * Apply properties from metaObject to item.
- * @param {Object} metaObject Source of properties
- * @param {Object} item Target of property apply
- * @param {Object} objectScope Scope in which properties should be evaluated
- * @param {Object} componentScope Component scope in which properties should be evaluated
+ *
+ * @param   metaObject      source of properties
+ * @param   item            target of property application
+ * @param   objectScope     scope for property evaluation
+ * @param   componentScope  component scope for property evaluation
+ *
  */
 function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
@@ -316,7 +302,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         if (i == "id" || i[0] == "$") {
             continue;
         }
-        // slots
+
         if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
             var signalName = i[2].toLowerCase() + i.slice(3);
             if (!item[signalName]) {
@@ -391,8 +377,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             throw "Cannot assign to unexistant default property";
     }
-    // We purposefully set the default property AFTER using it, in order to only have it applied for
-    // instanciations of this component, but not for its internal children
+
     if (metaObject.$defaultProperty)
         item.$defaultProperty = metaObject.$defaultProperty;
     if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
@@ -401,7 +386,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
 }
 
-// ItemModel. EXPORTED.
 JSItemModel = function () {
     this.roleNames = [];
 
@@ -456,11 +440,6 @@ JSItemModel = function () {
     this.modelReset = Signal();
 }
 
-// -----------------------------------------------------------------------------
-// Stuff below defines QML things
-// -----------------------------------------------------------------------------
-
-// Helper
 function unboundMethod() {
     console.log("Unbound method for", this);
 }

@@ -1,29 +1,60 @@
+/**
+ * Creates the Qt namespace.
+ *
+ * Defines the functions
+ *  +   rgba
+ *  +   openUrlExternally
+ *
+ */
 global.Qt = {
+    /**
+     * rgba function as a string
+     *
+     * @param   r   red value in the interval [0, 1]
+     * @param   g   green value in the interval [0, 1]
+     * @param   b   blue value in the interval [0, 1]
+     * @param   a   alpha value in the interval [0, 1]
+     *
+     * @return  function converting float colors to interval [0, 255]
+     *
+     */
     rgba: function (r, g, b, a) {
-        return "rgba(" + Math.round(r * 255) + "," + Math.round(g * 255) + "," + Math.round(b * 255) + "," + a + ")";
+        return "rgba("
+          + Math.round(r * 255)
+          + "," + Math.round(g * 255)
+          + "," + Math.round(b * 255)
+          + "," + a + ")";
     },
+
+    /**
+     * function to load an external URL
+     * can only used in browser, where window is defined
+     *
+     * @param   url URL string
+     *
+     */
     openUrlExternally: function (url) {
         page = window.open(url, '_blank');
         page.focus();
     },
-    // Buttons masks
+
     LeftButton: 1,
     RightButton: 2,
     MiddleButton: 4,
-    // Modifiers masks
+
     NoModifier: 0,
     ShiftModifier: 1,
     ControlModifier: 2,
     AltModifier: 4,
     MetaModifier: 8,
-    KeypadModifier: 16, // Note: Not available in web
-    // Layout directions
+    KeypadModifier: 16,
+
     LeftToRight: 0,
     RightToLeft: 1,
-    // Orientations
+
     Vertical: 0,
     Horizontal: 1,
-    // Keys
+
     Key_Escape: 27,
     Key_Tab: 9,
     Key_Backtab: 245,

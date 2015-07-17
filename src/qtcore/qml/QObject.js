@@ -1,11 +1,21 @@
-// Base object for all qml thingies
+/**
+ * Create QML object
+ * QMLObject is inherited by all QML items
+ *
+ */
+
+/**
+ * Create QML property
+ *
+ * @param   parent  parent of the QObject
+ *
+ */
 var objectIds = 0;
 
 function QObject(parent) {
     this.$parent = parent;
     if (parent && parent.$tidyupList)
         parent.$tidyupList.push(this);
-    // List of things to tidy up when deleting this object.
     if (!this.$tidyupList)
         this.$tidyupList = [];
     if (!this.$properties)
@@ -15,9 +25,9 @@ function QObject(parent) {
     this.$delete = function () {
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
-            if (item.$delete) // It's a QObject
+            if (item.$delete)
                 item.$delete();
-            else // It must be a signal
+            else
                 item.disconnect(this);
         }
 

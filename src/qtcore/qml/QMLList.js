@@ -1,3 +1,12 @@
+/**
+ * Create QML list
+ *
+ * @param   meta    meta object
+ *
+ * @return QML list
+ *
+ */
+
 function QMLList(meta) {
     var list = [];
     if (meta.object instanceof Array)

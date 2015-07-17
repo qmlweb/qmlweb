@@ -1,3 +1,14 @@
+/**
+ * Create QML positioner
+ *
+ */
+
+/**
+ * Create QML positioner
+ *
+ * @param   meta    meta object
+ *
+ */
 function QMLPositioner(meta) {
     QMLItem.call(this, meta);
 
@@ -9,6 +20,10 @@ function QMLPositioner(meta) {
     this.spacing = 0;
 }
 
+/**
+ * TODO
+ *
+ */
 QMLPositioner.slotChildrenChanged = function () {
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];

@@ -1,11 +1,12 @@
 /**
  * Creates and returns a signal with the parameters specified in @p params.
  *
- * @param params Array with the parameters of the signal. Each element has to be
- *               an object with the two properties "type" and "name" specifying
- *               the datatype of the parameter and its name. The type is
- *               currently ignored.
- * @param options Options that allow finetuning of the signal.
+ * @param   params  Array with the parameters of the signal. Each element
+ *                  has to bean object with the two properties "type" and
+ *                  "name" specifying the datatype of the parameter
+ *                  and its name. The type is currently ignored.
+ * @param   options Options that allow finetuning of the signal.
+ *
  */
 global.Signal = function Signal(params, options) {
     options = options || {};

@@ -1,46 +1,39 @@
-/*
- * - QMLEngine(element, options) -- Returns new qml engine object, for which:
- *   - loadFile(file) -- Load file to the engine (.qml or .qml.js atm)
- *   - start() -- start the engine/application
- *   - stop() -- stop the engine/application. Restarting is experimental.
- *   element is HTMLCanvasElement and options are for debugging.
- *   For further reference, see testpad and qml viewer applications.
+/**
+ *
+ * Create QML engine
+ * Only one engine can be running at a time
+ *
+ * useful functions of the engine are
+ *
+ *  +   loadFile
+ *  +   start
+ *  +   stop
+ *
  */
 
-// There can only be one running QMLEngine. This variable points to the currently running engine.
 var engine = null;
 
-// QML engine. EXPORTED.
+/**
+ * @param   element HTMLCanvasElement
+ * @param   options used for debugging
+ */
 QMLEngine = function (element, options) {
-    //----------Public Members----------
     this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
     this.running = false;
+    this.rootElement = element;
+    this.operationState = 1;
 
-    // Mouse Handling
     this.mouseAreas = [];
     this.oldMousePos = {
         x: 0,
         y: 0
     };
 
-    // List of available Components
     this.components = {};
-
-    this.rootElement = element;
-
-    // List of Component.completed signals
     this.completedSignals = [];
-
-    // Current operation state of the engine (Idle, init, etc.)
-    this.operationState = 1;
-
-    // List of properties whose values are bindings. For internal use only.
     this.bindedProperties = [];
 
-
-    //----------Public Methods----------
-    // Start the engine
     this.start = function () {
         engine = this;
         var i;
@@ -53,7 +46,6 @@ QMLEngine = function (element, options) {
         }
     }
 
-    // Stop the engine
     this.stop = function () {
         var i;
         if (this.operationState == QMLOperationState.Running) {
@@ -83,7 +75,6 @@ QMLEngine = function (element, options) {
         }
     }
 
-    // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function (file) {
         var tree;
 
@@ -94,7 +85,6 @@ QMLEngine = function (element, options) {
         this.loadQMLTree(tree);
     }
 
-    // parse and construct qml
     this.loadQML = function (src) {
         this.loadQMLTree(parseQML(src));
     }
@@ -104,8 +94,6 @@ QMLEngine = function (element, options) {
         if (options.debugTree) {
             options.debugTree(tree);
         }
-
-        // Create and initialize objects
         var component = new QMLComponent({
             object: tree,
             parent: null
@@ -116,7 +104,6 @@ QMLEngine = function (element, options) {
 
         this.start();
 
-        // Call completed signals
         for (var i in this.completedSignals) {
             this.completedSignals[i]();
         }
@@ -130,7 +117,6 @@ QMLEngine = function (element, options) {
         return this.rootContext().activeFocus;
     }).bind(this);
 
-    // KEYBOARD MANAGEMENT
     var keyboardSignals = {};
     keyboardSignals[Qt.Key_Asterisk] = 'asteriskPressed';
     keyboardSignals[Qt.Key_Back] = 'backPressed';
@@ -223,7 +209,6 @@ QMLEngine = function (element, options) {
                 focusedElement = focusedElement.$parent;
         }
     }).bind(this);
-    // END KEYBOARD MANAGEMENT
 
     this.registerProperty = function (obj, propName) {
         var dependantProperties = [];
@@ -246,9 +231,6 @@ QMLEngine = function (element, options) {
         setupGetterSetter(obj, propName, getter, setter);
     }
 
-    //Intern
-
-    // Load file, parse and construct as Component (.qml)
     this.loadComponent = function (name) {
         if (name in this.components)
             return this.components[name];
@@ -313,21 +295,13 @@ QMLEngine = function (element, options) {
         };
     }
 
-    // Performance measurements
     this.$perfDraw = function (canvas) {
         doc.$draw(canvas);
     }
 
-    //----------Private Methods----------
-    // In JS we cannot easily access public members from
-    // private members so self acts as a bridge
     var self = this;
 
-    // Listen also to touchstart events on supporting devices
-    // Makes clicks more responsive (do not wait for click event anymore)
     function touchHandler(e) {
-        // preventDefault also disables pinching and scrolling while touching
-        // on qml application
         e.preventDefault();
         var at = {
             layerX: e.touches[0].pageX - element.offsetLeft,
@@ -367,28 +341,18 @@ QMLEngine = function (element, options) {
     }
 
 
-    //----------Private Members----------
-    // Target canvas
-    var // Root document of the engine
-        doc,
-        // Callbacks for stopping or starting the engine
+    var doc,
         whenStop = [],
         whenStart = [],
-        // Ticker resource id and ticker callbacks
         tickerId,
         tickers = [],
         lastTick = new Date().getTime(),
-        // Base path of qml engine (used for resource loading)
         basePath,
         i;
-
-
-    //----------Construct----------
 
     options = options || {};
 
     if (options.debugConsole) {
-        // Replace QML-side console.log
         console = {};
         console.log = function () {
             var args = Array.prototype.slice.call(arguments);
