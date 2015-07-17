@@ -83,7 +83,7 @@ QMLProperty.prototype.set = function (newVal, fromAnimation, objectScope, compon
         if (!fromAnimation)
             this.binding = null;
         if (newVal instanceof Array)
-            newVal = newVal.slice(); // Copies the array
+            newVal = newVal.slice();
     }
 
     if (constructors[this.type] == QMLList) {

@@ -119,7 +119,6 @@ function updateVGeometry(newVal, oldVal, propName) {
         tM = anchors.topMargin || anchors.margins,
         bM = anchors.bottomMargin || anchors.margins;
 
-    // Height
     if (this.$isUsingImplicitHeight && propName == "implicitHeight")
         height = this.implicitHeight;
     else if (propName == "height")

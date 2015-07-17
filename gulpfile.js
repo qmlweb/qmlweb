@@ -31,25 +31,19 @@ var qtcoreSources = [
 
 gulp.task('qt', function() {
   return gulp.src(qtcoreSources)
-    .pipe(g_changed('./lib/qt.js'))
     .pipe(g_concat('qt.js'))
+    .pipe(g_changed('./lib/qt.js'))
     .pipe(gulp.dest('./lib'));
 });
 
 gulp.task('min-qt', function() {
   return gulp.src('./lib/qt.js')
-    .pipe(g_changed('./lib/qt.min.js'))
     .pipe(g_rename('qt.min.js'))
     .pipe(g_uglify())
+    .pipe(g_changed('./lib/qt.min.js'))
     .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('copy-qt', function() {
-  gulp.src('./lib/qt*.js')
-    .pipe(g_changed('../firstflask/static/js/qml3'))
-    .pipe(gulp.dest('../firstflask/static/js/qml3'));
-});
-
-gulp.task('default', ['qt', 'min-qt', 'copy-qt'], function() {
+gulp.task('default', ['qt', 'min-qt'], function() {
    //gulp.watch(qtcoreSources, ['qt', 'min-qt']);
 });

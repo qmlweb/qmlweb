@@ -7,11 +7,9 @@ registerQmlType({
         var self = this;
 
         this.BorderImage = {
-            // tileMode
             Stretch: "stretch",
             Repeat: "repeat",
             Round: "round",
-            // status
             Null: 1,
             Ready: 2,
             Loading: 3,

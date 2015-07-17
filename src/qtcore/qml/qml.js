@@ -30,13 +30,14 @@ var modules = {
 /**
  *
  * TODO ? is this needed ? should be part of the language
+ * After commenting out create tests still work.
  *
  */
-Object.create = function (o) {
-    function F() {}
-    F.prototype = o;
-    return new F();
-};
+//Object.create = function (o) {
+//    function F() {}
+//    F.prototype = o;
+//    return new F();
+//};
 
 global.registerGlobalQmlType = function (name, type) {
     global[type.name] = type;
@@ -298,7 +299,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     objectScope = objectScope || item;
     for (i in metaObject) {
         var value = metaObject[i];
-        // skip global id's and internal values
         if (i == "id" || i[0] == "$") {
             continue;
         }
@@ -357,7 +357,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 item.$properties[i].set(value.value, true, objectScope, componentScope);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
-                // Apply properties one by one, otherwise apply at once
                 applyProperties(value, item[i], objectScope, componentScope);
                 continue;
             }

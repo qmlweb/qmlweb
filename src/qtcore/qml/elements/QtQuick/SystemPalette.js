@@ -5,9 +5,6 @@ window.SystemPalette = {
 };
 
 window.platformsDetectors = [
-  //{ name: 'W8',      regexp: /Windows NT 6\.2/ },
-  //{ name: 'W7',      regexp: /Windows NT 6\.1/ },
-  //{ name: 'Windows', regexp: /Windows NT/ },
     {
         name: 'OSX',
         regexp: /Macintosh/
@@ -40,7 +37,6 @@ registerQmlType({
             delete this.$canEditReadOnlyProperties;
         }).bind(this));
 
-        // Detect OS
         for (var i = 0; i < platformsDetectors.length; ++i) {
             if (platformsDetectors[i].regexp.test(navigator.userAgent)) {
                 platforms = platformsDetectors[i].name;

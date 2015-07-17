@@ -19,7 +19,7 @@ var engine = null;
  */
 QMLEngine = function (element, options) {
     this.fps = 60;
-    this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
+    this.$interval = Math.floor(1000 / this.fps);
     this.running = false;
     this.rootElement = element;
     this.operationState = 1;
@@ -244,7 +244,6 @@ QMLEngine = function (element, options) {
     }
 
     this.$initializePropertyBindings = function () {
-        // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
             property.binding.compile();
@@ -261,7 +260,6 @@ QMLEngine = function (element, options) {
         return metrics;
     }
 
-    // Return a path to load the file
     this.$resolvePath = function (file) {
         if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
             return file;

@@ -48,7 +48,7 @@ registerQmlType({
 
         engine.$registerStart(function () {
             if (self.running) {
-                self.running = false; // toggled back by start();
+                self.running = false;
                 self.start();
             }
         });

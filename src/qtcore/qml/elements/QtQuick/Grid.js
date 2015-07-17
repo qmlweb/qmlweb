@@ -37,14 +37,12 @@ QMLGrid.prototype.layoutChildren = function () {
         curHPos = 0,
         curVPos = 0;
 
-    // How many items are actually visible?
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (child.visible && child.opacity && child.width && child.height)
             visibleItems.push(this.children[i]);
     }
 
-    // How many rows and columns do we need?
     if (!this.columns && !this.rows) {
         c = 4;
         r = Math.ceil(visibleItems.length / 4);
@@ -56,7 +54,6 @@ QMLGrid.prototype.layoutChildren = function () {
         r = Math.ceil(visibleItems.length / c);
     }
 
-    // How big are the colums/rows?
     if (this.flow == 0)
         for (var i = 0; i < r; i++) {
             for (var j = 0; j < c; j++) {
@@ -86,8 +83,6 @@ QMLGrid.prototype.layoutChildren = function () {
     for (var i in rowHeight)
         gridHeight += rowHeight[i] + this.spacing;
 
-    // Do actual positioning
-    // When layoutDirection is RightToLeft we need oposite order of coumns
     var step = this.layoutDirection == 1 ? -1 : 1,
         startingPoint = this.layoutDirection == 1 ? c - 1 : 0,
         endPoint = this.layoutDirection == 1 ? -1 : c;

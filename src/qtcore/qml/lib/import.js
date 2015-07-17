@@ -76,7 +76,7 @@
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, false);
             xhr.send(null);
-            if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
+            if (xhr.status != 200 && xhr.status != 0) {
                 console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
                 return false;
             }
@@ -94,7 +94,7 @@
      *                          and .externals lists qmldir external references.
      */
     readQmlDir = function (url) {
-        var qmldir = getUrlContents(url += "/qmldir"), // Modifies url here!
+        var qmldir = getUrlContents(url += "/qmldir"),
             lines,
             line,
             internals = {},
@@ -108,10 +108,8 @@
 
         lines = qmldir.split(/\r?\n/);
         for (i = 0; i < lines.length; i++) {
-            // trim
             line = lines[i].replace(/^\s+|\s+$/g, "");
             if (!line.length || line[0] == "#") {
-                // Empty line or comment
                 continue;
             }
             match = line.split(/\s+/);
@@ -154,13 +152,7 @@
 
         // todo: .pragma support
 
-        // Exports as follow:
-        // function a() { function b() {} } exports only a.
-        // var a = function b(){} exports a and b. Not sure if b should be exported.
-        //                        rare case, however.
-        // var a = function(){} exports only a.
-
-        var i,
+         var i,
             src = getUrlContents(filename),
             exports = [];
 
@@ -168,26 +160,16 @@
             return;
         }
 
-        // Analyse source
         exports = readExports(src);
         console.log(filename + " exports:", exports);
 
-        // Wrap source to function to retain private scope of the variables.
-        // Make that function return an object.
-        // That object contains getters and setters for exported stuff.
-        // Add () to execute the function.
         src = "(function(){" + src + ";return {";
         for (i = 0; i < exports.length; i++) {
-            // create getters and setters for properties
-            // keeps variables synced better
             src += "get " + exports[i] + "(){return " + exports[i] + "},";
             src += "set " + exports[i] + "(){" + exports[i] + " = arguments[0]},";
-            // without getters and setters:
-            // src += exports[i] + ":" + exports[i] + ",";
         }
         src += "}})()";
 
-        // evaluate source to get the object.
         return eval(src);
     }
 
@@ -199,7 +181,6 @@
      */
     function readExports(src) {
 
-        // Eat src until str is found. Recurse if recursive set.
         function eatUntil(src, str, recursive) {
             var i;
             if (!recursive) {
@@ -215,15 +196,15 @@
                         break;
                     }
                     switch (src[i]) {
-                    case "{": // inner block
+                    case "{":
                         src = eatUntil(src.substr(i + 1), "}", true);
                         i = 0;
                         break;
-                    case "(": // Parentheses
+                    case "(":
                         src = eatUntil(src.substr(i + 1), ")", true);
                         i = 0;
                         break;
-                    case "/": // Possible beginning of comment
+                    case "/":
                         if (src[i + 1] == "/") {
                             src = eatUntil(src.substr(i + 1), "\n");
                             i = 0;
@@ -242,11 +223,7 @@
             return src.substr(i + str.length);
         }
 
-        // Strip comments and code blocks from the input source
-        // This is quite similar with eatCodeBlock but still a bit different.
-        // If either section has bugs, check the other section, too!
         var i = 0,
-            // Code without blocks and comments
             semi = "",
             // todo: these doesn't match with exports containing "$"
             matcher = /var\s+\w+|function\s+\w+/g,
@@ -256,15 +233,15 @@
 
         while (i < src.length) {
             switch (src[i]) {
-            case "{": // code block
+            case "{":
                 src = eatUntil(src.substr(i + 1), "}", true);
                 i = 0;
                 break;
-            case "(": // parentheses
+            case "(":
                 src = eatUntil(src.substr(i + 1), ")", true);
                 i = 0;
                 break;
-            case "/": // comment
+            case "/":
                 if (src[i + 1] == "/") {
                     src = eatUntil(src.substr(i + 1), "\n");
                     i = 0;
@@ -283,12 +260,7 @@
             }
         }
 
-        // Search exports from semi
         matches = semi.match(matcher);
-
-        // matches now contain strings defined in matcher. Re-match these to get
-        // exports. Matching can be done in one step, but I couldn't get it working
-        // so bear this extra step.
         for (i = 0; i < matches.length; i++) {
             tmp = /\w+\s+(\w+)/.exec(matches[i]);
             if (tmp) {

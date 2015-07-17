@@ -8,9 +8,6 @@ registerQmlType({
 
         this.dom.style.pointerEvents = "all";
 
-        // IE does not handle mouse clicks to transparent divs, so we have
-        // to set a background color and make it invisible using opacity
-        // as that doesn't affect the mouse handling.
         this.dom.style.backgroundColor = "white";
         this.dom.style.opacity = 0;
 
@@ -53,7 +50,7 @@ registerQmlType({
             if (self.enabled && self.acceptedButtons & mouse.button) {
                 self.clicked(mouse);
             }
-            // This decides whether to show the browser's context menu on right click or not
+             This decides whether to show the browser's context menu on right click or not
             return !(self.acceptedButtons & Qt.RightButton);
         }
         this.dom.onclick = handleClick;

@@ -22,7 +22,6 @@ registerQmlType({
 
         this.easing.$valueForProgress = function (t) {
             switch (this.type) {
-                // Quad
             case Easing.InQuad:
                 return Math.pow(t, 2);
             case Easing.OutQuad:
@@ -35,7 +34,6 @@ registerQmlType({
                 if (t < 0.5)
                     return -2 * Math.pow(t - 0.5, 2) + 0.5;
                 return 2 * Math.pow(t - 0.5, 2) + 0.5;
-                // Cubic
             case Easing.InCubic:
                 return Math.pow(t, 3);
             case Easing.OutCubic:
@@ -46,7 +44,6 @@ registerQmlType({
                 return 4 * Math.pow(t - 1, 3) + 1;
             case Easing.OutInCubic:
                 return 4 * Math.pow(t - 0.5, 3) + 0.5;
-                // Quart
             case Easing.InQuart:
                 return Math.pow(t, 4);
             case Easing.OutQuart:
@@ -59,7 +56,6 @@ registerQmlType({
                 if (t < 0.5)
                     return -8 * Math.pow(t - 0.5, 4) + 0.5;
                 return 8 * Math.pow(t - 0.5, 4) + 0.5;
-                // Quint
             case Easing.InQuint:
                 return Math.pow(t, 5);
             case Easing.OutQuint:
@@ -72,7 +68,6 @@ registerQmlType({
                 if (t < 0.5)
                     return 16 * Math.pow(t - 0.5, 5) + 0.5;
                 return 16 * Math.pow(t - 0.5, 5) + 0.5;
-                // Sine
             case Easing.InSine:
                 return -Math.cos(0.5 * Math.PI * t) + 1;
             case Easing.OutSine:
@@ -83,7 +78,6 @@ registerQmlType({
                 if (t < 0.5)
                     return 0.5 * Math.sin(Math.PI * t);
                 return -0.5 * Math.sin(Math.PI * t) + 1;
-                // Expo
             case Easing.InExpo:
                 return (1 / 1023) * (Math.pow(2, 10 * t) - 1);
             case Easing.OutExpo:
@@ -96,7 +90,6 @@ registerQmlType({
                 if (t < 0.5)
                     return -(16 / 31) * (Math.pow(2, -10 * t) - 1);
                 return (1 / 1984) * Math.pow(2, 10 * t) + (15 / 31);
-                // Circ
             case Easing.InCirc:
                 return 1 - Math.sqrt(1 - t * t);
             case Easing.OutCirc:
@@ -109,7 +102,6 @@ registerQmlType({
                 if (t < 0.5)
                     return 0.5 * Math.sqrt(1 - Math.pow(2 * t - 1, 2));
                 return 0.5 * (2 - Math.sqrt(1 - Math.pow(2 * t - 1, 2)));
-                // Elastic
             case Easing.InElastic:
                 return -this.amplitude * Math.pow(2, 10 * t - 10) * Math.sin(2 * t * Math.PI / this.period - Math.asin(1 / this.amplitude));
             case Easing.OutElastic:
@@ -122,7 +114,6 @@ registerQmlType({
                 if (t < 0.5)
                     return 0.5 * this.amplitude * Math.pow(2, -20 * t) * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude)) + 0.5;
                 return -0.5 * this.amplitude * Math.pow(2, 20 * t - 20) * Math.sin(4 * t * Math.PI / this.period - Math.asin(1 / this.amplitude)) + 0.5;
-                // Back
             case Easing.InBack:
                 return (this.overshoot + 1) * Math.pow(t, 3) - this.overshoot * Math.pow(t, 2);
             case Easing.OutBack:
@@ -135,7 +126,6 @@ registerQmlType({
                 if (t < 0.5)
                     return 0.5 * ((this.overshoot + 1) * Math.pow(2 * t - 1, 3) + this.overshoot * Math.pow(2 * t - 1, 2) + 1);
                 return 4 * (this.overshoot + 1) * Math.pow(t - 0.5, 3) - 2 * this.overshoot * Math.pow(t - 0.5, 2) + 0.5;
-                // Bounce
             case Easing.InBounce:
                 if (t < 1 / 11) return -this.amplitude * (121 / 16) * (t * t - (1 / 11) * t);
                 if (t < 3 / 11) return -this.amplitude * (121 / 16) * (t * t - (4 / 11) * t + (3 / 121));
@@ -164,10 +154,9 @@ registerQmlType({
                 if (t < 14 / 22) return this.amplitude * (121 / 8) * (t * t - (13 / 11) * t + (42 / 121)) + 0.5;
                 if (t < 18 / 22) return this.amplitude * (121 / 8) * (t * t - (16 / 11) * t + (63 / 121)) + 0.5;
                 return -(121 / 8) * (t * t - 2 * t + (117 / 121)) + 0.5;
-                // Default
+                 Default
             default:
                 console.log("Unsupported animation type: ", this.type);
-                // Linear
             case Easing.Linear:
                 return t;
             }
@@ -190,7 +179,6 @@ registerQmlType({
         function redoProperties() {
             this.$props = this.properties.split(",");
 
-            // Remove whitespaces
             for (var i = 0; i < this.$props.length; i++) {
                 var matches = this.$props[i].match(/\w+/);
                 if (matches) {
@@ -200,7 +188,6 @@ registerQmlType({
                     i--;
                 }
             }
-            // Merge properties and property
             if (this.property && this.$props.indexOf(this.property) === -1)
                 this.$props.push(this.property);
         }

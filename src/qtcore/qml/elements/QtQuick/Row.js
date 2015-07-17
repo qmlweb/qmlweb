@@ -16,7 +16,6 @@ function QMLRow(meta) {
 QMLRow.prototype.layoutChildren = function () {
     var curPos = 0,
         maxHeight = 0,
-        // When layoutDirection is RightToLeft we need oposite order
         i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
         endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
         step = this.layoutDirection == 1 ? -1 : 1;
@@ -30,5 +29,5 @@ QMLRow.prototype.layoutChildren = function () {
         curPos += child.width + this.spacing;
     }
     this.implicitHeight = maxHeight;
-    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
+    this.implicitWidth = curPos - this.spacing;
 }

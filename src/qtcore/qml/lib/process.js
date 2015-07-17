@@ -76,16 +76,6 @@
  * different files but the structure of code does not support that.
  */
 
-/*
-var jsp = require("./parse-js"),
-    slice = jsp.slice,
-    member = jsp.member,
-    PRECEDENCE = jsp.PRECEDENCE,
-    OPERATORS = jsp.OPERATORS;
-*/
-
-/* -----[ helper for AST traversal ]----- */
-
 function ast_walker(ast) {
     function _vardefs(defs) {
         return [this[0], MAP(defs, function (def) {
@@ -195,7 +185,7 @@ function ast_walker(ast) {
         },
         "object": function (props) {
             return [this[0], MAP(props, function (p) {
-                return p.length == 2 ? [p[0], walk(p[1])] : [p[0], walk(p[1]), p[2]]; // get/set-ter
+                return p.length == 2 ? [p[0], walk(p[1])] : [p[0], walk(p[1]), p[2]];
             })];
         },
         "regexp": function (rx, mods) {
@@ -264,7 +254,7 @@ function ast_walker(ast) {
         walk: walk,
         with_walkers: with_walkers,
         parent: function () {
-            return stack[stack.length - 2]; // last one is current node
+            return stack[stack.length - 2];
         },
         stack: function () {
             return stack;
@@ -272,18 +262,16 @@ function ast_walker(ast) {
     };
 };
 
-/* -----[ Scope and mangling ]----- */
-
 function Scope(parent) {
-    this.names = {}; // names defined in this scope
-    this.mangled = {}; // mangled names (orig.name => mangled)
-    this.rev_mangled = {}; // reverse lookup (mangled => orig.name)
-    this.cname = -1; // current mangled name
-    this.refs = {}; // names referenced from this scope
-    this.uses_with = false; // will become TRUE if with() is detected in this or any subscopes
-    this.uses_eval = false; // will become TRUE if eval() is detected in this or any subscopes
-    this.parent = parent; // parent scope
-    this.children = []; // sub-scopes
+    this.names = {};
+    this.mangled = {};
+    this.rev_mangled = {};
+    this.cname = -1;
+    this.refs = {};
+    this.uses_with = false;
+    this.uses_eval = false;
+    this.parent = parent;
+    this.children = [];
     if (parent) {
         this.level = parent.level + 1;
         parent.children.push(this);
@@ -324,39 +312,21 @@ Scope.prototype = {
     },
 
     next_mangled: function () {
-        // we must be careful that the new mangled name:
-        //
-        // 1. doesn't shadow a mangled name from a parent
-        //    scope, unless we don't reference the original
-        //    name from this scope OR from any sub-scopes!
-        //    This will get slow.
-        //
-        // 2. doesn't shadow an original name from a parent
-        //    scope, in the event that the name is not mangled
-        //    in the parent scope and we reference that name
-        //    here OR IN ANY SUBSCOPES!
-        //
-        // 3. doesn't shadow a name that is referenced but not
-        //    defined (possibly global defined elsewhere).
         for (;;) {
             var m = base54(++this.cname),
                 prior;
 
-            // case 1.
             prior = this.has_mangled(m);
             if (prior && this.refs[prior.rev_mangled[m]] === prior)
                 continue;
 
-            // case 2.
             prior = this.has(m);
             if (prior && prior !== this && this.refs[m] === prior && !prior.has_mangled(m))
                 continue;
 
-            // case 3.
             if (HOP(this.refs, m) && this.refs[m] == null)
                 continue;
 
-            // I got "do" once. :-/
             if (!is_identifier(m))
                 continue;
 
@@ -368,11 +338,11 @@ Scope.prototype = {
         return this.mangled[name] = m;
     },
     get_mangled: function (name, newMangle) {
-        if (this.uses_eval || this.uses_with) return name; // no mangle if eval or with is in use
+        if (this.uses_eval || this.uses_with) return name;
         var s = this.has(name);
-        if (!s) return name; // not in visible scope, no mangle
-        if (HOP(s.mangled, name)) return s.mangled[name]; // already mangled in this scope
-        if (!newMangle) return name; // not found and no mangling requested
+        if (!s) return name;
+        if (HOP(s.mangled, name)) return s.mangled[name];
+        if (!newMangle) return name;
         return s.set_mangle(name, s.next_mangled());
     },
     references: function (name) {
@@ -431,7 +401,6 @@ function ast_add_scope(ast) {
     };
 
     return with_new_scope(function () {
-        // process AST
         var ret = w.with_walkers({
             "function": _lambda,
             "defun": _lambda,
@@ -467,12 +436,6 @@ function ast_add_scope(ast) {
             return walk(ast);
         });
 
-        // the reason why we need an additional pass here is
-        // that names can be used prior to their definition.
-
-        // scopes where eval was detected and their parents
-        // are marked with uses_eval, unless they define the
-        // "eval" name.
         MAP(having_eval, function (scope) {
             if (!scope.has("eval"))
                 while (scope) {
@@ -481,16 +444,11 @@ function ast_add_scope(ast) {
                 }
         });
 
-        // for referenced names it might be useful to know
-        // their origin scope.  current_scope here is the
-        // toplevel one.
         function fixrefs(scope, i) {
-            // do children first; order shouldn't matter
             for (i = scope.children.length; --i >= 0;)
                 fixrefs(scope.children[i]);
             for (i in scope.refs)
                 if (HOP(scope.refs, i)) {
-                    // find origin scope and propagate the reference to origin
                     for (var origin = scope.has(i), s = scope; s; s = s.parent) {
                         s.refs[i] = origin;
                         if (s === origin) break;
@@ -504,8 +462,6 @@ function ast_add_scope(ast) {
 
 };
 
-/* -----[ mangle names ]----- */
-
 function ast_mangle(ast, options) {
     var w = ast_walker(),
         walk = w.walk,
@@ -513,7 +469,7 @@ function ast_mangle(ast, options) {
     options = options || {};
 
     function get_mangled(name, newMangle) {
-        if (!options.toplevel && !scope.parent) return name; // don't mangle toplevel
+        if (!options.toplevel && !scope.parent) return name;
         if (options.except && member(name, options.except))
             return name;
         return scope.get_mangled(name, newMangle);
@@ -521,8 +477,6 @@ function ast_mangle(ast, options) {
 
     function get_define(name) {
         if (options.defines) {
-            // we always lookup a defined symbol for the current scope FIRST, so declared
-            // vars trump a DEFINE symbol, but if no such var is found, then match a DEFINE value
             if (!scope.has(name)) {
                 if (HOP(options.defines, name)) {
                     return options.defines[name];
@@ -581,8 +535,6 @@ function ast_mangle(ast, options) {
     return w.with_walkers({
         "function": _lambda,
         "defun": function () {
-            // move function declarations to the top when
-            // they are not in some block.
             var ast = _lambda.apply(this, arguments);
             switch (w.parent()[0]) {
             case "toplevel":
@@ -622,17 +574,6 @@ function ast_mangle(ast, options) {
         return walk(ast_add_scope(ast));
     });
 };
-
-/* -----[
-   - compress foo["bar"] into foo.bar,
-   - remove block brackets {} where possible
-   - join consecutive var declarations
-   - various optimizations for IFs:
-     - if (cond) foo(); else bar();  ==>  cond?foo():bar();
-     - if (cond) foo();  ==>  cond&&foo();
-     - if (foo) return bar(); else return baz();  ==> return foo?bar():baz(); // also for throw
-     - if (foo) return bar(); else something();  ==> {if(foo)return bar();something()}
-   ]----- */
 
 var warn = function () {};
 
@@ -679,7 +620,6 @@ function make_conditional(c, t, e) {
             return e ? ["conditional", c, t, e] : ["binary", "&&", c, t];
         }
     };
-    // shortcut the conditional if the expression has a constant value
     return when_constant(c, function (ast, val) {
         warn_unreachable(val ? e : t);
         return (val ? t : e);
@@ -701,8 +641,6 @@ var when_constant = (function () {
 
     var $NOT_CONSTANT = {};
 
-    // this can only evaluate constant expressions.  If it finds anything
-    // not constant, it throws $NOT_CONSTANT.
     function evaluate(expr) {
         switch (expr[0]) {
         case "string":
@@ -807,15 +745,12 @@ var when_constant = (function () {
                 if (expr[0] == "binary" && (expr[1] == "===" || expr[1] == "!==") && ((is_string(expr[2]) && is_string(expr[3])) || (boolean_expr(expr[2]) && boolean_expr(expr[3])))) {
                     expr[1] = expr[1].substr(0, 2);
                 } else if (no && expr[0] == "binary" && (expr[1] == "||" || expr[1] == "&&")) {
-                    // the whole expression is not constant but the lval may be...
                     try {
                         var lval = evaluate(expr[2]);
                         expr = ((expr[1] == "&&" && (lval ? expr[3] : lval)) ||
                             (expr[1] == "||" && (lval ? lval : expr[3])) ||
                             expr);
-                    } catch (ex2) {
-                        // IGNORE... lval is not constant
-                    }
+                    } catch (ex2) {}
                 }
                 return no ? no.call(expr, expr) : null;
             } else throw ex;
@@ -832,23 +767,6 @@ function warn_unreachable(ast) {
 function prepare_ifs(ast) {
     var w = ast_walker(),
         walk = w.walk;
-    // In this first pass, we rewrite ifs which abort with no else with an
-    // if-else.  For example:
-    //
-    // if (x) {
-    //     blah();
-    //     return y;
-    // }
-    // foobar();
-    //
-    // is rewritten into:
-    //
-    // if (x) {
-    //     blah();
-    //     return y;
-    // } else {
-    //     foobar();
-    // }
     function redo_if(statements) {
         statements = MAP(statements, walk);
 
@@ -867,10 +785,10 @@ function prepare_ifs(ast) {
             var e = e_body.length == 1 ? e_body[0] : ["block", e_body];
 
             var ret = statements.slice(0, i).concat([[
-                                fi[0], // "if"
-                                conditional, // conditional
-                                t, // then
-                                e // else
+                                fi[0],
+                                conditional,
+                                t,
+                                e
                         ]]);
 
             return redo_if(ret);
@@ -979,29 +897,24 @@ function ast_lift_variables(ast) {
                 return [name];
             });
         if (names.length > 0) {
-            // looking for assignments to any of these variables.
-            // we can save considerable space by moving the definitions
-            // in the var declaration.
             for_side_effects(["block", body], function (ast, walker, stop, restart) {
                 if (ast[0] == "assign" && ast[1] === true && ast[2][0] == "name" && HOP(hash, ast[2][1])) {
-                    // insert the definition into the var declaration
                     for (var i = names.length; --i >= 0;) {
                         if (names[i][0] == ast[2][1]) {
-                            if (names[i][1]) // this name already defined, we must stop
+                            if (names[i][1])
                                 stop();
-                            names[i][1] = ast[3]; // definition
+                            names[i][1] = ast[3];
                             names.push(names.splice(i, 1)[0]);
                             break;
                         }
                     }
-                    // remove this assignment from the AST.
                     var p = walker.parent();
                     if (p[0] == "seq") {
                         var a = p[2];
                         a.unshift(0, p.length);
                         p.splice.apply(p, a);
                     } else if (p[0] == "stat") {
-                        p.splice(0, p.length, "block"); // empty statement
+                        p.splice(0, p.length, "block");
                     } else {
                         stop();
                     }
@@ -1141,12 +1054,6 @@ function ast_squeeze(ast, options) {
         return [this[0], name, args, body];
     };
 
-    // this function does a few things:
-    // 1. discard useless blocks
-    // 2. join consecutive var declarations
-    // 3. remove obviously dead code
-    // 4. transform consecutive statements using the comma operator
-    // 5. if block_type == "lambda" and it detects constructs like if(foo) return ... - rewrite like if (!foo) { ... }
     function tighten(statements, block_type) {
         statements = MAP(statements, walk);
 
@@ -1214,28 +1121,6 @@ function ast_squeeze(ast, options) {
             }
             return a;
         })([]);
-
-        // this increases jQuery by 1K.  Probably not such a good idea after all..
-        // part of this is done in prepare_ifs anyway.
-        // if (block_type == "lambda") statements = (function(i, a, stat){
-        //         while (i < statements.length) {
-        //                 stat = statements[i++];
-        //                 if (stat[0] == "if" && !stat[3]) {
-        //                         if (stat[2][0] == "return" && stat[2][1] == null) {
-        //                                 a.push(make_if(negate(stat[1]), [ "block", statements.slice(i) ]));
-        //                                 break;
-        //                         }
-        //                         var last = last_stat(stat[2]);
-        //                         if (last[0] == "return" && last[1] == null) {
-        //                                 a.push(make_if(stat[1], [ "block", stat[2][1].slice(0, -1) ], [ "block", statements.slice(i) ]));
-        //                                 break;
-        //                         }
-        //                 }
-        //                 a.push(stat);
-        //         }
-        //         return a;
-        // })(0, []);
-
         return statements;
     };
 
@@ -1265,7 +1150,6 @@ function ast_squeeze(ast, options) {
         } else if (empty(e)) {
             e = null;
         } else {
-            // if we have both else and then, maybe it makes sense to switch them?
             (function () {
                 var a = gen_code(c);
                 var n = negate(c);
@@ -1381,7 +1265,7 @@ function ast_squeeze(ast, options) {
             if (op == "!")
                 ret = best_of(ret, negate(expr));
             return when_constant(ret, function (ast, val) {
-                return walk(ast); // it's either true or false, so minifies to !0 or !1
+                return walk(ast);
             }, function () {
                 return ret
             });
@@ -1419,9 +1303,7 @@ function ast_squeeze(ast, options) {
     });
 };
 
-/* -----[ re-generate code from the AST ]----- */
-
-var DOT_CALL_NO_PARENS = /*jsp.*/ array_to_hash([
+var DOT_CALL_NO_PARENS = array_to_hash([
         "name",
         "array",
         "object",
@@ -1475,7 +1357,7 @@ function to_ascii(str) {
     });
 };
 
-var SPLICE_NEEDS_BRACKETS = /*jsp.*/ array_to_hash(["if", "while", "do", "for", "for-in", "with"]);
+var SPLICE_NEEDS_BRACKETS = array_to_hash(["if", "while", "do", "for", "for-in", "with"]);
 
 function gen_code(ast, options) {
     options = defaults(options, {
@@ -1568,14 +1450,6 @@ function gen_code(ast, options) {
 
     function needs_parens(expr) {
         if (expr[0] == "function" || expr[0] == "object") {
-            // dot/call on a literal function requires the
-            // function literal itself to be parenthesized
-            // only if it's the first "thing" in a
-            // statement.  This means that the parent is
-            // "stat", but it could also be a "seq" and
-            // we're the first in this "seq" and the
-            // parent is "stat", and so on.  Messy stuff,
-            // but it worths the trouble.
             var a = slice(w.stack()),
                 self = a.pop(),
                 p = a.pop();
@@ -1598,8 +1472,8 @@ function gen_code(ast, options) {
             a = [str.replace(/^0\./, ".")],
             m;
         if (Math.floor(num) === num) {
-            a.push("0x" + num.toString(16).toLowerCase(), // probably pointless
-                "0" + num.toString(8)); // same.
+            a.push("0x" + num.toString(16).toLowerCase(),
+                "0" + num.toString(8));
             if ((m = /^(.*?)(0+)$/.exec(num))) {
                 a.push(m[1] + "e" + m[2].length);
             }
@@ -1623,12 +1497,10 @@ function gen_code(ast, options) {
         "splice": function (statements) {
             var parent = w.parent();
             if (HOP(SPLICE_NEEDS_BRACKETS, parent)) {
-                // we need block brackets in this case
                 return make_block.apply(this, arguments);
             } else {
                 return MAP(make_block_statements(statements, true),
                     function (line, i) {
-                        // the first line is already indented
                         return i > 0 ? indent(line) : line;
                     }).join(newline);
             }
@@ -1756,9 +1628,6 @@ function gen_code(ast, options) {
         "binary": function (operator, lvalue, rvalue) {
             var left = make(lvalue),
                 right = make(rvalue);
-            // XXX: I'm pretty sure other cases will bite here.
-            //      we need to be smarter.
-            //      adding parens all the time is the safest bet.
             if (member(lvalue[0], ["assign", "conditional", "seq"]) ||
                 lvalue[0] == "binary" && PRECEDENCE[operator] > PRECEDENCE[lvalue[1]]) {
                 left = "(" + left + ")";
@@ -1796,8 +1665,6 @@ function gen_code(ast, options) {
             return "{" + newline + with_indent(function () {
                 return MAP(props, function (p) {
                     if (p.length == 3) {
-                        // getter/setter.  The name is in p[0], the arg.list in p[1][2], the
-                        // body in p[1][3] and type ("get" / "set") in p[2].
                         return indent(make_function(p[0], p[1][2], p[1][3], p[2]));
                     }
                     var key = p[0],
@@ -1842,19 +1709,8 @@ function gen_code(ast, options) {
         return make(ast)
     });
 
-    // The squeezer replaces "block"-s that contain only a single
-    // statement with the statement itself; technically, the AST
-    // is correct, but this can create problems when we output an
-    // IF having an ELSE clause where the THEN clause ends in an
-    // IF *without* an ELSE block (then the outer ELSE would refer
-    // to the inner IF).  This function checks for this case and
-    // adds the block brackets if needed.
     function make_then(th) {
         if (th[0] == "do") {
-            // https://github.com/mishoo/UglifyJS/issues/#issue/57
-            // IE croaks with "syntax error" on code like this:
-            //     if (foo) do ... while(cond); else ...
-            // we need block brackets around do/while
             return make_block([th]);
         }
         var b = th;
@@ -1862,7 +1718,6 @@ function gen_code(ast, options) {
             var type = b[0];
             if (type == "if") {
                 if (!b[3])
-                // no else, we must add the block
                     return make(["block", [th]]);
                 b = b[3];
             } else if (type == "while" || type == "do") b = b[2];
@@ -1885,17 +1740,17 @@ function gen_code(ast, options) {
         switch (node[0]) {
         case "with":
         case "while":
-            return empty(node[2]); // `with' or `while' with empty body?
+            return empty(node[2]);
         case "for":
         case "for-in":
-            return empty(node[4]); // `for' with empty body?
+            return empty(node[4]);
         case "if":
-            if (empty(node[2]) && !node[3]) return true; // `if' with empty `then' and no `else'
+            if (empty(node[2]) && !node[3]) return true;
             if (node[3]) {
-                if (empty(node[3])) return true; // `else' present but empty
-                return must_has_semicolon(node[3]); // dive into the `else' branch
+                if (empty(node[3])) return true;
+                return must_has_semicolon(node[3]);
             }
-            return must_has_semicolon(node[2]); // dive into the `then' branch
+            return must_has_semicolon(node[2]);
         }
     };
 
@@ -1993,8 +1848,6 @@ function split_lines(code, max_line_length) {
     }).join("\n");
 };
 
-/* -----[ Utilities ]----- */
-
 function repeat_string(str, i) {
     if (i <= 0) return "";
     if (i == 1) return str;
@@ -2022,8 +1875,6 @@ function is_identifier(name) {
 function HOP(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
 };
-
-// some utilities
 
 var MAP;
 
@@ -2073,20 +1924,3 @@ var MAP;
         this.v = val
     };
 })();
-
-/* -----[ Exports ]----- */
-/*
-exports.ast_walker = ast_walker;
-exports.ast_mangle = ast_mangle;
-exports.ast_squeeze = ast_squeeze;
-exports.ast_lift_variables = ast_lift_variables;
-exports.gen_code = gen_code;
-exports.ast_add_scope = ast_add_scope;
-exports.set_logger = function(logger) { warn = logger };
-exports.make_string = make_string;
-exports.split_lines = split_lines;
-exports.MAP = MAP;
-
-// keep this last!
-exports.ast_squeeze_more = require("./squeeze-more").ast_squeeze_more;
-*/

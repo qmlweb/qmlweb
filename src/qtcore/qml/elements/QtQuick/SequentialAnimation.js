@@ -62,7 +62,6 @@ registerQmlType({
         this.complete = function () {
             if (this.running) {
                 if (curIndex < this.animations.length) {
-                    // Stop current animation
                     this.animations[curIndex].stop();
                 }
                 this.running = false;
@@ -71,7 +70,7 @@ registerQmlType({
 
         engine.$registerStart(function () {
             if (self.running) {
-                self.running = false; // toggled back by start();
+                self.running = false;
                 self.start();
             }
         });

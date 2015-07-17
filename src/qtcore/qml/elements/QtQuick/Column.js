@@ -15,7 +15,7 @@ QMLColumn.prototype.layoutChildren = function () {
         curPos += child.height + this.spacing;
     }
     this.implicitWidth = maxWidth;
-    this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
+    this.implicitHeight = curPos - this.spacing;
 }
 
 registerQmlType({

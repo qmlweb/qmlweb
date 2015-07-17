@@ -15,7 +15,7 @@ registerQmlType({
         createSimpleProperty("variant", this, "model");
         createSimpleProperty("int", this, "count");
         this.$completed = false;
-        this.$items = []; // List of created items
+        this.$items = [];
         this._childrenInserted = Signal();
 
         this.modelChanged.connect(applyModel);
@@ -54,8 +54,6 @@ registerQmlType({
                 newItem.index = index;
 
                 if (engine.operationState !== QMLOperationState.Init) {
-                    // We don't call those on first creation, as they will be called
-                    // by the regular creation-procedures at the right time.
                     engine.$initializePropertyBindings();
                     callOnCompleted(newItem);
                 }
@@ -72,7 +70,7 @@ registerQmlType({
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             if (model instanceof JSItemModel) {
                 model.dataChanged.connect(function (startIndex, endIndex) {
-                    //TODO
+                    // TODO
                 });
                 model.rowsInserted.connect(insertChildren);
                 model.rowsMoved.connect(function (sourceStartIndex, sourceEndIndex, destinationIndex) {

@@ -17,8 +17,6 @@ registerQmlType({
         this.running = false;
         this.triggeredOnStart = false;
 
-        // Create trigger as simple property. Reading the property triggers
-        // the function!
         this.triggered = Signal();
 
         engine.$addTicker(ticker);
@@ -53,21 +51,17 @@ registerQmlType({
 
         function trigger() {
             if (!self.repeat)
-            // We set the value directly in order to be able to emit the runningChanged
-            // signal after triggered, like Qt does it.
                 self.$properties.running.val = false;
 
-            // Trigger this.
             self.triggered();
 
             if (!self.repeat)
-            // Emit changed signal manually after setting the value manually above.
                 self.runningChanged();
         }
 
         engine.$registerStart(function () {
             if (self.running) {
-                self.running = false; // toggled back by self.start();
+                self.running = false;
                 self.start();
             }
         });

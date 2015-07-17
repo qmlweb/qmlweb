@@ -6,7 +6,7 @@ function QMLItem(meta) {
     this.completed = Signal();
     this.completedAlreadyCalled = false;
 
-    if (this.$parent === null) { // This is the root element. Initialize it.
+    if (this.$parent === null) {
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
@@ -19,12 +19,12 @@ function QMLItem(meta) {
             this.implicitHeight = this.dom.offsetHeight;
             this.implicitWidth = this.dom.offsetWidth;
         }
-        this.dom.style.position = "relative"; // Needed to make absolute positioning work
+        this.dom.style.position = "relative";
         this.dom.style.top = "0";
         this.dom.style.left = "0";
-        this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
+        this.dom.style.overflow = "hidden";
     } else {
-        if (!this.dom) // Create a dom element for this item.
+        if (!this.dom)
             this.dom = document.createElement("div");
         this.dom.style.position = "absolute";
     }
@@ -58,8 +58,9 @@ function QMLItem(meta) {
     this.dataChanged.connect(this, function (newData) {
         for (var i in newData) {
             var child = newData[i];
-            if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
-                child.parent = this; // This will also add it to children.
+            // TODO: Use real inheritance and ask using instanceof.
+            if (child.hasOwnProperty("parent"))
+                child.parent = this;
             else
                 this.resources.push(child);
         }
@@ -166,7 +167,6 @@ function QMLItem(meta) {
 
         var actions = this.$revertActions.slice();
 
-        // Get current values for revert actions
         for (i in actions) {
             var action = actions[i];
             action.from = action.target[action.property];
@@ -174,7 +174,6 @@ function QMLItem(meta) {
         if (newState) {
             var changes = newState.$getAllChanges();
 
-            // Get all actions we need to do and create actions to revert them
             for (i = 0; i < changes.length; i++) {
                 var change = changes[i];
 
@@ -200,12 +199,11 @@ function QMLItem(meta) {
                     if (!found)
                         actions.push(action);
 
-                    // Look for existing revert action, else create it
                     var found = false;
                     for (k = 0; k < this.$revertActions.length; k++)
                         if (this.$revertActions[k].target == change.target && this.$revertActions[k].property == item.property) {
                             if (!change.restoreEntryValues)
-                                this.$revertActions.splice(k, 1); // We don't want to revert, so remove it
+                                this.$revertActions.splice(k, 1);
                             found = true;
                             break;
                         }
@@ -221,9 +219,6 @@ function QMLItem(meta) {
             }
         }
 
-        // Set all property changes and fetch the actual values afterwards
-        // The latter is needed for transitions. We need to set all properties
-        // before we fetch the values because properties can be interdependent.
         for (i in actions) {
             var action = actions[i];
             action.target.$properties[action.property].set(action.value, false, action.target,
@@ -233,17 +228,15 @@ function QMLItem(meta) {
             var action = actions[i];
             action.to = action.target[action.property];
             if (action.explicit) {
-                action.target[action.property] = action.target[action.property]; //Remove binding
+                action.target[action.property] = action.target[action.property];
                 action.value = action.target[action.property];
             }
         }
 
-        // Find the best transition to use
         var transition,
             rating = 0;
         for (var i = 0; i < this.transitions.length; i++) {
-            this.transitions[i].$stop(); // We need to stop running transitions, so let's do
-            // it while iterating through the transitions anyway
+            this.transitions[i].$stop();
             var curTransition = this.transitions[i],
                 curRating = 0;
             if (curTransition.from == oldVal || curTransition.reversible && curTransition.from == newVal)
@@ -294,15 +287,15 @@ function QMLItem(meta) {
             transform += " translate3d(0, 0, " + this.z + "px)";
         this.dom.style.transform = transform;
         this.dom.style.transformStyle = transformStyle;
-        this.dom.style.MozTransform = transform; // Firefox
-        this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
+        this.dom.style.MozTransform = transform;
+        this.dom.style.webkitTransform = transform;
         this.dom.style.webkitTransformStyle = transformStyle;
-        this.dom.style.OTransform = transform; // Opera
-        this.dom.style.msTransform = transform; // IE
+        this.dom.style.OTransform = transform;
+        this.dom.style.msTransform = transform;
         this.dom.style.filter = filter;
-        this.dom.style.msFilter = filter; // IE
-        this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
-        this.dom.style.MozFilter = filter; // Firefox
+        this.dom.style.msFilter = filter;
+        this.dom.style.webkitFilter = filter;
+        this.dom.style.MozFilter = filter;
     }
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
@@ -348,27 +341,24 @@ function QMLItem(meta) {
     this.rotation = 0;
     this.scale = 1;
 
-    // Init size of root element
     if (this.$parent === null && engine.rootElement == undefined) {
         window.onresize();
     }
 
     this.$draw = function (c) {
         var i;
-        if (this.visible !== false) { // Undefined means inherit, means true
+        if (this.visible !== false) {
             if (this.$drawItem) {
                 var rotRad = (this.rotation || 0) / 180 * Math.PI,
                     rotOffsetX = Math.sin(rotRad) * this.width,
                     rotOffsetY = Math.sin(rotRad) * this.height;
                 c.save();
 
-                // Handle rotation
                 // todo: implement transformOrigin
                 c.globalAlpha = this.opacity;
                 c.translate(this.left + rotOffsetX, this.top + rotOffsetY);
                 c.rotate(rotRad);
                 c.translate(-this.left, -this.top);
-                // Leave offset for drawing...
                 this.$drawItem(c);
                 c.translate(-rotOffsetX, -rotOffsetY);
                 c.restore();

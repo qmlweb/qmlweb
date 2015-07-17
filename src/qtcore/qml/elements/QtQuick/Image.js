@@ -7,23 +7,19 @@ registerQmlType({
         var img = new Image(),
             self = this;
 
-        // Exports.
         this.Image = {
-            // fillMode
             Stretch: 1,
             PreserveAspectFit: 2,
             PreserveAspectCrop: 3,
             Tile: 4,
             TileVertically: 5,
             TileHorizontally: 6,
-            // status
             Null: 1,
             Ready: 2,
             Loading: 3,
             Error: 4
         }
 
-        // no-op properties
         createSimpleProperty("bool", this, "asynchronous");
         createSimpleProperty("bool", this, "cache");
         createSimpleProperty("bool", this, "smooth");
@@ -50,7 +46,6 @@ registerQmlType({
         this.sourceSize.width = 0;
         this.sourceSize.height = 0;
 
-        // Bind status to img element
         img.onload = function () {
             self.progress = 1;
             self.status = self.Image.Ready;
@@ -130,7 +125,6 @@ registerQmlType({
         this.mirrorChanged.connect(this, updateMirroring);
         this.fillModeChanged.connect(this, updateFillMode);
         this.$drawItem = function (c) {
-            //descr("draw image", this, ["left", "top", "width", "height", "source"]);
 
             updateFillMode();
 

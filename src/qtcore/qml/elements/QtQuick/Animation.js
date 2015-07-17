@@ -5,7 +5,6 @@ registerQmlType({
     constructor: function QMLAnimation(meta) {
         QMLBaseObject.call(this, meta);
 
-        // Exports
         this.Animation = {
             Infinite: -1
         };
@@ -20,7 +19,6 @@ registerQmlType({
         this.paused = false;
         this.running = false;
 
-        // Methods
         this.restart = function () {
             this.stop();
             this.start();
@@ -38,7 +36,6 @@ registerQmlType({
             this.paused = false;
         }
 
-        // To be overridden
         this.complete = unboundMethod;
     }
 });

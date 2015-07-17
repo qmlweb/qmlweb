@@ -11,18 +11,15 @@ registerQmlType({
         this.dom.firstChild.style.height = "100%";
 
         this.Text = {
-            // Wrap Mode
             NoWrap: 0,
             WordWrap: 1,
             WrapAnywhere: 2,
             Wrap: 3,
-            WrapAtWordBoundaryOrAnywhere: 3, // COMPAT
-            // Horizontal-Alignment
+            WrapAtWordBoundaryOrAnywhere: 3,
             AlignLeft: "left",
             AlignRight: "right",
             AlignHCenter: "center",
             AlignJustify: "justify",
-            // Style
             Normal: 0,
             Outline: 1,
             Raised: 2,

@@ -18,8 +18,6 @@ registerQmlType({
 
         this.dom.innerHTML = "<input type=\"text\" disabled/>"
         this.dom.firstChild.style.pointerEvents = "auto";
-        // In some browsers text-inputs have a margin by default, which distorts
-        // the positioning, so we need to manually set it to 0.
         this.dom.firstChild.style.margin = "0";
         this.dom.firstChild.style.width = "100%";
 

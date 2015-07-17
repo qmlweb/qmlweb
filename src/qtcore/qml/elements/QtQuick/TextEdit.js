@@ -7,7 +7,6 @@
 
           var self = this;
 
-          // Properties
           createSimpleProperty('bool', this, 'activeFocusOnPress');
           createSimpleProperty('url', this, 'baseUrl');
           createSimpleProperty('bool', this, 'canPaste');
@@ -85,7 +84,6 @@
           this.verticalAlignment = undefined;
           this.wrapMode = undefined;
 
-          // Undo / Redo stacks;
           this.undoStack = [];
           this.undoStackPosition = -1;
           this.redoStack = [];
@@ -98,7 +96,6 @@
           this.dom.firstChild.style.margin = '0';
           this.dom.firstChild.disabled = false;
 
-          // Signals
           this.linkActivated = Signal([{
               type: 'string',
               name: 'link'
@@ -108,7 +105,6 @@
               name: 'link'
           }]);
 
-          // Methods
           this.append = function append(text) {
               this.text += text;
           };
@@ -124,9 +120,7 @@
           };
 
           this.deselect = function deselect() {
-              //this.selectionStart = -1;
-              //this.selectionEnd = -1;
-              //this.selectedText = null;
+              // TODO
           };
 
           this.getFormattedText = function getFormattedText(start, end) {
@@ -201,7 +195,6 @@
 
           this.Component.completed.connect(this, function() {
               this.selectByKeyboard = !this.readOnly;
-              //logCss();
               updateValue();
           });
 
@@ -222,7 +215,6 @@
               this.dom.firstChild.value = newVal;
           });
 
-          // The function below is from QMLText
           this.$drawItem = function(c) {
               c.save();
               c.font = fontCss(this.font);

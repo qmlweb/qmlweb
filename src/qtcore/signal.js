@@ -48,7 +48,7 @@ global.Signal = function Signal(params, options) {
                 if (item.thisObj)
                     item.thisObj.$tidyupList.splice(item.thisObj.$tidyupList.indexOf(this), 1);
                 connectedSlots.splice(i, 1);
-                i--; // We have removed an item from the list so the indexes shifted one backwards
+                i--;
             }
         }
     }

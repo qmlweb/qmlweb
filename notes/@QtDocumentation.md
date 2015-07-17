@@ -1,6 +1,9 @@
 # Tidbits culled from Digia's Qt documentation
 
+---
+
 ## Basic QML language types
+
  + bool            Binary true/false value
  + double          Number with a decimal point, stored in double precision
  + enumeration     Named enumeration value
@@ -12,6 +15,7 @@
  + var             Generic property type
 
 ## Basic QML module types
+
  + color           ARGB color value. The type refers to an ARGB color value. It can be specified in a number of ways:
  + date            Date value
  + font            Font value with the properties of QFont. The type refers to a font value with the properties of QFont
@@ -24,7 +28,10 @@
  + vector3d        Value with x, y, and z attributes
  + vector4d        A vector4d type has x, y, z and w attributes
 
-## anchors group
+---
+
+### anchors group
+
  + anchors.top : AnchorLine
  + anchors.bottom : AnchorLine
  + anchors.left : AnchorLine
@@ -44,7 +51,8 @@
  + anchors.baselineOffset : real
  + anchors.alignWhenCentered : bool
 
-## animation types
+### animation types
+
  + Animation (base type)
  + AnchorAnimation
  + ParallelAnimation

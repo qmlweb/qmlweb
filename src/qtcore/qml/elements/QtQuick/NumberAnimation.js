@@ -13,7 +13,7 @@ registerQmlType({
         engine.$addTicker(ticker);
 
         function ticker(now, elapsed) {
-            if ((self.running || loop === -1) && !self.paused) { // loop === -1 is a marker to just finish this run
+            if ((self.running || loop === -1) && !self.paused) {
                 if (at == 0 && loop == 0 && !self.$actions.length)
                     self.$redoActions();
                 at += elapsed / self.duration;
@@ -41,7 +41,7 @@ registerQmlType({
                 startLoop.call(this);
                 this.paused = false;
             } else if (this.alwaysRunToEnd && at < 1) {
-                loop = -1; // -1 is used as a marker to stop
+                loop = -1;
             } else {
                 loop = 0;
                 this.$actions = [];
