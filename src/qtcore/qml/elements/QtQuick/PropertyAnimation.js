@@ -154,7 +154,6 @@ registerQmlType({
                 if (t < 14 / 22) return this.amplitude * (121 / 8) * (t * t - (13 / 11) * t + (42 / 121)) + 0.5;
                 if (t < 18 / 22) return this.amplitude * (121 / 8) * (t * t - (16 / 11) * t + (63 / 121)) + 0.5;
                 return -(121 / 8) * (t * t - 2 * t + (117 / 121)) + 0.5;
-                 Default
             default:
                 console.log("Unsupported animation type: ", this.type);
             case Easing.Linear:

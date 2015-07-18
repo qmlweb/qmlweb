@@ -50,7 +50,6 @@ registerQmlType({
             if (self.enabled && self.acceptedButtons & mouse.button) {
                 self.clicked(mouse);
             }
-             This decides whether to show the browser's context menu on right click or not
             return !(self.acceptedButtons & Qt.RightButton);
         }
         this.dom.onclick = handleClick;

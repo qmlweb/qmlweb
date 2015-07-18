@@ -33,11 +33,11 @@ var modules = {
  * After commenting out create tests still work.
  *
  */
-//Object.create = function (o) {
-//    function F() {}
-//    F.prototype = o;
-//    return new F();
-//};
+Object.create = function (o) {
+    function F() {}
+    F.prototype = o;
+    return new F();
+};
 
 global.registerGlobalQmlType = function (name, type) {
     global[type.name] = type;

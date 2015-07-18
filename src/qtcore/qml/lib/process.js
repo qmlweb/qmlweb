@@ -750,7 +750,9 @@ var when_constant = (function () {
                         expr = ((expr[1] == "&&" && (lval ? expr[3] : lval)) ||
                             (expr[1] == "||" && (lval ? lval : expr[3])) ||
                             expr);
-                    } catch (ex2) {}
+                    } catch (ex2) {
+                        //
+                    }
                 }
                 return no ? no.call(expr, expr) : null;
             } else throw ex;

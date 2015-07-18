@@ -19,7 +19,7 @@ registerQmlType({
         function updateOrigin() {
             this.$parent.dom.style.transformOrigin = this.origin.x + "px " + this.origin.y + "px";
             this.$parent.dom.style.MozTransformOrigin = this.origin.x + "px " + this.origin.y + "px";
-            this.$parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px";w
+            this.$parent.dom.style.webkitTransformOrigin = this.origin.x + "px " + this.origin.y + "px";
         }
         this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
         this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);
