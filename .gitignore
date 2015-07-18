@@ -5,3 +5,4 @@ spec.js
 .*.swo
 .idea/
 /.project
+temp/
