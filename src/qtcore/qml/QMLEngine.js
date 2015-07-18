@@ -311,14 +311,14 @@ QMLEngine = function (element, options) {
     }
 
     function mousemoveHandler(e) {
-        var i;
+        var i, l;
         for (i in self.mouseAreas) {
-            var l = self.mouseAreas[i];
+            l = self.mouseAreas[i];
             if (l && l.hoverEnabled && (self.oldMousePos.x >= l.left && self.oldMousePos.x <= l.right && self.oldMousePos.y >= l.top && self.oldMousePos.y <= l.bottom) && !(e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom))
                 l.exited();
         }
         for (i in self.mouseAreas) {
-            var l = self.mouseAreas[i];
+            l = self.mouseAreas[i];
             if (l && l.hoverEnabled && (e.pageX - element.offsetLeft >= l.left && e.pageX - element.offsetLeft <= l.right && e.pageY - element.offsetTop >= l.top && e.pageY - element.offsetTop <= l.bottom) && !(self.oldMousePos.x >= l.left && self.oldMousePos.x <= l.right && self.oldMousePos.y >= l.top && self.oldMousePos.y <= l.bottom))
                 l.entered();
         }

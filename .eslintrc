@@ -1,0 +1,27 @@
+{
+    "rules": {
+        "indent": [
+            0,
+            4
+        ],
+        "quotes": [
+            0,
+            "double"
+        ],
+        "linebreak-style": [
+            0,
+            "windows"
+        ],
+        "no-console": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "semi": [
+            0,
+            "always"
+        ]
+    },
+    "env": {
+        "browser": true
+    },
+    "extends": "eslint:recommended"
+}

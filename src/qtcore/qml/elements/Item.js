@@ -1,6 +1,8 @@
 function QMLItem(meta) {
     QMLBaseObject.call(this, meta);
     var child,
+        action,
+        found,
         o, i;
 
     this.completed = Signal();
@@ -180,7 +182,7 @@ function QMLItem(meta) {
                 for (j = 0; j < change.$actions.length; j++) {
                     var item = change.$actions[j];
 
-                    var action = {
+                    action = {
                         target: change.target,
                         property: item.property,
                         origValue: change.target.$properties[item.property].binding || change.target.$properties[item.property].val,
@@ -189,7 +191,7 @@ function QMLItem(meta) {
                         to: undefined,
                         explicit: change.explicit
                     };
-                    var found = false;
+                    found = false;
                     for (k in actions)
                         if (actions[k].target == action.target && actions[k].property == action.property) {
                             found = true;
@@ -199,7 +201,7 @@ function QMLItem(meta) {
                     if (!found)
                         actions.push(action);
 
-                    var found = false;
+                    found = false;
                     for (k = 0; k < this.$revertActions.length; k++)
                         if (this.$revertActions[k].target == change.target && this.$revertActions[k].property == item.property) {
                             if (!change.restoreEntryValues)
@@ -220,12 +222,12 @@ function QMLItem(meta) {
         }
 
         for (i in actions) {
-            var action = actions[i];
+            action = actions[i];
             action.target.$properties[action.property].set(action.value, false, action.target,
                 newState ? newState.$context : action.target.$context);
         }
         for (i in actions) {
-            var action = actions[i];
+            action = actions[i];
             action.to = action.target[action.property];
             if (action.explicit) {
                 action.target[action.property] = action.target[action.property];
@@ -235,7 +237,7 @@ function QMLItem(meta) {
 
         var transition,
             rating = 0;
-        for (var i = 0; i < this.transitions.length; i++) {
+        for (i = 0; i < this.transitions.length; i++) {
             this.transitions[i].$stop();
             var curTransition = this.transitions[i],
                 curRating = 0;

@@ -91,15 +91,15 @@ global.collectConstructorsForModule = function (moduleName, version) {
 };
 
 global.mergeObjects = function (obj1, obj2) {
-    var mergedObject = {};
+    var key, mergedObject = {};
 
     if (typeof obj1 != 'undefined' && obj1 != null) {
-        for (var key in obj1) {
+        for (key in obj1) {
             mergedObject[key] = obj1[key];
         }
     }
     if (typeof obj2 != 'undefined' && obj2 != null) {
-        for (var key in obj2) {
+        for (key in obj2) {
             mergedObject[key] = obj2[key];
         }
     }
@@ -122,11 +122,8 @@ global.loadImports = function (self, imports) {
     perContextConstructors[self.objectId] = constructors;
 }
 
-function noop() {};
-
-function tilt() {
-    arguments.length = 0
-};
+function noop() {}
+function tilt() { arguments.length = 0 }
 
 function cloneObject(obj) {
     if (null == obj || typeof obj != "object")
@@ -174,7 +171,7 @@ function construct(meta) {
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("QML components may contain only one root element!");
-        var item = (new QMLComponent({
+            item = (new QMLComponent({
             object: cTree,
             context: meta.context
         })).createObject(meta.parent);

@@ -61,7 +61,7 @@ registerQmlType({
             case 3:
                 this.dom.firstChild.style.whiteSpace = "pre-wrap";
                 this.dom.firstChild.style.wordWrap = "break-word";
-            };
+            }
             if (this.horizontalAlignment == "justify")
                 this.dom.firstChild.style.whiteSpace = "normal";
         });
@@ -84,7 +84,7 @@ registerQmlType({
                 break;
             case 3:
                 this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
-            };
+            }
         });
         this.styleColorChanged.connect(this, function (newVal) {
             switch (this.style) {
@@ -99,7 +99,7 @@ registerQmlType({
                 break;
             case 3:
                 this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
-            };
+            }
         });
 
         this.font.family = "sans-serif";

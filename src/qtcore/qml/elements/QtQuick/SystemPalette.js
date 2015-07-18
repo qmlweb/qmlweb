@@ -23,9 +23,10 @@ registerQmlType({
         createSimpleProperty("enum", this, "colorGroup");
 
         var attrs = ['alternateBase', 'base', 'button', 'buttonText', 'dark', 'highlight', 'highlightedText', 'light', 'mid', 'midlight', 'shadow', 'text', 'window', 'windowText'];
-        var platform = 'OSX';
+        var i,
+            platform = 'OSX';
 
-        for (var i = 0; i < attrs.length; ++i)
+        for (i = 0; i < attrs.length; ++i)
             createSimpleProperty("color", this, attrs[i], "ro");
         createSimpleProperty("enum", this, "colorGroup");
 
@@ -37,7 +38,7 @@ registerQmlType({
             delete this.$canEditReadOnlyProperties;
         }).bind(this));
 
-        for (var i = 0; i < platformsDetectors.length; ++i) {
+        for (i = 0; i < platformsDetectors.length; ++i) {
             if (platformsDetectors[i].regexp.test(navigator.userAgent)) {
                 platforms = platformsDetectors[i].name;
                 break;

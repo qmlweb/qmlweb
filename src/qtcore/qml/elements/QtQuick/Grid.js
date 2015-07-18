@@ -28,6 +28,8 @@ function QMLGrid(meta) {
 
 QMLGrid.prototype.layoutChildren = function () {
     var visibleItems = [],
+        i, j,
+        item,
         r = 0,
         c = 0,
         colWidth = [],
@@ -37,7 +39,7 @@ QMLGrid.prototype.layoutChildren = function () {
         curHPos = 0,
         curVPos = 0;
 
-    for (var i = 0; i < this.children.length; i++) {
+    for (i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (child.visible && child.opacity && child.width && child.height)
             visibleItems.push(this.children[i]);
@@ -55,9 +57,9 @@ QMLGrid.prototype.layoutChildren = function () {
     }
 
     if (this.flow == 0)
-        for (var i = 0; i < r; i++) {
-            for (var j = 0; j < c; j++) {
-                var item = visibleItems[i * c + j];
+        for (i = 0; i < r; i++) {
+            for (j = 0; j < c; j++) {
+                item = visibleItems[i * c + j];
                 if (!item)
                     break;
                 if (!colWidth[j] || item.width > colWidth[j])
@@ -66,9 +68,9 @@ QMLGrid.prototype.layoutChildren = function () {
                     rowHeight[i] = item.height;
             }
         } else
-        for (var i = 0; i < c; i++) {
-            for (var j = 0; j < r; j++) {
-                var item = visibleItems[i * r + j];
+        for (i = 0; i < c; i++) {
+            for (j = 0; j < r; j++) {
+                item = visibleItems[i * r + j];
                 if (!item)
                     break;
                 if (!rowHeight[j] || item.height > rowHeight[j])
@@ -78,18 +80,18 @@ QMLGrid.prototype.layoutChildren = function () {
             }
         }
 
-    for (var i in colWidth)
+    for (i in colWidth)
         gridWidth += colWidth[i] + this.spacing;
-    for (var i in rowHeight)
+    for (i in rowHeight)
         gridHeight += rowHeight[i] + this.spacing;
 
     var step = this.layoutDirection == 1 ? -1 : 1,
         startingPoint = this.layoutDirection == 1 ? c - 1 : 0,
         endPoint = this.layoutDirection == 1 ? -1 : c;
     if (this.flow == 0)
-        for (var i = 0; i < r; i++) {
-            for (var j = startingPoint; j !== endPoint; j += step) {
-                var item = visibleItems[i * c + j];
+        for (i = 0; i < r; i++) {
+            for (j = startingPoint; j !== endPoint; j += step) {
+                item = visibleItems[i * c + j];
                 if (!item)
                     break;
                 item.x = curHPos;
@@ -100,9 +102,9 @@ QMLGrid.prototype.layoutChildren = function () {
             curVPos += rowHeight[i] + this.spacing;
             curHPos = 0;
         } else
-        for (var i = startingPoint; i !== endPoint; i += step) {
-            for (var j = 0; j < r; j++) {
-                var item = visibleItems[i * r + j];
+        for (i = startingPoint; i !== endPoint; i += step) {
+            for (j = 0; j < r; j++) {
+                item = visibleItems[i * r + j];
                 if (!item)
                     break;
                 item.x = curHPos;

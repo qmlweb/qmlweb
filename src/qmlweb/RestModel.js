@@ -89,7 +89,7 @@ registerQmlType({
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
                     var value = object[key];
-                    if (str != '')
+                    if (str !== '')
                         str += '&';
                     if (typeof prefix != 'undefined')
                         key = prefix + '[' + key + ']';
@@ -116,7 +116,7 @@ registerQmlType({
                     if (self.runningRequests <= 0)
                         self.isLoading = false;
                 }
-            }
+            };
             xhr.open(options.method, self.url, true);
             if (typeof options.body != 'undefined') {
                 xhr.setRequestHeader('Content-Type', self.queryMimeType);
@@ -146,6 +146,6 @@ registerQmlType({
 
         this.$hasProperty = function (name) {
             return (typeof self.$properties[name] != 'undefined');
-        }
+        };
     }
 });

@@ -26,10 +26,8 @@ registerQmlType({
             switch (notation) {
             case DoubleValidator.ScientificNotation:
                 return scientificRegExp;
-                break;
             case DoubleValidator.StandardNotation:
                 return standardRegExp;
-                break;
             }
             return null;
         }).bind(this);

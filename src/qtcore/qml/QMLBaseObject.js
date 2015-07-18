@@ -38,7 +38,7 @@ function QMLBaseObject(meta) {
     this.Keys.callPressed = Signal();
     this.Keys.cancelPressed = Signal();
     this.Keys.deletePressed = Signal();
-    for (var i = 0; i < 10; ++i)
+    for (i = 0; i < 10; ++i)
         this.Keys['digit' + i + 'Pressed'] = Signal();
     this.Keys.escapePressed = Signal();
     this.Keys.flipPressed = Signal();
