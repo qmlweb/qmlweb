@@ -127,7 +127,7 @@ registerQmlType({
         function updateImplicitHeight() {
             var height;
 
-            if (this.text === Undefined || this.text === "") {
+            if (this.text === undefined || this.text === "") {
                 height = 0;
             } else {
                 height = this.dom ? this.dom.firstChild.offsetHeight : 0;
@@ -139,7 +139,7 @@ registerQmlType({
         function updateImplicitWidth() {
             var width;
 
-            if (this.text === Undefined || this.text === "")
+            if (this.text === undefined || this.text === "")
                 width = 0;
             else
                 width = this.dom ? this.dom.firstChild.offsetWidth : 0;

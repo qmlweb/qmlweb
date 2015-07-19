@@ -6,7 +6,6 @@
 
 var GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
-    Undefined = undefined,
     evaluatingProperty = undefined,
     constructors = {
         int: QMLInteger,
