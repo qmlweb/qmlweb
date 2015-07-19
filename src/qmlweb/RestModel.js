@@ -89,7 +89,7 @@ registerQmlType({
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
                     var value = object[key];
-                    if (str !== '')
+                    if (str != '')
                         str += '&';
                     if (typeof prefix != 'undefined')
                         key = prefix + '[' + key + ']';

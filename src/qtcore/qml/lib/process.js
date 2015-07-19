@@ -748,8 +748,7 @@ var when_constant = (function () {
                     try {
                         var lval = evaluate(expr[2]);
                         expr = ((expr[1] == "&&" && (lval ? expr[3] : lval)) ||
-                            (expr[1] == "||" && (lval ? lval : expr[3])) ||
-                            expr);
+                            (expr[1] == "||" && (lval ? lval : expr[3])) || expr);
                     } catch (ex2) {
                         //
                     }

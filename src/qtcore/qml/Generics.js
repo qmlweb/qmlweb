@@ -26,8 +26,8 @@ function fontCss(font) {
     css += font.italic ? "italic " : "normal ";
     css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
     css += (font.weight == Font.Bold || font.weight == Font.DemiBold || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
-    css += font.pixelSize !== null ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
-    css += this.lineHeight !== null ? this.lineHeight + "px " : " ";
+    css += font.pixelSize != undefined ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
+    css += this.lineHeight != undefined ? this.lineHeight + "px " : " ";
     css += (font.family || "sans-serif") + " ";
     return css;
 }
