@@ -12,8 +12,6 @@ registerQmlType({
         this.name = 'default name';
         this.data = ['###', 2, 'three', 4, '###'];
 
-        this.testPluginSignal = Signal();
-
         function updateText() {
             var text = '[';
             for (var i = 0; i < self.data.length; ++i)
