@@ -31,7 +31,7 @@ registerQmlType({
     function startLoop() {
         for (var i in this.$actions) {
             var action = this.$actions[i];
-            action.from = action.from !== Undefined ? action.from : action.target[action.property];
+            action.from = action.from !== undefined ? action.from : action.target[action.property];
         }
         at = 0;
     }

@@ -625,7 +625,7 @@ QMLEngine = function (element, options) {
         console = {};
         console.log = function() {
             var args = Array.prototype.slice.call(arguments);
-            options.debugConsole.apply(Undefined, args);
+            options.debugConsole.apply(undefined, args);
         };
     }
 }

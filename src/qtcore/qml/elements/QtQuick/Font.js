@@ -21,7 +21,7 @@ registerQmlType({
         });
         this.boldChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontWeight =
-                parent.font.weight !== Undefined ? parent.font.weight :
+                parent.font.weight !== undefined ? parent.font.weight :
                 newVal ? "bold" : "normal";
         });
         this.capitalizationChanged.connect(function(newVal) {
@@ -37,16 +37,16 @@ registerQmlType({
             parent.dom.firstChild.style.fontStyle = newVal ? "italic" : "normal";
         });
         this.letterSpacingChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.letterSpacing = newVal !== Undefined ? newVal + "px" : "";
+            parent.dom.firstChild.style.letterSpacing = newVal !== undefined ? newVal + "px" : "";
         });
         this.pixelSizeChanged.connect(function(newVal) {
-            var val = newVal !== Undefined ? newVal + "px "
+            var val = newVal !== undefined ? newVal + "px "
                 : (parent.font.pointSize || 10) + "pt";
             parent.dom.style.fontSize = val;
             parent.dom.firstChild.style.fontSize = val;
         });
         this.pointSizeChanged.connect(function(newVal) {
-            var val = parent.font.pixelSize !== Undefined ? parent.font.pixelSize + "px "
+            var val = parent.font.pixelSize !== undefined ? parent.font.pixelSize + "px "
                 : (newVal || 10) + "pt";
             parent.dom.style.fontSize = val;
             parent.dom.firstChild.style.fontSize = val;
@@ -67,11 +67,11 @@ registerQmlType({
         });
         this.weightChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontWeight =
-                newVal !== Undefined ? newVal :
+                newVal !== undefined ? newVal :
                 parent.font.bold ? "bold" : "normal";
         });
         this.wordSpacingChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.wordSpacing = newVal !== Undefined ? newVal + "px" : "";
+            parent.dom.firstChild.style.wordSpacing = newVal !== undefined ? newVal + "px" : "";
         });
   }
 });
