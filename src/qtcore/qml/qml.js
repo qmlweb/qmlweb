@@ -1,6 +1,5 @@
 var GETTER = "__defineGetter__",
     SETTER = "__defineSetter__",
-    Undefined = undefined,
     // Property that is currently beeing evaluated. Used to get the information
     // which property called the getter of a certain other property for
     // evaluation and is thus dependant on it.
