@@ -1,10 +1,12 @@
-import QtQuick 2.5
+import QtQuick 2.0
 
 Rectangle {
     id: root
     width: 700
     height: 440
+
     Title { id: title ; title: 'ColumnRow' }
+    PlanetsModel { id: planets }
 
     Rectangle {
         id: page
@@ -14,18 +16,6 @@ Rectangle {
         y: title.bottom + 25
         border.width: 1
         border.color: 'red'
-
-        ListModel {
-            id: planets
-            ListElement { name: 'Mercury'; surfaceColor: 'gray' }
-            ListElement { name: 'Venus'; surfaceColor: 'yellow' }
-            ListElement { name: 'Earth'; surfaceColor: 'blue' }
-            ListElement { name: 'Mars'; surfaceColor: 'orange' }
-            ListElement { name: 'Jupiter'; surfaceColor: 'orange' }
-            ListElement { name: 'Saturn'; surfaceColor: 'yellow' }
-            ListElement { name: 'Uranus'; surfaceColor: 'lightBlue' }
-            ListElement { name: 'Neptune'; surfaceColor: 'lightBlue' }
-        }
 
         Column {
             id: col
@@ -51,6 +41,7 @@ Rectangle {
         Column {
             spacing: 10
             y: 7
+            id: planet_display
             Repeater {
                 id: planet_display
                 model: planets

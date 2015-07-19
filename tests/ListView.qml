@@ -1,5 +1,4 @@
-import QtQuick 2.0;
-import QtQuick.Controls 1.0
+import QtQuick 2.0
 
 Rectangle {
     id: root
@@ -88,7 +87,7 @@ Rectangle {
             Text {
                 id: info
                 anchors.centerIn: parent
-                color: '777'
+                color: '#777'
                 font.pointSize: 18
                 font.bold: true
                 text: 'Your text could be here\nNot working with Windows10 Edge'

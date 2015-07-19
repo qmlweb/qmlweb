@@ -4,14 +4,13 @@ registerQmlType({
     versions: /.*/,
     constructor: function QMLRepeater(meta) {
         QMLItem.call(this, meta);
-        var i,
-            self = this;
+        var i, self = this;
         var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
         createSimpleProperty("Component", this, "delegate");
         this.container = function () {
             return this.parent;
-        }
+        };
         this.$defaultProperty = "delegate";
         createSimpleProperty("variant", this, "model");
         createSimpleProperty("int", this, "count");
@@ -27,11 +26,12 @@ registerQmlType({
 
         this.itemAt = function (index) {
             return this.$items[index];
-        }
+        };
+        //alert(this.count);
 
         function callOnCompleted(child) {
             child.Component.completed();
-            for (i = 0; i < child.children.length; i++)
+            for (var i = 0; i < child.children.length; i++)
                 callOnCompleted(child.children[i]);
         }
 
@@ -59,7 +59,7 @@ registerQmlType({
                     callOnCompleted(newItem);
                 }
             }
-            for (i = endIndex; i < self.$items.length; i++)
+            for (var i = endIndex; i < self.$items.length; i++)
                 self.$items[i].index = i;
 
             self.count = self.$items.length;
@@ -76,17 +76,17 @@ registerQmlType({
                 model.rowsInserted.connect(insertChildren);
                 model.rowsMoved.connect(function (sourceStartIndex, sourceEndIndex, destinationIndex) {
                     var vals = self.$items.splice(sourceStartIndex, sourceEndIndex - sourceStartIndex);
-                    for (i = 0; i < vals.length; i++) {
+                    for (var i = 0; i < vals.length; i++) {
                         self.$items.splice(destinationIndex + i, 0, vals[i]);
                     }
                     var smallestChangedIndex = sourceStartIndex < destinationIndex ? sourceStartIndex : destinationIndex;
-                    for (i = smallestChangedIndex; i < self.$items.length; i++) {
+                    for (var i = smallestChangedIndex; i < self.$items.length; i++) {
                         self.$items[i].index = i;
                     }
                 });
                 model.rowsRemoved.connect(function (startIndex, endIndex) {
                     removeChildren(startIndex, endIndex);
-                    for (i = startIndex; i < self.$items.length; i++) {
+                    for (var i = startIndex; i < self.$items.length; i++) {
                         self.$items[i].index = i;
                     }
                     self.count = self.$items.length;
@@ -114,7 +114,7 @@ registerQmlType({
 
         function removeChildProperties(child) {
             engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed), 1);
-            for (i = 0; i < child.children.length; i++)
+            for (var i = 0; i < child.children.length; i++)
                 removeChildProperties(child.children[i])
         }
     }
