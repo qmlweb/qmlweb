@@ -55,6 +55,16 @@ Rectangle {
             info.text = text;
             text_edit.text = text;
         }
+
+        focus: true
+        Keys.onPressed: {
+            if (event.key != Qt.Key_Enter) {
+                var names = Object.getOwnPropertyNames(event), out = []
+                for (var n = 0; n < names.length; n++ )
+                    out.push(names[n] + ' : ' + event[names[n]]);
+                text_edit.text = out.join('\n');
+            }
+        }
     }
 
     Text {
@@ -95,9 +105,7 @@ Rectangle {
 
     TextArea {
         id: text_area
-        x: 280
-        y: 280
-        width: 200
+        width: 300
         height: 100
         anchors.top: checkbox.bottom
         anchors.topMargin: 10
@@ -108,22 +116,10 @@ Rectangle {
             + (checkbox.checked ? '' : 'not ') + 'checked.'
     }
 
-    Text {
-        id: final
-        anchors.horizontalCenter: root.horizontalCenter
-        anchors.bottom: root.bottom
-        anchors.bottomMargin: 30
-        color: 'red'
-        font.pointSize: 20
-        text: '<u>More Widgets to follow ...</u>'
-    }
-
     TextEdit {
         id: text_edit
-        x: 280
-        y: 280
-        width: 200
-        height: 100
+        width: 300
+        height: 200
         anchors.top: text_area.bottom
         anchors.topMargin: 10
         anchors.left: grid.left
@@ -135,5 +131,15 @@ Rectangle {
             + length + '\nI have '
             + lineCount + ' lines \nselectByKeyboard ' + selectByKeyboard
             + '\nselectByMouse ' + selectByMouse
+    }
+
+    Text {
+        id: final
+        anchors.horizontalCenter: root.horizontalCenter
+        anchors.top: text_edit.bottom
+        anchors.topMargin: 30
+        color: 'red'
+        font.pointSize: 20
+        text: '<u>More Widgets to follow ...</u>'
     }
 }
