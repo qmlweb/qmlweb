@@ -42,8 +42,8 @@ registerQmlType({
         this.sourceUrl = 'empty';
         this.qmlSource = 'empty';
 
-    this.setSource = function(url) { //, options) {
-            //this.props = options;
+    this.setSource = function(url, options) {
+            this.props = options;
             this.sourceUrl = url;
             this.qmlSource = getUrlContents(url);
             return;
