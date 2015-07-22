@@ -1,12 +1,12 @@
 import QtQuick 2.0;
 
 Rectangle {
-    id: root
+    width: 500
+    height: 500
     color: 'white'
-    x: 100
 
     Item {
-        id: js
+        id: js_LdR
          function makeUrl(url) {
             var body = document.getElementsByTagName('BODY')[0];
             var file = body.getAttribute('data-qml');
@@ -18,45 +18,46 @@ Rectangle {
     }
 
     Rectangle {
-        id: page
+        id: page_LdR
         color: 'lightcyan'
-        y: 30
-        width:700
-        height: output.bottom + 10
+        anchors.top: 0
+        width: 400
+        height: 450
+        anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
         border.color: 'red'
 
         Title {
-            id: title
+            id: title_LdR
             title: 'Loader'
-            anchors.horizontalCenter: page.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
         }
         Loader { id: pageLoader }
 
         TextInput {
-            id: input
+            id: input_LdR
             text: 'HelloWorld.qml'
-            width: 600
-            anchors.top: title.bottom
+            width: parent.width - 50
+            anchors.top: title_LdR.bottom
             anchors.topMargin: 20
-            anchors.horizontalCenter: page.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
 
            onAccepted: {
-                src = js.makeUrl(text)
+                src = js_LdR.makeUrl(text)
                 pageLoader.setSource(src, null)
-                output.text = pageLoader.qmlSource
+                output_LdR.text = pageLoader.qmlSource
             }
         }
 
         TextEdit {
-            id: output
-            width: 600
-            height: 450
-            anchors.horizontalCenter: page.horizontalCenter
-            anchors.top: input.bottom
+            id: output_LdR
+            width: parent.width - 50
+            height: 300
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: input_LdR.bottom
             anchors.topMargin: 20
             font.bold: true
-            font.pointSize: 12
+            font.pointSize: 11
             text:
 'Specify the name of a file to read in the TextInput.
 Loader will load the source of the file and display it
@@ -65,11 +66,11 @@ to take care that the file will be found on the server.
 The client requests the file with an HTTP GET request.'
 
             MouseArea {
-                anchors.fill: output
+                anchors.fill: output_LdR
                 onClicked: {
-                    src = js.makeUrl(input.text)
+                    src = js_LdR.makeUrl(input_LdR.text)
                     pageLoader.setSource(src, null)
-                    output.text = pageLoader.qmlSource
+                    output_LdR.text = pageLoader.qmlSource
                 }
             }
         }

@@ -17,23 +17,22 @@ As of July 15, 2015 major changes to the original Plaristote code base have been
 
 # Javascript powered QML Engine
 CSS and HTML are boring and lame. And they suck at designing cool, interactive interfaces. Qt came up with a much better answer for its renowned framework: `QML`, a declarative language perfect for designing UIs (and much more). Here's a sample of how QML looks like:
-
-```QML
-import QtQuick 2.0
-
-Rectangle {
-   width: 500; height: 200
-   color: "lightgray"
-
-   Text {
-       id: helloText
-       text: "Hello world!"
-       anchors.verticalCenter: parent.verticalCenter
-       anchors.horizontalCenter: parent.horizontalCenter
-       font.pointSize: 24; font.bold: true
-   }
-}
-```
+#
+	import QtQuick 2.0
+	
+	Rectangle {
+	   width: 500; height: 200
+	   color: "lightgray"
+	
+	   Text {
+	       id: helloText
+	       text: "Hello world!"
+	       anchors.verticalCenter: parent.verticalCenter
+	       anchors.horizontalCenter: parent.horizontalCenter
+	       font.pointSize: 24; font.bold: true
+	   }
+	}
+#
 
 This project aims at bringing the power of QML to the web browser.
 

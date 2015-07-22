@@ -2,19 +2,19 @@ import QtQuick 2.0
 import QtQuick.Controls 1.0
 
 Rectangle {
-    id: root
     color: 'white'
     width: 500
+    height: 700
 
-    Title { id: title ; title: 'Widgets' }
+    Title { id: title_WG ; title: 'Widgets' }
 
     Rectangle {
-        id: grid
+        id: grid_WG
         width: 190
         height: 120
-        anchors.top: title.bottom
+        anchors.top: title_WG.bottom
         anchors.topMargin: 20
-        anchors.horizontalCenter: title.horizontalCenter
+        anchors.horizontalCenter: title_WG.horizontalCenter
         border.width: 1
         border.color: 'red'
         Grid {
@@ -31,29 +31,29 @@ Rectangle {
     }
 
     Button {
-        id: button
+        id: button_WG
         text: 'Button'
         width: 100
-        anchors.horizontalCenter: title.horizontalCenter
-        anchors.top: grid.bottom
+        anchors.horizontalCenter: title_WG.horizontalCenter
+        anchors.top: grid_WG.bottom
         anchors.topMargin: 10
 
         onClicked: {
-            info.text = 'You clicked the Button!';
+            info_WG.text = 'You clicked the Button!';
         }
     }
 
     TextInput {
-        id: in_text
+        id: input_WG
         text: 'TextInput'
         width: 200
-        anchors.top: button.bottom
+        anchors.top: button_WG.bottom
         anchors.topMargin: 10
-        anchors.left: grid.left
+        anchors.left: grid_WG.left
 
         onAccepted: {
-            info.text = text;
-            text_edit.text = text;
+            info_WG.text = text;
+            edit_WG.text = text;
         }
 
         focus: true
@@ -62,15 +62,15 @@ Rectangle {
                 var names = Object.getOwnPropertyNames(event), out = []
                 for (var n = 0; n < names.length; n++ )
                     out.push(names[n] + ' : ' + event[names[n]]);
-                text_edit.text = out.join('\n');
+                edit_WG.text = out.join('\n');
             }
         }
     }
 
     Text {
-        id: info
-        anchors.left: in_text.left
-        anchors.top: in_text.bottom
+        id: info_WG
+        anchors.left: input_WG.left
+        anchors.top: input_WG.bottom
         anchors.topMargin: 10
         color: 'red'
         font.pointSize: 16
@@ -79,13 +79,13 @@ Rectangle {
 
 
     CheckBox {
-        id: checkbox
+        id: checkbox_WG
         text: '<b>Checkbox</b>'
         width: 150
         color: 'grey'
-        anchors.top: info.bottom
+        anchors.top: info_WG.bottom
         anchors.topMargin: 10
-        anchors.left: grid.left
+        anchors.left: grid_WG.left
 
         Rectangle {
             width: 20
@@ -104,25 +104,25 @@ Rectangle {
     }
 
     TextArea {
-        id: text_area
+        id: area_WG
         width: 300
         height: 100
-        anchors.top: checkbox.bottom
+        anchors.top: checkbox_WG.bottom
         anchors.topMargin: 10
-        anchors.left: grid.left
+        anchors.left: grid_WG.left
         font.bold: true
 
         text: 'Hi,\nI am a TextArea!\n\n' + 'The checkbox is '
-            + (checkbox.checked ? '' : 'not ') + 'checked.'
+            + (checkbox_WG.checked ? '' : 'not ') + 'checked.'
     }
 
     TextEdit {
-        id: text_edit
+        id: edit_WG
         width: 300
         height: 200
-        anchors.top: text_area.bottom
+        anchors.top: area_WG.bottom
         anchors.topMargin: 10
-        anchors.left: grid.left
+        anchors.left: grid_WG.left
         font.pointSize: 12
         font.italic: true
         color: 'red'
@@ -135,8 +135,8 @@ Rectangle {
 
     Text {
         id: final
-        anchors.horizontalCenter: root.horizontalCenter
-        anchors.top: text_edit.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: edit_WG.bottom
         anchors.topMargin: 30
         color: 'red'
         font.pointSize: 20
