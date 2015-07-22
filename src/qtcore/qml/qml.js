@@ -13,6 +13,7 @@ var GETTER = "__defineGetter__",
         double: Number,
         string: String,
         bool: Boolean,
+        array: Array,
         list: QMLList,
         color: QMLColor,
         enum: Number,
@@ -29,7 +30,7 @@ var modules = {
 /**
  *
  * TODO ? is this needed ? should be part of the language
- * After commenting out create tests still work.
+ * Yes, commenting out does not seem to work
  *
  */
 Object.create = function (o) {

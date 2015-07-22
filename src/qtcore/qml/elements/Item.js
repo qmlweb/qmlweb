@@ -24,7 +24,7 @@ function QMLItem(meta) {
         this.dom.style.position = "relative";
         this.dom.style.top = "0";
         this.dom.style.left = "0";
-        this.dom.style.overflow = "hidden";
+        this.dom.style.overflow = "auto";
     } else {
         if (!this.dom)
             this.dom = document.createElement("div");
@@ -309,7 +309,7 @@ function QMLItem(meta) {
         this.dom.style.opacity = newVal;
     });
     this.clipChanged.connect(this, function (newVal) {
-        this.dom.style.overflow = newVal ? "hidden" : "visible";
+        this.dom.style.overflow = newVal ? "auto" : "visible";
     });
     this.zChanged.connect(this, function (newVal) {
         this.$updateTransform();

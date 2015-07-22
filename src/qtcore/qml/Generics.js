@@ -6,8 +6,9 @@
  *  +   fontCss
  *  +   updateCSS
  *  +   objList
+ *  +   objItems
  *  +   logCSS
- *  +   descr
+ *  +   typeName
  *
  */
 
@@ -81,11 +82,29 @@ function updateCss(self) {
  *
  */
 function objList(obj, title) {
-    var o, out = [title];
+    var o, out = [title || 'Object List'];
     for (o in obj) {
         var ov = obj[o];
         if (ov)
             out.push(o + ' : ' + ov);
+    }
+    return out;
+}
+
+/**
+ *
+ * Create a list of object properties.
+ *
+ * @param   obj     object to be list
+ * @param   title   titlestring for the list
+ *
+ * @return  list of object property strings
+ *
+ */
+function objItems(obj, title) {
+    var o, out = [title || 'Object List'];
+    for (o in obj) {
+        out.push(o);
     }
     return out;
 }
@@ -107,19 +126,20 @@ function logCss() {
 }
 
 /**
- * Helper function - migrated from qml.js
- * Prints msg and values of object. Workaround when using getter functions
- * as Chrome (at least) won't show property values for them.
- * @param   msg     Message
- * @param   obj     Object to use (will be "printed", too)
- * @param   vals    Values to list from the object.
+ *
+ * http://stackoverflow.com/questions/332422/
+ * how-do-i-get-the-name-of-an-objects-type-in-javascript
+ *
+ * example:
+ *
+ * typeName([}) returns 'Array'
+ * typeof([]) returns 'object'
+ *
+ * @param   obj     Object whose type name is wanted
+ * @return  object type name as a string
+ *
  */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
+function typeName(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1);
 }
 
