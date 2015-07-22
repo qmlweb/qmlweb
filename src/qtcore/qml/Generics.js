@@ -6,7 +6,9 @@
  *  +   fontCss
  *  +   updateCSS
  *  +   objList
+ *  +   objItems
  *  +   logCSS
+ *  +   typeName
  *
  */
 
@@ -91,6 +93,24 @@ function objList(obj, title) {
 
 /**
  *
+ * Create a list of object properties.
+ *
+ * @param   obj     object to be list
+ * @param   title   titlestring for the list
+ *
+ * @return  list of object property strings
+ *
+ */
+function objItems(obj, title) {
+    var o, out = [title || 'Object List'];
+    for (o in obj) {
+        out.push(o);
+    }
+    return out;
+}
+
+/**
+ *
  * Log DOM object properties to the Javascript console.
  *
  * Visual QML items have a DOM akin to a HTML <body>
@@ -103,5 +123,23 @@ function logCss() {
 
     var out1 = objList(self.dom.firstChild.style);
     console.log(out1.join('\n'));
+}
+
+/**
+ *
+ * http://stackoverflow.com/questions/332422/
+ * how-do-i-get-the-name-of-an-objects-type-in-javascript
+ *
+ * example:
+ *
+ * typeName([}) returns 'Array'
+ * typeof([]) returns 'object'
+ *
+ * @param   obj     Object whose type name is wanted
+ * @return  object type name as a string
+ *
+ */
+function typeName(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1);
 }
 
