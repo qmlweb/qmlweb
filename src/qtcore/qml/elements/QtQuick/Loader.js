@@ -31,23 +31,27 @@ registerQmlType({
 
         this.active = true;
         this.asynchronous = false;
-        this.item = null;
+        this.item = undefined;
         this.progress = 0.0;
-        this.source = null;
-        this.sourceComponent = null;
+        this.source = undefined;
+        this.sourceComponent = undefined;
         this.status = 1;
 
         this.loaded = Signal();
 
         this.qml = 'not set';
         this.sourceUrl = 'empty';
-        this.qmlSource = 'empty';
+        this.sourceQml = 'empty';
 
-    this.setSource = function(url, options) {
-            this.props = options;
+        this.setSource = function(url, options) {
             this.sourceUrl = url;
-            this.qmlSource = getUrlContents(url);
-            return;
+            this.sourceQml = getUrlContents(url);
+
+            this.props = options;
+            this.source = url;
+            this.sourceComponent = null; // TODO Component
+            this.item = {}; // TODO
+            this.loaded();
         }
 
     }
