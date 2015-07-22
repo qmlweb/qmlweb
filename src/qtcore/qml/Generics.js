@@ -80,7 +80,7 @@ function updateCss(self) {
  *
  */
 function objList(obj, title) {
-    var o, out = [title];
+    var o, out = [title || 'Object List'];
     for (o in obj) {
         var ov = obj[o];
         if (ov)
