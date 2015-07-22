@@ -28,7 +28,62 @@
  + vector3d        Value with x, y, and z attributes
  + vector4d        A vector4d type has x, y, z and w attributes
 
+## Type correspondences in QMLWeb
+
+ + int		    QMLInteger
+ + real		    Number
+ + double	    Number
+ + string	    String
+ + bool		    Boolean
+ + list		    QMLList
+ + color	    QMLColor
+ + enum		    Number
+ + url		    String
+ + variant	    QMLVariant
+ + 'var'	    QMLVariant
+ + QMLDocument  QMLComponent
+
 ---
+
+## Items defined in QtQuick.Controls
+
+ + Action              Abstract user interface action that can be bound to items
+ + ApplicationWindow   Provides a top-level application window
+ + BusyIndicator       A busy indicator
+ + Button              A push button with a text label
+ + Calendar            Provides a way to select dates from a calendar
+ + CheckBox            A checkbox with a text label
+ + ComboBox            Provides a drop-down list functionality
+ + ExclusiveGroup      Way to declare several checkable controls as mutually exclusive
+ + GroupBox            Group box frame with a title
+ + Label               A text label
+ + Menu                Provides a menu component for use as a context menu, popup menu, or as part of a menu bar
+ + MenuBar             Provides a horizontal menu bar
+ + MenuItem            Item to add in a menu or a menu bar
+ + MenuSeparator       Separator for items inside a menu
+ + ProgressBar         A progress indicator
+ + RadioButton         A radio button with a text label
+ + ScrollView          Provides a scrolling view within another Item
+ + Slider              Provides a vertical or horizontal slider control
+ + SpinBox             Provides a spin box control
+ + SplitView           Lays out items with a draggable splitter between each item
+ + Stack               Provides attached properties for items pushed onto a StackView
+ + StackView           Provides a stack-based navigation model
+ + StackViewDelegate   A delegate used by StackView for loading transitions
+ + StatusBar           Contains status information in your app
+ + Switch              A switch
+ + Tab                 Represents the content of a tab in a TabView
+ + TabView             A control that allows the user to select one of multiple stacked items
+ + TableView           Provides a list view with scroll bars, styling and header sections
+ + TableViewColumn     Used to define columns in a TableView or in a TreeView
+ + TextArea            Displays multiple lines of editable formatted text
+ + TextField           Displays a single line of editable plain text
+ + ToolBar             Contains ToolButton and related controls
+ + ToolButton          Provides a button type that is typically used within a ToolBar
+ + TreeView            Provides a tree view with scroll bars, styling and header sections
+
+
+___
 
 ### anchors group
 

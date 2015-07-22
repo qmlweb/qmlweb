@@ -1,22 +1,20 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: root
     width: 700
     height: 400
-    Title { id: title ; title: 'Rectangle' }
+    Title { id: title_RA ; title: 'Rectangle' }
 
     Rectangle {
-        id: page
+        id: page_RA
         width: 520
         height: 300
-        x: root.left + 90
-        y: title.bottom + 25
+        anchors.top: title_RA.bottom + 50
+        anchors.horizontalCenter: parent.horizontalCenter
         color: '#ccf'
         border.width: 25
         border.color: 'magenta'
         Rectangle {
-            id: inner1
             width: 100
             height: 100
             x: 100
@@ -24,7 +22,6 @@ Rectangle {
             color: 'red'
         }
         Rectangle {
-            id: inner2
             width: 100
             height: 100
             x: 210
@@ -32,7 +29,6 @@ Rectangle {
             color: 'green'
         }
         Rectangle {
-            id: inner3
             width: 100
             height: 100
             x: 320

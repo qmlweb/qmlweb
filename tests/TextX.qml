@@ -1,23 +1,21 @@
-import QtQuick 2.0;
+import QtQuick 2.0
 
 Rectangle {
-    id: root
     width: 700
-    height: 400
-    Title { id: title ; title: 'Text' }
+    height: 250
+    Title { id: title_TX ; title: 'Text' }
 
     Rectangle {
-        id: page
+        id: page_TX
         width: 610
         height: 220
-        x: root.left + 45
-        y: title.bottom + 25
+        anchors.top: title_TX.bottom + 50
+        anchors.horizontalCenter: parent.horizontalCenter
         color: '#cfc'
         border.width: 15
         border.color: 'blue'
         Text {
-            id: inner1
-            anchors.centerIn: page
+            anchors.centerIn: page_TX
             font.pointSize: 18
             text:
 '<b>Gallia</b> est omnis divisa <i>in partes tres</i>,

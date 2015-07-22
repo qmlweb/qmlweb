@@ -2,18 +2,18 @@ import QtQuick 2.0
 import QtQuick.Controls 1.0
 
 Rectangle {
-    id: root
     color: 'white'
     width: 600
+    height: 600
 
-    Title { id: title ; title: 'TextEdit' }
+    Title { id: title_TX ; title: 'TextEdit' }
     TextEdit {
-        id: text_edit
+        id: edit_TX
         width: 500
         height: 400
-        anchors.top: title.bottom
+        anchors.top: title_TX.bottom
         anchors.topMargin: 30
-        anchors.horizontalCenter: root.horizontalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
         color: 'blue'
         font.pointSize: 13.5
         font.underline: true
@@ -35,13 +35,12 @@ To sleep: perchance to dream: ay, there's the rub;
 For in that sleep of death what dreams may come"
     }
     Text {
-        id: info
-        anchors.horizontalCenter: text_edit.horizontalCenter
-        anchors.top: text_edit.bottom
+        anchors.top: edit_TX.bottom
         anchors.topMargin: 15
+        anchors.horizontalCenter: edit_TX.horizontalCenter
         color: '#363'
         font.pointSize: 16
-        text: 'Lines = ' + text_edit.lineCount + '  '
-            + 'Chars = ' + text_edit.length
+        text: 'Lines = ' + edit_TX.lineCount + '  '
+            + 'Chars = ' + edit_TX.length
     }
 }

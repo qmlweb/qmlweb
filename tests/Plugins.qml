@@ -1,46 +1,46 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: root
     color: 'white'
     width: 500
     height: 500
 
-    Title { id: title ; title: 'Plugins' }
+    Title { id: title_PL ; title: 'Plugins' }
 
     TestPlugin {
-        id: plugin
+        id: plugin_PL
         name: 'Example Plugin'
         data: [1, 2, 'three', 4, '+++']
-        anchors.top: title.bottom + 30
-        anchors.left: title.left
+        anchors.top: title_PL.bottom + 30
+        anchors.left: title_PL.left
         onDataChanged: {
-            testPluginSignal()
+           dom.textContent = data
+           //testPluginSignal()
         }
-        onTestPluginSignal: {
-            dom.textContent = data
-        }
+        //onTestPluginSignal: {
+        //    dom.textContent = data
+        //}
     }
 
     Text {
-        id: child
-        anchors.top: plugin.bottom + 50
-        anchors.horizontalCenter: root.horizontalCenter
+        id: child_PL
+        anchors.top: plugin_PL.bottom + 50
+        anchors.horizontalCenter: parent.horizontalCenter
         font.pointSize: 20
         font.bold: true
         color: '#a0a'
-        text: plugin.name
+        text: plugin_PL.name
     }
 
     TextInput {
-        id: in_text
+        id: input_PL
         text: 'TextInput'
         width: 200
-        anchors.top: child.bottom + 30
-        anchors.left: child.left
+        anchors.top: child_PL.bottom + 30
+        anchors.left: child_PL.left
 
         onAccepted: {
-            plugin.data = text;
+            plugin_PL.data = text;
         }
     }
 }

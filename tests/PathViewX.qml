@@ -1,12 +1,12 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: root
-    width: 500
-    height: 200
+    color: 'white'
+    width: 700
+    height: 700
 
-    Title { id: title ; title: 'PathView' }
-    NotImplemented { anchors.top: title.bottom + 25 }
+    Title { id: title_PV ; title: 'PathView' }
+    NotImplemented { anchors.top: title_PV.bottom + 25 }
 }
 /*
     ListModel {

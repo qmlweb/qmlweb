@@ -1,37 +1,36 @@
 import QtQuick 2.0;
 
 Rectangle {
-    id: root
     width: 700
-    height: 400
-    Title { id: title ; title: 'Image' }
+    height: 700
+    Title { id: title_ImX ; title: 'Image' }
 
     Rectangle {
-        id: page
+        id: page_ImX
         width: 500
         height: 500
-        x: page.left + 100
-        y: title.bottom + 25
+        anchors.top: title_ImX.bottom + 50
+        anchors.horizontalCenter: parent.horizontalCenter
         color: '#fcc'
         border.width: 5
         border.color: 'blue'
         Image {
-            id: inner1
+            id: inner1_ImX
             source: 'images/lizard.jpg'
             scale: 0.75
             fillMode: Image.PreserveAspectFit
             anchors.fill: parent
             Rectangle {
-                anchors.fill: caption
+                anchors.fill: caption_ImX
                 color: '#ddd'
             }
             Text {
-                id: caption
-                x: inner1.width - 400
-                y: inner1.height - 50
+                id: caption_ImX
+                x: inner1_ImX.width - 400
+                y: inner1_ImX.height - 50
                 font.pointSize: 16
                 color: '#00d'
-                text: ' Lizard in Turkey - scale = ' + inner1.scale.toFixed(3)
+                text: ' Lizard in Turkey - scale = ' + inner1_ImX.scale.toFixed(3)
             }
             MouseArea {
                 anchors.fill: parent
@@ -39,25 +38,25 @@ Rectangle {
                 hoverEnabled: true
                 onClicked: {
                     if (mouse.button == Qt.LeftButton)
-                        inner1.scale += 0.025
+                        inner1_ImX.scale += 0.025
                     else
-                        inner1.scale -= 0.025
+                        inner1_ImX.scale -= 0.025
                 }
                 onEntered: {
-                    page.color = '#ccf'
+                    page_ImX.color = '#ccf'
                 }
                 onExited: {
-                    page.color = '#fcc'
+                    page_ImX.color = '#fcc'
                 }
             }
         }
         Text {
-            id: hint
-            y: page.height - 80
+            id: hint_ImX
+            y: page_ImX.height - 80
             font.family: 'Consolas'
             font.pointSize: 14
             color: '#303'
-            anchors.horizontalCenter: page.horizontalCenter
+            anchors.horizontalCenter: page_ImX.horizontalCenter
             text: '
 Left Mouse Click:  increase image scale
 Right Mouse Click: decrease image scale'

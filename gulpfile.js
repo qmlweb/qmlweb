@@ -1,6 +1,5 @@
 var gulp      = require('gulp');
-var g_changed = require('gulp-changed');
-var g_util    = require('gulp-util');
+//var g_util    = require('gulp-util');
 var g_uglify  = require('gulp-uglify');
 var g_concat  = require('gulp-concat');
 var g_rename  = require('gulp-rename');
@@ -32,18 +31,23 @@ var qtcoreSources = [
 gulp.task('qt', function() {
     return gulp.src(qtcoreSources)
         .pipe(g_concat('qt.js'))
-        .pipe(g_changed('./lib/qt.js'))
-        .pipe(gulp.dest('./lib'));
+        .pipe(gulp.dest('./lib/'));
 });
 
 gulp.task('min-qt', function() {
     return gulp.src('./lib/qt.js')
         .pipe(g_rename('qt.min.js'))
         .pipe(g_uglify())
-        .pipe(g_changed('./lib/qt.min.js'))
-        .pipe(gulp.dest('./lib'));
+        .pipe(gulp.dest('./lib/'));
 });
 
-gulp.task('default', ['qt', 'min-qt'], function() {
-   //gulp.watch(qtcoreSources, ['qt', 'min-qt']);
+gulp.task('copy-js', function() {
+    var SRC = './lib/*';
+    var DST = '../../flask/static/js/qml3/';
+    return gulp.src(SRC)
+        .pipe(gulp.dest(DST));
+});
+
+gulp.task('default', ['qt', 'min-qt', 'copy-js'], function() {
+   //gulp.watch(qtcoreSources, ['qt', 'min-qt', 'copy-js']);
 });

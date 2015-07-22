@@ -1,29 +1,30 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: root
+    width: Cities.count*130+125+50
+    height: Cities.count*45+40
     color: 'white'
-    x: 50
-    width: page.width
-
-    Title { id: title ; title: 'ListView' }
+ 
+    Title { id: title_LV ; title: 'ListView' }
     CitiesModel { id: Cities }
 
     Rectangle {
-        id: page
-        color: '#aab'
-        width: 7 * 130 + 5
+        id: page_LV
+        x: 50
+        width: parent.width
+        height: parent.height
         property string source1: 'images/go-next.png'
         property string source2: 'images/go-previous.png'
 
-        anchors.top: title.bottom
+        anchors.top: title_LV.bottom
         anchors.topMargin: 30
-        anchors.horizontalCenter: page.horizontalCenter
+        anchors.horizontalCenter: page_LV.horizontalCenter
 
         ListView {
-            id: lv_vertical
+            id: vertical_LV
             model: Cities
             orientation: Qt.Vertical
+            width: 130
             spacing: 5
             delegate: Rectangle {
                 width: 125
@@ -32,26 +33,28 @@ Rectangle {
                 border.width: 1
                 border.color: 'red'
                 Image {
-                    id: image
-                    source: locale[0] == 'e' ? page.source1 : page.source2
+                    id: image_LV
+                    source: locale[0] == 'e' ?
+                        page_LV.source1 : page_LV.source2
                     fillMode: Image.PreserveAspectFit
                     anchors.fill: parent
                 }
                 MouseArea {
-                  anchors.fill: parent
-                  acceptedButtons: Qt.LeftButton | Qt.RightButton
-                  onClicked: {
-                    info.text = 'clicked in ListView\nsource = ' + image.source
+                    anchors.fill: parent
+                    onClicked: {
+                        info_LV.text = 'clicked in ListView\nsource = '
+                        + image_LV.source
                   }
               }
             }
         }
 
         ListView {
-            id: lv_horizontal
+            id: horizontal_LV
             model: Cities
             orientation: Qt.Horizontal
-            x: 130
+            anchors.left: vertical_LV.right
+            height: 40
             spacing: 5
             delegate: Rectangle {
                 width: 125
@@ -60,37 +63,36 @@ Rectangle {
                 border.width: 1
                 border.color: 'blue'
                 Text {
-                    id: entryCities
                     anchors.centerIn: parent
                     text: name
                 }
                 MouseArea {
-                    id: mCity
                     anchors.fill: parent
                     onClicked: {
-                        info.text = 'CITY : ' + name +
-                                    '\n\ncountry : ' + country +
-                                    '\nlocale : ' + locale +
-                                    '\ntimezone : ' + tz
+                        info_LV.text = 'CITY : ' + name
+                        + '\n\ncountry : ' + country
+                        + '\nlocale : ' + locale
+                        + '\nUTC offset : ' + tz + ' min'
                     }
                 }
             }
         }
 
         Rectangle {
-            id: reporter
-            x: 130
-            y:  46
-            width:  page.width - 130
-            height: 229
+            anchors.top: horizontal_LV.bottom + 5
+            anchors.left: vertical_LV.right
+            width: Cities.count*130+5
+            height: (Cities.count-1)*45+5
             color: '#aaf'
             Text {
-                id: info
+                id: info_LV
                 anchors.centerIn: parent
                 color: '#777'
                 font.pointSize: 18
                 font.bold: true
-                text: 'Your text could be here\nNot working with Windows10 Edge'
+                text:
+'Your text could be here
+Not working with Windows10 Edge'
             }
         }
     }
