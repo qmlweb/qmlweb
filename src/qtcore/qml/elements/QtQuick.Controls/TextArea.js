@@ -28,7 +28,7 @@ registerQmlType({
         });
 
         function updateValue(e) {
-            if (self.text != self.dom.firstChild.value) {
+            if (self.text !== self.dom.firstChild.value) {
                 self.text = self.dom.firstChild.value;
             }
         }
