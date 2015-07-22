@@ -11,6 +11,7 @@ registerQmlType({
         createSimpleProperty('var', this, 'data');
         this.name = 'default name';
         this.data = ['###', 2, 'three', 4, '###'];
+        this.testPluginSignal = Signal();
 
         function updateText() {
             var text = '[';
