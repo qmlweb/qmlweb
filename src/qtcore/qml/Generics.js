@@ -7,7 +7,6 @@
  *  +   updateCSS
  *  +   objList
  *  +   logCSS
- *  +   descr
  *
  */
 
@@ -104,22 +103,5 @@ function logCss() {
 
     var out1 = objList(self.dom.firstChild.style);
     console.log(out1.join('\n'));
-}
-
-/**
- * Helper function - migrated from qml.js
- * Prints msg and values of object. Workaround when using getter functions
- * as Chrome (at least) won't show property values for them.
- * @param   msg     Message
- * @param   obj     Object to use (will be "printed", too)
- * @param   vals    Values to list from the object.
- */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
 }
 
