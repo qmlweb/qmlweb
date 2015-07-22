@@ -276,5 +276,10 @@ global.Qt = {
     Key_Play: 250,
     Key_Sleep: 95,
     Key_Zoom: 251,
-    Key_Cancel: 3
+    Key_Cancel: 3,
+
+    PrimaryOrientation: 0x00000000,
+    LandscapeOrientation: 0x00000002,
+    PortraitOrientation: 0x00000001,
+    InvertedLandscapeOrientation: 0x00000008
 }
