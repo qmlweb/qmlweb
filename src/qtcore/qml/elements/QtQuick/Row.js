@@ -9,6 +9,7 @@ function QMLRow(meta) {
     QMLPositioner.call(this, meta);
 
     createSimpleProperty("enum", this, "layoutDirection");
+    createSimpleProperty("enum", this, "effectiveLayoutDirection");
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutDirection = 0;
 }
