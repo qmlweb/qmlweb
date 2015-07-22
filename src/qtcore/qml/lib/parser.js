@@ -1683,21 +1683,22 @@ function convertToEngine(tree) {
         },
         "name": function (src) {
             return bindout(tree, src);
-        }
+        },
     };
 
     function walk(tree) {
-        var type = tree[0];
-        var walker = walkers[type];
+        var tree0 = tree[0],
+            tree1 = tree[1];
+        var walker = walkers[tree0];
         if (!walker) {
-            if (type == "array"
-                || type == "num"
-                || type == "string")
-                return walk1(type, tree[1]);
-            console.log("**  walk failed for " + type + "  **");
+            if (tree0 == "array"
+                || tree0 == "num"
+                || tree0 == "string")
+                return walk1(tree0, tree1);
+            console.log("**  walk failed for " + tree0 + "  **");
             return;
         } else {
-            return walker.apply(type, tree.slice(1));
+            return walker.apply(tree0, tree.slice(1));
         }
     }
 
@@ -1726,26 +1727,29 @@ function convertToEngine(tree) {
     }
 
     function bindout(tree, binding) {
-        if (tree[1][0] == "name" && (tree[1][1] == "true" || tree[1][1] == "false")) {
-            return tree[1][1] == "true";
+        var tree1 = tree[1],
+            tree10 = tree[1][0],
+            tree11 = tree[1][1];
+        if (tree10 == "name"
+            && (tree11 == "true" || tree11 == "false")) {
+            return tree11 == "true";
         }
-        switch (tree[1][0]) {
-        case "num":
-            return +tree[1][1];
-        case "string":
-            return String(tree[1][1]);
-        case "qmlelem":
-            return walk(tree[1]);
-        case "array":
-            var val = [];
-            for (var i in tree[1][1])
-                val.push(walk(tree[1][1][i]));
-            return val;
-        default:
-            return new QMLBinding(binding, tree);
+        switch (tree10) {
+            case "num":
+                return +tree11;
+            case "string":
+                return String(tree11);
+            case "qmlelem":
+                return walk(tree1);
+            case "array":
+                var val = [];
+                for (var i in tree11)
+                    val.push(walk(tree11[i]));
+                return val;
+            default:
+                return new QMLBinding(binding, tree);
         }
     }
-
 }
 
 function parseQML(src) {

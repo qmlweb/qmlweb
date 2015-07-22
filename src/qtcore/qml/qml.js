@@ -147,9 +147,9 @@ function cloneObject(obj) {
  *
  */
 QMLBinding.prototype.compile = function () {
-    var bindSrc = this.function ? "(function(o, c) { with(c) with(o) "
-        + this.src + "})" : "(function(o, c) { with(c) with(o) return "
-        + this.src + "})";
+    var bindSrc = this.function
+        ? "(function(o, c) { with(c) with(o) " + this.src + "})"
+        : "(function(o, c) { with(c) with(o) return " + this.src + "})";
     this.eval = eval(bindSrc);
 }
 

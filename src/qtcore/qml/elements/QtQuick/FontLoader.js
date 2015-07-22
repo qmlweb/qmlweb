@@ -1,6 +1,6 @@
 registerQmlType({
-    module: 'QtQuick',
-    name: 'FontLoader',
+    module: "QtQuick",
+    name: "FontLoader",
     versions: /.*/,
     constructor: function QMLFontLoader(meta) {
         QMLBaseObject.call(this, meta);
@@ -19,8 +19,8 @@ registerQmlType({
         this.status = this.FontLoader.Null;
 
         var self = this,
-            domStyle = document.createElement('style'),
-            lastName = '',
+            domStyle = document.createElement("style"),
+            lastName = "",
             inTouchName = false;
 
         var timeouts = [20, 50, 100, 300, 500, 1000, 3000, 5000, 10000, 15000];
@@ -31,7 +31,7 @@ registerQmlType({
             if (i > 0) {
                 var name = self.name;
                 inTouchName = true;
-                self.name = 'sans-serif';
+                self.name = "sans-serif";
                 self.name = name;
                 inTouchName = false;
             }
@@ -52,7 +52,7 @@ registerQmlType({
                 return;
             }
             self.status = self.FontLoader.Loading;
-            if (typeof FontLoader !== 'undefined') {
+            if (typeof FontLoader !== "undefined") {
                 var fontLoader = new FontLoader([fontName], {
                     "fontsLoaded": function (error) {
                         if (error !== null) {
@@ -72,7 +72,7 @@ registerQmlType({
                 FontLoader.testDiv = null;
                 fontLoader.loadFonts();
             } else {
-                console.warn('FontLoader.js library is not loaded.\nYou should load https://github.com/smnh/FontLoader if you want to use QtQuick FontLoader elements.')
+                console.warn("FontLoader.js library is not loaded.\nYou should load https://github.com/smnh/FontLoader if you want to use QtQuick FontLoader elements.")
                 self.status = self.FontLoader.Error;
                 self.name = fontName;
                 cycleTouchName(fontName, 0)
@@ -80,9 +80,9 @@ registerQmlType({
         }
 
         this.sourceChanged.connect(this, function (font_src) {
-            var fontName = 'font_' + ((new Date()).getTime()).toString(36) + '_' + (Math.round(Math.random() * 1e15)).toString(36);
-            domStyle.innerHTML = '@font-face { font-family: \'' + fontName + '\'; src: url(\'' + engine.$resolvePath(font_src) + '\'); }';
-            document.getElementsByTagName('head')[0].appendChild(domStyle);
+            var fontName = "font_" + ((new Date()).getTime()).toString(36) + "_" + (Math.round(Math.random() * 1e15)).toString(36);
+            domStyle.innerHTML = "@font-face { font-family: \"" + fontName + "\"; src: url(\"" + engine.$resolvePath(font_src) + "\"); }";
+            document.getElementsByTagName("head")[0].appendChild(domStyle);
             loadFont(fontName);
         });
 

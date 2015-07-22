@@ -21,10 +21,10 @@ global.Qt = {
      */
     rgba: function (r, g, b, a) {
         return "rgba("
-          + Math.round(r * 255)
-          + "," + Math.round(g * 255)
-          + "," + Math.round(b * 255)
-          + "," + a + ")";
+            + Math.round(r * 255)
+            + "," + Math.round(g * 255)
+            + "," + Math.round(b * 255)
+            + "," + a + ")";
     },
 
     /**
@@ -293,4 +293,4 @@ global.Qt = {
     LandscapeOrientation: 0x00000002,
     PortraitOrientation: 0x00000001,
     InvertedLandscapeOrientation: 0x00000008
-}
+};
