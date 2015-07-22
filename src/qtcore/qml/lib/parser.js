@@ -1690,7 +1690,11 @@ function convertToEngine(tree) {
         var type = tree[0];
         var walker = walkers[type];
         if (!walker) {
-            console.log("No walker for " + type);
+            if (type == "array"
+                || type == "num"
+                || type == "string")
+                return walk1(type, tree[1]);
+            console.log("**  walk failed for " + type + "  **");
             return;
         } else {
             return walker.apply(type, tree.slice(1));
@@ -1698,6 +1702,28 @@ function convertToEngine(tree) {
     }
 
     return walk(tree);
+
+    function walk1(tree0, tree1) {
+        switch (tree0) {
+            case "num":
+                return +tree1;
+            case "string":
+                return String(tree1);
+            case "array":
+                var val = [];
+                var elt = tree1.toString().split(",");
+                var len = elt.length;
+                for (var i = 0; i < len; i += 2) {
+                    var nxt0 = elt[i],
+                        nxt1 = elt[i+1];
+                    val.push(walk1(nxt0, nxt1))
+                }
+                return val;
+            default:
+                console.log("**  walk1 failed for " + tree0 + "  **");
+                return;
+        }
+    }
 
     function bindout(tree, binding) {
         if (tree[1][0] == "name" && (tree[1][1] == "true" || tree[1][1] == "false")) {
