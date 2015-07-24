@@ -133,13 +133,22 @@ Rectangle {
             + '\nselectByMouse ' + selectByMouse
     }
 
-    Text {
-        id: final
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: edit_WG.bottom
-        anchors.topMargin: 30
-        color: 'red'
-        font.pointSize: 20
-        text: '<u>More Widgets to follow ...</u>'
+    ComboBox {
+        width: 50
+        height: 20
+        anchors.top: checkbox_WG.top
+        anchors.left: checkbox_WG.right + 20
+
+        model: [1, 2, 3, 4, 5, 1, 2, 3, 4, 5]
+
+        onAccepted: {
+            alert(currentText + " " + currentIndex + " out of " + count)
+            alert($items.length)
+            info_WG.text = 'Item at index '+currentIndex + ' is ' + currentText;
+        }
+
+        onActivated: {
+            alert("#" + index)
+        }
     }
 }

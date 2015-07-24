@@ -44,8 +44,8 @@ Rectangle {
 
            onAccepted: {
                 src = js_LdR.makeUrl(text)
-                pageLoader.setSource(src, null)
-                output_LdR.text = pageLoader.qmlSource
+                pageLoader.setSource(src)
+                output_LdR.text = pageLoader.sourceQml
             }
         }
 
@@ -69,8 +69,8 @@ The client requests the file with an HTTP GET request.'
                 anchors.fill: output_LdR
                 onClicked: {
                     src = js_LdR.makeUrl(input_LdR.text)
-                    pageLoader.setSource(src, null)
-                    output_LdR.text = pageLoader.qmlSource
+                    pageLoader.setSource(src)
+                    output_LdR.text = pageLoader.sourceQml
                 }
             }
         }

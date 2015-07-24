@@ -7,4 +7,11 @@ Rectangle {
 
     Title { id: title_CN ; title: 'Canvas' }
     NotImplemented { anchors.top: title_CN.bottom + 25 }
+    Item {}
+    Canvas {
+        id: canvas_CN
+        onCompleted: {
+            alert(objList(canvas_CN, 'Canvas').join('\n'))
+        }
+    }
 }

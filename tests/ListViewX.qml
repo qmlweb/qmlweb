@@ -33,17 +33,17 @@ Rectangle {
                 border.width: 1
                 border.color: 'red'
                 Image {
+                    id: image_LV
                     source: locale[0] == 'e' ?
                         page_LV.source1 : page_LV.source2
                     fillMode: Image.PreserveAspectFit
                     anchors.fill: parent
                 }
                 MouseArea {
-                  anchors.fill: parent
-                  acceptedButtons: Qt.LeftButton | Qt.RightButton
-                  onClicked: {
-                    info_LV.text = 'clicked in ListView\nsource = '
-                        + image.source
+                    anchors.fill: parent
+                    onClicked: {
+                        info_LV.text = 'clicked in ListView\nsource = '
+                        + image_LV.source
                   }
               }
             }
@@ -69,10 +69,10 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        info_LV.text = 'CITY : ' + name +
-                            '\n\ncountry : ' + country +
-                            '\nlocale : ' + locale +
-                            '\ntimezone : ' + tz
+                        info_LV.text = 'CITY : ' + name
+                        + '\n\ncountry : ' + country
+                        + '\nlocale : ' + locale
+                        + '\nUTC offset : ' + tz + ' min'
                     }
                 }
             }
@@ -91,7 +91,8 @@ Rectangle {
                 font.pointSize: 18
                 font.bold: true
                 text:
-'Your text could be here\nNot working with Windows10 Edge'
+'Your text could be here
+Not working with Windows10 Edge'
             }
         }
     }
