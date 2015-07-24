@@ -7,6 +7,7 @@ function QMLButton(meta) {
     this.dom.innerHTML = "<span></span>";
 
     createSimpleProperty("string", this, "text");
+    createSimpleProperty("bool", this, "enabled");
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -18,6 +19,9 @@ function QMLButton(meta) {
         //TODO: Replace those statically sized borders
         this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
         this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+    });
+    this.enabledChanged.connect(this, function(newVal) {
+        this.dom.disabled = !newVal;
     });
 
     this.dom.onclick = function(e) {
