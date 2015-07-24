@@ -93,6 +93,10 @@
 {
     "file": "alias_changes.qml",
     "title": "* Alias changes test"
+},
+{
+    "file": "video.qml",
+    "title": "* Video test"
 }
 
 ]
