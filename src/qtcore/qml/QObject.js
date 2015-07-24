@@ -35,4 +35,8 @@ function QObject(parent) {
         // 2) DOM node will be removed.
         this.parent = undefined;
     }
+
+    // must have `destroy` method
+    // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
+    this.destroy = this.$delete;
 }
