@@ -171,6 +171,43 @@ constructors = {
     CheckBox: QMLCheckbox
 };
 
+// mix of engine.loadQML and Loader.qml
+Qt.createQmlObject = function( src, parent, file )
+{
+        var tree = parseQML(src);
+
+        // Create and initialize objects
+        var component = new QMLComponent({ object: tree, parent: parent });
+        
+        engine.loadImports( tree.$imports );
+        //component.$basePath = engine.$basePath;
+        if (!file) file = Qt.resolvedUrl("createQmlObject_function");
+        component.$basePath = engine.extractBasePath( file );
+        component.$imports = tree.$imports; // for later use
+        component.$file = file; // not just for debugging, but for basepath too, see above
+    
+        var obj = component.createObject(parent);
+        obj.parent = parent;
+        parent.childrenChanged();
+        
+        engine.$initializePropertyBindings();
+
+        if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
+          // We don't call those on first creation, as they will be called
+          // by the regular creation-procedures at the right time.
+          engine.$initializePropertyBindings();
+
+          function callOnCompleted(child) {
+            child.Component.completed();
+            for (var i = 0; i < child.children.length; i++)
+               callOnCompleted(child.children[i]);
+          }
+      
+          callOnCompleted(obj);
+        }
+
+        return obj;
+}
 
 // Load file, parse and construct as Component (.qml)
 //FIXME: remove the parameter executionContext and get it autonomously.
@@ -179,7 +216,7 @@ Qt.createComponent = function(name, executionContext)
     if (name in engine.components)
         return engine.components[name];
         
-    var nameIsUrl = name.indexOf("//") >= 0;
+    var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
 
     // Do not perform path lookups if name starts with @ sign.
     // This is used when we load components from qmldir files
@@ -1179,7 +1216,7 @@ QMLEngine = function (element, options) {
     // Return a path to load the file
     this.$resolvePath = function(file)
     {
-        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0) {
+        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0 || file.indexOf("data:") == 0) {
             return file;
         }
         return this.$basePath + file;
@@ -1540,6 +1577,10 @@ QObject = function(parent) {
 
         this.parent = undefined; // must do this. => 1) parent will be notified and erase object from it's children. 2) DOM node will be removed.
     }
+    
+    // must have `destroy` method
+    // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
+    this.destroy = this.$delete;    
 }
 QObject.createSimpleProperty = createSimpleProperty;
 
@@ -4210,6 +4251,8 @@ function QMLButton(meta) {
     this.dom.innerHTML = "<span></span>";
 
     createSimpleProperty("string", this, "text");
+    createSimpleProperty("bool", this, "enabled");    
+
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
@@ -4221,6 +4264,9 @@ function QMLButton(meta) {
         //TODO: Replace those statically sized borders
         this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
         this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+    });
+    this.enabledChanged.connect(this, function(newVal) {
+        this.dom.disabled = !newVal;
     });
 
     this.dom.onclick = function(e) {
