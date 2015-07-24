@@ -4399,6 +4399,7 @@ function QMLVideo(meta) {
     createSimpleProperty("real",   this, "volume");
     createSimpleProperty("enum",   this, "status");
     createSimpleProperty("enum",   this, "error");
+
     this.status = MediaPlayer.NoMedia;
     this.error = MediaPlayer.NoError;
     this.fillMode = VideoOutput.PreserveAspectFit;
@@ -4410,6 +4411,7 @@ function QMLVideo(meta) {
     this.paused  = Signal();
     this.playing = Signal();
     this.stopped = Signal();
+
 
     this.autoPlayChanged.connect(this, (function(newVal) {
       domVideo.autoplay = newVal;
@@ -4554,6 +4556,25 @@ function QMLVideo(meta) {
           break ;
       }
     }).bind(this));
+
+    // ************** Patching original version
+
+    this.dom.style.pointerEvents = "all";
+
+    createSimpleProperty("bool",   this, "controls");        
+    this.controls = false;
+    this.controlsChanged.connect(this, (function(newValue) {
+      domVideo.controls = newValue;
+    }).bind(this));
+    
+    createSimpleProperty("bool",   this, "ispaused");
+    this.ispaused = true;
+
+    this.playbackStateChanged.connect(this, (function(newValue) {
+      this.ispaused = (this.playbackState !== MediaPlayer.PlayingState);
+    }).bind(this));
+   
+    
 }
 
 })();
