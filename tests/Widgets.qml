@@ -139,16 +139,20 @@ Rectangle {
         anchors.top: checkbox_WG.top
         anchors.left: checkbox_WG.right + 20
 
-        model: [1, 2, 3, 4, 5, 1, 2, 3, 4, 5]
+        model: [
+        'HelloWorld', 'RectangleX', 'TextX', 'ImageX', 'ListViewX',
+        'AnimationX', 'Widgets', 'Plugins', 'ColumnRow', 'TextEditX',
+        'LoaderX', 'Demo', 'CanvasX', 'PathViewX',
+        [ 123, 'abc', 234, 'def', 345 ]]
+
+        //onDataChanged { alert(model.length) }
 
         onAccepted: {
-            alert(currentText + " " + currentIndex + " out of " + count)
-            alert($items.length)
-            info_WG.text = 'Item at index '+currentIndex + ' is ' + currentText;
+            info_WG.text = 'Item at index ' + (currentIndex+1) + ' is ' + currentText;
         }
 
         onActivated: {
-            alert("#" + index)
+            info_WG.text += '\ncurrent index = ' + (index+1)
         }
     }
 }

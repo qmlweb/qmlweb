@@ -1,15 +1,15 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: 800
     height: 7*450
     color: 'white'
     Title { id: title_DM ; title: 'Demo' }
 
     Grid {
-        width: 800
+        width: 450
+        height: 500
         anchors.top: title_DM.bottom + 50
-        anchors.horizontalCenter: parent.horizontalCenter
+        //anchors.horizontalCenter: parent.horizontalCenter
         columns: 2
         spacing: 2
 
@@ -20,7 +20,7 @@ Rectangle {
 
         ListViewX { scale: 400/width }
         AnimationX { scale: 400/width }
-        Widgets { scale: 400/height }
+        Widgets { scale: 400/width }
         Plugins { scale: 400/width }
 
         ColumnRow { scale: 400/width }

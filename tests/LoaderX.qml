@@ -1,7 +1,7 @@
 import QtQuick 2.0;
 
 Rectangle {
-    width: 500
+    width: 600
     height: 500
     color: 'white'
 
@@ -17,35 +17,54 @@ Rectangle {
         }
     }
 
+    Title {
+        id: title_LdR
+        title: 'Loader'
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+
     Rectangle {
         id: page_LdR
         color: 'lightcyan'
-        anchors.top: 0
-        width: 400
-        height: 450
+        anchors.top: title_LdR.bottom + 25
+        width: parent.width - 100
+        height: parent.height - 50
         anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
         border.color: 'red'
 
-        Title {
-            id: title_LdR
-            title: 'Loader'
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
         Loader { id: pageLoader }
 
         TextInput {
             id: input_LdR
             text: 'HelloWorld.qml'
-            width: parent.width - 50
-            anchors.top: title_LdR.bottom
+            width: 100
+            height: 30
+            anchors.top: parent.top
             anchors.topMargin: 20
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left + 50
 
            onAccepted: {
                 src = js_LdR.makeUrl(text)
                 pageLoader.setSource(src)
                 output_LdR.text = pageLoader.sourceQml
+            }
+        }
+
+        ComboBox {
+            width: 100
+            height: 30
+            anchors.top: input_LdR.top
+            anchors.left: input_LdR.right + 50
+
+            model: [
+            'HelloWorld', 'RectangleX', 'TextX', 'ImageX', 'ListViewX',
+            'AnimationX', 'Widgets', 'Plugins', 'ColumnRow', 'TextEditX',
+            'LoaderX', 'Demo', 'CanvasX', 'PathViewX']
+
+            onAccepted: {
+                input_LdR.text = currentText
+                input_LdR.accepted()
             }
         }
 
@@ -66,7 +85,7 @@ to take care that the file will be found on the server.
 The client requests the file with an HTTP GET request.'
 
             MouseArea {
-                anchors.fill: output_LdR
+                anchors.fill: parent
                 onClicked: {
                     src = js_LdR.makeUrl(input_LdR.text)
                     pageLoader.setSource(src)
