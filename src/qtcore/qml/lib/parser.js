@@ -1690,7 +1690,11 @@ function convertToEngine(tree) {
         var type = tree[0];
         var walker = walkers[type];
         if (!walker) {
-            console.log("No walker for " + type);
+            if (tree[0] == "num"
+                || tree[0] == "string"
+                || tree[0] == "array")
+                return walkfixer(tree);
+            console.log("\n--  No walker for " + type + "  --\n");
             return;
         } else {
             return walker.apply(type, tree.slice(1));
@@ -1698,6 +1702,29 @@ function convertToEngine(tree) {
     }
 
     return walk(tree);
+
+    function walkfixer(tree) {
+        var tree0 = tree[0],
+            tree1 = tree[1];
+        switch (tree0) {
+            case "num":
+                return +tree1;
+            case "string":
+                return String(tree1);
+            case "array":   // TODO - ???
+                var val = [];
+                var elt = tree1.toString().split(",");
+                var len = elt.length;
+                for (var i = 0; i < len; i += 2) {
+                    var nxt = [elt[i], elt[i+1]];
+                    val.push(walk(nxt));
+                }
+                return val;
+            default:
+                console.log("\n--- walkfixer failed ---\n");
+                return;
+        }
+    }
 
     function bindout(tree, binding) {
         if (tree[1][0] == "name" && (tree[1][1] == "true" || tree[1][1] == "false")) {
@@ -1719,7 +1746,6 @@ function convertToEngine(tree) {
             return new QMLBinding(binding, tree);
         }
     }
-
 }
 
 function parseQML(src) {

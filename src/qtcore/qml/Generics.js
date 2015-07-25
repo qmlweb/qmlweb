@@ -92,6 +92,24 @@ function objList(obj, title) {
 
 /**
  *
+ * Create a list of object properties.
+ *
+ * @param   obj     object to be list
+ * @param   title   titlestring for the list
+ *
+ * @return  list of object property strings
+ *
+ */
+function objItems(obj, title) {
+    var o, out = [title];
+    for (o in obj) {
+        out.push(o);
+    }
+    return out;
+}
+
+/**
+ *
  * Log DOM object properties to the Javascript console.
  *
  * Visual QML items have a DOM akin to a HTML <body>

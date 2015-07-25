@@ -1,26 +1,23 @@
 function QMLComboBox(meta) {
-    this.dom = document.createElement("form");
     QMLItem.call(this, meta);
     var self = this;
 
     this.dom.style.pointerEvents = "auto";
+    this.name = "QMLComboBox";
 
     createSimpleProperty("int", this, "count");
     createSimpleProperty("int", this, "currentIndex");
     createSimpleProperty("string", this, "currentText");
-    createSimpleProperty("var", this, "menu");
-    createSimpleProperty("var", this, "model");
+    createSimpleProperty("array", this, "menu");
+    createSimpleProperty("array", this, "model");
     createSimpleProperty("bool", this, "pressed");
-    createSimpleProperty("list", this, "$items");
 
     this.count = 0;
     this.currentIndex = 0;
     this.currentText = "";
-    this.menu = undefined;
-    this.model = undefined;
+    this.menu = [];
+    this.model = [];
     this.pressed = false;
-
-    this.$items = [];
 
     var updateCB = function(){
         var head = "<select>";
@@ -32,7 +29,14 @@ function QMLComboBox(meta) {
         self.count = count;
 
         for (var i = 0; i < count; i++) {
-            html += "<option>" + model[i] + "</option>"; // TODO - setting via QML not working
+            var elt = model[i];
+            //if (elt instanceof Array) { // TODO - optgroups? update model !
+            //    var count_i = elt.length;
+            //    for (var j = 0; j < count_i; j++)
+            //        html += "<option>" + elt[j] + "</option>";
+            //}
+            //else
+            html += "<option>" + elt + "</option>";
         }
         html += tail;
         return html;
