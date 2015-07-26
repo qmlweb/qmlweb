@@ -1217,7 +1217,7 @@ QMLEngine = function (element, options) {
     // Return a path to load the file
     this.$resolvePath = function(file)
     {
-        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0 || file.indexOf("data:") == 0) {
+        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0 || file.indexOf("data:") == 0 || file.indexOf("blob:") == 0) {
             return file;
         }
         return this.$basePath + file;
