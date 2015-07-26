@@ -45,28 +45,35 @@ function QMLComboBox(meta) {
     this.accepted = Signal();
     this.activated = Signal([{type: "int", name: "index"}]);
 
-    this.find = function(text) { return 0; };
-    this.selectAll = function () {};
+    this.find = function(text) {
+        var ix = -1;
+        for (var i = 0; i < this.count; i++)
+            if (self.model[i] == text)
+                return i;
+        return ix;
+    };
+    this.selectAll = function () {};    // TODO
     this.textAt = function(index) {
-        var mx = this.count - 1;
-        var ix = index < 0 ? 0 : index;
-        ix = ix > mx ? mx : ix;
-        return this.model[ix];
+        if (index >= 0 && index < this.count)
+            return this.model[index];
+        return;
     };
 
     this.Component.completed.connect(this, function () {
+        var child = this.dom.firstChild;
         this.dom.innerHTML = updateCB();
-        this.implicitWidth = this.dom.firstChild.offsetWidth;
-        this.implicitHeight = this.dom.firstChild.offsetHeight;
+        this.implicitWidth = child.offsetWidth;
+        this.implicitHeight = child.offsetHeight;
     });
 
     this.modelChanged.connect(updateCB);
 
     this.dom.onclick = function (e) {
-        self.currentIndex = self.dom.firstChild.selectedIndex;
-        self.currentText = self.model[self.currentIndex];
+        var index = self.dom.firstChild.selectedIndex
+        self.currentIndex = index ;
+        self.currentText = self.model[index];
         self.accepted();
-        self.activated(self.currentIndex);
+        self.activated(index);
     };
 }
 

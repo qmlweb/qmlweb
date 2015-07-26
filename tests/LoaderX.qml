@@ -60,7 +60,7 @@ Rectangle {
             model: [
             'HelloWorld', 'RectangleX', 'TextX', 'ImageX', 'ListViewX',
             'AnimationX', 'Widgets', 'Plugins', 'ColumnRow', 'TextEditX',
-            'LoaderX', 'Demo', 'CanvasX', 'PathViewX']
+            'LoaderX', 'Demo', 'CanvasX', 'PathViewX', 'ZZ.Z']
 
             onAccepted: {
                 input_LdR.text = currentText
