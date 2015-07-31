@@ -30,7 +30,7 @@ var modules = {
 /**
  *
  * TODO ? is this needed ? should be part of the language
- * After commenting out create tests still work.
+ * Yes, commenting out does not seem to work
  *
  */
 Object.create = function (o) {
@@ -147,9 +147,9 @@ function cloneObject(obj) {
  *
  */
 QMLBinding.prototype.compile = function () {
-    var bindSrc = this.function ? "(function(o, c) { with(c) with(o) "
-        + this.src + "})" : "(function(o, c) { with(c) with(o) return "
-        + this.src + "})";
+    var bindSrc = this.function
+        ? "(function(o, c) { with(c) with(o) " + this.src + "})"
+        : "(function(o, c) { with(c) with(o) return " + this.src + "})";
     this.eval = eval(bindSrc);
 }
 

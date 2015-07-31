@@ -9,8 +9,6 @@ function QMLScreen(meta) {
     QMLItem.call(this, meta);
     var self = this;
 
-    var dom = this.dom;
-
     createSimpleProperty("int", this, "desktopAvailableHeight");
     createSimpleProperty("int", this, "desktopAvailableWidth");
     createSimpleProperty("real", this, "devicePixelRatio");
@@ -22,14 +20,18 @@ function QMLScreen(meta) {
     createSimpleProperty("enum", this, "primaryOrientation");
     createSimpleProperty("int", this, "width");
 
-    this.desktopAvailableHeight = dom.outerHeight;
-    this.desktopAvailableWidth =  dom.outerWidth;
-    this.devicePixelRatio = dom.devicePixelRatio;
-    this.height = dom.innerHeight;
-    this.name = "QMLScreen";
-    this.orientation =  Qt.PrimaryOrientation;
-    this.orientationUpdateMask =  0;
-    this.pixelDensity = 100.0;  // TODO
-    this.primaryOrientation =  Qt.PrimaryOrientation;
-    this.width =  dom.innerWidth;
+    this.Component.completed.connect(this, updateSC);
+
+    function updateSC() {
+        self.desktopAvailableHeight = window.outerHeight;
+        self.desktopAvailableWidth = window.outerWidth;
+        self.devicePixelRatio = window.devicePixelRatio;
+        self.height = window.innerHeight;
+        self.name = "QMLScreen";
+        self.orientation =  Qt.PrimaryOrientation;
+        self.orientationUpdateMask = 0;
+        self.pixelDensity = 100.0;  // TODO
+        self.primaryOrientation =  Qt.PrimaryOrientation;
+        self.width = window.innerWidth;
+    }
 }

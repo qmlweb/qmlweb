@@ -63,12 +63,6 @@
  *
  */
 
-// http://stackoverflow.com/questions/332422/
-// how-do-i-get-the-name-of-an-objects-type-in-javascript
-function typeName(obj){
-    return Object.prototype.toString.call(obj).slice(8, -1);
-}
-
 function clone(obj) {
     if (obj == null || typeof (obj) != 'object')
         return obj;
@@ -1716,7 +1710,7 @@ function convertToEngine(tree) {
                 return +tree1;
             case "string":
                 return String(tree1);
-            case "array":   // TODO - ???
+            case "array":
                 var val = [];
                 var elt = tree1.toString().split(",");
                 var len = elt.length;

@@ -1,3 +1,10 @@
+registerQmlType({
+    module: 'QtQuick',
+    name: 'ComboBox',
+    versions: /.*/,
+    constructor: QMLComboBox
+});
+
 function QMLComboBox(meta) {
     QMLItem.call(this, meta);
     var self = this;
@@ -46,22 +53,16 @@ function QMLComboBox(meta) {
     this.activated = Signal([{type: "int", name: "index"}]);
 
     this.find = function(text) {
-        var ix = -1;
-        for (var i = 0; i < this.count; i++)
-            if (self.model[i] == text)
-                return i;
-        return ix;
+        return self.model.indexOf(text)
     };
     this.selectAll = function () {};    // TODO
     this.textAt = function(index) {
-        if (index >= 0 && index < this.count)
-            return this.model[index];
-        return;
+        return this.model[index];
     };
 
     this.Component.completed.connect(this, function () {
-        var child = this.dom.firstChild;
         this.dom.innerHTML = updateCB();
+        var child = this.dom.firstChild;
         this.implicitWidth = child.offsetWidth;
         this.implicitHeight = child.offsetHeight;
     });
@@ -69,12 +70,10 @@ function QMLComboBox(meta) {
     this.modelChanged.connect(updateCB);
 
     this.dom.onclick = function (e) {
-        var index = self.dom.firstChild.selectedIndex
+        var index = self.dom.firstChild.selectedIndex;
         self.currentIndex = index ;
         self.currentText = self.model[index];
         self.accepted();
         self.activated(index);
     };
 }
-
-registerQmlType('ComboBox', QMLComboBox);

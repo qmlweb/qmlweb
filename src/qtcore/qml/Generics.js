@@ -6,8 +6,9 @@
  *  +   fontCss
  *  +   updateCSS
  *  +   objList
+ *  +   objItems
  *  +   logCSS
- *  +   descr
+ *  +   typeName
  *
  */
 
@@ -25,8 +26,10 @@ function fontCss(font) {
     var css = "";
     css += font.italic ? "italic " : "normal ";
     css += font.capitalization == "smallcaps" ? "small-caps " : "normal ";
-    css += (font.weight == Font.Bold || font.weight == Font.DemiBold || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
-    css += font.pixelSize != undefined ? font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
+    css += (font.weight == Font.Bold || font.weight == Font.DemiBold
+        || font.weight == Font.Black || font.bold) ? "bold " : "normal ";
+    css += font.pixelSize != undefined ?
+        font.pixelSize + "px " : (font.pointSize || 10) + "pt ";
     css += this.lineHeight != undefined ? this.lineHeight + "px " : " ";
     css += (font.family || "sans-serif") + " ";
     return css;
@@ -58,8 +61,10 @@ function updateCss(self) {
         'backgroundColor'
     ];
 
-    var n, child_style = self.dom.firstChild.style;
-    for (n = 0; n < supported.length; n++) {
+    var n,
+        child_style = self.dom.firstChild.style,
+        length = supported.length;
+    for (n = 0; n < length; n++) {
         var o = supported[n];
         var v = self.css[o];
         if (v) {
@@ -81,7 +86,8 @@ function updateCss(self) {
  *
  */
 function objList(obj, title) {
-    var o, out = [title];
+    var o,
+        out = [title || 'Object List'];
     for (o in obj) {
         var ov = obj[o];
         if (ov)
@@ -101,7 +107,7 @@ function objList(obj, title) {
  *
  */
 function objItems(obj, title) {
-    var o, out = [title];
+    var o, out = [title || 'Object List'];
     for (o in obj) {
         out.push(o);
     }
@@ -125,19 +131,19 @@ function logCss() {
 }
 
 /**
- * Helper function - migrated from qml.js
- * Prints msg and values of object. Workaround when using getter functions
- * as Chrome (at least) won't show property values for them.
- * @param   msg     Message
- * @param   obj     Object to use (will be "printed", too)
- * @param   vals    Values to list from the object.
+ *
+ * http://stackoverflow.com/questions/332422/
+ * how-do-i-get-the-name-of-an-objects-type-in-javascript
+ *
+ * example:
+ *
+ * typeName([}) returns 'Array'
+ * typeof([]) returns 'object'
+ *
+ * @param   obj     Object whose type name is wanted
+ * @return  object type name as a string
+ *
  */
-function descr(msg, obj, vals) {
-    var str = msg + ": [" + obj.id + "] ",
-        i;
-    for (i = 0; i < vals.length; i++) {
-        str += vals[i] + "=" + obj[vals[i]] + " ";
-    }
-    console.log(str, obj);
+function typeName(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1);
 }
-

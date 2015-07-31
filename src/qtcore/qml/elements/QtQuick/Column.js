@@ -1,3 +1,10 @@
+registerQmlType({
+    module: 'QtQuick',
+    name: 'Column',
+    versions: /.*/,
+    constructor: QMLColumn
+});
+
 function QMLColumn(meta) {
     QMLPositioner.call(this, meta);
 }
@@ -17,10 +24,3 @@ QMLColumn.prototype.layoutChildren = function () {
     this.implicitWidth = maxWidth;
     this.implicitHeight = curPos - this.spacing;
 }
-
-registerQmlType({
-    module: 'QtQuick',
-    name: 'Column',
-    versions: /.*/,
-    constructor: QMLColumn
-});

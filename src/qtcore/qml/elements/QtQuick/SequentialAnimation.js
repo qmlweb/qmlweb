@@ -20,8 +20,6 @@ registerQmlType({
                 curIndex++;
                 if (curIndex < self.animations.length) {
                     anim = self.animations[curIndex];
-                    console.log("nextAnimation", self, curIndex, anim);
-                    descr("", anim, ["target"]);
                     anim.start();
                 } else {
                     passedLoops++;

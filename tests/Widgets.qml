@@ -1,5 +1,6 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.0
+import QtQuick.Controls 2.0
+import QtQuick.Window 2.0
 
 Rectangle {
     color: 'white'
@@ -116,6 +117,10 @@ Rectangle {
             + (checkbox_WG.checked ? '' : 'not ') + 'checked.'
     }
 
+    Item {
+        Screen { id: screen_WD; name: "Vienna" }
+    }
+
     TextEdit {
         id: edit_WG
         width: 300
@@ -127,10 +132,7 @@ Rectangle {
         font.italic: true
         color: 'red'
 
-        text: 'Hi,\nI am a TextEdit in making!\n\nMy char count is '
-            + length + '\nI have '
-            + lineCount + ' lines \nselectByKeyboard ' + selectByKeyboard
-            + '\nselectByMouse ' + selectByMouse
+        text: screen_WD.name + " : " + screen_WD.devicePixelRatio + " : " + screen_WD.width + " x " + screen_WD.height
     }
 
     ComboBox {
@@ -142,8 +144,7 @@ Rectangle {
         model: [
         'HelloWorld', 'RectangleX', 'TextX', 'ImageX', 'ListViewX',
         'AnimationX', 'Widgets', 'Plugins', 'ColumnRow', 'TextEditX',
-        'LoaderX', 'Demo', 'CanvasX', 'PathViewX',
-        [ 123, 'abc', 234, 'def', 345 ]]
+        'LoaderX', 'Demo', 'CanvasX', 'PathViewX']
 
         //onDataChanged { alert(model.length) }
 
@@ -152,7 +153,7 @@ Rectangle {
         }
 
         onActivated: {
-            info_WG.text += '\ncurrent index = ' + (index+1)
+            info_WG.text += '\ncurrent index is ' + (index+1) + ' out of ' + count
         }
     }
 }

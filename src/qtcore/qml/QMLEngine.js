@@ -152,9 +152,7 @@ QMLEngine = function (element, options) {
     keyboardSignals[Qt.Key_Left] = 'leftPressed';
 
     function keyCodeToQt(e) {
-        if (e.keyCode >= 96 && e.keyCode <= 111) {
-            e.keypad = true;
-        }
+        e.keypad = e.keyCode >= 96 && e.keyCode <= 111;
         if (e.keyCode == Qt.Key_Tab && e.shiftKey == true)
             return Qt.Key_Backtab;
         else if (e.keyCode >= 97 && e.keyCode <= 122)
