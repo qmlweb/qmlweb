@@ -178,10 +178,18 @@ Qt.createQmlObject = function( src, parent, file )
         var tree = parseQML(src, file);
 
         // Create and initialize objects
+
+        // WRONG here we provide context as __executionContext
+        // because we assume that __executionContext is provided by upper function, see QMLBinding.prototype.compile
+        // var component = new QMLComponent({ object: tree, parent: parent, context:__executionContext });
+        
+        // FIX
+        // it seems __executionContext is unavailable. But it is used in upper stack codes with `with` statement. So maybe we may omit it, hoping on closures?
         var component = new QMLComponent({ object: tree, parent: parent });
         
         engine.loadImports( tree.$imports );
         //component.$basePath = engine.$basePath;
+        
         if (!file) file = Qt.resolvedUrl("createQmlObject_function");
         component.$basePath = engine.extractBasePath( file );
         component.$imports = tree.$imports; // for later use
@@ -214,14 +222,28 @@ Qt.createQmlObject = function( src, parent, file )
 //FIXME: remove the parameter executionContext and get it autonomously.
 Qt.createComponent = function(name, executionContext)
 {
-    if (name in engine.components)
-        return engine.components[name];
+    if (name in engine.components) {
+        //OLD: return engine.components[name];
+
+        //all new component instances must have own executionContext (qml scope).
+        //if not, it will use the first executionContext occured during loading of qml tree..
+
+        //currently in qmlweb this context is provided by parameter, namely `executionContext`
+        //NOTE alternatively maybe better to patch createObject to override component's context by adding third argument (context), 
+        // due to performance reasons, e.g. not creating component instance each time it is needed.
+
+        var newComponentInstance = Object.create( engine.components[name] );
+        newComponentInstance.$context = executionContext;
+        return newComponentInstance;
+    }
         
     var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
-
+    
     // Do not perform path lookups if name starts with @ sign.
     // This is used when we load components from qmldir files
     // because in that case we do not need any lookups.
+    // INFO we keep original name to later use it as cache key (engine.components)
+    var origName = name;
     if (name.length > 0 && name[0] == "@") {
       nameIsUrl = true;
       name = name.substr( 1,name.length-1 );
@@ -258,7 +280,7 @@ Qt.createComponent = function(name, executionContext)
     
     engine.loadImports( tree.$imports,component.$basePath );
 
-    engine.components[name] = component;
+    engine.components[origName] = component;
     return component;
 }
 
@@ -415,8 +437,21 @@ function construct(meta) {
 
     // id
     if (meta.object.id) {
-        /// console.log("meta.context[meta.object.id] = item;",meta.object.id,"prev value=",meta.context[meta.object.id]);
-        meta.context[meta.object.id] = item;
+        // we have to call `delete` before setting new value to context
+        // because it may contain some object property with defined setter
+        // in that case our assign will invoke that setter, and thus we will break some external object property!
+
+        /// delete meta.context[meta.object.id]; 
+        /// meta.context[meta.object.id] = item;
+
+        // FIX
+        // we cannot just delete value from context, because it may contain setters/getters from prototype context's
+        // which are not deleted by `delete`
+
+        // SO
+        // we declare new getter and empty setter. seems it is ok.
+
+        setupGetterSetter( meta.context, meta.object.id, function() { return item }, function() {} );
     }
 
     // keep path in item for probale use it later in Qt.resolvedUrl 
@@ -1584,11 +1619,18 @@ QMLComponent.prototype.createObject = function(parent, properties) {
     
     // the logic of finding basepath is so interesting ...
     engine.$basePath = this.$basePath || (this.$context ? this.$context.$basePath : null) || engine.$basePath;
+    
+    var coco = this.$context ? Object.create(this.$context) : new QMLContext();
+    /*
+    coco._parentUniqueId = this.$context ? this.$context._uniqueId : "non";
+    coco.__uniqueId = undefined;
+    console.log("created context ",coco._uniqueId,"from parent",coco._parentUniqueId, this.$context);
+    */
 
     var item = construct({
         object: this.$metaObject,
         parent: parent,
-        context: this.$context ? Object.create(this.$context) : new QMLContext(),
+        context: coco,
         isComponentRoot: true
     });
     // change base path back
