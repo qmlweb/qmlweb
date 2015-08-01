@@ -335,12 +335,26 @@ QMLBinding.prototype.compile = function() {
          
       */
 
-      var s = "return (function(){"+this.src+"})()";
-      bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + s + "})"
+      //var s = "return (function(){"+this.src+"})()";
+      //bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + s + "})"
+
+      bindSrc = [
+        "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) ",
+        "return (function(){",
+        this.src,
+        "})()",
+        "})"
+      ].join("");
+      
     }
     else
     {
-      bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
+      // bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
+      bindSrc = [
+        "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return ",
+        this.src,
+        "})"
+      ].join("");
     }
 
     /* 
