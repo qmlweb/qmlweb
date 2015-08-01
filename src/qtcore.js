@@ -303,9 +303,51 @@ Qt.resolvedUrl = function(url)
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
 QMLBinding.prototype.compile = function() {
+    var bindSrc;
+    
+    if (this.function) {
+      // this is old behaviour
+      // bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + this.src + "})"
+      
+      // this is new, with additional scope for "var" operators inside this.src.
+      // Explanation. Those operators may declare variables with same names as in __executionContext or __executionObject.
+      // This is why we need one more layer of scope.
+
+      /* Test 1. What we do not want to occur.
+         var s = { x:3 }
+         with (s) { var x = 7; }
+         console.log(s); 
+         // output: 7. this is bad!
+
+         Test 2. What we actually need.
+         
+         var s = { x:3 }
+         with (s) { (function() { var x = 5; })() }
+         console.log(s); 
+         // output: 3. this is good!
+         
+         Test 3. We need this too.
+
+         var s = { x:3 }
+         with (s) { (function() { x = 5; })() }
+         console.log(s); 
+         //output: 5. good!
+         
+      */
+
+      var s = "return (function(){"+this.src+"})()";
+      bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + s + "})"
+    }
+    else
+    {
+      bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
+    }
+
+    /* 
     var bindSrc = this.function
                     ? "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + this.src + "})"
                     : "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
+    */                 
     this.eval = eval(bindSrc);
 }
 
