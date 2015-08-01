@@ -208,7 +208,7 @@ function construct(meta) {
 
     // id
     if (meta.object.id)
-        meta.context[meta.object.id] = item;
+        setupGetterSetter(meta.context, meta.object.id, function() { return item; }, function() {});
 
     // keep path in item for probale use it later in Qt.resolvedUrl
     item.$context["$basePath"] = engine.$basePath; //gut

@@ -20,6 +20,7 @@ global.Qt = {
     // Do not perform path lookups if name starts with @ sign.
     // This is used when we load components from qmldir files
     // because in that case we do not need any lookups.
+    var origName = name;
     if (name.length > 0 && name[0] == "@") {
       nameIsUrl = true;
       name = name.substr( 1,name.length-1 );
@@ -55,7 +56,7 @@ global.Qt = {
 
     engine.loadImports( tree.$imports,component.$basePath );
 
-    engine.components[name] = component;
+    engine.components[origName] = component;
     return component;
   },
 
