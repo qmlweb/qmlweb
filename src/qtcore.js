@@ -961,6 +961,10 @@ QMLEngine = function (element, options) {
 
     // Base path of qml engine (used for resource loading)
     this.$basePath = "";
+    
+    // Cache of content of loaded qmldir files. Used in engine.loadImports method.
+    // We init it with blank content of QtQuick module, because Qmlweb by default provides all the things from QtQuick.
+    this.qmldirsContents = { "QtQuick":{} };
 
 
 //----------Public Methods----------
@@ -1103,7 +1107,7 @@ QMLEngine = function (element, options) {
       TODO We have to keep results in component scope. 
            We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
     */
-
+    
     this.loadImports = function(importsArray, currentFileDir) { 
       if (!engine.qmldirsContents) engine.qmldirsContents = {}; // cache
       if (!engine.qmldirs) engine.qmldirs = {};                 // resulting components lookup table
