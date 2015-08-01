@@ -100,8 +100,8 @@ QMLEngine = function (element, options) {
     }
 
     // parse and construct qml
-    this.loadQML = function(src) {
-        this.loadQMLTree(parseQML(src));
+    this.loadQML = function(src, file) { // file is not required; only for debug purposes
+        this.loadQMLTree(parseQML(src, file));
     }
 
     this.loadQMLTree = function(tree, file) {

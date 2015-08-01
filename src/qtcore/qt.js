@@ -43,7 +43,7 @@ global.Qt = {
     if (src === false)
       return undefined;
 
-    var tree = parseQML(src);
+    var tree = parseQML(src, file);
 
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
@@ -60,7 +60,7 @@ global.Qt = {
   },
 
   createQmlObject: function(src, parent, file) {
-        var tree = parseQML(src); //parseQML(src, file);
+        var tree = parseQML(src, file);
 
         // Create and initialize objects
 

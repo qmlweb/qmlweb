@@ -276,6 +276,7 @@ function QMLParseError(message, line, col, pos, comment) {
         this.pos = pos;
         this.comment = comment ? comment : "";
         this.message = message + " (line: " + line + ", col: " + col + ", pos: " + pos + ")" + "\n" + comment + "\n"
+        this.file = nowParsingFile;
         try {
                 ({})();
         } catch(ex) {
@@ -1769,7 +1770,9 @@ function convertToEngine(tree) {
 }
 
 // Function to parse qml and output tree expected by engine
-function parseQML(src) {
+var nowParsingFile = "";
+function parseQML(src, file) {
+    nowParsingFile = file;
     var parsetree = qmlweb_parse(src, qmlweb_parse.QmlDocument);
     return convertToEngine(parsetree);
 }
