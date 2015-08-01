@@ -279,6 +279,7 @@ function JS_Parse_Error(message, line, col, pos, comment) {
         this.col = col;
         this.pos = pos;
         this.comment = comment ? comment : "";
+        this.file = nowParsingFile;
         try {
                 ({})();
         } catch(ex) {
@@ -1772,7 +1773,9 @@ function convertToEngine(tree) {
 }
 
 // Function to parse qml and output tree expected by engine
-function parseQML(src) {
+var nowParsingFile = "";
+function parseQML(src, file) {
+    nowParsingFile = file;
     var parsetree = qmlparse(src);
     return convertToEngine(parsetree);
 }

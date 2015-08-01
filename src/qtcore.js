@@ -175,7 +175,7 @@ constructors = {
 // mix of engine.loadQML and Loader.qml
 Qt.createQmlObject = function( src, parent, file )
 {
-        var tree = parseQML(src);
+        var tree = parseQML(src, file);
 
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: parent });
@@ -245,7 +245,7 @@ Qt.createComponent = function(name, executionContext)
     if (src === false)
        return undefined;
    
-    var tree = parseQML(src);
+    var tree = parseQML(src, file);
 
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
@@ -1033,7 +1033,7 @@ QMLEngine = function (element, options) {
     // parse and construct qml
     this.loadQML = function(src,file) { // file is not required; only for debug purposes
         engine = this;
-        var tree = parseQML(src);
+        var tree = parseQML(src, file);
         if (options.debugTree) {
             options.debugTree(tree);
         }
