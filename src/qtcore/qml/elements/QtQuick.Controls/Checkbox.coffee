@@ -1,4 +1,3 @@
-
 registerQmlType
     module: 'QtQuick.Controls'
     name: 'CheckBox'

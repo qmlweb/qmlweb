@@ -27,7 +27,7 @@ function QMLScreen(meta) {
         self.desktopAvailableWidth = window.outerWidth;
         self.devicePixelRatio = window.devicePixelRatio;
         self.height = window.innerHeight;
-        self.name = "QMLScreen";
+        self.name = this.name;
         self.orientation =  Qt.PrimaryOrientation;
         self.orientationUpdateMask = 0;
         self.pixelDensity = 100.0;  // TODO
