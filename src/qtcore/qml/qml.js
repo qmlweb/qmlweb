@@ -209,13 +209,13 @@ function construct(meta) {
         var qdirInfo = engine.qmldirs[meta.object.$class]; // Are we have info on that component in some imported qmldir files?
         if (qdirInfo) {
             // We have that component in some qmldir, load it from qmldir's url
-            component = Qt.createComponent( "@" + qdirInfo.url, meta.context);
+            component = Qt.createComponent( "@" + qdirInfo.url);
         }
         else
-            component = Qt.createComponent(meta.object.$class + ".qml", meta.context);
+            component = Qt.createComponent(meta.object.$class + ".qml");
 
         if (component) {
-            var item = component.createObject(meta.parent);
+            var item = component.createObject(meta.parent, {}, meta.context);
 
             if (typeof item.dom != 'undefined')
                 item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
