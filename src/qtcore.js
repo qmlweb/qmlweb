@@ -554,8 +554,11 @@ function createSimpleProperty(type, obj, propName) {
         return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
     };
     setupGetterSetter(obj, propName, getter, setter);
-    if (obj.$isComponentRoot)
+    if (obj.$isComponentRoot) {
         setupGetterSetter(obj.$context, propName, getter, setter);
+        if (obj.$context.__proto__)
+          setupGetterSetter(obj.$context.__proto__, propName, getter, setter);
+    }
 }
 
 function QMLProperty(type, obj, name) {
