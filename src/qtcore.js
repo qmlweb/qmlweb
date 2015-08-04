@@ -173,19 +173,14 @@ constructors = {
 };
 
 // mix of engine.loadQML and Loader.qml
-Qt.createQmlObject = function( src, parent, file )
+// THINK now we force to provide executionContext. Maybe it is better to compute if from parent if not provided?
+Qt.createQmlObject = function( src, parent, file, executionContext )
 {
         var tree = parseQML(src, file);
 
         // Create and initialize objects
 
-        // WRONG here we provide context as __executionContext
-        // because we assume that __executionContext is provided by upper function, see QMLBinding.prototype.compile
-        // var component = new QMLComponent({ object: tree, parent: parent, context:__executionContext });
-        
-        // FIX
-        // it seems __executionContext is unavailable. But it is used in upper stack codes with `with` statement. So maybe we may omit it, hoping on closures?
-        var component = new QMLComponent({ object: tree, parent: parent });
+        var component = new QMLComponent({ object: tree, parent: parent, context: executionContext });
         
         engine.loadImports( tree.$imports );
         //component.$basePath = engine.$basePath;
@@ -223,18 +218,14 @@ Qt.createQmlObject = function( src, parent, file )
 Qt.createComponent = function(name, executionContext)
 {
     if (name in engine.components) {
-        //OLD: return engine.components[name];
-
-        //all new component instances must have own executionContext (qml scope).
-        //if not, it will use the first executionContext occured during loading of qml tree..
-
-        //currently in qmlweb this context is provided by parameter, namely `executionContext`
-        //NOTE alternatively maybe better to patch createObject to override component's context by adding third argument (context), 
-        // due to performance reasons, e.g. not creating component instance each time it is needed.
-
-        var newComponentInstance = Object.create( engine.components[name] );
-        newComponentInstance.$context = executionContext;
-        return newComponentInstance;
+        // user specified context? => should create copy of component with new context
+        if (executionContext) {
+            var newComponentInstance = Object.create( engine.components[name] );
+            newComponentInstance.$context = executionContext;
+            return newComponentInstance;        
+        }
+        // no context, may return cached object.
+        return engine.components[name];
     }
         
     var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
@@ -415,17 +406,17 @@ function construct(meta) {
       var qdirInfo = engine.qmldirs[ meta.object.$class ]; // Are we have info on that component in some imported qmldir files?
       if (qdirInfo) {
           // We have that component in some qmldir, load it from qmldir's url // 4
-          component = Qt.createComponent( "@" + qdirInfo.url, meta.context);
+          component = Qt.createComponent( "@" + qdirInfo.url );
       }
       else
-          component = Qt.createComponent(meta.object.$class + ".qml", meta.context); // 1,2
+          component = Qt.createComponent(meta.object.$class + ".qml" ); // 1,2
 
       if (component) {
-        var item = component.createObject(meta.parent);
-
+        var item = component.createObject(meta.parent,{},meta.context);
+        
         // Alter objects context to the outer context
         item.$context = meta.context;
-
+        
         if (engine.renderMode == QMLRenderMode.DOM)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
@@ -444,11 +435,11 @@ function construct(meta) {
         /// delete meta.context[meta.object.id]; 
         /// meta.context[meta.object.id] = item;
 
-        // FIX
+        // PROBLEM
         // we cannot just delete value from context, because it may contain setters/getters from prototype context's
         // which are not deleted by `delete`
 
-        // SO
+        // SOLUTION
         // we declare new getter and empty setter. seems it is ok.
 
         setupGetterSetter( meta.context, meta.object.id, function() { return item }, function() {} );
@@ -849,7 +840,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             if (value instanceof QMLSignalDefinition) {
                 item[i] = Signal(value.parameters);
                 if (item.$isComponentRoot)
-                    componentScope[i] = item[i];
+                    componentScope[i] = item[i]; // BUG? might be here, if componentScope contains property with same name and a setter func. Must reset getter-setter, see construct function.
                 continue;
             } else if (value instanceof QMLMethod) {
                 value.compile();
@@ -1609,7 +1600,9 @@ QMLComponent.getAttachedObject = function() { // static
     }
     return this.$Component;
 }
-QMLComponent.prototype.createObject = function(parent, properties) {
+
+// componentContext is not necessary
+QMLComponent.prototype.createObject = function(parent, properties, componentContext ) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
     
@@ -1617,20 +1610,31 @@ QMLComponent.prototype.createObject = function(parent, properties) {
 
     var bp = engine.$basePath; // this is old engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
     
-    // the logic of finding basepath is so interesting ...
+    // the logic of finding basepath is tricky
+    // 1 check own component property $basePath
+    // 2 if (1) failed, try lookup in context
     engine.$basePath = this.$basePath || (this.$context ? this.$context.$basePath : null) || engine.$basePath;
     
-    var coco = this.$context ? Object.create(this.$context) : new QMLContext();
-    /*
-    coco._parentUniqueId = this.$context ? this.$context._uniqueId : "non";
-    coco.__uniqueId = undefined;
-    console.log("created context ",coco._uniqueId,"from parent",coco._parentUniqueId, this.$context);
-    */
+    // `componentContext` param is a feature for optimization
+    // sometimes we do not want to keep context in component
+    // because it may be 'blank' component from cache (see createComponent method)
+    // so we introduce `componentContext` param for override component context
+    
+    if (!componentContext) componentContext = this.$context;
 
+    var objectContext = componentContext ? Object.create(componentContext) : new QMLContext();
+
+    /* debugging. must define _uniqueId method. see https://gist.github.com/pavelvasev/1d37390dfdd2dcba24ac#file-uniq-js
+    if (componentContext)
+       objectContext._parentUniqueId = componentContext._uniqueId;
+     objectContext.__uniqueId = undefined;
+     console.log("created context ",objectContext._uniqueId,objectContext, "from componentContext",objectContext._parentUniqueId, componentContext);
+    */
+    
     var item = construct({
         object: this.$metaObject,
         parent: parent,
-        context: coco,
+        context: objectContext,
         isComponentRoot: true
     });
     // change base path back
