@@ -26,7 +26,7 @@ global.Signal = function Signal(params, options) {
             connectedSlots.push({thisObj: arguments[0], slot: arguments[0][arguments[1]]});
         } else {
             if (arguments[0].$tidyupList && (!obj || (arguments[0] !== obj && arguments[0] !== obj.$parent)))
-                arguments[0].$tidyupList.push(this);
+                arguments[0].$tidyupList.push(this); //TODO: check "this"
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
         }
     }

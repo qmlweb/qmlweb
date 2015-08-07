@@ -38,7 +38,7 @@ registerQmlType({
     this.verticalTileMode = this.BorderImage.Stretch;
 
     this.sourceChanged.connect(this, function() {
-        this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.borderImageSource = "url(" + qmlEngine.$resolvePath(this.source) + ")";
     });
     this.border.leftChanged.connect(this, updateBorder);
     this.border.rightChanged.connect(this, updateBorder);
@@ -48,7 +48,7 @@ registerQmlType({
     this.verticalTileModeChanged.connect(this, updateBorder);
 
     function updateBorder() {
-        this.dom.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.MozBorderImageSource = "url(" + qmlEngine.$resolvePath(this.source) + ")";
         this.dom.style.MozBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
@@ -60,7 +60,7 @@ registerQmlType({
                                                 + this.border.bottom + " "
                                                 + this.border.left;
 
-        this.dom.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.webkitBorderImageSource = "url(" + qmlEngine.$resolvePath(this.source) + ")";
         this.dom.style.webkitBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
@@ -72,7 +72,7 @@ registerQmlType({
                                                 + this.border.bottom + " "
                                                 + this.border.left;
 
-        this.dom.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
+        this.dom.style.OBorderImageSource = "url(" + qmlEngine.$resolvePath(this.source) + ")";
         this.dom.style.OBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "

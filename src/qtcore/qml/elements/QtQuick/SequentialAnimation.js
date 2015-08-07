@@ -68,13 +68,13 @@ registerQmlType({
         }
     }
 
-    engine.$registerStart(function() {
+    qmlEngine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by start();
             self.start();
         }
     });
-    engine.$registerStop(function() {
+    qmlEngine.$registerStop(function() {
         self.stop();
     });
   }

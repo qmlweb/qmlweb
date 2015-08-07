@@ -22,9 +22,8 @@ global.QMLBinding.prototype.toJSON = function() {
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
-global.QMLBinding.prototype.compile = function() {
+global.QMLBinding.prototype.compile = function($objectScope, $componentScope) {
     var bindSrc = this.function
-                    ? "(function(o, c) { with(c) with(o) " + this.src + "})"
-                    : "(function(o, c) { with(c) with(o) return " + this.src + "})";
-    this.eval = eval(bindSrc);
-}
+                    ? "(function() { with($componentScope.getCombinedContext()) with($objectScope) " + this.src + "})"
+                    : "(function() { with($componentScope.getCombinedContext()) with($objectScope) return " + this.src + "})";
+    this.eval = eval(bindSrc).bind({});}

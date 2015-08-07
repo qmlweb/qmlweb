@@ -3,8 +3,6 @@ function QMLProperty(type, obj, name) {
     this.name = name;
     this.changed = Signal([], {obj:obj});
     this.binding = null;
-    this.objectScope = null;
-    this.componentScope = null;
     this.value = undefined;
     this.type = type;
     this.animation = null;
@@ -22,7 +20,7 @@ QMLProperty.prototype.update = function() {
 
     var oldVal = this.value;
     evaluatingProperty = this;
-    this.value = this.binding.eval(this.objectScope, this.componentScope);
+    this.value = this.binding.eval();
     evaluatingProperty = undefined;
 
     if (this.animation) {
@@ -50,26 +48,22 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
+QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, context) {
     var i,
         oldVal = this.value;
 
     if (newVal instanceof QMLBinding) {
-        if (!objectScope || !componentScope)
-            throw "Internal error: binding assigned without scope";
         this.binding = newVal;
-        this.objectScope = objectScope;
-        this.componentScope = componentScope;
 
-        if (engine.operationState !== QMLOperationState.Init) {
-            if (!newVal.eval)
-                newVal.compile();
+        if (!newVal.eval)
+            newVal.compile(objectScope, context);
 
+        if (qmlEngine.operationState !== QMLOperationState.Init) {
             evaluatingProperty = this;
-            newVal = this.binding.eval(objectScope, componentScope);
+            newVal = this.binding.eval();
             evaluatingProperty = null;
         } else {
-            engine.bindedProperties.push(this);
+            qmlEngine.bindedProperties.push(this);
             return;
         }
     } else {
@@ -80,12 +74,9 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
     }
 
     if (constructors[this.type] == QMLList) {
-        this.value = QMLList({ object: newVal, parent: this.obj, context: componentScope });
+        this.value = QMLList({ object: newVal, parent: this.obj, context: context});
     } else if (newVal instanceof QMLMetaElement) {
-        if (constructors[newVal.$class] == QMLComponent || constructors[this.type] == QMLComponent)
-            this.value = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
-        else
-            this.value = construct({ object: newVal, parent: this.obj, context: componentScope });
+        this.value = construct({ object: newVal, parent: this.obj, context: context});
     } else if (newVal instanceof Object || !newVal) {
         this.value = newVal;
     } else {

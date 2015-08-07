@@ -3,11 +3,12 @@ function QMLItem(meta) {
     var child,
         o, i;
 
+    //TODO: handle this better
     if (this.$parent === null) { // This is the root element. Initialize it.
-        this.dom = engine.rootElement || document.body;
+        this.dom = qmlEngine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
-        if (engine.rootElement == undefined) {
+        if (qmlEngine.rootElement == undefined) {
             window.onresize = function() {
                 self.implicitHeight = window.innerHeight;
                 self.implicitWidth = window.innerWidth;
@@ -37,6 +38,13 @@ function QMLItem(meta) {
     createSimpleProperty("Item", this, "parent");
     this.children = [];
     this.resources = [];
+    if(meta.parent) {
+        var newParent = meta.parent
+        this.$properties["parent"].value = newParent
+        newParent.children.push(this);
+        newParent.childrenChanged();
+        newParent.dom.appendChild(this.dom);
+    }
     this.parentChanged.connect(this, function(newParent, oldParent) {
         if (oldParent) {
             oldParent.children.splice(oldParent.children.indexOf(this), 1);
@@ -55,15 +63,15 @@ function QMLItem(meta) {
     this.dataChanged.connect(this, function(newData) {
         for (var i in newData) {
             var child = newData[i];
-            if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
-                child.parent = this; // This will also add it to children.
-            else
+            if (child.hasOwnProperty("parent")) { // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
+//                child.parent = this; // This will also add it to children.
+            } else {
                 this.resources.push(child);
+            }
         }
     });
 
-    if (this.$isComponentRoot)
-      createSimpleProperty("var", this, "activeFocus");
+    createSimpleProperty("bool", this, "activeFocus");
     createSimpleProperty("real", this, "x");
     createSimpleProperty("real", this, "y");
     createSimpleProperty("real", this, "width");
@@ -91,6 +99,7 @@ function QMLItem(meta) {
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
     this.focus = false;
+    this.activeFocus = false;
 
     this.Keys = new QObject(this);
     this.Keys.asteriskPresed = Signal();
@@ -123,8 +132,8 @@ function QMLItem(meta) {
       var updateFocus = (function() {
         var hasFocus = document.activeElement == this.dom || document.activeElement == this.dom.firstChild;
 
-        if (this.focus != hasFocus)
-          this.focus = hasFocus;
+        if (this.activeFocus != hasFocus)
+          this.activeFocus = hasFocus;
       }).bind(this);
       element.addEventListener("focus", updateFocus);
       element.addEventListener("blur",  updateFocus);
@@ -134,12 +143,10 @@ function QMLItem(meta) {
       if (newVal == true) {
         if (this.dom.firstChild != null)
           this.dom.firstChild.focus();
-        document.qmlFocus = this;
-        this.$context.activeFocus = this;
-      } else if (document.qmlFocus == this) {
+        qmlEngine.activeFocus = this;
+      } else if (qmlEngine.activeFocus == this) {
         document.getElementsByTagName("BODY")[0].focus();
-        document.qmlFocus = qmlEngine.rootContext().base;
-        this.$context.activeFocus = null;
+        qmlEngine.activeFocus = null;
       }
     }).bind(this));
 
@@ -153,8 +160,8 @@ function QMLItem(meta) {
     createSimpleProperty("real", this.anchors, "bottom");
     createSimpleProperty("real", this.anchors, "horizontalCenter");
     createSimpleProperty("real", this.anchors, "verticalCenter");
-    createSimpleProperty("real", this.anchors, "fill");
-    createSimpleProperty("real", this.anchors, "centerIn");
+    createSimpleProperty("Item", this.anchors, "fill");
+    createSimpleProperty("Item", this.anchors, "centerIn");
     createSimpleProperty("real", this.anchors, "margins");
     createSimpleProperty("real", this.anchors, "leftMargin");
     createSimpleProperty("real", this.anchors, "rightMargin");
@@ -376,9 +383,11 @@ function QMLItem(meta) {
     this.transform = [];
     this.rotation = 0;
     this.scale = 1;
+    this.parent = meta.parent
 
     // Init size of root element
-    if (this.$parent === null && engine.rootElement == undefined) {
+    //TODO handle this better
+    if (this.$parent === null && qmlEngine.rootElement == undefined) {
         window.onresize();
     }
 

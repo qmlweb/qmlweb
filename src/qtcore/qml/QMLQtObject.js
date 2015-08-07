@@ -15,8 +15,8 @@ function QMLQtObject(meta) {
     // Component.onCompleted
     this.Component = new QObject(this);
     this.Component.completed = Signal([]);
-    engine.completedSignals.push(this.Component.completed);
     this.completed = this.Component.completed;
+    this.$context.rootComponent.completed.connect(this,"completed")
 
     this.completedAlreadyCalled = false;
 

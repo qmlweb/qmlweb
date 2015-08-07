@@ -50,10 +50,10 @@ registerQmlType({
 
             newItem.index = index;
 
-            if (engine.operationState !== QMLOperationState.Init) {
+            if (qmlEngine.operationState !== QMLOperationState.Init) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
-                engine.$initializePropertyBindings();
+                qmlEngine.$initializePropertyBindings();
                 callOnCompleted(newItem);
             }
         }
@@ -111,7 +111,7 @@ registerQmlType({
         }
     }
     function removeChildProperties(child) {
-        engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed), 1);
+        qmlEngine.completedSignals.splice(qmlEngine.completedSignals.indexOf(child.Component.completed), 1);
         for (var i = 0; i < child.children.length; i++)
             removeChildProperties(child.children[i])
     }

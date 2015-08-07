@@ -7,16 +7,6 @@
     UglifyJS = this;
   }
 
-  global.importJavascriptInContext = function (jsData, $context) {
-    with(qmlEngine.rootContext()) {
-      eval(jsData.source);
-      for (var i = 0 ; i < jsData.exports.length ; ++i) {
-        var symbolName = jsData.exports[i];
-        $context[symbolName] = eval(symbolName);
-      }
-    }
-  }
-
   global.jsparse = function (source) {
     var AST_Tree = UglifyJS.parse(source);
     var obj = { exports: [], source: source };

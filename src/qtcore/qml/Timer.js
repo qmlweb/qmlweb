@@ -17,7 +17,7 @@ function QMLTimer(meta) {
     // the function!
     this.triggered = Signal();
 
-    engine.$addTicker(ticker);
+    qmlEngine.$addTicker(ticker);
     function ticker(now, elapsed) {
         if (self.running) {
             if (now - prevTrigger >= self.interval) {
@@ -60,14 +60,14 @@ function QMLTimer(meta) {
             self.runningChanged();
     }
 
-    engine.$registerStart(function() {
+    qmlEngine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by self.start();
             self.start();
         }
     });
 
-    engine.$registerStop(function() {
+    qmlEngine.$registerStop(function() {
         self.stop();
     });
 }

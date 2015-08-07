@@ -8,18 +8,25 @@
  */
 
 // There can only be one running QMLEngine. This variable points to the currently running engine.
-var engine = null;
+global.qmlEngine = null;
 
 // QML engine. EXPORTED.
 QMLEngine = function (element, options) {
+    global.qmlEngine = this
+
 //----------Public Members----------
     this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
+    //TODO: is this used?
     this.running = false;
 
     // Mouse Handling
     this.mouseAreas = [];
     this.oldMousePos = {x:0, y:0};
+
+    this.rootContext = new QMLContext();
+
+    this.activeFucus = null;
 
     // List of available Components
     this.components = {};
@@ -35,12 +42,12 @@ QMLEngine = function (element, options) {
     // List of properties whose values are bindings. For internal use only.
     this.bindedProperties = [];
 
+    this.debugTree = typeof options.debugTree == "undefined" ? false : options.debugTree
 
 //----------Public Methods----------
     // Start the engine
     this.start = function()
     {
-        engine = this;
         var i;
         if (this.operationState !== QMLOperationState.Running) {
             this.operationState = QMLOperationState.Running;
@@ -66,13 +73,6 @@ QMLEngine = function (element, options) {
         }
     }
 
-    this.pathFromFilepath = function(file) {
-      var basePath = file.split("/");
-      basePath[basePath.length - 1] = "";
-      basePath = basePath.join("/");
-      return basePath;
-    }
-
     this.ensureFileIsLoadedInQrc = function(file) {
       if (!qrc.includesFile(file)) {
         var src = getUrlContents(file);
@@ -84,46 +84,41 @@ QMLEngine = function (element, options) {
 
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
-        var tree;
+        var rootComponent = new QMLComponent(file);
 
-        basePath = this.pathFromFilepath(file);
-        this.basePath = basePath;
-        this.ensureFileIsLoadedInQrc(file);
-        tree = convertToEngine(qrc[file]);
-        this.loadQMLTree(tree);
+        rootObject = rootComponent.create(null);
+        this.start();
     }
 
     // parse and construct qml
     this.loadQML = function(src) {
-        this.loadQMLTree(parseQML(src));
-    }
+        var rootComponent = new QMLComponent();
+        rootComponent.setData(parseQML(src));
 
-    this.loadQMLTree = function(tree) {
-        engine = this;
-        if (options.debugTree) {
-            options.debugTree(tree);
-        }
-
-        // Create and initialize objects
-        var component = new QMLComponent({ object: tree, parent: null });
-        doc = component.createObject(null);
-        component.finalizeImports();
-        this.$initializePropertyBindings();
-
+        rootObject = component.create(null);
         this.start();
-
-        // Call completed signals
-        for (var i in this.completedSignals) {
-            this.completedSignals[i]();
-        }
     }
 
-    this.rootContext = function() {
-      return doc.$context;
-    }
+//    this.loadQMLTree = function(tree) {
+//        if (options.debugTree) {
+//            options.debugTree(tree);
+//        }
+//
+//        // Create and initialize objects
+//        var rootComponent = new QMLComponent({ object: tree, parent: null });
+//        rootObject = component.createObject(null);
+//        this.$initializePropertyBindings();
+//
+//        this.start();
+//
+//        // Call completed signals
+//        for (var i in this.completedSignals) {
+//            this.completedSignals[i]();
+//        }
+//    }
 
     this.focusedElement = (function() {
-      return this.rootContext().activeFocus;
+      return this.activeFocus;
     }).bind(this);
 
     // KEYBOARD MANAGEMENT
@@ -225,27 +220,28 @@ QMLEngine = function (element, options) {
     }).bind(this);
     // END KEYBOARD MANAGEMENT
 
-    this.registerProperty = function(obj, propName)
-    {
-        var dependantProperties = [];
-        var value = obj[propName];
-
-        function getter() {
-            if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
-                dependantProperties.push(evaluatingProperty);
-
-            return value;
-        }
-
-        function setter(newVal) {
-            value = newVal;
-
-            for (i in dependantProperties)
-                dependantProperties[i].update();
-        }
-
-        setupGetterSetter(obj, propName, getter, setter);
-    }
+//Unused
+//    this.registerProperty = function(obj, propName)
+//    {
+//        var dependantProperties = [];
+//        var value = obj[propName];
+//
+//        function getter() {
+//            if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) == -1)
+//                dependantProperties.push(evaluatingProperty);
+//
+//            return value;
+//        }
+//
+//        function setter(newVal) {
+//            value = newVal;
+//
+//            for (i in dependantProperties)
+//                dependantProperties[i].update();
+//        }
+//
+//        setupGetterSetter(obj, propName, getter, setter);
+//    }
 
 //Intern
 
@@ -267,7 +263,6 @@ QMLEngine = function (element, options) {
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
-            property.binding.compile();
             property.update();
         }
         this.bindedProperties = [];
@@ -316,13 +311,13 @@ QMLEngine = function (element, options) {
 
     this.size = function()
     {
-        return { width: doc.getWidth(), height: doc.getHeight() };
+        return { width: rootObject.getWidth(), height: rootObject.getHeight() };
     }
 
     // Performance measurements
     this.$perfDraw = function(canvas)
     {
-        doc.$draw(canvas);
+        rootObject.$draw(canvas);
     }
 
 //----------Private Methods----------
@@ -393,8 +388,8 @@ QMLEngine = function (element, options) {
 
 //----------Private Members----------
     // Target canvas
-    var // Root document of the engine
-        doc,
+    var // Root object of the engine
+        rootObject,
         // Callbacks for stopping or starting the engine
         whenStop = [],
         whenStart = [],
@@ -403,7 +398,7 @@ QMLEngine = function (element, options) {
         tickers = [],
         lastTick = new Date().getTime(),
         // Base path of qml engine (used for resource loading)
-        basePath,
+        baseUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1),
         i;
 
 

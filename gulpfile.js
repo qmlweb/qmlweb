@@ -22,6 +22,7 @@ var qtcoreSources = [
   './src/qtcore/signal.js',
   './src/qtcore/font.js',
   './src/qtcore/easing.js',
+  './src/qtcore/utils.js',
   './src/qtcore/qml/qml.js',
   './src/qtcore/qml/**/*.js',
 

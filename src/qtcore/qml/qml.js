@@ -84,54 +84,24 @@ global.collectConstructorsForModule = function (moduleName, version) {
   return constructors;
 };
 
-global.mergeObjects = function (obj1, obj2) {
-  var mergedObject = {};
-
-  if (typeof obj1 != 'undefined' && obj1 != null) {
-    for (var key in obj1) { mergedObject[key] = obj1[key]; }
-  }
-  if (typeof obj2 != 'undefined' && obj2 != null) {
-    for (var key in obj2) { mergedObject[key] = obj2[key]; }
-  }
-  return mergedObject;
-}
-
 global.perContextConstructors = {};
 
+global.copyImports = function (fromId, toId) {
+  perContextConstructors[toId] = perContextConstructors[fromId]
+}
+
 global.loadImports = function (self, imports) {
-  constructors = mergeObjects(modules.Main, null);
+  var constructors = mergeObjects(modules.Main, perContextConstructors[self.contextId]);
   for (var i = 0 ; i < imports.length ; ++i) {
     var importDesc         = imports[i];
     var moduleConstructors = collectConstructorsForModule(importDesc.subject, importDesc.version);
 
     if (importDesc.alias != null)
-      constructors[importDesc.alias] = mergeObjects(constructors[importDesc.alias], moduleConstructors);
+      constructors[importDesc.alias] = mergeObjects(moduleConstructors, constructors[importDesc.alias]);
     else
-      constructors                   = mergeObjects(constructors,                   moduleConstructors);
+      constructors                   = mergeObjects(moduleConstructors, constructors);
   }
-  perContextConstructors[self.objectId] = constructors;
-}
-
-// Helper. Ought to do absolutely nothing.
-function noop(){};
-
-// Helper to prevent some minimization cases. Ought to do "nothing".
-function tilt() {arguments.length = 0};
-
-// Helper to clone meta-objects for dynamic element creation
-function cloneObject(obj) {
-    if (null == obj || typeof obj != "object")
-        return obj;
-    var copy = new obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) {
-            if (typeof obj[attr] == "object")
-                copy[attr] = cloneObject(obj[attr]);
-            else
-                copy[attr] = obj[attr];
-        }
-    }
-    return copy;
+  perContextConstructors[self.contextId] = constructors;
 }
 
 /**
@@ -158,21 +128,50 @@ function descr(msg, obj, vals) {
  */
 function construct(meta) {
     var item,
-        cTree;
-
-    if (meta.object.$class in constructors) {
+        cTree,
+        applyProp;
+    if (constructors[meta.object.$class] == QMLComponent) {
+        item = new QMLComponent();
+        item.setData(meta.object)
+        item.context = new QMLContext(meta.context);
+        applyProp = false;
+    }
+    else if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
-    } else if (cTree = engine.loadComponent(meta.object.$class)) {
+        applyProp = true;
+    } else if (perContextConstructors[meta.context.contextId] && meta.object.$class in perContextConstructors[meta.context.contextId]) {
+        item = new perContextConstructors[meta.context.contextId][meta.object.$class](meta);
+        applyProp = true;
+    } else if (cTree = qmlEngine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
-
+        var newContext = new QMLContext(meta.context);
+        var comp = new QMLComponent();
+        comp.setData(cTree)
+        comp.$parent = meta.parent
+        var rootItem = comp.create(newContext);
+        
+        item = {}
+        var $properties = rootItem.$properties
+        for (var i in $properties) {
+            createSimpleProperty("alias", item, i);
+            item.$properties[i].item = rootItem;
+            item.$properties[i].prop = i;
+            item.$properties[i].get = function() {
+                return this.item[this.prop].get()
+            }
+            item.$properties[i].set = function(newVal, fromAnimation, objectScope, context) {
+                this.item[this.prop].set(newVal, fromAnimation, objectScope, context);
+            }
+        }
+ 
         // Recall QMLQtObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
-        QMLQtObject.call(item, meta);
-        if (typeof item.dom != 'undefined')
-          item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+//        QMLQtObject.call(rootItem, meta);
+        if (typeof rootItem.dom != 'undefined')
+          rootItem.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
+        applyProp = true;
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
@@ -180,10 +179,11 @@ function construct(meta) {
 
     // id
     if (meta.object.id)
-        meta.context[meta.object.id] = item;
+        meta.context.setContextProperty(meta.object.id,item)
 
     // Apply properties (Bindings won't get evaluated, yet)
-    applyProperties(meta.object, item, item, meta.context);
+    if(applyProp)
+        applyProperties(meta.object, item, item, meta.context);
 
     return item;
 }
@@ -214,7 +214,7 @@ function createSimpleProperty(type, obj, propName, access) {
     }
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot)
-        setupGetterSetter(obj.$context, propName, getter, setter);
+        setupGetterSetter(obj.$context.getContextObject(), propName, getter, setter);
 }
 
 /**
@@ -273,9 +273,9 @@ var setupGetter,
  * @param {Object} metaObject Source of properties
  * @param {Object} item Target of property apply
  * @param {Object} objectScope Scope in which properties should be evaluated
- * @param {Object} componentScope Component scope in which properties should be evaluated
+ * @param {Object} QMLContext in which properties should be evaluated
  */
-function applyProperties(metaObject, item, objectScope, componentScope) {
+function applyProperties(metaObject, item, objectScope, context) {
     var i;
     objectScope = objectScope || item;
     for (i in metaObject) {
@@ -303,9 +303,9 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 }
                 value.src = "(function(" + params + ") {" + value.src + "})";
                 value.function = false;
-                value.compile();
+                value.compile(objectScope, context);
             }
-            item[signalName].connect(item, value.eval(objectScope, componentScope));
+            item[signalName].connect(item, function() { value.eval().apply(this, arguments);});
             continue;
         }
 
@@ -313,40 +313,41 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             if (value instanceof QMLSignalDefinition) {
                 item[i] = Signal(value.parameters);
                 if (item.$isComponentRoot)
-                    componentScope[i] = item[i];
+                    context.setContextProperty(i) = item[i];
                 continue;
             } else if (value instanceof QMLMethod) {
-                value.compile();
-                item[i] = value.eval(objectScope, componentScope);
+                value.compile(objectContext, context);
+                item[i] = function() { value.eval().apply(this, arguments);}
                 if (item.$isComponentRoot)
-                    componentScope[i] = item[i];
+                    context.setContextProperty(i, item[i]);
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
                 createSimpleProperty("alias", item, i);
-                item.$properties[i].componentScope = componentScope;
+                item.$properties[i].context = context;
                 item.$properties[i].value = value;
                 item.$properties[i].get = function() {
-                    var obj = this.componentScope[this.value.objectName];
+                    var obj = this.context.contextProperty(this.value.objectName);
                     return this.value.propertyName ? obj.$properties[this.value.propertyName].get() : obj;
                 }
-                item.$properties[i].set = function(newVal, fromAnimation, objectScope, componentScope) {
+                item.$properties[i].set = function(newVal, fromAnimation, objectScope, context) {
                     if (!this.value.propertyName)
                         throw "Cannot set alias property pointing to an QML object.";
-                    this.componentScope[this.value.objectName].$properties[this.value.propertyName].set(newVal, fromAnimation, objectScope, componentScope);
+                    this.context.contextProperty(this.value.objectName).$properties[this.value.propertyName].set(newVal, fromAnimation, objectScope, context);
                 }
+                //TODO: handle componentRoot
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
                 createSimpleProperty(value.type, item, i);
-                item.$properties[i].set(value.value, true, objectScope, componentScope);
+                item.$properties[i].set(value.value, true, objectScope, context);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
-                applyProperties(value, item[i], objectScope, componentScope);
+                applyProperties(value, item[i], objectScope, context);
                 continue;
             }
         }
         if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, true, objectScope, componentScope);
+            item.$properties[i].set(value, true, objectScope, context);
         else if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
@@ -356,7 +357,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, context);
         else
             throw "Cannot assign to unexistant default property";
     }
@@ -364,10 +365,10 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     // instanciations of this component, but not for its internal children
     if (metaObject.$defaultProperty)
         item.$defaultProperty = metaObject.$defaultProperty;
-    if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
-      item.completedAlreadyCalled = true;
-      item.completed();
-    }
+//    if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
+//      item.completedAlreadyCalled = true;
+//      item.completed();
+//    }
 }
 
 // ItemModel. EXPORTED.

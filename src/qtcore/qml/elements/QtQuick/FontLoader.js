@@ -94,7 +94,7 @@ registerQmlType({
 
     this.sourceChanged.connect(this, function(font_src) {
         var fontName = 'font_' + ((new Date()).getTime()).toString(36) + '_' + (Math.round(Math.random() * 1e15)).toString(36);
-        domStyle.innerHTML = '@font-face { font-family: \'' + fontName + '\'; src: url(\'' + engine.$resolvePath(font_src) + '\'); }';
+        domStyle.innerHTML = '@font-face { font-family: \'' + fontName + '\'; src: url(\'' + qmlEngine.$resolvePath(font_src) + '\'); }';
         document.getElementsByTagName('head')[0].appendChild(domStyle);
         loadFont(fontName);
     });
