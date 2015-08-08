@@ -36,7 +36,7 @@ gulp.task('qt', function() {
   return gulp.src(qtcoreSources).pipe(concat('qt.js')).pipe(gulp.dest('./lib'));
 });
 
-gulp.task('min-qt', function() {
+gulp.task('min-qt', ['qt'], function() {
   return gulp.src('./lib/qt.js').pipe(rename('qt.min.js')).pipe(uglify()).pipe(gulp.dest('./lib'));
 });
 
