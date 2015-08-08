@@ -1,5 +1,6 @@
 node_modules/
 spec.js
+lib/*
 
 .*.swp
 .*.swo
