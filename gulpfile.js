@@ -41,7 +41,7 @@ gulp.task('qt', function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('min-qt', function() {
+gulp.task('min-qt', ['qt'], function() {
   return gulp.src('./lib/qt.js')
              .pipe(rename('qt.min.js'))
              .pipe(uglify())
