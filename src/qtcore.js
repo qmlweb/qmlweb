@@ -219,11 +219,13 @@ Qt.createComponent = function(name, executionContext)
 {
     if (name in engine.components) {
         // user specified context? => should create copy of component with new context
+        /*
         if (executionContext) {
             var newComponentInstance = Object.create( engine.components[name] );
             newComponentInstance.$context = executionContext;
             return newComponentInstance;        
         }
+        */
         // no context, may return cached object.
         return engine.components[name];
     }
@@ -406,13 +408,13 @@ function construct(meta) {
       var qdirInfo = engine.qmldirs[ meta.object.$class ]; // Are we have info on that component in some imported qmldir files?
       if (qdirInfo) {
           // We have that component in some qmldir, load it from qmldir's url // 4
-          component = Qt.createComponent( "@" + qdirInfo.url );
+          component = Qt.createComponent( "@" + qdirInfo.url,meta.context );
       }
       else
-          component = Qt.createComponent(meta.object.$class + ".qml" ); // 1,2
+          component = Qt.createComponent(meta.object.$class + ".qml",meta.context ); // 1,2
 
       if (component) {
-        var item = component.createObject(meta.parent,{},meta.context);
+        var item = component.createObject(meta.parent);
         
         // Alter objects context to the outer context
         item.$context = meta.context;
@@ -556,8 +558,8 @@ function createSimpleProperty(type, obj, propName) {
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot) {
         setupGetterSetter(obj.$context, propName, getter, setter);
-        if (obj.$context.__proto__)
-          setupGetterSetter(obj.$context.__proto__, propName, getter, setter);
+        //if (obj.$context.__proto__)
+        //  setupGetterSetter(obj.$context.__proto__, propName, getter, setter);
     }
 }
 
@@ -1063,6 +1065,18 @@ QMLEngine = function (element, options) {
         return basePath;
     }
 
+    this.callCompletedSignals = function () {
+        while (this.completedSignals.length > 0) {
+           var h = this.completedSignals.splice(0,1); // remove first handler from list and put it to `h`
+           h[0](); // call first handler
+        }
+        /*
+        for (var i in this.completedSignals) {
+            this.completedSignals[i]();
+        }
+        */
+    }
+
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
         this.$basePath = this.extractBasePath( file );
@@ -1096,9 +1110,7 @@ QMLEngine = function (element, options) {
         this.start();
         
         // Call completed signals
-        for (var i in this.completedSignals) {
-            this.completedSignals[i]();
-        }
+        this.callCompletedSignals();
     }
 
 /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
