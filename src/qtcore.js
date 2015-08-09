@@ -194,13 +194,14 @@ Qt.createQmlObject = function( src, parent, file, executionContext )
         obj.parent = parent;
         parent.childrenChanged();
         
-        engine.$initializePropertyBindings();
+        // engine.$initializePropertyBindings();
 
         if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
           // We don't call those on first creation, as they will be called
           // by the regular creation-procedures at the right time.
           engine.$initializePropertyBindings();
-
+          engine.callCompletedSignals();
+          /*
           function callOnCompleted(child) {
             child.Component.completed();
             for (var i = 0; i < child.children.length; i++)
@@ -208,6 +209,7 @@ Qt.createQmlObject = function( src, parent, file, executionContext )
           }
       
           callOnCompleted(obj);
+          */
         }
 
         return obj;
