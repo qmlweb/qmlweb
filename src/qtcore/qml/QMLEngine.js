@@ -477,8 +477,9 @@ QMLEngine = function (element, options) {
 
     this.$initializePropertyBindings = function() {
         // Initialize property bindings
-        for (var i = 0; i < this.bindedProperties.length; i++) {
-            var property = this.bindedProperties[i];
+        // we use `while`, because $initializePropertyBindings may be called recursive (because of Loader and/or createQmlObject )
+        while (this.bindedProperties.length > 0) {
+            var property = this.bindedProperties.shift();
             if (!property.binding)
               continue; // Probably, the binding was overwritten by an explicit value. Ignore.
             if (property.needsUpdate)
@@ -494,15 +495,14 @@ QMLEngine = function (element, options) {
                 updateVGeometry.apply( property.obj,[property.val, property.val, property.name] );
             }
         }
-        this.bindedProperties = [];
 
         this.$initializeAliasSignals();
     }
 
     this.$initializeAliasSignals = function() {
         // Perform pending operations. Now we use it only to init alias's "changed" handlers, that's why we have such strange function name.
-        for (var i = 0; i < this.pendingOperations.length; i++) {
-            var op = this.pendingOperations[i];
+        while (this.pendingOperations.length > 0) {
+            var op = this.pendingOperations.shift();
             op[0]( op[1], op[2], op[3] );
         }
         this.pendingOperations = [];
