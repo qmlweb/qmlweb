@@ -4683,6 +4683,7 @@ function QMLVideo(meta) {
           break ;
         case VideoOutput.PreserveAspectCrop:
           domVideo.style.objectFit = 'cover';
+          this.dom.style.overflow = 'hidden';
           break ;
       }
     }).bind(this));
