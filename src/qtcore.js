@@ -4472,12 +4472,12 @@ function QMLCheckbox(meta) {
 
     this.Component.completed.connect(this, function() {
         this.implicitHeight = this.dom.offsetHeight;
-        this.implicitWidth = this.dom.offsetWidth;
+        this.implicitWidth = this.dom.offsetWidth > 0 ? this.dom.offsetWidth + 4 : 0;
     });
     this.textChanged.connect(this, function(newVal) {
         this.dom.children[1].innerHTML = newVal;
         this.implicitHeight = this.dom.offsetHeight;
-        this.implicitWidth = this.dom.offsetWidth;
+        this.implicitWidth = this.dom.offsetWidth > 0 ? this.dom.offsetWidth + 4 : 0;
     });
     this.colorChanged.connect(this, function(newVal) {
         newVal = QMLColor(newVal);
