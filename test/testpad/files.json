@@ -97,6 +97,10 @@
 {
     "file": "video.qml",
     "title": "* Video test"
+},
+{
+    "file": "UpFlow/main.qml",
+    "title": "* Up flow test"
 }
 
 ]

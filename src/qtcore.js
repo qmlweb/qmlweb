@@ -49,6 +49,11 @@
 
 (function() {
 
+/* Up flow - flow of accessible properties of base object of components to it's parent component scopes.
+   It consumes a little of performance.
+*/
+var useUpflow = false;
+
 // Helpers
 
 function QW_INHERIT(constructor, baseClass) {
@@ -355,8 +360,10 @@ QMLBinding.prototype.compile = function() {
       //var s = "return (function(){"+this.src+"})()";
       //bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + s + "})"
 
-      bindSrc = [
-        "(function(__executionObject, __executionContext) { with(__executionContext.upflowContext) with(__executionContext) with(__executionObject) ",
+      bindSrc = [ 
+        "(function(__executionObject, __executionContext) { ",
+        useUpflow ? "with(__executionContext.upflowContext) " : "",
+        "with(__executionContext) with(__executionObject) ",
         "return (function(){",
         this.src,
         "})()",
@@ -368,7 +375,10 @@ QMLBinding.prototype.compile = function() {
     {
       // bindSrc = "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
       bindSrc = [
-        "(function(__executionObject, __executionContext) { with(__executionContext.upflowContext) with(__executionContext) with(__executionObject) return ",
+        "(function(__executionObject, __executionContext) { ",
+        useUpflow ? "with(__executionContext.upflowContext) " : "",
+        "with(__executionContext) with(__executionObject) ",
+        "return ",
         this.src,
         "})"
       ].join("");
@@ -568,7 +578,8 @@ function createSimpleProperty(type, obj, propName) {
         3. add properties to this upflowContext in component root objects.
         */
         
-        setupGetterSetter(obj.$context.upflowContext, propName, getter, setter);
+        if (useUpflow)
+          setupGetterSetter(obj.$context.upflowContext, propName, getter, setter);
 
        /* Below is an old attempt - add properties one by one to parent's component contexts. This was O(2) seems.
 
