@@ -665,6 +665,7 @@ QMLProperty.prototype.update = function() {
 QMLProperty.prototype.get = function() {
     //if (this.needsUpdate && !evaluatingPropertyPaused) {
     if (this.needsUpdate && engine.operationState !== QMLOperationState.Init) {
+    //if (this.needsUpdate) { not working...
       this.update();
     }
 
@@ -885,8 +886,29 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                       if (!targetProp) {
                         console.error("qtcore: target property [",prop.val.objectName,"].",prop.val.propertyName," not found for alias ",prop.name );
                       }
-                      else
-                        targetProp.changed.connect( prop.changed );
+                      else {
+                        // targetProp.changed.connect( prop.changed );
+                        // it is not sufficient to connect to `changed` of source property
+                        // we have to propagate own changed to it too
+                        // seems the best way to do this is to make them identical?..
+                        // prop.changed = targetProp.changed;
+                        // obj[i + "Changed"] = prop.changed;
+                        // no. because those object might be destroyed later.
+                        ( function() {
+                          var loopWatchdog = false;
+                          targetProp.changed.connect( item, function() { 
+                              if (loopWatchdog) return; loopWatchdog = true;
+                              prop.changed.apply( item,arguments ); 
+                              loopWatchdog = false;
+                          } );
+                          prop.changed.connect( obj, function() { 
+                              if (loopWatchdog) return; loopWatchdog = true;
+                              targetProp.changed.apply( obj, arguments ); 
+                              loopWatchdog = false;
+                          } );
+                        } ) ();
+
+                      }
                      }
                   }                
                   engine.pendingOperations.push( [con,item.$properties[i]] );
@@ -4334,6 +4356,9 @@ function QMLTextInput(meta) {
     createSimpleProperty("enum", this, "echoMode", "text");
     this.accepted = Signal();
 
+    this.focused = Signal();
+    this.unfocused = Signal();
+
     this.Component.completed.connect(this, function() {
         this.implicitWidth = this.dom.firstChild.offsetWidth;
         this.implicitHeight = this.dom.firstChild.offsetHeight;
@@ -4364,6 +4389,14 @@ function QMLTextInput(meta) {
 
     this.dom.firstChild.oninput = updateValue;
     this.dom.firstChild.onpropertychanged = updateValue;
+
+    this.dom.firstChild.onfocus = function(e) {
+      self.focused();    
+    }
+
+    this.dom.firstChild.onblur = function(e) {
+      self.unfocused();    
+    }
 }
 
 QW_INHERIT(QMLButton, QMLItem);
@@ -4417,16 +4450,21 @@ function QMLTextEdit(meta) {
     var self = this;
 
     this.font = new QMLFont(this);
-
+    
     this.dom.innerHTML = "<textarea></textarea>"
     this.dom.firstChild.style.pointerEvents = "auto";
     this.dom.firstChild.style.width = "100%";
     this.dom.firstChild.style.height = "100%";
+    this.dom.firstChild.style.padding = "0";
+
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
 
     createSimpleProperty("string", this, "text", "");
+
+    this.focused = Signal();
+    this.unfocused = Signal();
 
     this.Component.completed.connect(this, function() {
         this.implicitWidth = this.dom.firstChild.offsetWidth;
@@ -4446,6 +4484,14 @@ function QMLTextEdit(meta) {
 
     this.dom.firstChild.oninput = updateValue;
     this.dom.firstChild.onpropertychanged = updateValue;
+
+    this.dom.firstChild.onfocus = function(e) {
+      self.focused();    
+    }
+
+    this.dom.firstChild.onblur = function(e) {
+      self.unfocused();    
+    }
 }
 
 QW_INHERIT(QMLCheckbox, QMLItem);
