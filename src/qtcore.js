@@ -560,8 +560,30 @@ function createSimpleProperty(type, obj, propName) {
     setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot) {
         setupGetterSetter(obj.$context, propName, getter, setter);
-        //if (obj.$context.__proto__)
-        //  setupGetterSetter(obj.$context.__proto__, propName, getter, setter);
+
+       /* 
+        this way is very slow. without this, heart load is 4 sec; with this 10-20 sec. 
+        What we actually should do is introduce new type of context for "from-down-to-up" data flow.
+        This context should contain all properties of all componentRoot objects in subtree.
+        So:
+        1. introduce that type of context
+        2. fill it here, in if (obj.$isComponentRoot)
+        3. refactor binging functions
+        4. refactor all calls to .eval of the bindings.
+
+        if (propName === "children" || propName === "data" || propName === "resources" || propName === "parent") {
+          return;
+        }
+        console.log(propName);
+
+        // propagate property to upper levels object specs...
+        var protoContext = obj.$context.__proto__;
+        while (protoContext instanceof QMLContext) {
+          setupGetterSetter(protoContext, propName, getter, setter);
+          protoContext = protoContext.__proto__;
+        }
+       */
+        
     }
 }
 
