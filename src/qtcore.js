@@ -143,6 +143,7 @@ constructors = {
     'var': QMLVariant,
     Component: QMLComponent,
     QMLDocument: QMLComponent,
+    QtObject: QMLBaseObject,
     MouseArea: QMLMouseArea,
     Image: QMLImage,
     AnimatedImage: QMLAnimatedImage,
@@ -430,8 +431,8 @@ function construct(meta) {
         
         // Alter objects context to the outer context
         item.$context = meta.context;
-        
-        if (engine.renderMode == QMLRenderMode.DOM)
+
+        if (engine.renderMode == QMLRenderMode.DOM && item.dom)
             item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
         var dProp; // Handle default properties
       } else {
@@ -3188,8 +3189,9 @@ function QMLRepeater(meta) {
 
     function callOnCompleted(child) {
         child.Component.completed();
-        for (var i = 0; i < child.children.length; i++)
-            callOnCompleted(child.children[i]);
+        for (var i = 0; i < child.$tidyupList.length; i++)
+            if (child.$tidyupList[i] instanceof QMLBaseObject)
+                callOnCompleted(child.$tidyupList[i]);
     }
     function insertChildren(startIndex, endIndex) {
         for (var index = startIndex; index < endIndex; index++) {
