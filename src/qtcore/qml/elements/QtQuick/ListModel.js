@@ -67,6 +67,7 @@ registerQmlType({
     }
     this.set = function(index, dict) {
         this.$items[index] = dict;
+        this.$model.dataChanged(index, index);
     }
     this.setProperty = function(index, property, value) {
         this.$items[index][property] = value;
