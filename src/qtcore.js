@@ -3364,6 +3364,7 @@ function QMLListModel(meta) {
     }
     this.set = function(index, dict) {
         this.$items[index] = dict;
+        this.$model.dataChanged(index, index);
         engine.$requestDraw();
     }
     this.setProperty = function(index, property, value) {
