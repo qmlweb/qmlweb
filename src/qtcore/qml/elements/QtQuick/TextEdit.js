@@ -1,8 +1,4 @@
-registerQmlType({
-  module:   'QtQuick.Controls',
-  name:     'TextArea',
-  versions: /.*/,
-  constructor: function QMLTextArea(meta) {
+function QMLTextEdit(meta) {
     QMLItem.call(this, meta);
 
     var self = this;
@@ -37,5 +33,18 @@ registerQmlType({
 
     this.dom.firstChild.oninput = updateValue;
     this.dom.firstChild.onpropertychanged = updateValue;
-  }
+}
+
+registerQmlType({
+  module:   'QtQuick',
+  name:     'TextEdit',
+  versions: /.*/,
+  constructor: QMLTextEdit
+});
+
+registerQmlType({ // non-standard, to be removed!
+  module:   'QtQuick.Controls',
+  name:     'TextArea',
+  versions: /.*/,
+  constructor: QMLTextEdit
 });
