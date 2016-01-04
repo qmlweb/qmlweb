@@ -394,5 +394,6 @@ function QMLItem(meta) {
         }
     }
 }
+inherit(QMLItem, QMLBaseObject);
 
 constructors['Item'] = QMLItem;

@@ -8,6 +8,7 @@ function QMLPositioner(meta) {
 
     this.spacing = 0;
 }
+inherit(QMLPositioner, QMLItem);
 
 QMLPositioner.slotChildrenChanged = function() {
     for (var i = 0; i < this.children.length; i++) {

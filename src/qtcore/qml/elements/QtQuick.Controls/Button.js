@@ -24,5 +24,6 @@ function QMLButton(meta) {
         self.clicked();
     }
 }
+inherit(QMLButton, QMLItem);
 
 registerQmlType('Button', QMLButton);

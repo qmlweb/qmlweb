@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'ListView',
   versions: /.*/,
+  baseClass: QMLRepeater,
   constructor: function QMLListView(meta) {
     var self = this;
     var QMLRepeater = getConstructor('QtQuick', '2.0', 'Repeater');

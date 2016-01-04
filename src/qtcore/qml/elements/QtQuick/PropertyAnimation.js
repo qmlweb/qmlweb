@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'PropertyAnimation',
   versions: /.*/,
+  baseClass: QMLAnimation,
   constructor: function QMLPropertyAnimation(meta) {
     var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);

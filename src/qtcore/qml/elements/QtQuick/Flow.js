@@ -61,5 +61,6 @@ registerQmlType({
   module:      'QtQuick',
   name:        'Flow',
   versions:    /.*/,
+  baseClass: QMLPositioner,
   constructor: QMLFlow
 });

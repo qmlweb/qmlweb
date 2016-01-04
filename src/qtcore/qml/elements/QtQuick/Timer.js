@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Timer',
   versions: /.*/,
+  baseClass: QMLBaseObject,
   constructor: function QMLTimer(meta) {
     QMLBaseObject.call(this, meta);
     var prevTrigger,

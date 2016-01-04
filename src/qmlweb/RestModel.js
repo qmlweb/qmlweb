@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QmlWeb',
   name:     'RestModel',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLRestModel(meta) {
     QMLItem.call(this, meta);
     var self = this;

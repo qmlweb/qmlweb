@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtMobility',
   name:     'GeoLocation',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLGeoLocation(meta) {
     var self = this;
     QMLItem.call(this, meta);

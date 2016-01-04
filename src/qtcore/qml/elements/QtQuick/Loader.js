@@ -15,6 +15,7 @@ registerQmlType({
     module: 'QtQuick',
     name: 'Loader',
     versions: /.*/,
+    baseClass: QMLItem,
     constructor: function(meta) {
         QMLItem.call(this, meta);
 
