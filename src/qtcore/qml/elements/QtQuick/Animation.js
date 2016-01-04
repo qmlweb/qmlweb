@@ -1,8 +1,4 @@
-registerQmlType({
-  module:   'QtQuick',
-  name:     'Animation',
-  versions: /.*/,
-  constructor: function QMLAnimation(meta) {
+function QMLAnimation(meta) {
     QMLBaseObject.call(this, meta);
 
     // Exports
@@ -40,6 +36,12 @@ registerQmlType({
 
     // To be overridden
     this.complete = unboundMethod;
-  }
-});
+}
 
+registerQmlType({
+  module:   'QtQuick',
+  name:     'Animation',
+  versions: /.*/,
+  baseClass: QMLBaseObject,
+  constructor: QMLAnimation
+});

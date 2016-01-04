@@ -1,8 +1,4 @@
-registerQmlType({
-  module: 'QtQuick',
-  name:   'Image',
-  versions: /.*/,
-  constructor: function QMLImage(meta) {
+function QMLImage(meta) {
     QMLItem.call(this, meta);
     var img = new Image(),
         self = this;
@@ -142,5 +138,12 @@ registerQmlType({
             console.log("Waiting for image to load");
         }
     }
-  }
+}
+
+registerQmlType({
+  module: 'QtQuick',
+  name:   'Image',
+  versions: /.*/,
+  baseClass: QMLItem,
+  constructor: QMLImage
 });

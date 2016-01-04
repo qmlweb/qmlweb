@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'RegExpValidator',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLRegExpValidator(meta) {
     QMLItem.call(this, meta);
 

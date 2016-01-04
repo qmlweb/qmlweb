@@ -2,6 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Font',
   versions: /.*/,
+  baseClass: QMLBaseObject,
   constructor: function QMLFont(parent) {
     QObject.call(this);
     createSimpleProperty("bool", this, "bold");

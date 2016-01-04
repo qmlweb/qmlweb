@@ -16,5 +16,6 @@ function QMLPropertyChanges(meta) {
         });
     }
 }
+inherit(QMLPropertyChanges, QMLBaseObject);
 
 registerQmlType('PropertyChanges', QMLPropertyChanges);

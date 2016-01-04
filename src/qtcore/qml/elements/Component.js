@@ -76,6 +76,7 @@ function QMLComponent(meta) {
         this.finalizeImports(this.$context);
     }
 }
+inherit(QMLComponent, QMLBaseObject);
 
 registerQmlType('Component',   QMLComponent);
 registerQmlType('QMLDocument', QMLComponent);

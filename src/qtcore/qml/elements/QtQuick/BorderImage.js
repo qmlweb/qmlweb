@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'BorderImage',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLBorderImage(meta) {
     QMLItem.call(this, meta);
     var self = this;

@@ -39,6 +39,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'TextEdit',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: QMLTextEdit
 });
 
@@ -46,5 +47,6 @@ registerQmlType({ // non-standard, to be removed!
   module:   'QtQuick.Controls',
   name:     'TextArea',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: QMLTextEdit
 });

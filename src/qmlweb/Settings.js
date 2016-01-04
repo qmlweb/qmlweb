@@ -2,6 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Settings',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLSettings(meta) {
     QMLItem.call(this, meta);
 

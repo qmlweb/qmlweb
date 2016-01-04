@@ -44,6 +44,10 @@ global.registerQmlType = function(options) {
     if (typeof modules[options.module] == 'undefined')
       modules[options.module] = [];
     modules[options.module].push(moduleDescriptor);
+
+    if (typeof options.baseClass !== 'undefined') {
+      inherit(options.constructor, options.baseClass);
+    }
   }
 };
 
@@ -104,6 +108,11 @@ global.loadImports = function (self, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
   }
   perContextConstructors[self.objectId] = constructors;
+}
+
+global.inherit = function(constructor, baseClass) {
+  constructor.prototype = Object.create(baseClass.prototype);
+  constructor.prototype.constructor = baseClass;
 }
 
 /**
