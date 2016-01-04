@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'SequentialAnimation',
   versions: /.*/,
+  baseClass: QMLAnimation,
   constructor: function QMLSequentialAnimation(meta) {
     var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);

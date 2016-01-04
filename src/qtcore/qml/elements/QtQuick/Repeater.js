@@ -1,8 +1,4 @@
-registerQmlType({
-  module:   'QtQuick',
-  name:     'Repeater',
-  versions: /.*/,
-  constructor: function QMLRepeater(meta) {
+function QMLRepeater(meta) {
     QMLItem.call(this, meta);
     var self = this;
     var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
@@ -135,5 +131,12 @@ registerQmlType({
         for (var i = 0; i < child.children.length; i++)
             removeChildProperties(child.children[i])
     }
-  }
+}
+
+registerQmlType({
+  module:   'QtQuick',
+  name:     'Repeater',
+  versions: /.*/,
+  baseClass: QMLItem,
+  constructor: QMLRepeater
 });

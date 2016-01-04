@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'FontLoader',
   versions: /.*/,
+  baseClass: QMLBaseObject,
   constructor: function QMLFontLoader(meta) {
     QMLBaseObject.call(this, meta);
 
