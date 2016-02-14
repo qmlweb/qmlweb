@@ -9,5 +9,9 @@
     "gulp-jasmine-phantom": "^2.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^0.2.1"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/gulp build",
+    "watch": "./node_modules/.bin/gulp watch"
   }
 }

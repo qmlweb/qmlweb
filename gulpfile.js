@@ -28,25 +28,38 @@ var qtcoreSources = [
   './src/helpers/encapsulate.end.js'
 ];
 
-var tests = [ './lib/qt.js', './spec/**/*.js' ];
+var tests = [
+  './lib/qt.js',
+  './spec/**/*.js'
+];
 
 gulp.task('qt', function() {
-  return gulp.src(qtcoreSources).pipe(concat('qt.js')).pipe(gulp.dest('./lib'));
+  return gulp.src(qtcoreSources)
+             .pipe(concat('qt.js'))
+             .pipe(gulp.dest('./lib'));
 });
 
 gulp.task('min-qt', function() {
-  return gulp.src('./lib/qt.js').pipe(rename('qt.min.js')).pipe(uglify()).pipe(gulp.dest('./lib'));
+  return gulp.src('./lib/qt.js')
+             .pipe(rename('qt.min.js'))
+             .pipe(uglify())
+             .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('compile-tests', ['qt'], function() {
-  return gulp.src(tests).pipe(concat('spec.js')).pipe(gulp.dest('./tmp'));
+gulp.task('spec', ['qt'], function() {
+  return gulp.src(tests)
+             .pipe(concat('spec.js'))
+             .pipe(gulp.dest('./tmp'));
 });
 
-gulp.task('tests', ['compile-tests'], function() {
-  return gulp.src('tmp/spec.js').pipe(jasmine({ integration: true }));
+gulp.task('test', ['spec'], function() {
+  return gulp.src('tmp/spec.js')
+             .pipe(jasmine({ integration: true }));
 });
 
-gulp.task('default', ['qt', 'min-qt', 'compile-tests'],function() {
-   gulp.watch(qtcoreSources, ['qt', 'min-qt', 'compile-tests']);
-   gulp.watch(['.spec/**/*.js'], ['compile-tests']);
+gulp.task('build', ['qt', 'min-qt']);
+
+gulp.task('default', ['qt', 'min-qt', 'spec'],function() {
+  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'spec']);
+  gulp.watch(['.spec/**/*.js'], ['spec']);
 });
