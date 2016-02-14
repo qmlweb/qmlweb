@@ -1,4 +1,4 @@
-## Javascript powered QML Engine
+## JavaScript powered QML Engine
 
 [![Join the chat at https://gitter.im/qmlweb/qmlweb](https://badges.gitter.im/qmlweb/qmlweb.svg)](https://gitter.im/qmlweb/qmlweb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -63,7 +63,7 @@ registerQmlType({
     this.somethingHappened = Signal(); // creates a signal somethingHappened
 
     this.somethingHappened.connect(this, function() {
-      console.log('You may also connect to signals in Javascript');
+      console.log('You may also connect to signals in JavaScript');
     });
   
     // Using the DOM
