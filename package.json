@@ -12,6 +12,7 @@
     "gulp-uglify": "^0.2.1"
   },
   "scripts": {
+    "test": "./node_modules/.bin/gulp test",
     "build": "./node_modules/.bin/gulp build",
     "watch": "./node_modules/.bin/gulp watch"
   }
