@@ -39,11 +39,11 @@ gulp.task('min-qt', function() {
 });
 
 gulp.task('compile-tests', ['qt'], function() {
-  return gulp.src(tests).pipe(concat('spec.js')).pipe(gulp.dest('.'));
+  return gulp.src(tests).pipe(concat('spec.js')).pipe(gulp.dest('./tmp'));
 });
 
 gulp.task('tests', ['compile-tests'], function() {
-  return gulp.src('spec.js').pipe(jasmine({ integration: true }));
+  return gulp.src('tmp/spec.js').pipe(jasmine({ integration: true }));
 });
 
 gulp.task('default', ['qt', 'min-qt', 'compile-tests'],function() {
