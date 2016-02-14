@@ -48,50 +48,7 @@ You may then modify the `<body>` element to specify what QML file to load when t
 ````
 
 ## How to use with Gulp
-Note that for the following, you need to have `NodeJS` installed.
-#### Gulp
-You can use Gulp to pre-parse your QML files and pre-load them in your javascript file. First, you'll need to install the dependencies. Create a `package.json` file such as this one:
-
-```Javascript
-{
-  "name": "QmlWebClient",
-  "devDependencies": {
-    "gulp": "~3.6.0",
-    "gulp-concat": "~2.1.7",
-    "gulp-util": "~2.2.14",
-    "gulp-uglify": "~0.2.1",
-    "gulp-qml": "git://github.com/Plaristote/qmlweb.git"
-  }
-}
-````
-
-Now run the command `npm install` to have node.js install your dependencies, and start writing your `Gulpfile.js` :
-
-```Javascript
-var gulp   = require('gulp');
-var concat = require('gulp-concat');
-var qml    = require('QMLWeb');
-
-var qmlFiles = [ 'qml/**/*.qml', 'qml/**/*.js' ];
-var jsFiles  = [ 'lib/qt.js', 'lib/**/*.js' ];
-
-gulp.task('default', ['qml', 'application'], function() {
-  gulp.watch(qmlFiles, ['qml']);
-  gulp.watch(jsFiles, ['application']);
-});
-
-// Parses your qml and javascript source files
-gulp.task('qml', function() {
-  return gulp.src(qmlFiles).pipe(qml()).pipe(concat('qrc.js')).pipe(gulp.dest('./lib'));
-});
-
-// Merge 'qt.js' with your compiled QML files and outputs it in app/QtApplication.js
-gulp.task('application', function() {
-  return gulp.src(jsFiles).pipe(concat('QtApplication.js')).pipe(gulp.dest('./app'));
-});
-````
-
-Now, you may run the script by running the `gulp` command: the qml files in the `./qml` folder will be directly pre-loaded in your `QtApplication.js` file.
+See [gulp-qmlweb](https://github.com/qmlweb/gulp-qmlweb) package.
 
 ## How to extend
 When implementing new features, you may need to get away from QML and create your own QML components from scratch, using directly the engine's API.

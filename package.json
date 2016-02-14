@@ -3,10 +3,6 @@
   "version": "0.0.1",
   "description": "QML port to Javascript",
   "license": "BSD",
-  "dependencies": {
-    "event-stream": "^3.3.2",
-    "gulp-util": "^2.2.20"
-  },
   "devDependencies": {
     "gulp": "^3.6.2",
     "gulp-concat": "^2.1.7",
