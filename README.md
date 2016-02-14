@@ -23,8 +23,6 @@ Rectangle {
 
 This project aims at bringing the power of QML to the web browser.
 
-This is a fork from `git://anongit.kde.org/qmlweb` in [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore)
-
 ## How to use
 #### Add the library to your web page
 Download the file `lib/qt.js` and preload it in an HTML page.
@@ -95,3 +93,9 @@ MyTypeName {
   onSomethingHappened: console.log(data)
 }
 ```
+
+## History
+
+ 1. [git://anongit.kde.org/qmlweb](https://quickgit.kde.org/?p=qmlweb.git), see [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore),
+ 2. [@JoshuaKolden/qmlweb](https://github.com/JoshuaKolden/qmlweb),
+ 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb).
