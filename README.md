@@ -98,4 +98,5 @@ MyTypeName {
 
  1. [git://anongit.kde.org/qmlweb](https://quickgit.kde.org/?p=qmlweb.git), see [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore),
  2. [@JoshuaKolden/qmlweb](https://github.com/JoshuaKolden/qmlweb),
- 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb).
+ 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb),
+ 4. [@labsin/qmlweb](https://github.com/labsin/qmlweb).
