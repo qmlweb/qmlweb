@@ -1,8 +1,8 @@
 {
-  "name": "QMLWeb",
+  "name": "qmlweb",
   "version": "0.0.1",
   "description": "QML port to Javascript",
-  "author": "michael@unetresgrossebite.com",
+  "license": "BSD",
   "dependencies": {
     "gulp": "~3.6.0",
     "gulp-concat": "~2.1.7",
