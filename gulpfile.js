@@ -36,7 +36,7 @@ var tests = [
 
 gulp.task('qt', function() {
   return gulp.src(qtcoreSources)
-             .pipe(order(qtcoreSources))
+             .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(concat('qt.js'))
              .pipe(gulp.dest('./lib'));
 });
