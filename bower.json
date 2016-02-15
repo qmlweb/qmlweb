@@ -1,0 +1,19 @@
+{
+  "name": "qmlweb",
+  "description": "QML port to Javascript",
+  "main": "lib/qt.min.js",
+  "license": "BSD",
+  "keywords": [
+    "qml",
+    "qt"
+  ],
+  "homepage": "https://github.com/qmlweb/qmlweb",
+  "moduleType": [
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "spec"
+  ]
+}
