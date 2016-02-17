@@ -47,7 +47,7 @@ gulp.task('min-qt', ['qt'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('test', function() {
+gulp.task('test', ['qt', 'min-qt'], function() {
   return gulp.src(tests)
              .pipe(jasmine({
                integration: true,
