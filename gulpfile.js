@@ -31,7 +31,7 @@ var qtcoreSources = [
 
 var tests = [
   'lib/qt.js',
-  'spec/**/*.js'
+  'tests/**/*.js'
 ];
 
 gulp.task('qt', function() {
@@ -48,20 +48,20 @@ gulp.task('min-qt', ['qt'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('spec', ['qt'], function() {
+gulp.task('tests', ['qt'], function() {
   return gulp.src(tests)
-             .pipe(concat('spec.js'))
+             .pipe(concat('tests.js'))
              .pipe(gulp.dest('./tmp'));
 });
 
-gulp.task('test', ['spec'], function() {
-  return gulp.src('tmp/spec.js')
+gulp.task('test', ['tests'], function() {
+  return gulp.src('tmp/tests.js')
              .pipe(jasmine({ integration: true }));
 });
 
 gulp.task('build', ['qt', 'min-qt']);
 
-gulp.task('default', ['qt', 'min-qt', 'spec'],function() {
-  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'spec']);
-  gulp.watch(['.spec/**/*.js'], ['spec']);
+gulp.task('default', ['qt', 'min-qt', 'tests'],function() {
+  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'tests']);
+  gulp.watch(['tests/**/*.js'], ['tests']);
 });
