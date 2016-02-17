@@ -57,7 +57,13 @@ gulp.task('test', function() {
 
 gulp.task('build', ['qt', 'min-qt']);
 
-gulp.task('default', ['qt', 'min-qt', 'test'],function() {
+gulp.task('watch', ['qt', 'min-qt'],function() {
+  gulp.watch(qtcoreSources, ['qt', 'min-qt']);
+});
+
+gulp.task('watch-tests', ['qt', 'min-qt', 'test'],function() {
   gulp.watch(qtcoreSources, ['qt', 'min-qt', 'test']);
   gulp.watch(tests, ['test']);
 });
+
+gulp.task('default', ['watch']);
