@@ -47,7 +47,9 @@ gulp.task('min-qt', ['qt'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('test', ['qt', 'min-qt'], function() {
+gulp.task('build', ['qt', 'min-qt']);
+
+gulp.task('test', ['build'], function() {
   return gulp.src(tests)
              .pipe(jasmine({
                integration: true,
@@ -55,14 +57,12 @@ gulp.task('test', ['qt', 'min-qt'], function() {
              }));
 });
 
-gulp.task('build', ['qt', 'min-qt']);
-
-gulp.task('watch', ['qt', 'min-qt'],function() {
-  gulp.watch(qtcoreSources, ['qt', 'min-qt']);
+gulp.task('watch', ['build'], function() {
+  gulp.watch(qtcoreSources, ['build']);
 });
 
-gulp.task('watch-tests', ['qt', 'min-qt', 'test'],function() {
-  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'test']);
+gulp.task('watch-tests', ['build', 'test'],function() {
+  gulp.watch(qtcoreSources, ['build', 'test']);
   gulp.watch(tests, ['test']);
 });
 
