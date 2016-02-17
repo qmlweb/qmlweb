@@ -30,7 +30,6 @@ var qtcoreSources = [
 ];
 
 var tests = [
-  'lib/qt.js',
   'tests/**/*.js'
 ];
 
@@ -48,20 +47,17 @@ gulp.task('min-qt', ['qt'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('tests', ['qt'], function() {
+gulp.task('test', function() {
   return gulp.src(tests)
-             .pipe(concat('tests.js'))
-             .pipe(gulp.dest('./tmp'));
-});
-
-gulp.task('test', ['tests'], function() {
-  return gulp.src('tmp/tests.js')
-             .pipe(jasmine({ integration: true }));
+             .pipe(jasmine({
+               integration: true,
+               vendor: ['./lib/qt.js']
+             }));
 });
 
 gulp.task('build', ['qt', 'min-qt']);
 
-gulp.task('default', ['qt', 'min-qt', 'tests'],function() {
-  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'tests']);
-  gulp.watch(['tests/**/*.js'], ['tests']);
+gulp.task('default', ['qt', 'min-qt', 'test'],function() {
+  gulp.watch(qtcoreSources, ['qt', 'min-qt', 'test']);
+  gulp.watch(tests, ['test']);
 });
