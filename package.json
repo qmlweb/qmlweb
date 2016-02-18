@@ -3,6 +3,7 @@
   "version": "0.0.4",
   "description": "QML port to Javascript",
   "license": "BSD",
+  "repository": "qmlweb/qmlweb",
   "devDependencies": {
     "gulp": "^3.6.2",
     "gulp-concat": "^2.1.7",
