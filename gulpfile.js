@@ -3,6 +3,7 @@ var order   = require('gulp-order');
 var uglify  = require('gulp-uglify');
 var concat  = require('gulp-concat');
 var rename  = require('gulp-rename');
+var changed = require('gulp-changed');
 var jasmine = require('gulp-jasmine-phantom');
 
 var qtcoreSources = [
@@ -37,12 +38,14 @@ gulp.task('qt', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(concat('qt.js'))
+             .pipe(changed('./lib'))
              .pipe(gulp.dest('./lib'));
 });
 
 gulp.task('min-qt', ['qt'], function() {
   return gulp.src('./lib/qt.js')
              .pipe(rename('qt.min.js'))
+             .pipe(changed('./lib'))
              .pipe(uglify())
              .pipe(gulp.dest('./lib'));
 });

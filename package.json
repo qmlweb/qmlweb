@@ -6,6 +6,7 @@
   "repository": "qmlweb/qmlweb",
   "devDependencies": {
     "gulp": "^3.6.2",
+    "gulp-changed": "^1.3.0",
     "gulp-concat": "^2.1.7",
     "gulp-jasmine-phantom": "^3.0.0-rc1",
     "gulp-order": "^1.1.1",
