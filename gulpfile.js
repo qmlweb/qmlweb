@@ -1,9 +1,10 @@
-var gulp    = require('gulp');
-var order   = require('gulp-order');
-var uglify  = require('gulp-uglify');
-var concat  = require('gulp-concat');
-var rename  = require('gulp-rename');
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var rename = require('gulp-rename');
 var changed = require('gulp-changed');
+var order = require('gulp-order');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
 var jasmine = require('gulp-jasmine-phantom');
 
 var qtcoreSources = [
@@ -37,8 +38,10 @@ var tests = [
 gulp.task('qt', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
+             .pipe(sourcemaps.init())
              .pipe(concat('qt.js'))
              .pipe(changed('./lib'))
+             .pipe(sourcemaps.write('./'))
              .pipe(gulp.dest('./lib'));
 });
 
@@ -46,7 +49,9 @@ gulp.task('min-qt', ['qt'], function() {
   return gulp.src('./lib/qt.js')
              .pipe(rename('qt.min.js'))
              .pipe(changed('./lib'))
+             .pipe(sourcemaps.init({ loadMaps: true }))
              .pipe(uglify())
+             .pipe(sourcemaps.write('./'))
              .pipe(gulp.dest('./lib'));
 });
 
