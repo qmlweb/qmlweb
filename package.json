@@ -15,5 +15,17 @@
     "test": "./node_modules/.bin/gulp test",
     "build": "./node_modules/.bin/gulp build",
     "watch": "./node_modules/.bin/gulp watch"
-  }
+  },
+  "files": [
+    "AUTHORS",
+    "LICENSE",
+    "README.md",
+    "misc/**/*.svg",
+    "misc/**/*.png",
+    "lib/**/*.js",
+    "src/**/*.js",
+    "src/**/*.qml",
+    "tests/**/*.js",
+    "tests/**/*.qml"
+  ]
 }
