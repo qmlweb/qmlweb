@@ -31,12 +31,32 @@ This project aims at bringing the power of QML to the web browser.
 
 ## How to use
 #### Add the library to your web page
+Using one of the methods below, install the qmlweb JavaScript library:
 
-Install with [npm](https://www.npmjs.com/package/qmlweb),
-[Bower](http://bower.io/search/?q=qmlweb), or download directly from the
-GitHub [releases](https://github.com/qmlweb/qmlweb/releases) page.
+- [npm](https://www.npmjs.com/package/qmlweb):
 
-From that package, preload the file `lib/qt.js` in an HTML page.
+  ```
+  npm install qmlweb
+  ```
+
+- [Bower](http://bower.io/search/?q=qmlweb):
+
+  ```
+  bower install qmlweb
+  ```
+
+- GitHub [releases](https://github.com/qmlweb/qmlweb/releases):
+  ```
+  tar -xzvf v0.0.4.tar.gz
+  ```
+
+- Manually using gulp (recommended if you cloned from git):
+  ```
+  npm install
+  npm run build
+  ```
+
+Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's HTML file:
 
 
 ```HTML
@@ -47,7 +67,15 @@ From that package, preload the file `lib/qt.js` in an HTML page.
 You may then modify the `<body>` element to specify what QML file to load when the page is opened.
 
 ```HTML
-<body style="margin: 0;" data-qml="qml/main.qml">
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QML Auto-load Example</title>
+  </head>
+  <body style="margin: 0;" data-qml="qml/main.qml">
+    <script type="text/javascript" src="/lib/qt.js"></script>
+  </body>
+</html>
 ````
 
 ## How to use with Gulp
