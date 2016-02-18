@@ -29,7 +29,13 @@ This project aims at bringing the power of QML to the web browser.
 
 ## How to use
 #### Add the library to your web page
-Download the file `lib/qt.js` and preload it in an HTML page.
+
+Install with [npm](https://www.npmjs.com/package/qmlweb),
+[Bower](http://bower.io/search/?q=qmlweb), or download directly from the
+GitHub [releases](https://github.com/qmlweb/qmlweb/releases) page.
+
+From that package, preload the file `lib/qt.js` in an HTML page.
+
 
 ```HTML
 <script type="text/javascript" src="/lib/qt.js"></script>
