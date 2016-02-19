@@ -4,6 +4,7 @@ tmp/
 build/
 *~
 *.bak
+*.log
 .*.swp
 .*.swo
 *.kdev4
