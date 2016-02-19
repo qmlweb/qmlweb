@@ -8,7 +8,9 @@ module.exports = function(config) {
     ],
     browsers: ['PhantomJS'],
     singleRun: true,
-    reporters: ['progress', 'coverage'],
+    reporters: process.env.COVERALLS_REPO_TOKEN ?
+                   ['progress', 'coverage', 'coveralls'] :
+                   ['progress', 'coverage'],
     coverageReporter: {
       type: 'lcov',
       dir: 'coverage/'
