@@ -5,7 +5,7 @@ var changed = require('gulp-changed');
 var order = require('gulp-order');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
-var jasmine = require('gulp-jasmine-phantom');
+var karma = require('karma');
 
 var qtcoreSources = [
   'src/helpers/encapsulate.begin.js',
@@ -57,12 +57,10 @@ gulp.task('min-qt', ['qt'], function() {
 
 gulp.task('build', ['qt', 'min-qt']);
 
-gulp.task('test', ['build'], function() {
-  return gulp.src(tests)
-             .pipe(jasmine({
-               integration: true,
-               vendor: ['./lib/qt.js']
-             }));
+gulp.task('test', ['build'], function(done) {
+  new karma.Server({
+    configFile: __dirname + '/karma.conf.js'
+  }, done).start();
 });
 
 gulp.task('watch', ['build'], function() {
