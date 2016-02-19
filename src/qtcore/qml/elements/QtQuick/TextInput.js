@@ -49,6 +49,14 @@ registerQmlType({
           case TextInput.Password:
             this.dom.firstChild.type = "password";
             break ;
+          case TextInput.NoEcho:
+            // Not supported, use password, that's nearest
+            this.dom.firstChild.type = "password";
+            break;
+          case TextInput.PasswordEchoOnEdit:
+            // Not supported, use password, that's nearest
+            this.dom.firstChild.type = "password";
+            break;
         }
     }).bind(this));
 
