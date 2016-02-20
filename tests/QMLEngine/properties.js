@@ -12,6 +12,7 @@ describe('properties', function() {
         expect(qml.rootObject.doubleProperty).toBe(0.5)
         expect(qml.rootObject.stringProperty).toBe("hello")
         expect(qml.rootObject.itemProperty.x).not.toBe(undefined)
+        expect(qml.rootObject.arrayProperty).toEqual([1,2,"bar"])
     });
 
     it('can maintain property bindings', function() {
@@ -39,7 +40,7 @@ describe('properties', function() {
         expect(childB).not.toBe(undefined)
     });
 
-    it('can be aliased', function(){
+    it.cannot('be aliased', function(){
         var qml = loader('RootItem');
         var obj = qml.rootObject
         expect(obj.childX).toBe(125)
