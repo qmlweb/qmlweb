@@ -32,6 +32,7 @@
     "misc/**/*.svg",
     "misc/**/*.png",
     "lib/**/*.js",
+    "lib/**/*.js.map",
     "src/**/*.js",
     "src/**/*.qml",
     "tests/**/*.js",
