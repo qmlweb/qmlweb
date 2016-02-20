@@ -1,3 +1,4 @@
+
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
@@ -67,6 +68,11 @@ gulp.task('test', ['build'], function(done) {
 gulp.task('karma', ['build'], function(done) {
   new karma.Server({
     configFile: __dirname + '/karma.conf.js'
+  }, done).start();
+});
+gulp.task('karma-debug', ['build'], function(done) {
+  new karma.Server({
+    configFile: __dirname + '/karma.debug.conf.js'
   }, done).start();
 });
 

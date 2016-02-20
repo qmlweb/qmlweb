@@ -19,3 +19,6 @@ function prefixedQmlLoader(prefix) {
     return loadQmlFile(prefix + file + '.qml', opts);
   }
 }
+function contextVariable(obj, name){
+  return obj.$context[name]
+}

@@ -26,24 +26,16 @@ describe('properties', function() {
 
     });
 
-    //it('reference by ids', function() {
-    //    var qml = loader('BoundProperties');
-    //    var obj = qml.rootObject
-    //    expect(obj.parentItem).not.toBe(undefined)
-    //
-    //});
-    //
-    //it('scoping', function() {
-    //    var qml = loader('RootItem');
-    //    var obj = qml.rootObject.parent
-    //
-    //    expect(obj.intB).toBe(20)
-    //    expect(obj.textB).toBe("hello world")
-    //    obj.intA = 5
-    //    expect(obj.intB).toBe(10)
-    //    obj.textA = "goodbye"
-    //    expect(obj.textB).toBe("goodbye world")
-    //
-    //});
+    it('reference by ids', function() {
+        var qml = loader('RootItem');
+        var obj = qml.rootObject
+        var parentItem = contextVariable(obj, "parentItem")
+        expect(parentItem).not.toBe(undefined)
+        expect(parentItem.$context).not.toBe(undefined)
+        var childA = contextVariable(parentItem, "childA")
+        expect(childA).not.toBe(undefined)
+        var childB = contextVariable(parentItem, "childB")
+        expect(childB).not.toBe(undefined)
+    });
 
 });

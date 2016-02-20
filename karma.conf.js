@@ -18,6 +18,7 @@ module.exports = function(config) {
     },
     preprocessors: {
       'lib/qt.js': ['coverage']
-    }
+    },
+
   });
 };
