@@ -6,9 +6,10 @@ module.exports = function(config) {
       'lib/qt.js',
       'tests/common.js',
       'tests/*/**/*.js',
-      { pattern: 'tests/*/**/*.qml', included: false }
+      { pattern: 'tests/*/**/*.qml', included: false },
+      { pattern: 'tests/*/**/*.png', included: false }
     ],
-    browsers: ['PhantomJS'],
+    browsers: ['PhantomJSCustom'],
     reporters: process.env.COVERALLS_REPO_TOKEN ?
                    ['progress', 'coverage', 'coveralls'] :
                    ['progress', 'coverage'],
@@ -18,6 +19,14 @@ module.exports = function(config) {
     },
     preprocessors: {
       'lib/qt.js': ['coverage']
+    },
+    customLaunchers: {
+      PhantomJSCustom: {
+        base: 'PhantomJS',
+        options: {
+          onCallback: require('./tests/phantom.callback.js')
+        }
+      }
     }
   });
 };
