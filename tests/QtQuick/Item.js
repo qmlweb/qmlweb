@@ -1,13 +1,13 @@
 describe('QtQuick.Item', function() {
   var loader = prefixedQmlLoader('QtQuick/qml/Item');
   it('Empty', function() {
-    var div = loader('Empty');
+    var div = loader('Empty').rootElement;
     expect(div.innerHTML).toBe('');
     expect(div.style.backgroundColor).toBe('');
     div.remove();
   });
   it('Size', function() {
-    var div = loader('Size');
+    var div = loader('Size').rootElement;
     expect(div.offsetWidth).toBe(200);
     expect(div.offsetHeight).toBe(100);
     expect(div.clientWidth).toBe(200);
