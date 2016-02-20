@@ -4,7 +4,9 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'lib/qt.js',
-      'tests/**/*.js'
+      'tests/common.js',
+      'tests/*/**/*.js',
+      { pattern: 'tests/*/**/*.qml', included: false }
     ],
     browsers: ['PhantomJS'],
     reporters: process.env.COVERALLS_REPO_TOKEN ?
