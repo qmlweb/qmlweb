@@ -3,7 +3,7 @@
  */
 describe('properties', function() {
     var loader = prefixedQmlLoader('QMLEngine/qml/');
-    it('assigned values', function() {
+    it('can store values', function() {
         var qml = loader('BasicProperties');
         var div = qml.rootElement
         expect(qml).not.toBe(undefined)
@@ -11,9 +11,10 @@ describe('properties', function() {
         expect(qml.rootObject.intProperty).toBe(10)
         expect(qml.rootObject.doubleProperty).toBe(0.5)
         expect(qml.rootObject.stringProperty).toBe("hello")
+        expect(qml.rootObject.itemProperty.x).not.toBe(undefined)
     });
 
-    it('property binding', function() {
+    it('can maintain property bindings', function() {
         var qml = loader('BoundProperties');
         var obj = qml.rootObject
 
@@ -37,5 +38,13 @@ describe('properties', function() {
         var childB = contextVariable(parentItem, "childB")
         expect(childB).not.toBe(undefined)
     });
+
+    it('can be aliased', function(){
+        var qml = loader('RootItem');
+        var obj = qml.rootObject
+        expect(obj.childX).toBe(125)
+
+    });
+
 
 });
