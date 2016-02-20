@@ -7,7 +7,6 @@ module.exports = function(config) {
       'tests/**/*.js'
     ],
     browsers: ['PhantomJS'],
-    singleRun: true,
     reporters: process.env.COVERALLS_REPO_TOKEN ?
                    ['progress', 'coverage', 'coveralls'] :
                    ['progress', 'coverage'],

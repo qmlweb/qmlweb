@@ -59,6 +59,13 @@ gulp.task('build', ['qt', 'min-qt']);
 
 gulp.task('test', ['build'], function(done) {
   new karma.Server({
+    singleRun: true,
+    configFile: __dirname + '/karma.conf.js'
+  }, done).start();
+});
+
+gulp.task('karma', ['build'], function(done) {
+  new karma.Server({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
@@ -67,9 +74,6 @@ gulp.task('watch', ['build'], function() {
   gulp.watch(qtcoreSources, ['build']);
 });
 
-gulp.task('watch-tests', ['build', 'test'],function() {
-  gulp.watch(qtcoreSources, ['build', 'test']);
-  gulp.watch(tests, ['test']);
-});
+gulp.task('watch-tests', ['watch', 'karma']);
 
 gulp.task('default', ['watch']);
