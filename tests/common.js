@@ -1,3 +1,6 @@
+it.cannot = function(name, func){
+
+}
 function createQmlEngine(opts){
   var div = document.createElement('div');
   var qml = new QMLEngine(div, opts || {});
