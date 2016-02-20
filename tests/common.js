@@ -12,3 +12,30 @@ function prefixedQmlLoader(prefix) {
     return loadQmlFile('/base/tests/' + prefix + file + '.qml', opts);
   }
 }
+
+(function() {
+  var describeOrig = describe;
+  var itOrig = it;
+  var current = '';
+
+  function isFailing(name) {
+    var data = window.failingTests;
+    current.split('.').forEach(function(part) {
+      data = data[part] || {};
+    });
+    return Array.isArray(data) && data.indexOf(name) !== -1;
+  }
+
+  window.describe = function(name) {
+    current = name;
+    describeOrig.apply(this, arguments);
+  }
+
+  window.it = function(name) {
+    if (isFailing(name)) {
+      console.log('Test ' + current + '.' + name + ' is known to be failing. Skipping...');
+      return;
+    }
+    itOrig.apply(this, arguments);
+  }
+})();

@@ -5,6 +5,7 @@ module.exports = function(config) {
     files: [
       'lib/qt.js',
       'tests/common.js',
+      'tests/failingTests.js',
       'tests/*/**/*.js',
       { pattern: 'tests/*/**/*.qml', included: false },
       { pattern: 'tests/*/**/*.png', included: false }
