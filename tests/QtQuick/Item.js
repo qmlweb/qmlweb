@@ -3,11 +3,11 @@ describe('QtQuick.Item', function() {
   it('Empty', function() {
     var div = loader('Empty');
     expect(div.innerHTML).toBe('');
+    expect(div.style.backgroundColor).toBe('');
     div.remove();
   });
   it('Size', function() {
     var div = loader('Size');
-    expect(div.innerHTML).toBe('');
     expect(div.offsetWidth).toBe(200);
     expect(div.offsetHeight).toBe(100);
     expect(div.clientWidth).toBe(200);
