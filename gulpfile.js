@@ -61,7 +61,11 @@ gulp.task('test', ['build'], function(done) {
   new karma.Server({
     singleRun: true,
     configFile: __dirname + '/karma.conf.js'
-  }, done).start();
+  }, function(code) {
+    if (code !== 0)
+      process.exit(1);
+    done();
+  }).start();
 });
 
 gulp.task('karma', ['build'], function(done) {
