@@ -17,17 +17,7 @@ registerQmlType({
 
     this.$itemsChanged.connect(this, function(newVal) {
         this.count = this.$items.length;
-        if (firstItem && newVal.length > 0 ) {
-            firstItem = false;
-            var roleNames = [];
-            var dict = newVal[0];
-            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
-                if (i != "index")
-                    roleNames.push(i);
-            }
-
-            self.$model.setRoleNames(roleNames);
-        }
+        updateRoleNames(newVal);
     });
 
     this.$model.data = function(index, role) {
@@ -84,6 +74,21 @@ registerQmlType({
     }
     this.setProperty = function(index, property, value) {
         this.$items[index][property] = value;
+    }
+
+    function updateRoleNames(newVal){
+        if (firstItem && newVal.length > 0 ) {
+            firstItem = false;
+            var roleNames = [];
+            var dict = newVal[0];
+
+            for (var i in (dict instanceof QMLListElement) ? dict.$properties : dict) {
+                if (i != "index")
+                    roleNames.push(i);
+            }
+
+            self.$model.setRoleNames(roleNames);
+        }
     }
   }
 });
