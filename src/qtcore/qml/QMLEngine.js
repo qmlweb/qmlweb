@@ -273,7 +273,10 @@ QMLEngine = function (element, options) {
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
             var property = this.bindedProperties[i];
-            property.binding.compile();
+            if (!property) continue;
+            if (property.binding != null) {
+               property.binding.compile();
+            }
             property.update();
         }
         this.bindedProperties = [];
