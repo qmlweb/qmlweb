@@ -14,7 +14,11 @@ global.Signal = function Signal(params, options) {
 
     var signal = function() {
         for (var i in connectedSlots)
-            connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+            try {
+                connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+            } catch(err) {
+                console.log(err.message);
+            }
     };
     signal.parameters = params || [];
     signal.connect = function() {
