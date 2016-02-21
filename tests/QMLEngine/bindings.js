@@ -6,4 +6,16 @@ describe('QMLEngine.imports', function() {
     expect(div.offsetHeight).toBe(12);
     div.remove();
   });
+
+  it('update immediately', function() {
+    var qml = loader('Update').qml
+
+    expect(qml.intB).toBe(20)
+    expect(qml.textB).toBe("hello world")
+    qml.intA = 5
+    expect(qml.intB).toBe(10)
+    qml.textA = "goodbye"
+    expect(qml.textB).toBe("goodbye world")
+
+  });
 });
