@@ -11,3 +11,4 @@ build/
 *.kdev4
 *kate-swp
 .idea
+.arcconfig
