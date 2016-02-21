@@ -81,42 +81,49 @@ function QMLRepeater(meta) {
         self.count = self.$items.length;
     }
 
+    function onModelDataChanged(startIndex, endIndex, roles) {
+        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
+
+        if (!roles)
+            roles = model.roleNames;
+        for (var index = startIndex; index <= endIndex; index++) {
+            for (var i in roles) {
+                self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), QMLProperty.ReasonInit, self.$items[index], self.model.$context);
+            }
+        }
+    }
+    function onRowsMoved(sourceStartIndex, sourceEndIndex, destinationIndex) {
+        var vals = self.$items.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
+        for (var i = 0; i < vals.length; i++) {
+            self.$items.splice(destinationIndex + i, 0, vals[i]);
+        }
+        var smallestChangedIndex = sourceStartIndex < destinationIndex
+                                ? sourceStartIndex : destinationIndex;
+        for (var i = smallestChangedIndex; i < self.$items.length; i++) {
+            self.$items[i].index = i;
+        }
+    }
+    function onRowsRemoved(startIndex, endIndex) {
+        removeChildren(startIndex, endIndex);
+        for (var i = startIndex; i < self.$items.length; i++) {
+            self.$items[i].index = i;
+        }
+        self.count = self.$items.length;
+    }
+    function onModelReset() {
+        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
+        removeChildren(0, self.$items.length);
+    }
     function applyModel() {
         if (!self.delegate || !self.parent)
             return;
         var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
         if (model instanceof JSItemModel) {
-            model.dataChanged.connect(function(startIndex, endIndex, roles) {
-                if (!roles)
-                    roles = model.roleNames;
-                for (var index = startIndex; index <= endIndex; index++) {
-                    for (var i in roles) {
-                        self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), QMLProperty.ReasonInit, self.$items[index], self.model.$context);
-                    }
-                }
-            });
-            model.rowsInserted.connect(insertChildren);
-            model.rowsMoved.connect(function(sourceStartIndex, sourceEndIndex, destinationIndex) {
-                var vals = self.$items.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
-                for (var i = 0; i < vals.length; i++) {
-                    self.$items.splice(destinationIndex + i, 0, vals[i]);
-                }
-                var smallestChangedIndex = sourceStartIndex < destinationIndex
-                                        ? sourceStartIndex : destinationIndex;
-                for (var i = smallestChangedIndex; i < self.$items.length; i++) {
-                    self.$items[i].index = i;
-                }
-            });
-            model.rowsRemoved.connect(function(startIndex, endIndex) {
-                removeChildren(startIndex, endIndex);
-                for (var i = startIndex; i < self.$items.length; i++) {
-                    self.$items[i].index = i;
-                }
-                self.count = self.$items.length;
-            });
-            model.modelReset.connect(function() {
-                removeChildren(0, self.$items.length);
-            });
+            if ( model.dataChanged.isConnected(onModelDataChanged) == false ) model.dataChanged.connect(onModelDataChanged);
+            if ( model.rowsInserted.isConnected(insertChildren) == false ) model.rowsInserted.connect(insertChildren);
+            if ( model.rowsMoved.isConnected(onRowsMoved) == false  ) model.rowsMoved.connect(onRowsMoved);
+            if ( model.rowsRemoved.isConnected(onRowsRemoved) == false  ) model.rowsRemoved.connect(onRowsRemoved);
+            if ( model.modelReset.isConnected(onModelReset) == false  ) model.modelReset.connect(onModelReset);
 
             removeChildren(0, self.$items.length);
             insertChildren(0, model.rowCount());
