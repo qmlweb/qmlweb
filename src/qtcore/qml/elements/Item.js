@@ -30,7 +30,6 @@ function QMLItem(meta) {
     }
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
-    this.dom.qml = this;
     this.css = this.dom.style;
 
     createSimpleProperty("list", this, "data");
