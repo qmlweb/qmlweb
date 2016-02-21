@@ -7,6 +7,10 @@ describe('QMLEngine.properties', function() {
         expect(qml.stringProperty).toBe("hello")
         expect(qml.itemProperty.x).not.toBe(undefined)
         expect(qml.arrayProperty).toEqual([1,2,"bar"])
+        expect(qml.hexProperty).toEqual(255)
+        expect(qml.octProperty).toEqual(63)
+        expect(qml.bigNumber).toEqual(100000000)
+
     })
 
     it('can be aliased', function(){
