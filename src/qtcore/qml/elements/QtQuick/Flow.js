@@ -21,38 +21,44 @@ QMLFlow.prototype.layoutChildren = function() {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
+    var children = this.children;
+    var child    = undefined;
 
     if (children.length == 0) return;
 
-    for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
+    var flowWidth = this.$isUsingImplicitWidth ? this.implicitWidth : this.width;
+    var flowHeight = this.$isUsingImplicitHeight ? this.implicitHeight : this.height;
+
+    for (var i = 0; i < children.length; i++) {
+        child = children[i];
+        childHeight = child.$isUsingImplicitHeight ? child.implicitHeight : child.height;
+        childWidth = child.$isUsingImplicitWidth ? child.implicitWidth : child.width;
+
+        if (!(child.visible && childWidth && childHeight))
             continue;
 
         if (this.flow == this.Flow.LeftToRight) {
-            if (curHPos + child.width > this.width) {
+            if (curHPos + childWidth > flowWidth) {
                 if (this.$isUsingImplicitWidth == false ) curHPos = 0;
                 curVPos += rowSize + this.spacing;
                 rowSize = 0;
             }
-            rowSize = child.height > rowSize ? child.height : rowSize;
+            rowSize = childHeight > rowSize ? childHeight : rowSize;
 
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
+            child.x = this.layoutDirection == 1 ? flowWidth - curHPos - childWidth : curHPos;
             child.y = curVPos;
-            curHPos += child.width + this.spacing;
+            curHPos += childWidth + this.spacing;
         } else {
-            if (curVPos + child.height > this.height) {
+            if (curVPos + childHeight > flowHeight) {
                 if (this.$isUsingImplicitHeight == false ) curVPos = 0;
                 curHPos += rowSize + this.spacing;
                 rowSize = 0;
             }
-            rowSize = child.width > rowSize ? child.width : rowSize;
+            rowSize = childWidth > rowSize ? childWidth : rowSize;
 
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
+            child.x = this.layoutDirection == 1 ? flowWidth - curHPos - childWidth : curHPos;
             child.y = curVPos;
-            curVPos += child.height + this.spacing;
+            curVPos += childHeight + this.spacing;
         }
     }
 
