@@ -11,6 +11,7 @@ function QMLFlow(meta) {
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
+    this.implicitWidthChanged.connect(this, this.layoutChildren);
 
     this.flow = this.Flow.LeftToRight;
     this.layoutDirection = 0;
