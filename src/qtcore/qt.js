@@ -54,6 +54,7 @@ global.Qt = {
     component.$file = file; // just for debugging
 
     engine.loadImports( tree.$imports,component.$basePath );
+    component.finalizeImports(_executionContext);
 
     engine.components[name] = component;
     return component;
