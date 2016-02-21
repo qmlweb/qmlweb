@@ -4,4 +4,7 @@ Item {
   property string stringProperty: "hello"
   property Item itemProperty: Item { }
   property var arrayProperty: [1, 2, "bar"]
+  property int hexProperty: 0xFF
+  property int octProperty: 077
+  property double bigNumber: 1e8
 }
