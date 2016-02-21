@@ -13,13 +13,13 @@ global.Signal = function Signal(params, options) {
     var obj = options.obj
 
     var signal = function() {
-        for (var i in connectedSlots)
+        for (var i=0;i<connectedSlots.length;i++) {
             try {
                 connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
-            } catch(err) {
-                console.log(err.message);
-            }
+            } catch(err) {console.log(err.message);}
+        }
     };
+    
     signal.parameters = params || [];
     signal.connect = function() {
         if (arguments.length == 1)
@@ -37,8 +37,9 @@ global.Signal = function Signal(params, options) {
     signal.disconnect = function() {
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
                        : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 3 : 4;
+        var item;
         for (var i = 0; i < connectedSlots.length; i++) {
-            var item = connectedSlots[i];
+            item = connectedSlots[i];
             if ((callType == 1 && item.slot == arguments[0])
                 || (callType == 2 && item.thisObj == arguments[0])
                 || (callType == 3 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
@@ -54,13 +55,14 @@ global.Signal = function Signal(params, options) {
     signal.isConnected = function() {
         var callType = arguments.length == 1 ? 1
                        : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 2 : 3;
-        for (var i in connectedSlots) {
-            var item = connectedSlots[i];
+        var item;
+        for (var i=0; i < connectedSlots.length; i++) {
+            item = connectedSlots[i];
             if ((callType == 1 && item.slot == arguments[0])
                 || (callType == 2 && item.thisObj == arguments[0] && item.slot == arguments[0][arguments[1]])
                 || (item.thisObj == arguments[0] && item.slot == arguments[1])
             )
-                return true;
+          return true;
         }
         return false;
     }

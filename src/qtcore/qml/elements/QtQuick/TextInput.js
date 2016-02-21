@@ -11,7 +11,8 @@ registerQmlType({
 
     var self = this;
 
-    this.font = new getConstructor('QtQuick', '2.0', 'Font')(this);
+    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
+    this.font   = new QMLFont(this);
 
     this.dom.innerHTML = "<input type=\"text\" disabled/>"
     this.dom.firstChild.style.pointerEvents = "auto";
@@ -29,6 +30,7 @@ registerQmlType({
     createSimpleProperty("bool",   this, "readOnly");
     createSimpleProperty("var",    this, "validator");
     createSimpleProperty("enum",   this, "echoMode");
+    
     this.accepted = Signal();
     this.readOnly = false;
     this.maximumLength = -1;

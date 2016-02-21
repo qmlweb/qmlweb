@@ -1,13 +1,10 @@
-registerQmlType({
-  module: 'QtQuick',
-  name:   'ListModel',
-  versions: /.*/,
-  constructor: function QMLListModel(meta) {
+function QMLListModel(meta) {
     QMLBaseObject.call(this, meta);
     var self = this,
     firstItem = true;
-    var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
 
+    var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
+     
     createSimpleProperty("int", this, "count");
     createSimpleProperty("list", this, "$items");
     this.$defaultProperty = "$items";
@@ -17,7 +14,7 @@ registerQmlType({
 
     this.$itemsChanged.connect(this, function(newVal) {
         this.count = this.$items.length;
-        updateRoleNames(newVal);
+    updateRoleNames(newVal);
     });
 
     this.$model.data = function(index, role) {
@@ -36,7 +33,7 @@ registerQmlType({
                 this.$items.push(dict[key]);
                 c++;
             }
-        } else {
+        }else {
             this.$items.push(dict);
             c=1;
         }
@@ -55,7 +52,7 @@ registerQmlType({
     this.insert = function(index, dict) {
         this.$items.splice(index, 0, dict);
         this.$itemsChanged(this.$items);
-        this.$model.rowsInserted(index, index+1);
+        this.$model.rowsInserted(index, index + 1);
     }
     this.move = function(from, to, n) {
         var vals = this.$items.splice(from, n);
@@ -92,5 +89,11 @@ registerQmlType({
             self.$model.setRoleNames(roleNames);
         }
     }
-  }
+}
+
+registerQmlType({
+  module: 'QtQuick',
+  name:   'ListModel',
+  versions: /.*/,
+  constructor: QMLListModel
 });

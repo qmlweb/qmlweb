@@ -44,7 +44,7 @@ QMLEngine = function (element, options) {
         var i;
         if (this.operationState !== QMLOperationState.Running) {
             this.operationState = QMLOperationState.Running;
-            tickerId = setInterval(tick, this.$interval);
+            tickerId = setInterval(tick, this.$interval);  // TODO: considering performance: shouldn't it we start only when we have active animation
             for (i = 0; i < whenStart.length; i++) {
                 whenStart[i]();
             }
@@ -78,14 +78,14 @@ QMLEngine = function (element, options) {
         var src = getUrlContents(file);
 
         if (src) {
-            console.log('Loading file [', file, ']');
+            console.log('Loading file [', file,']');
             qrc[file] = qmlparse(src);
-        } else {
-            console.log('Can nor load file [', file, ']');
+        }else {
+            console.log('Can nor load file [', file,']');
         }
       }
     }
-
+    
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file, parentComponent) {
         var tree;
@@ -120,12 +120,12 @@ QMLEngine = function (element, options) {
         for (var i in this.completedSignals) {
             this.completedSignals[i]();
         }
-
+        
         return component;
     }
 
     this.rootContext = function() {
-      return global.qmlEngine.doc.$context;
+        return global.qmlEngine.doc.$context;
     }
 
     this.focusedElement = (function() {
@@ -270,16 +270,19 @@ QMLEngine = function (element, options) {
     }
 
     this.$initializePropertyBindings = function() {
+        var property;
+        
         // Initialize property bindings
         for (var i = 0; i < this.bindedProperties.length; i++) {
-            var property = this.bindedProperties[i];
+            property = this.bindedProperties[i];
             if (!property) continue;
+ 
             if (property.binding != null) {
                property.binding.compile();
             }
             property.update();
         }
-        this.bindedProperties = [];
+        this.bindedProperties.length = 0;
     }
 
     this.$getTextMetrics = function(text, fontCss)

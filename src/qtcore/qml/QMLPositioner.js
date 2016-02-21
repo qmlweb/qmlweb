@@ -10,8 +10,11 @@ function QMLPositioner(meta) {
 }
 
 QMLPositioner.slotChildrenChanged = function() {
-    for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
+    var children = this.children;
+    var child;
+
+    for (var i = 0; i < children.length; i++) {
+        child = children[i];
         if (!child.widthChanged.isConnected(this, this.layoutChildren))
             child.widthChanged.connect(this, this.layoutChildren);
         if (!child.heightChanged.isConnected(this, this.layoutChildren))

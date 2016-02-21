@@ -22,7 +22,8 @@ registerQmlType({
     createSimpleProperty("bool", this, "pressed");
     createSimpleProperty("bool", this, "containsMouse");
     createSimpleProperty("enum", this, "cursorShape");
-
+    
+        
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
@@ -33,7 +34,7 @@ registerQmlType({
     this.hoverEnabled = false;
     this.containsMouse = false;
     this.cursorShape = Qt.ArrowCursor;
-
+    
     function eventToMouse(e) {
         return {
             accepted: true,

@@ -7,13 +7,13 @@ function QMLItem(meta) {
     this.completedAlreadyCalled = false;
 
     createSimpleProperty("Item", this, "parent");
-
+    
     if (this.$parent === null) { // This is the root element. Initialize it.
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
         var rootItem = undefined;
-
+        
         if (engine.rootElement == undefined) { // create supplement of QQuickRootItem
             rootItem = construct({
                 object: {$class: "Item"},
@@ -22,12 +22,13 @@ function QMLItem(meta) {
                 isComponentRoot: true
             });
         }
-
+        
         if (engine.rootElement == undefined) {
             window.onresize = function() {
                 rootItem.implicitHeight = window.innerHeight;
                 rootItem.implicitWidth = window.innerWidth;
             }
+            
             this.parent = rootItem;
         } else {
             this.implicitHeight = this.dom.offsetHeight;
@@ -40,8 +41,10 @@ function QMLItem(meta) {
     } else {
         if (!this.dom) // Create a dom element for this item.
             this.dom = document.createElement("div");
+        
         this.dom.style.position = "absolute";
     }
+    
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
     this.css = this.dom.style;
@@ -50,6 +53,7 @@ function QMLItem(meta) {
     this.$defaultProperty = "data";
     createSimpleProperty("list", this, "children");
     createSimpleProperty("list", this, "resources");
+ 
     this.children = [];
     this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
@@ -134,6 +138,7 @@ function QMLItem(meta) {
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
+    // anchors property
     this.anchors = new QObject(this);
     createSimpleProperty("real", this.anchors, "left");
     createSimpleProperty("real", this.anchors, "right");
@@ -171,10 +176,11 @@ function QMLItem(meta) {
     createSimpleProperty("real", this.childrenRect, "y");  // todo ro
     createSimpleProperty("real", this.childrenRect, "width"); // todo ro
     createSimpleProperty("real", this.childrenRect, "height"); // todo ro
-
+    
     createSimpleProperty("list", this, "states");
     createSimpleProperty("string", this, "state");
     createSimpleProperty("list", this, "transitions");
+    
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
@@ -316,6 +322,8 @@ function QMLItem(meta) {
             }
             if (typeof this.z == "number")
               transform += " translate3d(0, 0, " + this.z + "px)";
+            
+
             this.dom.style.transform = transform;
             this.dom.style.transformStyle = transformStyle;
             this.dom.style.MozTransform = transform;    // Firefox
@@ -361,7 +369,7 @@ function QMLItem(meta) {
     this.implicitHeightChanged.connect(this, function(newVal) {
         if (this.$isUsingImplicitHeight) this.css.height = newVal ? newVal + "px" : "auto";
     });
-
+    
     this.implicitHeight = 0;
     this.implicitWidth = 0;
     this.spacing = 0;
@@ -381,7 +389,7 @@ function QMLItem(meta) {
     this.childrenRect.y = 0;
     this.childrenRect.width = 0;
     this.childrenRect.height = 0;
-
+    
     // Init size of root element
     if (this.$parent === null && engine.rootElement == undefined) {
         window.onresize();

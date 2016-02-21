@@ -95,7 +95,7 @@ function updateHGeometry(newVal, oldVal, propName) {
         this.width = width;
 
     this.$updatingGeometry = false;
-
+    
     if (this.parent != undefined) updateChildrenRect(this.parent);
 }
 
@@ -196,15 +196,16 @@ function updateVGeometry(newVal, oldVal, propName) {
         this.height = height;
 
     this.$updatingGeometry = false;
-
+    
     if (this.parent != undefined) updateChildrenRect(this.parent);
 }
 
-function updateChildrenRect(component) {
+function updateChildrenRect(component){
+    
     var children = component !== undefined ? component.children : undefined
     if ( children == undefined || children.length == 0 )
         return;
-
+    
     var maxWidth = 0;
     var maxHeight = 0;
     var minX = children.length>0 ? children[0].x : 0;
@@ -212,19 +213,19 @@ function updateChildrenRect(component) {
     var h=0;
     var w=0;
     var child;
-
+ 
     for (var i=0;i<children.length; i++){
         child = children[i];
-
+        
         h = child.$isUsingImplicitHeight ? child.implicitHeight : child.height;
         w = child.$isUsingImplicitWidth ? child.implicitWidth : child.width;
-
-        maxWidth = Math.max(maxWidth, child.x + w);
+        
+        maxWidth = Math.max(maxWidth, child.x + w); 
         maxHeight = Math.max(maxHeight, child.y + h);
         minX = Math.min(minX, child.x);
         minY = Math.min(minX, child.y);
     }
-
+    
     component.childrenRect.x = minX;
     component.childrenRect.y = minY;
     component.childrenRect.width = maxWidth;

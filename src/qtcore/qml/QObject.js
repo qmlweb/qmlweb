@@ -12,16 +12,18 @@ function QObject(parent) {
 
     this.objectId = objectIds++;
     this.$delete = function() {
+        var item;
         while (this.$tidyupList.length > 0) {
-            var item = this.$tidyupList[0];
+            item = this.$tidyupList[0];
             if (item.$delete) // It's a QObject
                 item.$delete();
             else // It must be a signal
                 item.disconnect(this);
         }
 
+        var prop;
         for (var i in this.$properties) {
-            var prop = this.$properties[i];
+            prop = this.$properties[i];
             while (prop.$tidyupList.length > 0)
                 prop.$tidyupList[0].disconnect(prop);
         }

@@ -8,6 +8,7 @@ registerQmlType({
     // We create another span inside the text to distinguish the actual
     // (possibly html-formatted) text from child elements
     this.dom.innerHTML = "<span></span>";
+     
     this.dom.firstChild.style.width = "100%";
     this.dom.firstChild.style.height = "100%";
 
@@ -140,7 +141,7 @@ registerQmlType({
     this.wrapMode = this.Text.NoWrap;
     this.color = "black";
     this.text = "";
-
+    
     this.textChanged.connect(this, updateImplicit);
     this.font.boldChanged.connect(this, updateImplicit);
     this.font.pixelSizeChanged.connect(this, updateImplicit);
@@ -150,7 +151,7 @@ registerQmlType({
     this.font.wordSpacingChanged.connect(this, updateImplicit);
 
     this.Component.completed.connect(this, updateImplicit);
-
+    
     function updateImplicit() {
         if (typeof this.text == undefined || this.text === "" || !this.dom) {
              this.implicitHeigh = this.implicitWidth = 0;
