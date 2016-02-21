@@ -21,6 +21,8 @@ registerQmlType({
     createSimpleProperty("real", this, "mouseY");
     createSimpleProperty("bool", this, "pressed");
     createSimpleProperty("bool", this, "containsMouse");
+    createSimpleProperty("enum", this, "cursorShape");
+
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
@@ -30,6 +32,7 @@ registerQmlType({
     this.enabled = true;
     this.hoverEnabled = false;
     this.containsMouse = false;
+    this.cursorShape = Qt.ArrowCursor;
 
     function eventToMouse(e) {
         return {
@@ -76,6 +79,16 @@ registerQmlType({
         self.containsMouse = false;
         self.exited();
     }
+    this.dom.onmouseover = function(e) {
+        self.containsMouse = true;
+        self.dom.style.cursor = cursorShapeToCSS();
+        self.entered();
+    }
+    this.dom.onmouseout = function(e) {
+        self.containsMouse = false;
+        self.dom.style.cursor = "auto";
+        self.exited();
+    }
     this.dom.onmousemove = function(e) {
         if (self.enabled && (self.hoverEnabled || self.pressed)) {
             var mouse = eventToMouse(e);
@@ -83,6 +96,38 @@ registerQmlType({
             self.mouseX = mouse.x;
             self.mouseY = mouse.y;
         }
+    }
+    
+    function cursorShapeToCSS(){
+        var cursor = "auto";
+        switch (self.cursorShape) {
+          case Qt.ArrowCursor: cursor = "default"; break;
+          case Qt.UpArrowCursor: cursor = "auto";break;
+          case Qt.CrossCursor: cursor = "crosshair";break;
+          case Qt.WaitCursor: cursor = "wait";break;
+          case Qt.IBeamCursor: cursor = "auto";break;
+          case Qt.SizeVerCursor: cursor = "auto";break;
+          case Qt.SizeHorCursor: cursor = "auto";break;
+          case Qt.SizeBDiagCursor: cursor = "auto";break;
+          case Qt.SizeFDiagCursor: cursor = "auto";break;
+          case Qt.SizeAllCursor: cursor = "auto";break;
+          case Qt.BlankCursor: cursor = "auto";break;
+          case Qt.SplitVCursor: cursor = "auto";break;
+          case Qt.SplitHCursor: cursor = "auto";break;
+          case Qt.PointingHandCursor: cursor = "pointer";break;
+          case Qt.ForbiddenCursor: cursor = "not-allowed";break;
+          case Qt.WhatsThisCursor: cursor = "auto";break;
+          case Qt.BusyCursor: cursor = "progress";break;
+          case Qt.OpenHandCursor: cursor = "auto";break;
+          case Qt.ClosedHandCursor: cursor = "move";break;
+          case Qt.DragCopyCursor: cursor = "auto";break;
+          case Qt.DragMoveCursor: cursor = "auto";break;
+          case Qt.DragLinkCursor: cursor = "auto";break;
+          case Qt.LastCursor: cursor = "auto";break;
+          case Qt.BitmapCursor: cursor = "auto";break;
+          case Qt.CustomCursor: cursor = "auto";  break;
+        }
+        return cursor;
     }
   }
 });
