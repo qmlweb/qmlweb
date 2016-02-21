@@ -16,7 +16,8 @@ registerQmlType({
     this.count = 0;
 
     this.$itemsChanged.connect(this, function(newVal) {
-        if (firstItem) {
+        this.count = this.$items.length;
+        if (firstItem && newVal.length > 0 ) {
             firstItem = false;
             var roleNames = [];
             var dict = newVal[0];
@@ -24,9 +25,9 @@ registerQmlType({
                 if (i != "index")
                     roleNames.push(i);
             }
-            this.$model.setRoleNames(roleNames);
+
+            self.$model.setRoleNames(roleNames);
         }
-        this.count = this.$items.length;
     });
 
     this.$model.data = function(index, role) {
@@ -37,11 +38,25 @@ registerQmlType({
     }
 
     this.append = function(dict) {
-        this.insert(this.$items.length, dict);
+        var index = this.$items.length;
+        var c = 0;
+
+        if (dict instanceof Array){
+            for (var key in dict) {
+                this.$items.push(dict[key]);
+                c++;
+            }
+        } else {
+            this.$items.push(dict);
+            c=1;
+        }
+
+        this.$itemsChanged(this.$items);
+        this.$model.rowsInserted(index, index + c);
     }
     this.clear = function() {
-        this.$items = [];
         this.$model.modelReset();
+        this.$items.length = 0;
         this.count = 0;
     }
     this.get = function(index) {
