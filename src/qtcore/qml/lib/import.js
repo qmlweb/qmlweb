@@ -52,7 +52,7 @@ function parseQML(file) {
     var contents = getUrlContents(file + ".js");
     if (contents) {
         console.log("Using pre-processed content for " + file);
-        return eval("(function(){return "+contents+"})();");
+        return new Function("return " + contents)();
     } else {
         contents = getUrlContents(file);
         if (contents) {
@@ -167,9 +167,7 @@ importJs = function (filename) {
     // Make that function return an object.
     // That object contains getters and setters for exported stuff.
     // Add () to execute the function.
-    src = "(function(){"
-        + src
-        + ";return {";
+    src += ";return {";
     for (i = 0; i < exports.length; i++) {
         // create getters and setters for properties
         // keeps variables synced better
@@ -178,10 +176,10 @@ importJs = function (filename) {
         // without getters and setters:
         // src += exports[i] + ":" + exports[i] + ",";
     }
-    src += "}})()";
+    src += "}";
 
     // evaluate source to get the object.
-    return eval(src);
+    return new Function(src)();
 }
 
 /**

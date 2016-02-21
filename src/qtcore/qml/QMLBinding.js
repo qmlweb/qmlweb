@@ -23,8 +23,5 @@ global.QMLBinding.prototype.toJSON = function() {
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
 QMLBinding.prototype.compile = function() {
-    var bindSrc = this.function
-                    ? "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) " + this.src + "})"
-                    : "(function(__executionObject, __executionContext) { with(__executionContext) with(__executionObject) return " + this.src + "})";
-    this.eval = eval(bindSrc);
+    this.eval = new Function('__executionObject', '__executionContext', "with(__executionContext) with(__executionObject) " + ( this.function ? "" : "return " ) + this.src);
 }
