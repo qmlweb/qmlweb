@@ -77,8 +77,12 @@ QMLEngine = function (element, options) {
       if (!qrc.includesFile(file)) {
         var src = getUrlContents(file);
 
-        console.log('loading file', file);
-        qrc[file] = qmlparse(src);
+        if (src) {
+            console.log('Loading file [', file, ']');
+            qrc[file] = qmlparse(src);
+        } else {
+            console.log('Can not load file [', file, ']');
+        }
       }
     }
 
