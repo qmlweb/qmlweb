@@ -39,7 +39,7 @@ QMLGrid.prototype.layoutChildren = function() {
     // How many items are actually visible?
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (child.visible && child.opacity && child.width && child.height)
+        if (child.visible && child.width && child.height)
             visibleItems.push(this.children[i]);
     }
 

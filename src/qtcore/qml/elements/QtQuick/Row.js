@@ -22,7 +22,7 @@ QMLRow.prototype.layoutChildren = function() {
         step = this.layoutDirection == 1 ? -1 : 1;
     for (; i !== endPoint; i += step) {
         var child = this.children[i];
-        if (!(child.visible && child.opacity && child.width && child.height))
+        if (!(child.visible && child.width && child.height))
             continue;
         maxHeight = child.height > maxHeight ? child.height : maxHeight;
 

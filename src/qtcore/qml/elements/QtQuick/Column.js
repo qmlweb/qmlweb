@@ -7,7 +7,7 @@ QMLColumn.prototype.layoutChildren = function() {
         maxWidth = 0;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (!(child.visible && child.opacity && child.width && child.height))
+        if (!(child.visible && child.width && child.height))
             continue;
         maxWidth = child.width > maxWidth ? child.width : maxWidth;
 
