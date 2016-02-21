@@ -349,13 +349,22 @@ function QMLItem(meta) {
         if (engine.rootElement == undefined) {
             // Case 1: Qml scene is placed in body tag
 
+            var rootItem = construct({
+                object: {$class: "Item"},
+                parent: this,
+                context: Object.create(null),
+                isComponentRoot: true
+            });
+
             // event handling by addEventListener is probably better than setting window.onresize
             var updateQmlGeometry = function() {
-                self.implicitHeight = window.innerHeight;
-                self.implicitWidth = window.innerWidth;
+                rootItem.implicitHeight = window.innerHeight;
+                rootItem.implicitWidth = window.innerWidth;
             }
             window.addEventListener( "resize", updateQmlGeometry );
             updateQmlGeometry();
+
+            this.parent = rootItem;
         } else {
             // Case 2: Qml scene is placed in some element tag
 
