@@ -37,7 +37,7 @@ function QMLItem(meta) {
         this.dom.style.position = "relative"; // Needed to make absolute positioning work
         this.dom.style.top = "0";
         this.dom.style.left = "0";
-        this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
+        this.dom.style.overflow = "auto"; // igan: for now it's good to have a scrolbar "hidden"; // No QML stuff should stand out the root element
     } else {
         if (!this.dom) // Create a dom element for this item.
             this.dom = document.createElement("div");
