@@ -306,28 +306,28 @@ function QMLItem(meta) {
     this.scaleChanged.connect(this, this.$updateTransform);
     this.transformChanged.connect(this, this.$updateTransform);
     this.visibleChanged.connect(this, function(newVal) {
-        this.dom.style.visibility = newVal ? "inherit" : "hidden";
+        this.css.visibility = newVal ? "inherit" : "hidden";
     });
     this.opacityChanged.connect(this, function(newVal) {
-        this.dom.style.opacity = newVal;
+        this.css.opacity = newVal;
     });
     this.clipChanged.connect(this, function(newVal) {
-        this.dom.style.overflow = newVal ? "hidden" : "visible";
+        this.css.overflow = newVal ? "hidden" : "visible";
     });
     this.zChanged.connect(this, function(newVal) {
         this.$updateTransform();
     });
     this.xChanged.connect(this, function(newVal) {
-        this.dom.style.left = newVal + "px";
+        this.css.left = newVal + "px";
     });
     this.yChanged.connect(this, function(newVal) {
-        this.dom.style.top = newVal + "px";
+        this.css.top = newVal + "px";
     });
     this.widthChanged.connect(this, function(newVal) {
-        this.dom.style.width = newVal ? newVal + "px" : "auto";
+        this.css.width = newVal ? newVal + "px" : "auto";
     });
     this.heightChanged.connect(this, function(newVal) {
-        this.dom.style.height = newVal ? newVal + "px" : "auto";
+        this.css.height = newVal ? newVal + "px" : "auto";
     });
 
     this.implicitHeight = 0;
