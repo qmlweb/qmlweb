@@ -11,14 +11,17 @@ registerQmlType({
 
     var self = this;
 
-    this.font = new getConstructor('QtQuick', '2.0', 'Font')(this);
+    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
+    this.font   = new QMLFont(this);
 
     this.dom.innerHTML = "<input type=\"text\" disabled/>"
     this.dom.firstChild.style.pointerEvents = "auto";
     // In some browsers text-inputs have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
+    this.dom.firstChild.style.padding = "0";
     this.dom.firstChild.style.width = "100%";
+    this.dom.firstChild.style.height = "100%";
 
     this.setupFocusOnDom(this.dom.firstChild);
 
@@ -27,6 +30,7 @@ registerQmlType({
     createSimpleProperty("bool",   this, "readOnly");
     createSimpleProperty("var",    this, "validator");
     createSimpleProperty("enum",   this, "echoMode");
+    
     this.accepted = Signal();
     this.readOnly = false;
     this.maximumLength = -1;

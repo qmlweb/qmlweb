@@ -3,19 +3,29 @@ function QMLColumn(meta) {
 }
 
 QMLColumn.prototype.layoutChildren = function() {
-    var curPos = 0,
-        maxWidth = 0;
-    for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
-        if (!(child.visible && child.opacity && child.width && child.height))
+    var curPos = 0, maxWidth = 0;
+    var children = this.children;
+    var child    = undefined;  
+    var childWidth =0, childHeight = 0;    
+    var i,l = children.length; 
+    if ( l == 0) return;   
+       
+    for (i = 0; i < l; i++) {
+        child = children[i]; 
+        childHeight = child.$isUsingImplicitHeight ? child.implicitHeight : child.height;
+        childWidth = child.$isUsingImplicitWidth ? child.implicitWidth : child.width;
+        
+        if (!(child.visible && childWidth && childHeight)) {  
             continue;
-        maxWidth = child.width > maxWidth ? child.width : maxWidth;
-
+        }
+        
+        maxWidth = childWidth > maxWidth ? childWidth : maxWidth;
         child.y = curPos;
-        curPos += child.height + this.spacing;
+        curPos += childHeight + this.spacing;
     }
-    this.implicitWidth = maxWidth;
-    this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
+    
+    if (this.$isUsingImplicitWidth) this.implicitWidth = maxWidth;   
+    if (this.$isUsingImplicitHeight) this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
 }
 
 registerQmlType({

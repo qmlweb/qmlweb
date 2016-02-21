@@ -10,16 +10,21 @@ function QMLPositioner(meta) {
 }
 
 QMLPositioner.slotChildrenChanged = function() {
-    for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
+    var children = this.children;
+    var child;
+
+    for (var i = 0; i < children.length; i++) {
+        child = children[i];
         if (!child.widthChanged.isConnected(this, this.layoutChildren))
             child.widthChanged.connect(this, this.layoutChildren);
         if (!child.heightChanged.isConnected(this, this.layoutChildren))
             child.heightChanged.connect(this, this.layoutChildren);
+        if (!child.implicitWidthChanged.isConnected(this, this.layoutChildren))
+            child.implicitWidthChanged.connect(this, this.layoutChildren);
+        if (!child.implicitHeightChanged.isConnected(this, this.layoutChildren))
+            child.implicitHeightChanged.connect(this, this.layoutChildren);
         if (!child.visibleChanged.isConnected(this, this.layoutChildren))
             child.visibleChanged.connect(this, this.layoutChildren);
-        if (!child.opacityChanged.isConnected(this, this.layoutChildren))
-            child.opacityChanged.connect(this, this.layoutChildren);
     }
 }
 

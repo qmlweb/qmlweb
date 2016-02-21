@@ -8,7 +8,7 @@ registerQmlType({
     // We create another span inside the text to distinguish the actual
     // (possibly html-formatted) text from child elements
     this.dom.innerHTML = "<span></span>";
-    this.dom.style.pointerEvents = "auto";
+     
     this.dom.firstChild.style.width = "100%";
     this.dom.firstChild.style.height = "100%";
 
@@ -76,6 +76,7 @@ registerQmlType({
                 break;
             case 1:
                 this.dom.firstChild.style.whiteSpace = "pre-wrap";
+                this.dom.firstChild.style.wordWrap = "normal";
                 break;
             case 2:
                 this.dom.firstChild.style.whiteSpace = "pre-wrap";
@@ -140,44 +141,25 @@ registerQmlType({
     this.wrapMode = this.Text.NoWrap;
     this.color = "black";
     this.text = "";
+    
+    this.textChanged.connect(this, updateImplicit);
+    this.font.boldChanged.connect(this, updateImplicit);
+    this.font.pixelSizeChanged.connect(this, updateImplicit);
+    this.font.pointSizeChanged.connect(this, updateImplicit);
+    this.font.familyChanged.connect(this, updateImplicit);
+    this.font.letterSpacingChanged.connect(this, updateImplicit);
+    this.font.wordSpacingChanged.connect(this, updateImplicit);
 
-    this.textChanged.connect(this, updateImplicitHeight);
-    this.textChanged.connect(this, updateImplicitWidth);
-    this.font.boldChanged.connect(this, updateImplicitHeight);
-    this.font.boldChanged.connect(this, updateImplicitWidth);
-    this.font.pixelSizeChanged.connect(this, updateImplicitHeight);
-    this.font.pixelSizeChanged.connect(this, updateImplicitWidth);
-    this.font.pointSizeChanged.connect(this, updateImplicitHeight);
-    this.font.pointSizeChanged.connect(this, updateImplicitWidth);
-    this.font.familyChanged.connect(this, updateImplicitHeight);
-    this.font.familyChanged.connect(this, updateImplicitWidth);
-    this.font.letterSpacingChanged.connect(this, updateImplicitHeight);
-    this.font.wordSpacingChanged.connect(this, updateImplicitWidth);
-
-    this.Component.completed.connect(this, updateImplicitHeight);
-    this.Component.completed.connect(this, updateImplicitWidth);
-
-    function updateImplicitHeight() {
-        var height;
-
-        if (this.text === Undefined || this.text === "") {
-            height = 0;
+    this.Component.completed.connect(this, updateImplicit);
+    
+    function updateImplicit() {
+        if (typeof this.text == undefined || this.text === "" || !this.dom) {
+             this.implicitHeigh = this.implicitWidth = 0;
         } else {
-            height = this.dom ? this.dom.firstChild.offsetHeight : 0;
+            var fc = this.dom.firstChild;
+            this.implicitHeight = fc.offsetHeight;
+            this.implicitWidth = fc.offsetWidth;
         }
-
-        this.implicitHeight = height;
-    }
-
-    function updateImplicitWidth() {
-        var width;
-
-        if (this.text === Undefined || this.text === "")
-            width = 0;
-        else
-            width = this.dom ? this.dom.firstChild.offsetWidth : 0;
-
-        this.implicitWidth = width;
     }
 
     this.$drawItem = function(c) {

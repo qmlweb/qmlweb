@@ -6,15 +6,30 @@ function QMLItem(meta) {
     this.completed = Signal();
     this.completedAlreadyCalled = false;
 
+    createSimpleProperty("Item", this, "parent");
+    
     if (this.$parent === null) { // This is the root element. Initialize it.
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
+        var rootItem = undefined;
+        
+        if (engine.rootElement == undefined) { // create supplement of QQuickRootItem
+            rootItem = construct({
+                object: {$class: "Item"},
+                parent: this,
+                context: Object.create(null),
+                isComponentRoot: true
+            });
+        }
+        
         if (engine.rootElement == undefined) {
             window.onresize = function() {
-                self.implicitHeight = window.innerHeight;
-                self.implicitWidth = window.innerWidth;
+                rootItem.implicitHeight = window.innerHeight;
+                rootItem.implicitWidth = window.innerWidth;
             }
+            
+            this.parent = rootItem;
         } else {
             this.implicitHeight = this.dom.offsetHeight;
             this.implicitWidth = this.dom.offsetWidth;
@@ -22,22 +37,23 @@ function QMLItem(meta) {
         this.dom.style.position = "relative"; // Needed to make absolute positioning work
         this.dom.style.top = "0";
         this.dom.style.left = "0";
-        this.dom.style.overflow = "hidden"; // No QML stuff should stand out the root element
+        this.dom.style.overflow = "auto"; // igan: for now it's good to have a scrolbar "hidden"; // No QML stuff should stand out the root element
     } else {
         if (!this.dom) // Create a dom element for this item.
             this.dom = document.createElement("div");
+        
         this.dom.style.position = "absolute";
     }
+    
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
-    this.dom.qml = this;
     this.css = this.dom.style;
 
     createSimpleProperty("list", this, "data");
     this.$defaultProperty = "data";
     createSimpleProperty("list", this, "children");
     createSimpleProperty("list", this, "resources");
-    createSimpleProperty("Item", this, "parent");
+ 
     this.children = [];
     this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
@@ -122,6 +138,7 @@ function QMLItem(meta) {
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
+    // anchors property
     this.anchors = new QObject(this);
     createSimpleProperty("real", this.anchors, "left");
     createSimpleProperty("real", this.anchors, "right");
@@ -153,9 +170,17 @@ function QMLItem(meta) {
     this.anchors.marginsChanged.connect(this, updateHGeometry);
     this.anchors.marginsChanged.connect(this, updateVGeometry);
 
+    // childrenRect property    
+    this.childrenRect = new QObject(this);
+    createSimpleProperty("real", this.childrenRect, "x");  //todo ro 
+    createSimpleProperty("real", this.childrenRect, "y");  // todo ro
+    createSimpleProperty("real", this.childrenRect, "width"); // todo ro
+    createSimpleProperty("real", this.childrenRect, "height"); // todo ro
+    
     createSimpleProperty("list", this, "states");
     createSimpleProperty("string", this, "state");
     createSimpleProperty("list", this, "transitions");
+    
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
@@ -297,6 +322,8 @@ function QMLItem(meta) {
             }
             if (typeof this.z == "number")
               transform += " translate3d(0, 0, " + this.z + "px)";
+            
+
             this.dom.style.transform = transform;
             this.dom.style.transformStyle = transformStyle;
             this.dom.style.MozTransform = transform;    // Firefox
@@ -313,30 +340,36 @@ function QMLItem(meta) {
     this.scaleChanged.connect(this, this.$updateTransform);
     this.transformChanged.connect(this, this.$updateTransform);
     this.visibleChanged.connect(this, function(newVal) {
-        this.dom.style.visibility = newVal ? "inherit" : "hidden";
+        this.css.visibility = newVal ? "inherit" : "hidden";
     });
     this.opacityChanged.connect(this, function(newVal) {
-        this.dom.style.opacity = newVal;
+        this.css.opacity = newVal;
     });
     this.clipChanged.connect(this, function(newVal) {
-        this.dom.style.overflow = newVal ? "hidden" : "visible";
+        this.css.overflow = newVal ? "hidden" : "visible";
     });
     this.zChanged.connect(this, function(newVal) {
         this.$updateTransform();
     });
     this.xChanged.connect(this, function(newVal) {
-        this.dom.style.left = newVal + "px";
+        this.css.left = newVal + "px";
     });
     this.yChanged.connect(this, function(newVal) {
-        this.dom.style.top = newVal + "px";
+        this.css.top = newVal + "px";
     });
     this.widthChanged.connect(this, function(newVal) {
-        this.dom.style.width = newVal ? newVal + "px" : "auto";
+        this.css.width = newVal ? newVal + "px" : "auto";
     });
     this.heightChanged.connect(this, function(newVal) {
-        this.dom.style.height = newVal ? newVal + "px" : "auto";
+        this.css.height = newVal ? newVal + "px" : "auto";
     });
-
+    this.implicitWidthChanged.connect(this, function(newVal) { 
+        if (this.$isUsingImplicitWidth) this.css.width = newVal ? newVal + "px" : "auto";
+    });
+    this.implicitHeightChanged.connect(this, function(newVal) {
+        if (this.$isUsingImplicitHeight) this.css.height = newVal ? newVal + "px" : "auto";
+    });
+    
     this.implicitHeight = 0;
     this.implicitWidth = 0;
     this.spacing = 0;
@@ -352,7 +385,11 @@ function QMLItem(meta) {
     this.transform = [];
     this.rotation = 0;
     this.scale = 1;
-
+    this.childrenRect.x = 0;
+    this.childrenRect.y = 0;
+    this.childrenRect.width = 0;
+    this.childrenRect.height = 0;
+    
     // Init size of root element
     if (this.$parent === null && engine.rootElement == undefined) {
         window.onresize();

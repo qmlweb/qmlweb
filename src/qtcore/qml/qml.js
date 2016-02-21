@@ -168,34 +168,57 @@ QMLBinding.prototype.compile = function() {
  * @return {Object} New qml object
  */
 function construct(meta) {
-    var item,
-        cTree;
-
+    var item = 0,
+        cTree = 0;
+  
     if (meta.object.$class in constructors) {
         item = new constructors[meta.object.$class](meta);
+        
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
-        if (cTree.$children.length !== 1)
+        if (cTree.$children.length !== 1) {
             console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+        }
 
+        var component = new QMLComponent( {object: cTree, context: meta.context });       
+        //component.finalizeImports(); 
+        
+        item = component.createObject(meta.parent);
+        component.finalizeImports(); 
+ 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
         QMLBaseObject.call(item, meta);
+                
+        
         if (typeof item.dom != 'undefined')
           item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+   
+         
+//         var metaObject = component.$metaObject;
+//         // id
+//         if (metaObject && metaObject.id) {
+//             meta.context[metaObject.id] = item;
+//         }
+
         var dProp; // Handle default properties
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
     }
 
-    // id
-    if (meta.object.id)
-        meta.context[meta.object.id] = item;
+    if (!global.qmlEngine.doc) {
+        global.qmlEngine.doc = item;
+    }
+    
 
-    // Apply properties (Bindings won't get evaluated, yet)
-    applyProperties(meta.object, item, item, meta.context);
-
+     // id
+     if (meta.object.id){
+         meta.context[meta.object.id] = item;
+     }
+ 
+     // Apply properties (Bindings won't get evaluated, yet)
+     applyProperties( meta.object, item, item, meta.context);
+   
     return item;
 }
 
@@ -215,12 +238,12 @@ function createSimpleProperty(type, obj, propName, access) {
     obj.$properties[propName] = prop;
     getter = function()       { return obj.$properties[propName].get(); };
     if (access == 'rw')
-      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+      setter = function(newVal) { obj.$properties[propName].set(newVal); };
     else {
       setter = function(newVal) {
         if (obj.$canEditReadOnlyProperties != true)
           throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal);
+        obj.$properties[propName].set(newVal);
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
@@ -287,17 +310,30 @@ var setupGetter,
  * @param {Object} componentScope Component scope in which properties should be evaluated
  */
 function applyProperties(metaObject, item, objectScope, componentScope) {
-    var i;
+    var i, value, signalName;
+    
     objectScope = objectScope || item;
+    
+    if (metaObject.$children && metaObject.$children.length !== 0) {
+        if (item.$defaultProperty)
+            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+        else
+            throw "Cannot assign to unexistant default property";
+    }
+    // We purposefully set the default property AFTER using it, in order to only have it applied for
+    // instanciations of this component, but not for its internal children
+    if (metaObject.$defaultProperty)
+        item.$defaultProperty = metaObject.$defaultProperty;
+    
     for (i in metaObject) {
-        var value = metaObject[i];
+        value = metaObject[i];
         // skip global id's and internal values
         if (i == "id" || i[0] == "$") {
             continue;
         }
         // slots
         if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
-            var signalName =  i[2].toLowerCase() + i.slice(3);
+            signalName =  i[2].toLowerCase() + i.slice(3);
             if (!item[signalName]) {
                 console.warn("No signal called " + signalName + " found!");
                 continue;
@@ -356,8 +392,10 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 continue;
             }
         }
-        if (item.$properties && i in item.$properties)
+        
+        if (item.$properties && i in item.$properties){
             item.$properties[i].set(value, true, objectScope, componentScope);
+        }
         else if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
@@ -365,16 +403,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
-    if (metaObject.$children && metaObject.$children.length !== 0) {
-        if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
-        else
-            throw "Cannot assign to unexistant default property";
-    }
-    // We purposefully set the default property AFTER using it, in order to only have it applied for
-    // instanciations of this component, but not for its internal children
-    if (metaObject.$defaultProperty)
-        item.$defaultProperty = metaObject.$defaultProperty;
+ 
     if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
       item.completedAlreadyCalled = true;
       item.completed();

@@ -34,11 +34,15 @@ function QMLComponent(meta) {
 
         if (typeof qmlEngine.basePath != 'undefined')
           src = qmlEngine.basePath + src;
-        if (typeof qrc[src] != 'undefined')
+        
+        if (typeof qrc[src] != 'undefined') {
           js = qrc[src];
-        else
+        }
+        else {
           js = jsparse(getUrlContents(src));
-        var $context = qmlEngine.rootContext();
+        }
+        
+        var $context = this.$context;
         $context[importDesc.alias] = {};
         importJavascriptInContext(js, $context[importDesc.alias]);
       }
