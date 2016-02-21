@@ -176,7 +176,11 @@ function construct(meta) {
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+
+        var component = new QMLComponent( {object: cTree, context: meta.context });       
+
+        item = component.createObject(meta.parent);
+        component.finalizeImports(); 
 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
@@ -187,6 +191,10 @@ function construct(meta) {
     } else {
         console.log("No constructor found for " + meta.object.$class);
         return;
+    }
+
+    if (!global.qmlEngine.doc) {
+        global.qmlEngine.doc = item;
     }
 
     // id
@@ -215,12 +223,12 @@ function createSimpleProperty(type, obj, propName, access) {
     obj.$properties[propName] = prop;
     getter = function()       { return obj.$properties[propName].get(); };
     if (access == 'rw')
-      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+      setter = function(newVal) { obj.$properties[propName].set(newVal); };
     else {
       setter = function(newVal) {
         if (obj.$canEditReadOnlyProperties != true)
           throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal);
+        obj.$properties[propName].set(newVal);
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
@@ -289,6 +297,18 @@ var setupGetter,
 function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
     objectScope = objectScope || item;
+
+    if (metaObject.$children && metaObject.$children.length !== 0) {
+        if (item.$defaultProperty)
+            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
+        else
+            throw "Cannot assign to unexistant default property";
+    }
+    // We purposefully set the default property AFTER using it, in order to only have it applied for
+    // instanciations of this component, but not for its internal children
+    if (metaObject.$defaultProperty)
+        item.$defaultProperty = metaObject.$defaultProperty;
+
     for (i in metaObject) {
         var value = metaObject[i];
         // skip global id's and internal values
@@ -365,16 +385,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
-    if (metaObject.$children && metaObject.$children.length !== 0) {
-        if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
-        else
-            throw "Cannot assign to unexistant default property";
-    }
-    // We purposefully set the default property AFTER using it, in order to only have it applied for
-    // instanciations of this component, but not for its internal children
-    if (metaObject.$defaultProperty)
-        item.$defaultProperty = metaObject.$defaultProperty;
     if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
       item.completedAlreadyCalled = true;
       item.completed();

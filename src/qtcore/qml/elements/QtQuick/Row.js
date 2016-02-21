@@ -16,19 +16,32 @@ function QMLRow(meta) {
 QMLRow.prototype.layoutChildren = function() {
     var curPos = 0,
         maxHeight = 0,
-        // When layoutDirection is RightToLeft we need oposite order
-        i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
-        endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
+        children = this.children,
+        child = undefined;
+    var i,l = children.length
+
+    if (l == 0) return;
+
+    // When layoutDirection is RightToLeft we need oposite order
+    var i = this.layoutDirection == 1 ? l - 1 : 0,
+        endPoint = this.layoutDirection == 1 ? -1 : l,
         step = this.layoutDirection == 1 ? -1 : 1;
+
+    var rowWidth = this.$isUsingImplicitWidth ? this.implicitWidth : this.width;
+    var rowHeight = this.$isUsingImplicitHeight ? this.implicitHeight : this.height;
+
     for (; i !== endPoint; i += step) {
-        var child = this.children[i];
-        if (!(child.visible && child.opacity && child.width && child.height))
+        child = children[i];
+        childHeight = child.$isUsingImplicitHeight ? child.implicitHeight : child.height;
+        childWidth = child.$isUsingImplicitWidth ? child.implicitWidth : child.width;
+        if (!(child.visible && childWidth && childHeight)) 
             continue;
-        maxHeight = child.height > maxHeight ? child.height : maxHeight;
+        maxHeight = childHeight > maxHeight ? childHeight : maxHeight;
 
         child.x = curPos;
-        curPos += child.width + this.spacing;
+        curPos += childWidth + this.spacing;
     }
-    this.implicitHeight = maxHeight;
-    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
+
+    if (this.$isUsingImplicitHeight) this.implicitHeight = maxHeight;  
+    if (this.$isUsingImplicitWidth)  this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }

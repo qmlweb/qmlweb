@@ -39,7 +39,10 @@ QMLGrid.prototype.layoutChildren = function() {
     // How many items are actually visible?
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (child.visible && child.opacity && child.width && child.height)
+        var childHeight = child.$isUsingImplicitHeight ? child.implicitHeight : child.height;
+        var childWidth = child.$isUsingImplicitWidth ? child.implicitWidth : child.width;
+        
+        if (child.visible && childWidth && childHeight) 
             visibleItems.push(this.children[i]);
     }
 
@@ -62,10 +65,14 @@ QMLGrid.prototype.layoutChildren = function() {
                 var item = visibleItems[i*c+j];
                 if (!item)
                     break;
-                if (!colWidth[j] || item.width > colWidth[j])
-                    colWidth[j] = item.width;
-                if (!rowHeight[i] || item.height > rowHeight[i])
-                    rowHeight[i] = item.height;
+
+                var itemHeight = item.$isUsingImplicitHeight ? item.implicitHeight : item.height;
+                var itemWidth = item.$isUsingImplicitWidth ? item.implicitWidth : item.width;
+
+                if (!colWidth[j] || itemWidth > colWidth[j])
+                    colWidth[j] = itemWidth;
+                if (!rowHeight[i] || itemHeight > rowHeight[i])
+                    rowHeight[i] = itemHeight;
             }
         }
     else
@@ -74,10 +81,14 @@ QMLGrid.prototype.layoutChildren = function() {
                 var item = visibleItems[i*r+j];
                 if (!item)
                     break;
-                if (!rowHeight[j] || item.height > rowHeight[j])
-                    rowHeight[j] = item.height;
-                if (!colWidth[i] || item.width > colWidth[i])
-                    colWidth[i] = item.width;
+
+                var itemHeight = item.$isUsingImplicitHeight ? item.implicitHeight : item.height;
+                var itemWidth = item.$isUsingImplicitWidth ? item.implicitWidth : item.width;
+
+                if (!rowHeight[j] || itemHeight > rowHeight[j])
+                    rowHeight[j] = itemHeight;
+                if (!colWidth[i] || itemWidth > colWidth[i])
+                    colWidth[i] = itemWidth;
             }
         }
 
@@ -120,6 +131,8 @@ QMLGrid.prototype.layoutChildren = function() {
             curVPos = 0;
         }
 
-    this.implicitWidth = gridWidth;
-    this.implicitHeight = gridHeight;
+    if (this.$isUsingImplicitWidth)
+        this.implicitWidth = gridWidth;  
+    if (this.$isUsingImplicitHeight)
+        this.implicitHeight = gridHeight; 
 }

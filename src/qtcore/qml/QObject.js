@@ -14,8 +14,10 @@ function QObject(parent) {
     this.$delete = function() {
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
-            if (item.$delete) // It's a QObject
+            if (item.$delete) {// It's a QObject
                 item.$delete();
+                item.parent = undefined;
+            }
             else // It must be a signal
                 item.disconnect(this);
         }

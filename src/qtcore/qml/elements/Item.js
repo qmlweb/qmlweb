@@ -6,15 +6,29 @@ function QMLItem(meta) {
     this.completed = Signal();
     this.completedAlreadyCalled = false;
 
+    createSimpleProperty("Item", this, "parent");
+
     if (this.$parent === null) { // This is the root element. Initialize it.
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";
         var self = this;
+        var rootItem = undefined;
+
+        if (engine.rootElement == undefined) { // create supplement of QQuickRootItem
+            rootItem = construct({
+                object: {$class: "Item"},
+                parent: this,
+                context: Object.create(null),
+                isComponentRoot: true
+            });
+        }
+
         if (engine.rootElement == undefined) {
             window.onresize = function() {
-                self.implicitHeight = window.innerHeight;
-                self.implicitWidth = window.innerWidth;
+                rootItem.implicitHeight = window.innerHeight;
+                rootItem.implicitWidth = window.innerWidth;
             }
+            this.parent = rootItem;
         } else {
             this.implicitHeight = this.dom.offsetHeight;
             this.implicitWidth = this.dom.offsetWidth;
@@ -30,14 +44,12 @@ function QMLItem(meta) {
     }
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
-    this.dom.qml = this;
     this.css = this.dom.style;
 
     createSimpleProperty("list", this, "data");
     this.$defaultProperty = "data";
     createSimpleProperty("list", this, "children");
     createSimpleProperty("list", this, "resources");
-    createSimpleProperty("Item", this, "parent");
     this.children = [];
     this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
@@ -342,6 +354,12 @@ function QMLItem(meta) {
     });
     this.heightChanged.connect(this, function(newVal) {
         this.css.height = newVal ? newVal + "px" : "auto";
+    });
+    this.implicitWidthChanged.connect(this, function(newVal) { 
+        if (this.$isUsingImplicitWidth) this.css.width = newVal ? newVal + "px" : "auto";
+    });
+    this.implicitHeightChanged.connect(this, function(newVal) {
+        if (this.$isUsingImplicitHeight) this.css.height = newVal ? newVal + "px" : "auto";
     });
 
     this.implicitHeight = 0;

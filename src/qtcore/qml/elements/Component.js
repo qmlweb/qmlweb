@@ -38,7 +38,7 @@ function QMLComponent(meta) {
           js = qrc[src];
         else
           js = jsparse(getUrlContents(src));
-        var $context = qmlEngine.rootContext();
+        var $context = this.$context;
         $context[importDesc.alias] = {};
         importJavascriptInContext(js, $context[importDesc.alias]);
       }
