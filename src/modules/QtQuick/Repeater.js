@@ -3,6 +3,8 @@ function QMLRepeater(meta) {
     var self = this;
     var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
+    this.parent = meta.parent; // TODO: some (all ?) of the components including Repeater needs to know own parent at creation time. Please consider this major change.
+
     createProperty("Component", this, "delegate");
     this.container = function() { return this.parent; }
     this.$defaultProperty = "delegate";
@@ -27,32 +29,52 @@ function QMLRepeater(meta) {
                 callOnCompleted(child.$tidyupList[i]);
     }
     function insertChildren(startIndex, endIndex) {
+        if (endIndex <= 0) return;
+
+        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
+
         for (var index = startIndex; index < endIndex; index++) {
-            var newItem = self.delegate.createObject(self);
+            var newItem = self.delegate.createObject();
+            newItem.parent = self.parent;
+            self.delegate.finalizeImports(); // To properly import JavaScript in the context of a component
 
             createProperty("int", newItem, "index");
-            var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-            for (var i in model.roleNames) {
-                if (typeof newItem.$properties[model.roleNames[i]] == 'undefined')
-                  createProperty("variant", newItem, model.roleNames[i]);
-                newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), QMLProperty.ReasonInit, newItem, self.model.$context);
+            newItem.index = index;
+
+            if ( typeof model == "number" || model instanceof Array ) {
+                 if (typeof newItem.$properties["modelData"] == 'undefined'){
+                    createProperty("variant", newItem, "modelData");
+                 }
+                 var value = model instanceof Array ? model[index] : typeof model == "number" ? index : "undefined";
+                 newItem.$properties["modelData"].set(value, true, newItem, model.$context);
+            } else {
+                for (var i = 0; i < model.roleNames.length; i++) {
+                    var roleName = model.roleNames[i];
+                    if (typeof newItem.$properties[roleName] == 'undefined')
+                      createProperty("variant", newItem, roleName);
+                    newItem.$properties[roleName].set(model.data(index, roleName), true, newItem, self.model.$context);
+                }
             }
 
-            self.container().children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
-            newItem.parent = self.container();
-            self.container().childrenChanged();
             self.$items.splice(index, 0, newItem);
-
-            newItem.index = index;
 
             // TODO debug this. Without check to Init, Completed sometimes called twice.. But is this check correct?
             if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
-                engine.$initializePropertyBindings();
                 callOnCompleted(newItem);
             }
         }
+        if (engine.operationState !== QMLOperationState.Init) {
+             // We don't call those on first creation, as they will be called
+             // by the regular creation-procedures at the right time.
+             engine.$initializePropertyBindings();
+        }
+
+        if (index > 0) {
+            self.container().childrenChanged();
+        }
+
         for (var i = endIndex; i < self.$items.length; i++)
             self.$items[i].index = i;
 
@@ -94,9 +116,9 @@ function QMLRepeater(meta) {
             });
             model.modelReset.connect(function() {
                 removeChildren(0, self.$items.length);
-                insertChildren(0, model.rowCount());
             });
 
+            removeChildren(0, self.$items.length);
             insertChildren(0, model.rowCount());
         } else if (typeof model == "number") {
             // must be more elegant here.. do not delete already created models..
@@ -113,6 +135,9 @@ function QMLRepeater(meta) {
                insertChildren(self.$items.length,model);
             }
 
+        } else if (model instanceof Array) {
+            removeChildren(0, self.$items.length);
+            insertChildren(0, model.length);
         }
     }
 
