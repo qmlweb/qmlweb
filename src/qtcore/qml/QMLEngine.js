@@ -91,13 +91,13 @@ QMLEngine = function (element, options) {
        return basePath;
     }
     // Load file, parse and construct (.qml or .qml.js)
-    this.loadFile = function(file) {
+    this.loadFile = function(file, parentComponent = null) {
         var tree;
 
         this.$basePath = this.extractBasePath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
-        this.loadQMLTree(tree);
+        this.loadQMLTree(tree, parentComponent);
     }
 
     // parse and construct qml
@@ -105,21 +105,21 @@ QMLEngine = function (element, options) {
         this.loadQMLTree(parseQML(src, file));
     }
 
-    this.loadQMLTree = function(tree, file) {
+    this.loadQMLTree = function(tree, parentComponent = null, file = undefined) {
         engine = this;
         if (options.debugTree) {
             options.debugTree(tree);
         }
 
         // Create and initialize objects
-        var component = new QMLComponent({ object: tree, parent: null });
+        var component = new QMLComponent({ object: tree, parent: parentComponent });
 
         this.loadImports( tree.$imports );
         component.$basePath = engine.$basePath;
         component.$imports = tree.$imports; // for later use
         component.$file = file; // just for debugging
 
-        this.rootObject = component.createObject(null);
+        this.rootObject = component.createObject(parentComponent);
         component.finalizeImports(this.rootContext());
         this.$initializePropertyBindings();
 
