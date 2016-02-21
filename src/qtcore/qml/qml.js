@@ -229,12 +229,12 @@ function createSimpleProperty(type, obj, propName, options) {
     obj.$properties[propName].set(options.default);
     getter = function()       { return obj.$properties[propName].get(); };
     if (!options.readOnly)
-      setter = function(newVal) { return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
+      setter = function(newVal) { obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
     else {
       setter = function(newVal) {
         if (obj.$canEditReadOnlyProperties != true)
           throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
