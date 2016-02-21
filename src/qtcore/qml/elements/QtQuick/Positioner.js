@@ -18,8 +18,6 @@ QMLPositioner.slotChildrenChanged = function() {
             child.heightChanged.connect(this, this.layoutChildren);
         if (!child.visibleChanged.isConnected(this, this.layoutChildren))
             child.visibleChanged.connect(this, this.layoutChildren);
-        if (!child.opacityChanged.isConnected(this, this.layoutChildren))
-            child.opacityChanged.connect(this, this.layoutChildren);
     }
 }
 
