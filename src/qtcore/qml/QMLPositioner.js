@@ -16,10 +16,12 @@ QMLPositioner.slotChildrenChanged = function() {
             child.widthChanged.connect(this, this.layoutChildren);
         if (!child.heightChanged.isConnected(this, this.layoutChildren))
             child.heightChanged.connect(this, this.layoutChildren);
+        if (!child.implicitWidthChanged.isConnected(this, this.layoutChildren))
+            child.implicitWidthChanged.connect(this, this.layoutChildren);
+        if (!child.implicitHeightChanged.isConnected(this, this.layoutChildren))
+            child.implicitHeightChanged.connect(this, this.layoutChildren);
         if (!child.visibleChanged.isConnected(this, this.layoutChildren))
             child.visibleChanged.connect(this, this.layoutChildren);
-        if (!child.opacityChanged.isConnected(this, this.layoutChildren))
-            child.opacityChanged.connect(this, this.layoutChildren);
     }
 }
 
