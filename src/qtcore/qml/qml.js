@@ -176,7 +176,11 @@ function construct(meta) {
     } else if (cTree = engine.loadComponent(meta.object.$class)) {
         if (cTree.$children.length !== 1)
             console.error("A QML component must only contain one root element!");
-        var item = (new QMLComponent({ object: cTree, context: meta.context })).createObject(meta.parent);
+
+        var component = new QMLComponent( {object: cTree, context: meta.context });
+
+        item = component.createObject(meta.parent);
+        component.finalizeImports();
 
         // Recall QMLBaseObject with the meta of the instance in order to get property
         // definitions, etc. from the instance
