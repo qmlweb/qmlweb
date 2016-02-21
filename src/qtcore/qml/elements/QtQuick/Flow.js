@@ -20,6 +20,9 @@ QMLFlow.prototype.layoutChildren = function() {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
+
+    if (children.length == 0) return;
+
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (!(child.visible && child.width && child.height))
