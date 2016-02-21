@@ -58,3 +58,9 @@ function QMLBaseObject(meta) {
     this.getAttributes = function() { return (attributes); }
 }
 
+registerQmlType({
+    module: 'QtQuick',
+    name: 'QtObject',
+    versions: /.*/,
+    constructor: QMLBaseObject
+});
