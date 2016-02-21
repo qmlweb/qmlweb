@@ -143,6 +143,13 @@ function QMLItem(meta) {
     this.anchors.marginsChanged.connect(this, updateHGeometry);
     this.anchors.marginsChanged.connect(this, updateVGeometry);
 
+    // childrenRect property
+    this.childrenRect = new QObject(this);
+    createSimpleProperty("real", this.childrenRect, "x"); // TODO ro
+    createSimpleProperty("real", this.childrenRect, "y"); // TODO ro
+    createSimpleProperty("real", this.childrenRect, "width"); // TODO ro
+    createSimpleProperty("real", this.childrenRect, "height"); // TODO ro
+
     createSimpleProperty("list", this, "states");
     createSimpleProperty("string", this, "state");
     createSimpleProperty("list", this, "transitions");
@@ -342,6 +349,10 @@ function QMLItem(meta) {
     this.transform = [];
     this.rotation = 0;
     this.scale = 1;
+    this.childrenRect.x = 0;
+    this.childrenRect.y = 0;
+    this.childrenRect.width = 0;
+    this.childrenRect.height = 0;
 
     // Init size of root element
     if (this.$parent === null) {
