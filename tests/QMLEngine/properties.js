@@ -1,4 +1,4 @@
-describe('properties', function() {
+describe('QMLEngine.properties', function() {
     var loader = prefixedQmlLoader('QMLEngine/qml/Properties')
     it('can store values', function() {
         var qml = loader('Basic').qml;

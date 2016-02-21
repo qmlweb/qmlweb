@@ -1,6 +1,6 @@
 Item{
     id: rootItem
-    property int rootValue: 1000
+    property int value: 1000
     ScopeMid{
         id: parentItem
     }
