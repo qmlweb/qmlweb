@@ -202,6 +202,10 @@ function construct(meta) {
         }
     }
 
+    if (!global.qmlEngine.doc) {
+        global.qmlEngine.doc = item;
+    }
+
     // id
     if (meta.object.id)
         meta.context[meta.object.id] = item;
