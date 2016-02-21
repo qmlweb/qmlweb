@@ -1680,6 +1680,12 @@ function convertToEngine(tree) {
         },
         "name": function(src) {
             return bindout(tree, src);
+        },
+        "string": function(src) {
+            return src;
+        },
+        "num": function(src) {
+            return src;
         }
     };
 
