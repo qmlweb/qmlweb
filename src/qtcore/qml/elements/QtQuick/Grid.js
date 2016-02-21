@@ -120,6 +120,8 @@ QMLGrid.prototype.layoutChildren = function() {
             curVPos = 0;
         }
 
-    this.implicitWidth = gridWidth;
-    this.implicitHeight = gridHeight;
+    if (this.$isUsingImplicitWidth)
+        this.implicitWidth = gridWidth;
+    if (this.$isUsingImplicitHeight)
+        this.implicitHeight = gridHeight;
 }

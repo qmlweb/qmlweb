@@ -32,6 +32,7 @@ QMLRow.prototype.layoutChildren = function() {
         child.x = curPos;
         curPos += child.width + this.spacing;
     }
-    this.implicitHeight = maxHeight;
-    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
+
+    if (this.$isUsingImplicitHeight) this.implicitHeight = maxHeight;
+    if (this.$isUsingImplicitWidth)  this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }
