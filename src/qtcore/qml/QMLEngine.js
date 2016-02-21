@@ -94,7 +94,7 @@ QMLEngine = function (element, options) {
         this.basePath = basePath;
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
-        this.loadQMLTree(tree, parentComponent);
+        return this.loadQMLTree(tree, parentComponent);
     }
 
     // parse and construct qml
@@ -120,6 +120,8 @@ QMLEngine = function (element, options) {
         for (var i in this.completedSignals) {
             this.completedSignals[i]();
         }
+
+        return component;
     }
 
     this.rootContext = function() {
