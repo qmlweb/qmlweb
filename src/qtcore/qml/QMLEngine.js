@@ -97,12 +97,12 @@ QMLEngine = function (element, options) {
         this.$basePath = this.extractBasePath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
-        this.loadQMLTree(tree, parentComponent, file);
+        return this.loadQMLTree(tree, parentComponent, file);
     }
 
     // parse and construct qml
     this.loadQML = function(src, parentComponent = null, file = undefined) { // file is not required; only for debug purposes
-        this.loadQMLTree(parseQML(src, file), parentComponent, file);
+        return this.loadQMLTree(parseQML(src, file), parentComponent, file);
     }
 
     this.loadQMLTree = function(tree, parentComponent = null, file = undefined) {
@@ -126,6 +126,8 @@ QMLEngine = function (element, options) {
         this.start();
 
         this.callCompletedSignals();
+
+        return component;
     }
 
     /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
