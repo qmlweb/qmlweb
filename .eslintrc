@@ -1,0 +1,25 @@
+extends: eslint:recommended
+rules:
+  camelcase: 2
+  comma-style: [2, "last"]
+  eol-last: 2
+  indent: [2, 2]
+  keyword-spacing: 2
+  max-len: [2, 80]
+  no-console: 0
+  no-eval: 2
+  no-extend-native: 2
+  no-extra-parens: 2
+  no-lone-blocks: 2
+  no-lonely-if: 2
+  no-loop-func: 2
+  no-multiple-empty-lines: 2
+  no-multi-spaces: 2
+  no-trailing-spaces: 2
+  no-undef: 0
+  no-unused-vars: 0
+  object-curly-spacing: [2, "always"]
+  semi: 2
+  space-before-blocks: 2
+  space-before-function-paren: [2, "never"]
+  yoda: 2

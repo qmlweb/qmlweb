@@ -5,6 +5,7 @@ var changed = require('gulp-changed');
 var order = require('gulp-order');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var eslint = require('gulp-eslint');
 var karma = require('karma');
 
 var qtcoreSources = [
@@ -63,7 +64,16 @@ gulp.task('watch-dev', ['build-dev'], function() {
   gulp.watch(qtcoreSources, ['build-dev']);
 });
 
-gulp.task('test', ['build'], function(done) {
+gulp.task('lint-tests', function() {
+  gulp.src(tests)
+      .pipe(eslint())
+      .pipe(eslint.formatEach('compact', process.stderr))
+      .pipe(eslint.failAfterError());
+});
+
+gulp.task('lint', ['lint-tests']);
+
+gulp.task('test', ['lint', 'build'], function(done) {
   new karma.Server({
     singleRun: true,
     configFile: __dirname + '/karma.conf.js'
