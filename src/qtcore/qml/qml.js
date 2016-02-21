@@ -215,12 +215,12 @@ function createSimpleProperty(type, obj, propName, access) {
     obj.$properties[propName] = prop;
     getter = function()       { return obj.$properties[propName].get(); };
     if (access == 'rw')
-      setter = function(newVal) { return obj.$properties[propName].set(newVal); };
+      setter = function(newVal) { obj.$properties[propName].set(newVal); };
     else {
       setter = function(newVal) {
         if (obj.$canEditReadOnlyProperties != true)
           throw "property '" + propName + "' has read only access";
-        return obj.$properties[propName].set(newVal);
+        obj.$properties[propName].set(newVal);
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
