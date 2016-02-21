@@ -180,6 +180,8 @@ function construct(meta) {
         }
 
         var component = new QMLComponent( {object: cTree, context: meta.context });       
+        //component.finalizeImports(); 
+        
         item = component.createObject(meta.parent);
         component.finalizeImports(); 
  
@@ -190,6 +192,14 @@ function construct(meta) {
         
         if (typeof item.dom != 'undefined')
           item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+   
+         
+//         var metaObject = component.$metaObject;
+//         // id
+//         if (metaObject && metaObject.id) {
+//             meta.context[metaObject.id] = item;
+//         }
+
         var dProp; // Handle default properties
     } else {
         console.log("No constructor found for " + meta.object.$class);
