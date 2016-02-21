@@ -12,7 +12,7 @@ function QMLFlow(meta) {
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
 
-    this.flow = 0;
+    this.flow = this.Flow.LeftToRight;
     this.layoutDirection = 0;
 }
 
@@ -25,7 +25,7 @@ QMLFlow.prototype.layoutChildren = function() {
         if (!(child.visible && child.opacity && child.width && child.height))
             continue;
 
-        if (this.flow == 0) {
+        if (this.flow == this.Flow.LeftToRight) {
             if (curHPos + child.width > this.width) {
                 curHPos = 0;
                 curVPos += rowSize + this.spacing;
