@@ -11,6 +11,9 @@ window.failingTests = {
   QMLEngine: {
     imports: [
       'Javascript'
+    ],
+    scope: [
+      'can reference parent items id'
     ]
   }
 };
