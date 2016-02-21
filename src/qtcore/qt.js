@@ -319,5 +319,9 @@ global.Qt = {
   PortraitOrientation: 1,
   LandscapeOrientation: 2,
   InvertedPortraitOrientation: 4,
-  InvertedLandscapeOrientation: 8
+  InvertedLandscapeOrientation: 8,
+  // ScrollBar Policy
+  ScrollBarAsNeeded: 0,
+  ScrollBarAlwaysOff: 1,
+  ScrollBarAlwaysOn: 2
 }
