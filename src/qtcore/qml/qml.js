@@ -283,6 +283,18 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
     objectScope = objectScope || item;
     _executionContext = componentScope;
+
+    if (metaObject.$children && metaObject.$children.length !== 0) {
+        if (item.$defaultProperty)
+            item.$properties[item.$defaultProperty].set(metaObject.$children, QMLProperty.ReasonInit, objectScope, componentScope);
+        else
+            throw "Cannot assign to unexistant default property";
+    }
+    // We purposefully set the default property AFTER using it, in order to only have it applied for
+    // instanciations of this component, but not for its internal children
+    if (metaObject.$defaultProperty)
+        item.$defaultProperty = metaObject.$defaultProperty;
+
     for (i in metaObject) {
         var value = metaObject[i];
         // skip global id's and internal values
@@ -399,16 +411,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
-    if (metaObject.$children && metaObject.$children.length !== 0) {
-        if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, QMLProperty.ReasonInit, objectScope, componentScope);
-        else
-            throw "Cannot assign to unexistant default property";
-    }
-    // We purposefully set the default property AFTER using it, in order to only have it applied for
-    // instanciations of this component, but not for its internal children
-    if (metaObject.$defaultProperty)
-        item.$defaultProperty = metaObject.$defaultProperty;
 }
 
 // ItemModel. EXPORTED.
