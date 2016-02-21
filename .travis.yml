@@ -4,3 +4,7 @@ node_js:
   - "stable"
 notifications:
   email: false
+cache:
+  directories:
+    - $HOME/.npm/
+    - node_modules
