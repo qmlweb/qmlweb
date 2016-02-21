@@ -181,5 +181,9 @@ global.Qt = {
   Key_Play: 250,
   Key_Sleep: 95,
   Key_Zoom: 251,
-  Key_Cancel: 3
+  Key_Cancel: 3,
+  // ScrollBar Policy
+  ScrollBarAsNeeded: 0,
+  ScrollBarAlwaysOff: 1,
+  ScrollBarAlwaysOn: 2
 }
