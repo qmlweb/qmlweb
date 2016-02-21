@@ -52,7 +52,7 @@ function parseQML(file) {
     var contents = getUrlContents(file + ".js");
     if (contents) {
         console.log("Using pre-processed content for " + file);
-        return eval("(function(){return "+contents+"})();");
+        return new Function("(function(){return ",contents,"})();");
     } else {
         contents = getUrlContents(file);
         if (contents) {
@@ -181,7 +181,7 @@ importJs = function (filename) {
     src += "}})()";
 
     // evaluate source to get the object.
-    return eval(src);
+   return new Function(src);
 }
 
 /**
