@@ -76,15 +76,29 @@
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
           var div = loadQmlFile(test.qml);
-          var result = screenshot(div, { fileName: test.group + '/' + test.name + '.png' });
-          div.remove();
+          var result, expected, loaded = 0;
 
-          var expected = document.createElement('img');
-          expected.src = test.png;
-          expected.onload = function() {
+          var process = function() {
+            if (++loaded !== 2) return;
             expect(imagesEqual(result, expected)).toBe(true);
             done();
           };
+
+          expected = document.createElement('img');
+          expected.src = test.png;
+          expected.onload = process;
+
+          var onTestLoad = function() {
+            result = screenshot(div, { fileName: test.group + '/' + test.name + '.png' });
+            result.onload = process;
+            div.remove();
+          }
+
+          if (group.indexOf('Async') !== -1) {
+            window.onTestLoad = onTestLoad;
+          } else {
+            onTestLoad();
+          }
         });
       });
     });
