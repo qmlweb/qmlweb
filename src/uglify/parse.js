@@ -576,6 +576,9 @@ function tokenizer($TEXT, filename, html5_comments) {
 
 };
 
+  
+function parse($TEXT, options) {
+    
 /* -----[ Parser (constants) ]----- */
 
 var UNARY_PREFIX = makePredicate([
@@ -623,8 +626,6 @@ var STATEMENTS_WITH_LABELS = array_to_hash([ "for", "do", "while", "switch" ]);
 var ATOMIC_START_TOKEN = array_to_hash([ "atom", "num", "string", "regexp", "name" ]);
 
 /* -----[ Parser ]----- */
-
-function parse($TEXT, options) {
 
     options = defaults(options, {
         strict         : false,
