@@ -18,7 +18,9 @@ registerQmlType({
     // In some browsers text-inputs have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     this.dom.firstChild.style.margin = "0";
+    this.dom.firstChild.style.padding = "0";
     this.dom.firstChild.style.width = "100%";
+    this.dom.firstChild.style.height = "100%";
 
     this.setupFocusOnDom(this.dom.firstChild);
 
