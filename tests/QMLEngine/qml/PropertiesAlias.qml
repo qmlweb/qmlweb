@@ -1,8 +1,8 @@
 Item {
     property alias childX: child.x
-    Item{
+
+    Item {
         id: child
         x: 125
     }
-
 }

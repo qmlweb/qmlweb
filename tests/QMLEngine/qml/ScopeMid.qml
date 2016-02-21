@@ -1,13 +1,14 @@
-Item{
+Item {
     id: parentItem
     property int value: 100
     property int sum: childA.totalValue + childB.totalValue
 
-    ScopeLeaf{
+    ScopeLeaf {
         id: childA
         value: 2
     }
-    ScopeLeaf{
+
+    ScopeLeaf {
         id: childB
         value: 4
     }

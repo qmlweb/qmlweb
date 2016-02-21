@@ -1,12 +1,8 @@
-//this is a line comment
-/*
-this is a block comment
-*/
-Item{
+Item {
     property int intProperty: 10
     property double doubleProperty: 0.5
     property string stringProperty: "hello"
-    property Item itemProperty: Item{ }
+    property Item itemProperty: Item { }
     property var arrayProperty: [1,2,"bar"]
     property int hexProperty: 0xFF
     property int octProperty: 077

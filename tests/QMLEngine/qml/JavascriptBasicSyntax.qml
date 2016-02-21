@@ -1,4 +1,8 @@
 Item {
+    //this is a line comment
+    /*
+    this is a block comment
+    */
     function ifstatements(arg){
         const b = 10
         var foo = 0
