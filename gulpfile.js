@@ -35,7 +35,7 @@ var tests = [
   'tests/**/*.js'
 ];
 
-gulp.task('qt', function() {
+gulp.task('build-dev', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
@@ -45,7 +45,7 @@ gulp.task('qt', function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('min-qt', ['qt'], function() {
+gulp.task('build', ['build-dev'], function() {
   return gulp.src('./lib/qt.js')
              .pipe(rename('qt.min.js'))
              .pipe(changed('./lib'))
@@ -55,7 +55,13 @@ gulp.task('min-qt', ['qt'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('build', ['qt', 'min-qt']);
+gulp.task('watch', ['build'], function() {
+  gulp.watch(qtcoreSources, ['build']);
+});
+
+gulp.task('watch-dev', ['build-dev'], function() {
+  gulp.watch(qtcoreSources, ['build-dev']);
+});
 
 gulp.task('test', ['build'], function(done) {
   new karma.Server({
@@ -68,16 +74,18 @@ gulp.task('test', ['build'], function(done) {
   }).start();
 });
 
-gulp.task('karma', ['build'], function(done) {
+gulp.task('test-watch', ['watch-dev'], function(done) {
   new karma.Server({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
 
-gulp.task('watch', ['build'], function() {
-  gulp.watch(qtcoreSources, ['build']);
+gulp.task('test-debug', ['watch-dev'], function(done) {
+  new karma.Server({
+    configFile: __dirname + '/karma.conf.js',
+    browsers: ['PhantomJSCustom', 'Chrome'],
+    debug: true
+  }, done).start();
 });
-
-gulp.task('watch-tests', ['watch', 'karma']);
 
 gulp.task('default', ['watch']);
