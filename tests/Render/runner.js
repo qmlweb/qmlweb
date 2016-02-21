@@ -9,7 +9,8 @@
       return undefined;
 
     var rect0 = div.getBoundingClientRect();
-    var rect1 = window.parent.document.getElementById('context').getBoundingClientRect();
+    var rect1 = window.parent.document.getElementById('context')
+                                      .getBoundingClientRect();
     var offset = {
       width: div.offsetWidth,
       height: div.offsetHeight,
@@ -18,7 +19,7 @@
     };
 
     var base64 = window.top.callPhantom('render', {
-      offset: offset, 
+      offset: offset,
       fileName: options && options.fileName || undefined
     });
     var image = document.createElement('img');
@@ -50,7 +51,7 @@
         return false;
 
     return true;
- }
+  }
 
   var regex = new RegExp('^/base/tests/Render/.*\.qml$');
   var tests = Object.keys(window.__karma__.files).filter(function(path) {
@@ -89,10 +90,12 @@
           expected.onload = process;
 
           var onTestLoad = function() {
-            result = screenshot(div, { fileName: test.group + '/' + test.name + '.png' });
+            result = screenshot(div, {
+              fileName: test.group + '/' + test.name + '.png'
+            });
             result.onload = process;
             div.remove();
-          }
+          };
 
           if (group.indexOf('Async') !== -1) {
             window.onTestLoad = onTestLoad;
@@ -103,5 +106,4 @@
       });
     });
   });
- 
 })();

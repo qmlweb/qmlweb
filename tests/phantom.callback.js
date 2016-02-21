@@ -7,4 +7,4 @@ module.exports = function(command, options) {
     page.render('tmp/render/' + options.fileName);
 
   return page.renderBase64('PNG');
-}
+};

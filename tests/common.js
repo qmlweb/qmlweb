@@ -10,7 +10,7 @@ function loadQmlFile(file, opts) {
 function prefixedQmlLoader(prefix) {
   return function(file, opts) {
     return loadQmlFile('/base/tests/' + prefix + file + '.qml', opts);
-  }
+  };
 }
 
 function loadQml(src, opts) {
@@ -38,13 +38,14 @@ function loadQml(src, opts) {
   window.describe = function(name) {
     current = name;
     describeOrig.apply(this, arguments);
-  }
+  };
 
   window.it = function(name) {
     if (isFailing(name)) {
-      console.log('Test ' + current + '.' + name + ' is known to be failing. Skipping...');
+      console.log('Test ' + current + '.' + name +
+                  ' is known to be failing. Skipping...');
       return;
     }
     itOrig.apply(this, arguments);
-  }
+  };
 })();

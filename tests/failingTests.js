@@ -6,7 +6,7 @@ window.failingTests = {
     Simple: [
       'RectanglesOpacity',
       'RepeaterNumber'
-    ],
+    ]
   },
   QMLEngine: {
     imports: [
