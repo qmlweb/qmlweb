@@ -4,10 +4,10 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'lib/qt.js',
-      //{
-      //  pattern: 'lib/qt.js.map',
-      //  included: false
-      //},
+      {
+        pattern: 'lib/qt.js.map',
+        included: false
+      },
       'tests/common.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
@@ -24,7 +24,7 @@ module.exports = function(config) {
       dir: 'coverage/'
     },
     preprocessors: {
-      //'lib/qt.js.map': ['sourcemap'],
+      'lib/qt.js.map': ['sourcemap'],
       'lib/qt.js': ['coverage'],
 
     },
