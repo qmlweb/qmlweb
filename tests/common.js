@@ -13,6 +13,15 @@ function prefixedQmlLoader(prefix) {
   }
 }
 
+function loadQml(src, opts) {
+  var div = document.createElement('div');
+  var qml = new QMLEngine(div, opts || {});
+  qml.loadQML(src);
+  qml.start();
+  document.body.appendChild(div);
+  return qml;
+}
+
 (function() {
   var describeOrig = describe;
   var itOrig = it;

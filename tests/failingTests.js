@@ -12,5 +12,14 @@ window.failingTests = {
     imports: [
       'Javascript'
     ]
+  },
+  Initialize: {
+    QtQuick: [
+      'Translate',
+      'Scale',
+      'Rotation',
+      'Font',
+      'AnimatedImage'
+    ]
   }
 };
