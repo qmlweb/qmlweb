@@ -1725,4 +1725,5 @@ function parseQML(src) {
 
 if (typeof global != "undefined") {
   global.qmlparse = qmlparse;
+  global.convertToEngine = convertToEngine;
 }

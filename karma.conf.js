@@ -19,7 +19,8 @@ module.exports = function(config) {
       dir: 'coverage/'
     },
     preprocessors: {
-      'lib/qt.js': ['coverage']
+      'lib/qt.js': ['coverage'],
+      'lib/qt.js': [],
     },
     customLaunchers: {
       PhantomJSCustom: {
