@@ -15,6 +15,12 @@ window.failingTests = {
     scope: [
       'can reference parent items id'
     ]
+  },
+  QtQuick: {
+    Translate: ["can be loaded"],
+    Scale: ["can be loaded"],
+    Rotation: ["can be loaded"]
+    
   }
 
 
