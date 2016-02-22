@@ -72,12 +72,6 @@ QMLEngine = function (element, options) {
         }
     }
 
-    this.pathFromFilepath = function(file) {
-      var basePath = file.split("/");
-      basePath[basePath.length - 1] = "";
-      basePath = basePath.join("/");
-      return basePath;
-    }
 
     this.ensureFileIsLoadedInQrc = function(file) {
       if (!qrc.includesFile(file)) {
@@ -88,11 +82,18 @@ QMLEngine = function (element, options) {
       }
     }
 
+    this.extractBasePath = function( file ) {
+       var basePath = file.split(/[\/\\]/); // work both in url ("/") and windows ("\", from file://d:\test\) notation
+       basePath[basePath.length - 1] = "";
+       basePath = basePath.join("/");
+       return basePath;
+    }
     // Load file, parse and construct (.qml or .qml.js)
+    //TODO-MERGE check if this is merged correctly
     this.loadFile = function(file) {
         var tree;
 
-        this.$basePath = this.pathFromFilepath(file);
+        this.$basePath = this.extractBasePath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.loadQMLTree(tree);
@@ -103,7 +104,7 @@ QMLEngine = function (element, options) {
         this.loadQMLTree(parseQML(src));
     }
 
-    this.loadQMLTree = function(tree) {
+    this.loadQMLTree = function(tree, file) {
         engine = this;
         if (options.debugTree) {
             options.debugTree(tree);
@@ -111,7 +112,14 @@ QMLEngine = function (element, options) {
 
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
+
+        this.loadImports( tree.$imports );
+        component.$basePath = engine.$basePath;
+        component.$imports = tree.$imports; // for later use
+        component.$file = file; // just for debugging
+
         this.rootObject = component.createObject(null);
+        //TODO-MERGE does this conflict with the loadImports?
         component.finalizeImports(this.rootContext());
         this.$initializePropertyBindings();
 
@@ -121,6 +129,127 @@ QMLEngine = function (element, options) {
         for (var i in this.completedSignals) {
             this.completedSignals[i]();
         }
+    }
+
+    /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
+     *
+     * Removes dot segments in given path component, as described in
+     * RFC 3986, section 5.2.4.
+     *
+     * @param {string} path A non-empty path component.
+     * @return {string} Path component with removed dot segments.
+     */
+    this.removeDotSegments = function(path) {
+        var leadingSlash = (path && path[0] == "/");   // path.startsWith('/'); -- startsWith seems to be undefined in some browsers
+        var segments = path.split('/');
+        var out = [];
+
+        for (var pos = 0; pos < segments.length; ) {
+            var segment = segments[pos++];
+
+            if (segment == '.') {
+                if (leadingSlash && pos == segments.length) {
+                    out.push('');
+                }
+            } else if (segment == '..') {
+                if (out.length > 1 || out.length == 1 && out[0] != '') {
+                    out.pop();
+                }
+                if (leadingSlash && pos == segments.length) {
+                    out.push('');
+                }
+            } else {
+                out.push(segment);
+                leadingSlash = true;
+            }
+        }
+
+        return out.join('/');
+    };
+
+    /*
+     engine.loadImports() - load qmldir files from `import` statements. Please look at import.js for main notes.
+
+     * `importsArray` is in parser notation, e.g. [import1, import2, ...] where each importN is also array: ["qmlimport","name",version,as,isQualifiedName]
+     * `currentFileDir` is a base dir for imports lookup (it will be used together with importPathList())
+
+     As a result, loadImports stores component names and urls from qmldir files in engine.qmldir variable
+     engine.qmldir is a hash of form: { componentName => { url } }
+     Later, engine.qmldir is used in construct() function for components lookup.
+
+     TODO We have to keep results in component scope.
+     We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
+     */
+
+    this.loadImports = function(importsArray, currentFileDir) {
+        if (!engine.qmldirsContents) engine.qmldirsContents = {}; // cache
+        if (!engine.qmldirs) engine.qmldirs = {};                 // resulting components lookup table
+
+        if (!importsArray || importsArray.length == 0) return;
+        if (!currentFileDir) currentFileDir = this.$basePath;     // use engine.$basePath by default
+
+        for (var i=0; i<importsArray.length; i++) {
+            var entry = importsArray[i];
+
+            var name = entry[1];
+
+            var nameIsUrl = name.indexOf("//") == 0 || name.indexOf("://") >= 0;  // is it url to remote resource
+            var nameIsQualifiedModuleName = entry[4]; // e.g. QtQuick, QtQuick.Controls, etc
+            var nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl; // local [relative] dir
+
+            if (nameIsDir) {
+                // resolve name from relative to full dir path
+                // we hope all dirs are relative
+                name = this.removeDotSegments( currentFileDir + name );
+                if (name[ name.length-1 ] == "/")
+                    name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir`
+            }
+            // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
+
+            // check if we have already loaded that qmldir file
+            if (engine.qmldirsContents[ name ]) continue;
+
+            var content = false;
+            if (nameIsQualifiedModuleName && this.userAddedModulePaths && this.userAddedModulePaths[ name ]) {
+                // 1. we have qualified module and user had configured path for that module with engine.addModulePath
+                content = readQmlDir( this.userAddedModulePaths[ name ] );
+            }
+            else if (nameIsUrl || nameIsDir)
+            {
+                // 2. direct load
+                // nameIsUrl => url do not need dirs
+                // nameIsDir => already computed full path above
+                content = readQmlDir( name );
+            }
+            else
+            {
+                // 3. qt-style lookup for qualified module
+                var probableDirs = [currentFileDir].concat( engine.importPathList() )
+                var diredName = name.replace( /\./g,"/" );
+
+                for (var k=0; k<probableDirs.length; k++) {
+                    var file = probableDirs[k] + diredName;
+                    content = readQmlDir( file );
+                    if (content) break;
+                }
+            }
+
+            if (!content) {
+                console.log("cannot load imports for ",name );
+                // save blank info, meaning that we failed to load import
+                // this prevents repeated lookups
+                engine.qmldirsContents[ name ] = {};
+                continue;
+            }
+
+            // copy founded externals to global var
+            // TODO actually we have to copy it to current component
+            for (var attrname in content.externals) { engine.qmldirs[attrname] = content.externals[attrname]; }
+
+            // keep already loaded qmldir files
+            engine.qmldirsContents[ name ] = content;
+        }
+
     }
 
     this.rootContext = function() {
@@ -250,6 +379,39 @@ QMLEngine = function (element, options) {
         }
 
         setupGetterSetter(obj, propName, getter, setter);
+    }
+
+    // next 3 methods used in Qt.createComponent for qml files lookup
+    // please open qt site for documentation
+    // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
+
+    this.addImportPath = function( dirpath ) {
+        if (!this.userAddedImportPaths) this.userAddedImportPaths = [];
+        this.userAddedImportPaths.push( dirpath );
+    }
+
+    this.setImportPathList = function( arrayOfDirs )
+    {
+        this.userAddedImportPaths = arrayOfDirs;
+    }
+
+    this.importPathList = function() {
+        return (this.userAddedImportPaths || []);
+    }
+
+    // `addModulePath` defines conrete path for module lookup
+    // e.g. addModulePath( "QtQuick.Controls","http://someserver.com/controls" )
+    // will force system to `import QtQuick.Controls` module from `http://someserver.com/controls/qmldir`
+
+    this.addModulePath = function( moduleName, dirPath ) {
+
+        // remove trailing slash as it required for `readQmlDir`
+        if (dirPath[ dirPath.length-1 ] == "/")
+            dirPath = dirPath.substr( 0, dirPath.length-1 );
+
+        // keep the mapping. It will be used in loadImports() function .
+        if (!this.userAddedModulePaths) this.userAddedModulePaths = {};
+        this.userAddedModulePaths[ moduleName ] = dirPath;
     }
 
 //Intern
