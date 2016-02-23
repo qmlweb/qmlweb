@@ -12,9 +12,6 @@ window.failingTests = {
     imports: [
       'Javascript'
     ],
-    scope: [
-      'can reference parent items id'
-    ]
   },
   Initialize: {
     Translate: ["can be loaded"],
