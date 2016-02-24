@@ -1,17 +1,17 @@
-window.SystemPalette = {
+var SystemPalette = {
   Active:   "active",
   Inactive: "inactive",
   Disabled: "disabled"
 };
 
-window.platformsDetectors = [
+var platformsDetectors = [
   //{ name: 'W8',      regexp: /Windows NT 6\.2/ },
   //{ name: 'W7',      regexp: /Windows NT 6\.1/ },
   //{ name: 'Windows', regexp: /Windows NT/ },
   { name: 'OSX',     regexp: /Macintosh/ }
 ];
 
-window.systemPalettes = {};
+var systemPalettes = {};
 
 registerQmlType({
   module: 'QtQuick',
@@ -47,7 +47,7 @@ registerQmlType({
   }
 });
 
-window.systemPalettes['OSX'] = {
+systemPalettes['OSX'] = {
         'active': {
           'alternateBase': '#f6f6f6',
           'base':          '#ffffff',
