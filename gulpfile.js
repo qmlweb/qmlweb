@@ -9,7 +9,6 @@ var sourcemaps = require('gulp-sourcemaps');
 var karma = require('karma');
 
 var qtcoreSources = [
-  'src/helpers/encapsulate.begin.js',
   'src/qtcore/qml/QMLBinding.js',
 
   'src/qtcore/qml/lib/parser.js',
@@ -25,7 +24,6 @@ var qtcoreSources = [
   'src/qtcore/qml/**/*.js',
 
   'src/qmlweb/**/*.js',
-  'src/helpers/encapsulate.end.js'
 ];
 
 var tests = [
