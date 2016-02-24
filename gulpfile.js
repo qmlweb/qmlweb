@@ -4,16 +4,13 @@ var rename = require('gulp-rename');
 var changed = require('gulp-changed');
 var order = require('gulp-order');
 var uglify = require('gulp-uglify');
+var browserify = require('gulp-browserify');
 var sourcemaps = require('gulp-sourcemaps');
 var karma = require('karma');
 
 var qtcoreSources = [
   'src/helpers/encapsulate.begin.js',
   'src/qtcore/qml/QMLBinding.js',
-
-  'src/uglify/ast.js',
-  'src/uglify/parse.js',
-  'src/uglify/utils.js',
 
   'src/qtcore/qml/lib/parser.js',
   'src/qtcore/qml/lib/process.js',
@@ -40,6 +37,9 @@ gulp.task('build-dev', function() {
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
              .pipe(concat('qt.js'))
+             .pipe(browserify({
+                insertGlobals: true,
+              }))
              .pipe(changed('./lib'))
              .pipe(sourcemaps.write('./'))
              .pipe(gulp.dest('./lib'));

@@ -1,10 +1,5 @@
 (function() {
-  var uglify_parse;
-
-  if (typeof module !== 'undefined' && module.exports)
-    uglify_parse = require("uglify-js").parse;
-  else
-    uglify_parse = parse;
+  var Uglify = require("uglify-js");
 
   global.importJavascriptInContext = function (jsData, $context) {
     with($context) {
@@ -17,7 +12,7 @@
   }
 
   global.jsparse = function (source) {
-    var AST_Tree = uglify_parse(source);
+    var AST_Tree = Uglify.parse(source);
     var obj = { exports: [], source: source };
 
     for (var i = 0 ; i < AST_Tree.body.length ; ++i) {
