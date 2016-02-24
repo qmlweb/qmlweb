@@ -18,6 +18,7 @@
     "karma-coveralls": "^1.1.2",
     "karma-jasmine": "^0.3.7",
     "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sourcemap-loader": "^0.3.7",
     "phantomjs-prebuilt": "^2.1.4"
   },
   "scripts": {

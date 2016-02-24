@@ -4,11 +4,16 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'lib/qt.js',
+      {
+        pattern: 'lib/qt.js.map',
+        included: false
+      },
       'tests/common.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
       { pattern: 'tests/*/**/*.qml', included: false },
-      { pattern: 'tests/*/**/*.png', included: false }
+      { pattern: 'tests/*/**/*.png', included: false },
+
     ],
     browsers: ['PhantomJSCustom'],
     reporters: process.env.COVERALLS_REPO_TOKEN ?
@@ -19,7 +24,9 @@ module.exports = function(config) {
       dir: 'coverage/'
     },
     preprocessors: {
-      'lib/qt.js': ['coverage']
+      'lib/qt.js.map': ['sourcemap'],
+      'lib/qt.js': ['coverage'],
+
     },
     customLaunchers: {
       PhantomJSCustom: {
