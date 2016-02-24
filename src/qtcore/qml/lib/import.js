@@ -71,6 +71,8 @@ function parseQML(file) {
  * @private
  * @return {mixed} String of contents or false in errors.
  */
+var urlContentCache = {};
+
 getUrlContents = function (url) {
     if (typeof urlContentCache[url] == 'undefined') {
       var xhr = new XMLHttpRequest();
@@ -84,8 +86,8 @@ getUrlContents = function (url) {
     }
     return urlContentCache[url];
 }
-if (typeof global.urlContentCache == 'undefined')
-  global.urlContentCache = {};
+
+module.exports.getUrlContents = getUrlContents;
 
 /**
  * Read qmldir spec file at directory. EXPORTED.

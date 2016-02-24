@@ -53,8 +53,6 @@
  *
  * Exports:
  *
- * - QMLBinding(src, tree) to pass qml bindings along.
- *
  * - parseQML(src) -- parses QML source and returns it as output tree expected
  *   by the QML engine
  *
@@ -1723,6 +1721,5 @@ function parseQML(src) {
     return convertToEngine(parsetree);
 }
 
-if (typeof global != "undefined") {
-  global.qmlparse = qmlparse;
-}
+module.exports.parseQML = parseQML;
+module.exports.qmlparse = qmlparse;

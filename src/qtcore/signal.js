@@ -7,7 +7,7 @@
  *               currently ignored.
  * @param options Options that allow finetuning of the signal.
  */
-global.Signal = function Signal(params, options) {
+function Signal(params, options) {
     options = options || {};
     var connectedSlots = [];
     var obj = options.obj

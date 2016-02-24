@@ -25,14 +25,14 @@ var modules = {
   };
 
 // Helper. Adds a type to the constructor list
-global.registerGlobalQmlType = function (name, type) {
+function registerGlobalQmlType(name, type) {
   global[type.name]  = type;
   constructors[name] = type;
   modules.Main[name] = type;
 };
 
 // Helper. Register a type to a module
-global.registerQmlType = function(options) {
+function registerQmlType(options) {
   if (typeof options != 'object') {
     registerGlobalQmlType(arguments[0], arguments[1]);
   } else {
@@ -48,7 +48,7 @@ global.registerQmlType = function(options) {
   }
 };
 
-global.getConstructor = function (moduleName, version, name) {
+function getConstructor(moduleName, version, name) {
   if (typeof modules[moduleName] != 'undefined') {
     for (var i = 0 ; i < modules[moduleName].length ; ++i) {
       var type = modules[moduleName][i];
@@ -60,7 +60,7 @@ global.getConstructor = function (moduleName, version, name) {
   return null;
 };
 
-global.collectConstructorsForModule = function (moduleName, version) {
+function collectConstructorsForModule(moduleName, version) {
   var constructors = {};
 
   if (typeof modules[moduleName] == 'undefined') {
@@ -77,7 +77,7 @@ global.collectConstructorsForModule = function (moduleName, version) {
   return constructors;
 };
 
-global.mergeObjects = function (obj1, obj2) {
+function mergeObjects(obj1, obj2) {
   var mergedObject = {};
 
   if (typeof obj1 != 'undefined' && obj1 != null) {
@@ -89,9 +89,9 @@ global.mergeObjects = function (obj1, obj2) {
   return mergedObject;
 }
 
-global.perContextConstructors = {};
+var perContextConstructors = {};
 
-global.loadImports = function (self, imports) {
+function loadImports(self, imports) {
   constructors = mergeObjects(modules.Main, null);
   for (var i = 0 ; i < imports.length ; ++i) {
     var moduleName = imports[i][1],
@@ -357,3 +357,8 @@ JSItemModel = function() {
 function unboundMethod() {
     console.log("Unbound method for", this);
 }
+
+module.exports.registerGlobalQmlType = registerGlobalQmlType;
+module.exports.registerQmlType = registerQmlType;
+module.exports.getConstructor = getConstructor;
+module.exports.collectConstructorsForModule = collectConstructorsForModule;

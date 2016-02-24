@@ -1,10 +1,10 @@
-global.MediaPlayer = {
+var MediaPlayer = {
   NoError: 0, ResourceError: 1, FormatError: 2, NetworkError: 4, AccessDenied: 8, ServiceMissing: 16,
   StoppedState: 0, PlayingState: 1, PausedState: 2,
   NoMedia: 0, Loading: 1, Loaded: 2, Buffering: 4, Stalled: 8, EndOfMedia: 16, InvalidMedia: 32, UnknownStatus: 64
 };
 
-global.VideoOutput = {
+var VideoOutput = {
   PreserveAspectFit: 0, PreserveAspectCrop: 1, Stretch: 2
 };
 

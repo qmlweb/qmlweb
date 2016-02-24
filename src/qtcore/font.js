@@ -1,4 +1,4 @@
-global.Font = {
+var Font = {
   // Capitalization
   MixedCase: "none",
   AllUppercase: "uppercase",

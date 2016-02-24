@@ -1,4 +1,4 @@
-global.DoubleValidator = {
+var DoubleValidator = {
   StandardNotation: 1, ScientificNotation: 2
 };
 

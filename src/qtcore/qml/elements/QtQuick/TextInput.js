@@ -1,4 +1,4 @@
-global.TextInput = {
+var TextInput = {
   Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3
 };
 

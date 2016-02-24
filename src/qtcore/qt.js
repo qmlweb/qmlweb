@@ -1,4 +1,4 @@
-global.Qt = {
+var Qt = {
   rgba: function(r,g,b,a) {
     return "rgba("
       + Math.round(r * 255) + ","

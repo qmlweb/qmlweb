@@ -42,7 +42,7 @@ function QMLComponent(meta) {
         if (typeof qrc[src] != 'undefined')
           js = qrc[src];
         else
-          js = global.jsparse(getUrlContents(src));
+          js = jsparse(getUrlContents(src));
         if (importDesc[3] !== "") {
           $context[importDesc[3]] = {};
           importJavascriptInContext(js, $context[importDesc[3]]);
