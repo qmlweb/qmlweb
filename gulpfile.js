@@ -30,15 +30,23 @@ var tests = [
   'tests/**/*.js'
 ];
 
-gulp.task('build-dev', function() {
+gulp.task('build-nodejs', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
-             .pipe(concat('qt.js'))
+             .pipe(concat('qt.node.js'))
+             .pipe(changed('./lib'))
+             .pipe(sourcemaps.write('./'))
+             .pipe(gulp.dest('./lib'));
+});
+
+gulp.task('build-dev', ['build-nodejs'], function() {
+  return gulp.src('./lib/qt.node.js')
+             .pipe(rename('qt.js'))
+             .pipe(changed('./lib'))
              .pipe(browserify({
                 insertGlobals: true,
               }))
-             .pipe(changed('./lib'))
              .pipe(sourcemaps.write('./'))
              .pipe(gulp.dest('./lib'));
 });

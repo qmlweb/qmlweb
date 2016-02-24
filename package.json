@@ -26,6 +26,7 @@
     "build": "./node_modules/.bin/gulp build",
     "watch": "./node_modules/.bin/gulp watch"
   },
+  "main": "lib/qt.node.js",
   "files": [
     "AUTHORS",
     "LICENSE",
