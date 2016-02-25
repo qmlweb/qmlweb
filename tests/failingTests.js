@@ -14,10 +14,10 @@ window.failingTests = {
     ],
   },
   Initialize: {
-    Translate: ["can be loaded"],
-    Scale: ["can be loaded"],
-    Rotation: ["can be loaded"],
-    Font: ["can be loaded"],
-    AnimatedImage: ["can be loaded"],
+    "QtQuick-Translate": ["can be loaded"],
+    "QtQuick-Scale": ["can be loaded"],
+    "QtQuick-Rotation": ["can be loaded"],
+    "QtQuick-Font": ["can be loaded"],
+    "QtQuick-AnimatedImage": ["can be loaded"],
   }
 };
