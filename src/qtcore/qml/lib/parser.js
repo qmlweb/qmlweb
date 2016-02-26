@@ -1339,7 +1339,6 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         }
 
         function qmlsignaldef() {
-            next();
             var name = S.token.value;
             next();
             var args = [];
@@ -1373,7 +1372,19 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
                 return as("qmlmethod", name, stat,
                     S.text.substr(from, to - from));
             } else if (is("name", "signal")) {
-                return qmlsignaldef();
+                next();
+                if (is("punc", ":")) {
+                    next();
+                    S.in_function++;
+                    var from = S.token.pos,
+                        stat = statement(),
+                        to = S.token.pos;
+                    S.in_function--;
+                    return as("qmlprop", propname, stat,
+                        S.text.substr(from, to - from));
+                } else {
+                    return qmlsignaldef();
+                }
             } else if (S.token.type == "name") {
                 var propname = S.token.value;
                 next();
