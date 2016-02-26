@@ -26,7 +26,7 @@ registerQmlType({
     var platform = 'OSX';
 
     for (var i = 0 ; i < attrs.length ; ++i)
-      createSimpleProperty("color", this, attrs[i], "ro");
+      createSimpleProperty("color", this, attrs[i], { readOnly: true });
     createSimpleProperty("enum", this, "colorGroup");
 
     this.colorGroupChanged.connect(this, (function (newVal) {

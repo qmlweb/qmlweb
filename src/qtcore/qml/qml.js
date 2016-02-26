@@ -145,16 +145,20 @@ function construct(meta) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(type, obj, propName, access) {
+function createSimpleProperty(type, obj, propName, options) {
     var prop = new QMLProperty(type, obj, propName);
     var getter, setter;
-    if (typeof access == 'undefined' || access == null)
-      access = 'rw';
+
+    if (typeof options == 'undefined')
+      options = {};
+    else if (typeof options != 'object')
+      options = { default: options }
 
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
+    obj.$properties[propName].set(options.default);
     getter = function()       { return obj.$properties[propName].get(); };
-    if (access == 'rw')
+    if (!options.readOnly)
       setter = function(newVal) { return obj.$properties[propName].set(newVal); };
     else {
       setter = function(newVal) {
