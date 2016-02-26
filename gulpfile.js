@@ -78,9 +78,7 @@ gulp.task('test', ['lint', 'build'], function(done) {
     singleRun: true,
     configFile: __dirname + '/karma.conf.js'
   }, function(code) {
-    if (code !== 0)
-      process.exit(1);
-    done();
+    process.exit(code);
   }).start();
 });
 
