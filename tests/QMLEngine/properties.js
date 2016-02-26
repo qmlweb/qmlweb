@@ -20,4 +20,11 @@ describe('QMLEngine.properties', function() {
     expect(qml.childX).toBe(125);
     div.remove();
   });
+
+  it('can be named signal', function() {
+    expect(function() {
+      var div = loader('NamedSignal');
+      div.remove();
+    }).not.toThrow();
+  });
 });
