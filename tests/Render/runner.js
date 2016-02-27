@@ -55,6 +55,14 @@
     return true;
   }
 
+  function delayedFrames(callback, frames) {
+    if (frames === 0)
+      return callback;
+    return function() {
+      window.requestAnimationFrame(delayedFrames(callback, frames - 1));
+    };
+  }
+
   var regex = new RegExp('^/base/tests/Render/.*\.qml$');
   var tests = Object.keys(window.__karma__.files).filter(function(path) {
     return regex.test(path);
@@ -100,7 +108,10 @@
           };
 
           if (group.indexOf('Async') !== -1) {
-            window.onTestLoad = onTestLoad;
+            window.onTestLoad = function(options) {
+              options = options || {};
+              delayedFrames(onTestLoad, options.framesDelay || 0)();
+            };
           } else {
             onTestLoad();
           }

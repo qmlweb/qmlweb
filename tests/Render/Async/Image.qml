@@ -8,7 +8,7 @@ Image {
   onStatusChanged: {
     if (typeof window !== 'undefined' &&
         status !== Image.Loading) {
-      window.onTestLoad();
+      window.onTestLoad({ framesDelay: 2 });
     }
   }
 }
