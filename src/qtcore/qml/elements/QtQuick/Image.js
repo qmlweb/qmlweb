@@ -52,15 +52,15 @@ registerQmlType({
 
     // Bind status to img element
     img.onload = function() {
-        self.progress = 1;
-        self.status = self.Image.Ready;
-
         var w = img.naturalWidth;
         var h = img.naturalHeight;
         self.sourceSize.width = w;
         self.sourceSize.height = h;
         self.implicitWidth = w;
         self.implicitHeight = h;
+
+        self.progress = 1;
+        self.status = self.Image.Ready;
     }
     img.onerror = function() {
         self.status = self.Image.Error;
