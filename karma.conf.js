@@ -4,6 +4,7 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files: [
       'lib/qt.js',
+      { pattern: 'lib/qt.js.map', included: false },
       'tests/common.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
