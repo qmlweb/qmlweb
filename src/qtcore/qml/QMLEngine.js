@@ -180,11 +180,11 @@ QMLEngine = function (element, options) {
      */
 
     this.loadImports = function(importsArray, currentFileDir) {
-        if (!engine.qmldirsContents) engine.qmldirsContents = {}; // cache
-        if (!engine.qmldirs) engine.qmldirs = {};                 // resulting components lookup table
+        if (!this.qmldirsContents) this.qmldirsContents = {}; // cache
+        if (!this.qmldirs) this.qmldirs = {};                 // resulting components lookup table
 
         if (!importsArray || importsArray.length == 0) return;
-        if (!currentFileDir) currentFileDir = this.$basePath;     // use engine.$basePath by default
+        if (!currentFileDir) currentFileDir = this.$basePath;     // use this.$basePath by default
 
         for (var i=0; i<importsArray.length; i++) {
             var entry = importsArray[i];
@@ -205,11 +205,11 @@ QMLEngine = function (element, options) {
             // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
 
             // check if we have already loaded that qmldir file
-            if (engine.qmldirsContents[ name ]) continue;
+            if (this.qmldirsContents[ name ]) continue;
 
             var content = false;
             if (nameIsQualifiedModuleName && this.userAddedModulePaths && this.userAddedModulePaths[ name ]) {
-                // 1. we have qualified module and user had configured path for that module with engine.addModulePath
+                // 1. we have qualified module and user had configured path for that module with this.addModulePath
                 content = readQmlDir( this.userAddedModulePaths[ name ] );
             }
             else if (nameIsUrl || nameIsDir)
@@ -222,7 +222,7 @@ QMLEngine = function (element, options) {
             else
             {
                 // 3. qt-style lookup for qualified module
-                var probableDirs = [currentFileDir].concat( engine.importPathList() )
+                var probableDirs = [currentFileDir].concat( this.importPathList() )
                 var diredName = name.replace( /\./g,"/" );
 
                 for (var k=0; k<probableDirs.length; k++) {
@@ -236,16 +236,16 @@ QMLEngine = function (element, options) {
                 console.log("cannot load imports for ",name );
                 // save blank info, meaning that we failed to load import
                 // this prevents repeated lookups
-                engine.qmldirsContents[ name ] = {};
+                this.qmldirsContents[ name ] = {};
                 continue;
             }
 
             // copy founded externals to global var
             // TODO actually we have to copy it to current component
-            for (var attrname in content.externals) { engine.qmldirs[attrname] = content.externals[attrname]; }
+            for (var attrname in content.externals) { this.qmldirs[attrname] = content.externals[attrname]; }
 
             // keep already loaded qmldir files
-            engine.qmldirsContents[ name ] = content;
+            this.qmldirsContents[ name ] = content;
         }
 
     }
