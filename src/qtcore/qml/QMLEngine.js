@@ -203,17 +203,21 @@ QMLEngine = function (element, options) {
       A1: Seems it doesn't matter. Seems we may just save name with dot-inside right to qmldirs, and it may be used by construct() seamlessly. Check it..
 
       Q2: How we may access component object from here, to store qmldirs info in components logical scope, and not at engine scope?
-      A2: ?
+      A2: Probably, answer is in Component.js and in global.loadImports
 
       TODO 
       * We have to keep output in component scope, not in engine scope.
       * We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
       * Determine how this stuff is related to `global.loadImports`
       * Check A1
+      * Make a complete picture of what going in with imports, including Component.js own imports loading
+      * Note importJs method in import.js 
     */
 
     this.loadImports = function(importsArray, currentFileDir) {
-        if (!this.qmldirsContents) this.qmldirsContents = {}; // cache
+        if (!this.qmldirsContents) this.qmldirsContents = { "QtQuick":{}, "QtQuick.Controls":{} }; // cache
+        // putting initial keys in qmldirsContents - is a hack. We should find a way to explain to qmlweb, is this built-in module or qmldir-style module.
+
         if (!this.qmldirs) this.qmldirs = {};                 // resulting components lookup table
 
         if (!importsArray || importsArray.length == 0) return;
