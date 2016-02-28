@@ -8,6 +8,7 @@ module.exports = function(config) {
       'tests/common.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
+      { pattern: 'tests/*/**/qmldir', included: false },
       { pattern: 'tests/*/**/*.qml', included: false },
       { pattern: 'tests/*/**/*.png', included: false }
     ],
