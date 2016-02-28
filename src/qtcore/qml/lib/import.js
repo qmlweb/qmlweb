@@ -70,14 +70,27 @@ function parseQML(file) {
 /**
  * Get URL contents. EXPORTED.
  * @param url {String} Url to fetch.
+ * @param skipExceptions {bool} when turned on, ignore exeptions and return false. This feature is used by readQmlDir.
  * @private
  * @return {mixed} String of contents or false in errors.
+ *
+ * Q1: can someone provide use-case when we need caching here?
+ * A1:
+ * Q2: should errors be cached? (now they aren't)
+ * A2:
+ 
+ * Q3: split getUrlContents into: getUrlContents, getUrlContentsWithCaching, getUrlContentsWithoutErrors..
  */
-getUrlContents = function (url) {
+getUrlContents = function (url, skipExceptions) {
     if (typeof urlContentCache[url] == 'undefined') {
       var xhr = new XMLHttpRequest();
       xhr.open("GET", url, false);
-      xhr.send(null);
+
+      if (skipExceptions)
+        { try { xhr.send(null); } catch (e) { return false; } } /* it is OK to not have logging here, because DeveloperTools already will have red log record */
+      else
+        xhr.send(null);
+
       if (xhr.status != 200 && xhr.status != 0) { // 0 if accessing with file://
           console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
           return false;
