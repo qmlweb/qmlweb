@@ -52,7 +52,8 @@ registerQmlType({
         this.dom.style.MozBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
-                                                + this.border.left;
+                                                + this.border.left + " "
+                                                + "fill";
         this.dom.style.MozBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
         this.dom.style.MozBorderImageWidth = this.border.top + " "
@@ -64,7 +65,8 @@ registerQmlType({
         this.dom.style.webkitBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
-                                                + this.border.left;
+                                                + this.border.left + " "
+                                                + "fill";
         this.dom.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
         this.dom.style.webkitBorderImageWidth = this.border.top + " "
@@ -76,7 +78,8 @@ registerQmlType({
         this.dom.style.OBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
-                                                + this.border.left;
+                                                + this.border.left + " "
+                                                + "fill";
         this.dom.style.OBorderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
         this.dom.style.OBorderImageWidth = this.border.top + "px "
@@ -87,7 +90,8 @@ registerQmlType({
         this.dom.style.borderImageSlice = this.border.top + " "
                                                 + this.border.right + " "
                                                 + this.border.bottom + " "
-                                                + this.border.left;
+                                                + this.border.left + " "
+                                                + "fill";
         this.dom.style.borderImageRepeat = this.horizontalTileMode + " "
                                                     + this.verticalTileMode;
         this.dom.style.borderImageWidth = this.border.top + "px "
