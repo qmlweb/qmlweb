@@ -166,18 +166,51 @@ QMLEngine = function (element, options) {
     };
 
     /*
-     engine.loadImports() - load qmldir files from `import` statements. Please look at import.js for main notes.
+      engine.loadImports( imports, currentDir ) : performs loading of qmldir files from given qml import records.
 
-     * `importsArray` is in parser notation, e.g. [import1, import2, ...] where each importN is also array: ["qmlimport","name",version,as,isQualifiedName]
-     * `currentFileDir` is a base dir for imports lookup (it will be used together with importPathList())
+      Input:
+      * parameter `importsArray` - import statements. It is in parser notation, e.g. [import1, import2, ...] where each importN is also array: ["qmlimport","name",version,as,isQualifiedName]
+      * parameter `currentFileDir` - base dir for imports lookup. It will be used together with importPathList()
 
-     As a result, loadImports stores component names and urls from qmldir files in engine.qmldir variable
-     engine.qmldir is a hash of form: { componentName => { url } }
-     Later, engine.qmldir is used in construct() function for components lookup.
+      Implicit input:
+      * engine object function `importPathList()` - list of urls bases used for qmldir files lookup
 
-     TODO We have to keep results in component scope.
-     We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
-     */
+      Additional implicit input/output:
+      * engine object variable `qmldirsContents` - used for caching, e.g. memory for previously loaded qmldir files
+
+      Output: 
+      * engine object variable `qmldirs` - new records will be added there
+
+      Return value: 
+      * nothing
+
+      Details:
+
+      For each of given import statements, loadImports 
+      1. computes qmldir file location according to http://doc.qt.io/qt-5/qtqml-syntax-imports.html
+      2. calls `readQmlDir` for actual reading and parsing of qmldir file content
+      3. gets `external` declarations of that qmldir file and pushes them to `engine.qmldirs` hash.
+
+      `engine.qmldirs` is a hash of form: { componentName => componentFileUrl }
+      This hash then used by `qml.js::construct` method for computing component urls.
+
+      Notes:
+      1. This method is not suited for loading js imports. This may be done probably after answering to Q1 (below).
+      2. Please look for additional notes at readQmlDir function.
+
+      QNA
+      Q1: How and where in engine component names might be prefixed? E.g. names with dot inside: SomeModule.Component1
+      A1: Seems it doesn't matter. Seems we may just save name with dot-inside right to qmldirs, and it may be used by construct() seamlessly. Check it..
+
+      Q2: How we may access component object from here, to store qmldirs info in components logical scope, and not at engine scope?
+      A2: ?
+
+      TODO 
+      * We have to keep output in component scope, not in engine scope.
+      * We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
+      * Determine how this stuff is related to `global.loadImports`
+      * Check A1
+    */
 
     this.loadImports = function(importsArray, currentFileDir) {
         if (!this.qmldirsContents) this.qmldirsContents = {}; // cache
@@ -233,7 +266,7 @@ QMLEngine = function (element, options) {
             }
 
             if (!content) {
-                console.log("cannot load imports for ",name );
+                console.log("qmlengine::loadImports: cannot load qmldir file for import name=",name );
                 // save blank info, meaning that we failed to load import
                 // this prevents repeated lookups
                 this.qmldirsContents[ name ] = {};
