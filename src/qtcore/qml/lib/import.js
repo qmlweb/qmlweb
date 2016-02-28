@@ -112,7 +112,11 @@ if (typeof global.urlContentCache == 'undefined')
 */
  
 readQmlDir = function (url) {
-    var qmldir = getUrlContents(url + "/qmldir", true), // loading url contents with skipping errors
+    // in case 'url' is empty, do not attach "/"
+    // Q1: when this happen?
+    var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";
+
+    var qmldir = getUrlContents( qmldirFileUrl, true), // loading url contents with skipping errors
         lines,
         line,
         internals = {},
