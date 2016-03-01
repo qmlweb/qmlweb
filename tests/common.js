@@ -1,10 +1,9 @@
-function loadQmlFile(file, opts) {
-  var div = document.createElement('div');
-  var qml = new QMLEngine(div, opts || {});
-  qml.loadFile(file);
-  qml.start();
+function loadQmlFile(file, div, opts) {
+  var engine = new QMLEngine(div, opts || {});
+  engine.loadFile(file);
+  engine.start();
   document.body.appendChild(div);
-  return div;
+  return engine.rootObject;
 }
 
 function prefixedQmlLoader(prefix) {
@@ -20,6 +19,15 @@ function loadQml(src, opts) {
   qml.start();
   document.body.appendChild(div);
   return qml;
+}
+
+function setupDivElement() {
+  beforeEach(function() {
+    this.div = document.createElement('div');
+  });
+  afterEach(function() {
+    this.div.remove();
+  });
 }
 
 (function() {
