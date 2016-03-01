@@ -498,7 +498,7 @@ QMLEngine = function (element, options) {
     this.$resolvePath = function(file)
     {
         // probably, replace :// with :/ ?
-        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0 || file.indexOf("data:") == 0) {
+        if (file == "" || file.indexOf("://") != -1 || file.indexOf("/") == 0 || file.indexOf("data:") == 0 || file.indexOf("blob:") == 0) {
             return file;
         }
         return this.$basePath + file;
