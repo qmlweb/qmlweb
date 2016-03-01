@@ -16,7 +16,7 @@ global.Qt = {
     if (name in engine.components)
         return engine.components[name];
 
-    var nameIsUrl = name.indexOf("//") >= 0;
+    var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
 
     // Do not perform path lookups if name starts with @ sign.
     // This is used when we load components from qmldir files
