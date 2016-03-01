@@ -38,10 +38,11 @@ global.Qt = {
         src = getUrlContents(file, true);
         if (src !== false) break;
       }
-
-      if (src === false)
-        return undefined;
     }
+
+    // When createComponent failed to load content from all probable sources, it should return undefined.
+    if (src === false)
+      return undefined;
 
     var tree = parseQML(src);
 
