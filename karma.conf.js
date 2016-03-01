@@ -14,7 +14,7 @@ module.exports = function(config) {
     browsers: ['PhantomJSCustom'],
     reporters: process.env.COVERALLS_REPO_TOKEN ?
                    ['progress', 'coverage', 'coveralls'] :
-                   ['progress', 'coverage'],
+                   ['spec', 'coverage'],
     coverageReporter: {
       type: 'lcov',
       dir: 'coverage/'
