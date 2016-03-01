@@ -274,7 +274,17 @@ QMLEngine = function (element, options) {
                 // save blank info, meaning that we failed to load import
                 // this prevents repeated lookups
                 this.qmldirsContents[ name ] = {};
-                continue;
+
+               // NEW
+               // add that dir to import path list
+               // that means, lookup qml files in that failed dir by trying to load them directly
+               // this is not the same behavior as in Qt for "url" schemes,
+               // but it is same as for ordirnal disk files. 
+               // So, we do it for experimental purposes.
+               if (nameIsDir) 
+                 this.addImportPath( name + "/" );
+
+               continue;
             }
 
             // copy founded externals to global var
