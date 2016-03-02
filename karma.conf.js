@@ -6,6 +6,7 @@ module.exports = function(config) {
       'lib/qt.js',
       { pattern: 'lib/qt.js.map', included: false },
       'tests/common.js',
+      'tests/render.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
       { pattern: 'tests/*/**/qmldir', included: false },
