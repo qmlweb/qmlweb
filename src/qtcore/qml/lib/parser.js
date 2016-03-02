@@ -271,7 +271,7 @@ function parse_js_number(num) {
 
 function JS_Parse_Error(message, line, col, pos, comment) {
         this.message = message;
-        this.line = line;
+        this.line = line + 1;
         this.col = col;
         this.pos = pos;
         this.comment = comment ? comment : "";
