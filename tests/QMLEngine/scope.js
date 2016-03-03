@@ -18,4 +18,10 @@ describe('QMLEngine.scope', function() {
     expect(childA.rootValue).toBe(1000);
     expect(parentItem.sum).toBe(6600);
   });
+
+  it('can reference inherited properties from parent (upflow)', function() {
+    var qml = loader("Upflow", this.div);
+    var child = contextVariable(qml, "child");
+    expect(child.thisFoo).toBe(15);
+  });
 });
