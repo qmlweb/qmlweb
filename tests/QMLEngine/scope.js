@@ -24,4 +24,10 @@ describe('QMLEngine.scope', function() {
     var child = contextVariable(qml, "child");
     expect(child.thisFoo).toBe(15);
   });
+
+  it('can reference sibling items by id', function() {
+    var qml = loader('Sibling', this.div);
+    var childB = contextVariable(qml, "childB");
+    expect(childB.value).toBe(4);
+  });
 });
