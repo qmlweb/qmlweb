@@ -6,7 +6,7 @@ Image {
   onStatusChanged: {
     if (typeof window !== 'undefined' &&
         status !== Image.Loading) {
-      window.onTestLoad({ framesDelay: 2 });
+      window.onTestLoad({ framesDelay: 200 });
     }
   }
 }
