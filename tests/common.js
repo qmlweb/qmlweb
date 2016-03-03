@@ -30,6 +30,25 @@ function setupDivElement() {
   });
 }
 
+var customMatchers = {
+  toBeRoughly: function(util, customEqualityTesters) {
+    return {
+      compare: function(actual, expected, diff) {
+        var result = {
+          pass: actual > expected * (1 - diff) &&
+                actual < expected * (1 + diff)
+        };
+        if (result.pass) {
+          result.message = actual + " is roughly equal to " + expected;
+        } else {
+          result.message = "Expected " + actual + " to be roughly " + expected;
+        }
+        return result;
+      }
+    };
+  }
+};
+
 (function() {
   var describeOrig = describe;
   var itOrig = it;
