@@ -17,4 +17,39 @@ describe('QMLEngine.imports', function() {
     qml.textA = "goodbye";
     expect(qml.textB).toBe("goodbye world");
   });
+
+  /* This test case shows that QMLProperty.js::get() method should check
+     if property itself is already evaluated or not. If it sees itself as
+     non-evaluated yet, it must evaluate self before returning the result.
+     If property lacks that evaluation, the get will return 'undefined' value.
+  */
+  it('RecursiveInit', function() {
+    var qml = loader('RecursiveInit', this.div);
+    expect(qml.log).toBe("Fly to planet N5!");
+  });
+
+  /* This test case shows that if QMLProperty.js::get() evaluates self
+     before returning the result, it might meet another properties
+     and call their's gets. That's why the case is called recursive.
+     This exposes us that `evaluatingProperty` variable is not enought
+     to track changed's signals connections, because it is being reset
+     to undefined value after each use, and we must use stack for that.
+  */
+  it('RecursiveInit2', function() {
+    var qml = loader('RecursiveInit2', this.div);
+    qml.retarget();
+    expect(qml.log).toBe("Fly to planet N10!Fly to planet N15!");
+  });
+
+  // must have exactly 1 call of changed signal
+  it('RecursiveInit3', function() {
+    var qml = loader('RecursiveInit3', this.div);
+    expect(qml.log).toBe("Fly to planet N6!");
+  });
+
+  // must have exactly 0 call of changed signal
+  it('RecursiveInit4', function() {
+    var qml = loader('RecursiveInit4', this.div);
+    expect(qml.log).toBe("");
+  });
 });

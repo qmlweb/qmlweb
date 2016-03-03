@@ -10,7 +10,9 @@ window.failingTests = {
   },
   QMLEngine: {
     imports: [
-      'Javascript'
+      'Javascript',
+      'RecursiveInit',
+      'RecursiveInit2'
     ],
     properties: [
       'alias have changed signal',
