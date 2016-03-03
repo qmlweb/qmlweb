@@ -34,6 +34,8 @@
     var ctx = canvas.getContext('2d');
     canvas.height = img.height;
     canvas.width = img.width;
+    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.fillRect (0,0, canvas.width,canvas.height);
     ctx.drawImage(img, 0, 0);
     return ctx.getImageData(0, 0, img.height, img.width).data;
   }
