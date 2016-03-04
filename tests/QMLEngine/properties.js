@@ -42,4 +42,20 @@ describe('QMLEngine.properties', function() {
   it('can be named signal', function() {
     load('NamedSignal', this.div);
   });
+
+  /* in Qml, when assigning non-string value to string property,
+     is convert's new value to string. */
+  it('StringConversion', function() {
+    var qml = load('StringConversion');
+
+    expect(qml.stringA).toBe("10");
+    expect(typeof qml.stringA).toBe("string");
+
+    //console.log("qml.stringB=", qml.stringB, typeof qml.stringB);
+    expect(qml.stringB).toBe("11");
+    expect(typeof qml.stringB).toBe("string");
+    qml.reassign();
+    expect(qml.stringA).toBe("333");
+    expect(typeof qml.stringA).toBe("string");
+  });
 });

@@ -15,7 +15,8 @@ window.failingTests = {
     ],
     properties: [
       'alias have changed signal',
-      'alias to id with same name'
+      'alias to id with same name',
+      'StringConversion'
     ]
   },
   Initialize: {
