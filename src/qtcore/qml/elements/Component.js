@@ -10,6 +10,8 @@ function QMLContext() {
 QMLComponent.prototype.createObject = function(parent, properties) {
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
+    // change base path to current component base path
+    var bp = engine.$basePath; engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
     var item = construct({
         object: this.$metaObject,
@@ -17,6 +19,10 @@ QMLComponent.prototype.createObject = function(parent, properties) {
         context: this.$context ? Object.create(this.$context) : new QMLContext(),
         isComponentRoot: true
     });
+
+    // change base path back
+    //TODO looks a bit hacky
+    engine.$basePath = bp;
 
     engine.operationState = oldState;
     return item;

@@ -16,20 +16,87 @@ global.Qt = {
     if (name in engine.components)
         return engine.components[name];
 
-    var file = engine.$basePath + name;
+    var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
 
-    var src = getUrlContents(file);
-    if (src=="")
-        return undefined;
+    // Do not perform path lookups if name starts with @ sign.
+    // This is used when we load components from qmldir files
+    // because in that case we do not need any lookups.
+    if (name.length > 0 && name[0] == "@") {
+      nameIsUrl = true;
+      name = name.substr( 1,name.length-1 );
+    }
+
+    var file = nameIsUrl ? name : engine.$basePath + name;
+
+    var src = getUrlContents(file, true);
+    // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
+    if (src==false && !nameIsUrl) {
+      var moredirs = engine.importPathList();
+
+      for (var i=0; i<moredirs.length; i++) {
+        file = moredirs[i] + name;
+        src = getUrlContents(file, true);
+        if (src !== false) break;
+      }
+    }
+
+    // When createComponent failed to load content from all probable sources, it should return undefined.
+    if (src === false)
+      return undefined;
+
     var tree = parseQML(src);
 
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
 
     var component = new QMLComponent({ object: tree, context: executionContext });
+    component.$basePath = engine.extractBasePath( file );
+    component.$imports = tree.$imports;
+    component.$file = file; // just for debugging
+
+    engine.loadImports( tree.$imports,component.$basePath );
+
     engine.components[name] = component;
     return component;
   },
+
+    // Returns url resolved relative to the URL of the caller.
+  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+  resolvedUrl: function(url)
+  {
+    if (!url || !url.substr) // url is not a string object
+      return url;
+
+    // Must check for cases: D:/, file://, http://, or slash at the beginning. 
+    // This means the url is absolute => we have to skip processing (except removing dot segments).
+    if (url == "" || url.indexOf(":/") != -1 || url.indexOf("/") == 0)
+      return engine.removeDotSegments( url );
+
+    // we have $basePath variable placed in context of "current" document
+    // this is done in construct() function
+
+    // let's go to the callers and inspect their arguments
+    // The 2-nd argument of the callers we hope is context object
+    // e.g. see calling signature of bindings and signals
+
+    // Actually Qt cpp code is doing the same; the difference is that they know calling context
+    // https://qt.gitorious.org/qt/qtdeclarative/source/eeaba26596d447c531dfac9d6e6bf5cfe4537813:src/qml/qml/v8/qqmlbuiltinfunctions.cpp#L833
+
+    var detectedBasePath = "";
+    var currentCaller = Qt.resolvedUrl.caller;
+    var maxcount = 10;
+    while (maxcount-- > 0 && currentCaller) {
+      if (currentCaller.arguments[1] && currentCaller.arguments[1]["$basePath"])
+      {
+        detectedBasePath = currentCaller.arguments[1]["$basePath"];
+        break;
+      }
+      currentCaller = currentCaller.caller;
+    }
+
+    return engine.removeDotSegments( detectedBasePath + url )
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,
