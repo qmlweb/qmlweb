@@ -4,8 +4,7 @@ window.failingTests = {
       'NumberAnimationAutorun'
     ],
     Simple: [
-      'RectanglesOpacity',
-      'RepeaterNumber'
+      'RectanglesOpacity'
     ]
   },
   QMLEngine: {
