@@ -80,10 +80,16 @@ function QMLItem(meta) {
     createSimpleProperty("bool", this, "focus");
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
+    
+    this.widthChanged.connect(this, function(newValue){
+       this.css.visibility = this.width == 0 || this.height == 0 ? "hidden" : "visible";
+    });
+    this.heightChanged.connect(this, function(newValue){
+       this.css.visibility = this.width == 0 || this.height == 0 ? "hidden" : "visible";
+    });
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
-    this.implicitWidthChanged.connect(this, updateHGeometry);
-    this.implicitHeightChanged.connect(this, updateVGeometry);
+
     this.focus = false;
 
     this.setupFocusOnDom = (function(element) {
