@@ -1,10 +1,9 @@
-function loadQmlFile(file, opts) {
-  var div = document.createElement('div');
-  var qml = new QMLEngine(div, opts || {});
-  qml.loadFile(file);
-  qml.start();
+function loadQmlFile(file, div, opts) {
+  var engine = new QMLEngine(div, opts || {});
+  engine.loadFile(file);
+  engine.start();
   document.body.appendChild(div);
-  return div;
+  return engine.rootObject;
 }
 
 function prefixedQmlLoader(prefix) {
@@ -21,6 +20,34 @@ function loadQml(src, opts) {
   document.body.appendChild(div);
   return qml;
 }
+
+function setupDivElement() {
+  beforeEach(function() {
+    this.div = document.createElement('div');
+  });
+  afterEach(function() {
+    this.div.remove();
+  });
+}
+
+var customMatchers = {
+  toBeRoughly: function(util, customEqualityTesters) {
+    return {
+      compare: function(actual, expected, diff) {
+        var result = {
+          pass: actual > expected * (1 - diff) &&
+                actual < expected * (1 + diff)
+        };
+        if (result.pass) {
+          result.message = actual + " is roughly equal to " + expected;
+        } else {
+          result.message = "Expected " + actual + " to be roughly " + expected;
+        }
+        return result;
+      }
+    };
+  }
+};
 
 (function() {
   var describeOrig = describe;

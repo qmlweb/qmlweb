@@ -84,9 +84,10 @@
 
   Object.keys(tests).forEach(function(group) {
     describe('Render.' + group, function() {
+      setupDivElement();
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
-          var div = loadQmlFile(test.qml);
+          var div = loadQmlFile(test.qml, this.div).dom;
           var result, expected, loaded = 0;
 
           var process = function() {
@@ -104,7 +105,6 @@
               fileName: test.group + '/' + test.name + '.png'
             });
             result.onload = process;
-            div.remove();
           };
 
           if (group.indexOf('Async') !== -1) {

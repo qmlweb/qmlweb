@@ -3,10 +3,10 @@ function contextVariable(obj, name) {
 }
 
 describe('QMLEngine.scope', function() {
+  setupDivElement();
   var loader = prefixedQmlLoader('QMLEngine/qml/Scope');
   it('can reference parent items id', function() {
-    var div = loader('Root');
-    var qml = div.qml;
+    var qml = loader('Root', this.div);
     var parentItem = contextVariable(qml, "parentItem");
     expect(parentItem).not.toBe(undefined);
     expect(parentItem.$context).not.toBe(undefined);
@@ -17,6 +17,5 @@ describe('QMLEngine.scope', function() {
     expect(childA.parentValue).toBe(100);
     expect(childA.rootValue).toBe(1000);
     expect(parentItem.sum).toBe(6600);
-    div.remove();
   });
 });
