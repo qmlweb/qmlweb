@@ -12,13 +12,12 @@ function prefixedQmlLoader(prefix) {
   };
 }
 
-function loadQml(src, opts) {
-  var div = document.createElement('div');
-  var qml = new QMLEngine(div, opts || {});
-  qml.loadQML(src);
-  qml.start();
+function loadQml(src, div, opts) {
+  var engine = new QMLEngine(div, opts || {});
+  engine.loadQML(src);
+  engine.start();
   document.body.appendChild(div);
-  return qml;
+  return engine.rootObject;
 }
 
 function setupDivElement() {
