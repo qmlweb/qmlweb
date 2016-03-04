@@ -1,9 +1,9 @@
 describe('QMLEngine.states', function() {
   setupDivElement();
-  var loader = prefixedQmlLoader('QMLEngine/qml/State');
+  var load = prefixedQmlLoader('QMLEngine/qml/State');
 
   it("changes property values state is changed", function(done) {
-    qml = loader("Simple", this.div);
+    var qml = load("Simple", this.div);
     var count = 0;
     qml.yield = function() {
       if (count == 0) {
@@ -20,7 +20,7 @@ describe('QMLEngine.states', function() {
   });
 
   it("changes state when conditions are met", function(done) {
-    qml = loader("When", this.div);
+    var qml = load("When", this.div);
     var count = 0;
     qml.yield = function() {
       if (count == 0) {

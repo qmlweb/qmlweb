@@ -4,9 +4,9 @@ describe('QtQuick.Timer', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  var loader = prefixedQmlLoader('QtQuick/qml/Timer');
+  var load = prefixedQmlLoader('QtQuick/qml/Timer');
   it("can roughly set short intervals", function(done) {
-    var qml = loader("Singleshot", this.div);
+    var qml = load("Singleshot", this.div);
     qml.interval = 50;
     qml.yield = function(arg) {
       var t = new Date() - now;
@@ -18,7 +18,7 @@ describe('QtQuick.Timer', function() {
   });
 
   it("can roughly set short intervals", function(done) {
-    var qml = loader("Singleshot", this.div);
+    var qml = load("Singleshot", this.div);
     qml.interval = 500;
     qml.yield = function(arg) {
       var t = new Date() - now;

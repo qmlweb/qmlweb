@@ -4,9 +4,9 @@ function contextVariable(obj, name) {
 
 describe('QMLEngine.scope', function() {
   setupDivElement();
-  var loader = prefixedQmlLoader('QMLEngine/qml/Scope');
+  var load = prefixedQmlLoader('QMLEngine/qml/Scope');
   it('can reference parent items id', function() {
-    var qml = loader('Root', this.div);
+    var qml = load('Root', this.div);
     var parentItem = contextVariable(qml, "parentItem");
     expect(parentItem).not.toBe(undefined);
     expect(parentItem.$context).not.toBe(undefined);
@@ -20,13 +20,13 @@ describe('QMLEngine.scope', function() {
   });
 
   it('can reference inherited properties from parent (upflow)', function() {
-    var qml = loader("Upflow", this.div);
+    var qml = load("Upflow", this.div);
     var child = contextVariable(qml, "child");
     expect(child.thisFoo).toBe(15);
   });
 
   it('can reference sibling items by id', function() {
-    var qml = loader('Sibling', this.div);
+    var qml = load('Sibling', this.div);
     var childB = contextVariable(qml, "childB");
     expect(childB.value).toBe(4);
   });
