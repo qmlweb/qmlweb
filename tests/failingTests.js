@@ -11,6 +11,10 @@ window.failingTests = {
   QMLEngine: {
     imports: [
       'Javascript'
+    ],
+    properties: [
+      'alias have changed signal',
+      'alias to id with same name'
     ]
   },
   Initialize: {
