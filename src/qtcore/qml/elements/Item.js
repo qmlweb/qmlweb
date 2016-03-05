@@ -334,6 +334,8 @@ function QMLItem(meta) {
         this.dom.style.height = newVal ? newVal + "px" : "auto";
     });
 
+    this.width = 0;
+    this.height = 0;
     this.implicitHeight = 0;
     this.implicitWidth = 0;
     this.spacing = 0;
