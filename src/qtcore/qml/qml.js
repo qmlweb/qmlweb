@@ -156,7 +156,7 @@ function construct(meta) {
     item.$context["$basePath"] = engine.$basePath; //gut
 
     // Apply properties (Bindings won't get evaluated, yet)
-    applyProperties(meta.object, item, item, item.$context);
+    applyProperties(meta.object, item, item, item.$context, true);
 
     return item;
 }
@@ -251,8 +251,9 @@ var setupGetter,
  * @param {Object} item Target of property apply
  * @param {Object} objectScope Scope in which properties should be evaluated
  * @param {Object} componentScope Component scope in which properties should be evaluated
+ * @param {Boolean} forceTheChange Forces to set property value (even if it's the same)
  */
-function applyProperties(metaObject, item, objectScope, componentScope) {
+function applyProperties(metaObject, item, objectScope, componentScope, forceTheChange) {
     var i;
     objectScope = objectScope || item;
     for (i in metaObject) {
@@ -323,7 +324,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
             }
         }
         if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, true, objectScope, componentScope);
+            item.$properties[i].set(value, true, objectScope, componentScope, forceTheChange);
         else if (i in item)
             item[i] = value;
         else if (item.$setCustomData)
