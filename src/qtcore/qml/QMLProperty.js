@@ -5,7 +5,7 @@ function QMLProperty(type, obj, name) {
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
-    this.value = undefined;
+    this.val = undefined;
     this.type = type;
     this.animation = null;
 
