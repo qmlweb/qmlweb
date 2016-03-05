@@ -3,6 +3,7 @@ describe('QtQuick.Rectangle', function() {
   var itCanRender = prefixedRenderTester("QtQuick/qml/Rectangle");
 
   setupDivElement();
+
   itCanRender("Color");
 
   it('White', function() {
