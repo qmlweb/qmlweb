@@ -1,5 +1,8 @@
 window.failingTests = {
   Render: {
+    Simple: [
+      "RectangleImplicitSize"
+    ]
   },
   QMLEngine: {
     basic: [
