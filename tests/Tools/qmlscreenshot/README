@@ -1,0 +1,6 @@
+
+
+This application loads qml file, render it amd save to file. Build it on Qt 5.4.
+
+Usage:  qmlscrenshot qmlFile imageFile
+
