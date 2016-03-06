@@ -13,7 +13,7 @@ Rectangle {
     width: 11
     height: 10
     x: 15
-    radius: 2
+    border.color: 'red'
   }
   Rectangle {
     width: 10
