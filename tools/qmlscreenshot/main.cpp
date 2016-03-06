@@ -2,7 +2,6 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
-#include <cppobject.h>
 
 int main(int argc, char *argv[]) {
     if (argc <= 1) {

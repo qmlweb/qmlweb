@@ -4,6 +4,8 @@ import QtQuick.Window 2.2
 Window {
     visible: true
 
+    opacity: 1
+
     Loader {
         id: qmlLoader
         active: true
@@ -14,12 +16,21 @@ Window {
         }
     }
 
-    Component.onCompleted: {
-        if (qmlLoader.item) {
-            qmlLoader.item.grabToImage(function (result) {
-                result.saveToFile(outImageFile)
-                Qt.quit()
-            })
+    Timer {
+        id: timer
+        interval: 1500
+        repeat: false
+        onTriggered: {
+            if (qmlLoader.item) {
+                qmlLoader.item.grabToImage(function (result) {
+                    result.saveToFile(outImageFile)
+                    Qt.quit()
+                })
+            }
         }
+    }
+
+    Component.onCompleted: {
+        timer.start()
     }
 }
