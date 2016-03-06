@@ -35,24 +35,14 @@
     canvas.height = img.height;
     canvas.width = img.width;
     ctx.drawImage(img, 0, 0);
-    return ctx.getImageData(0, 0, img.height, img.width).data;
+    return canvas.toDataURL('image/png', 1);
   }
 
   function imagesEqual(a, b) {
     if (a.width !== b.width || a.height !== b.height)
       return false;
 
-    a = image2data(a);
-    b = image2data(b);
-
-    if (a.length !== b.length)
-      return false;
-
-    for (var i = 0; i < a.length; i++)
-      if (a[i] !== b[i])
-        return false;
-
-    return true;
+    return image2data(a) === image2data(b);
   }
 
   function delayedFrames(callback, frames) {
