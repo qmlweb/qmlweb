@@ -1,16 +1,15 @@
 describe('QMLEngine.imports', function() {
   setupDivElement();
-  var loader = prefixedQmlLoader('QMLEngine/qml/Import');
+  var load = prefixedQmlLoader('QMLEngine/qml/Import');
 
   it('Javascript', function() {
-    var qml = loader('Javascript', this.div);
-    var div = qml.dom;
-    expect(div.offsetWidth).toBe(20);
-    expect(div.offsetHeight).toBe(10);
-    expect(div.style.backgroundColor).toBe('magenta');
+    load('Javascript', this.div);
+    expect(this.div.offsetWidth).toBe(20);
+    expect(this.div.offsetHeight).toBe(10);
+    expect(this.div.style.backgroundColor).toBe('magenta');
   });
   it('Qmldir', function() {
-    loader('Qmldir', this.div);
+    load('Qmldir', this.div);
     expect(this.div.offsetWidth).toBe(50);
     expect(this.div.offsetHeight).toBe(100);
     expect(this.div.style.backgroundColor).toBe('green');

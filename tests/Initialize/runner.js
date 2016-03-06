@@ -1,6 +1,8 @@
 describe('Initialize.loadQml', function() {
+  setupDivElement();
+
   it('it can load qml without a file', function() {
-    var div = loadQml("import QtQuick 2.0\nItem {}\n");
+    loadQml("import QtQuick 2.0\nItem {}\n", this.div);
   });
 });
 
@@ -60,20 +62,17 @@ function testModule(modules, testFunc) {
 
 testModule(modules, function(module, element, imports, options) {
   describe('Initialize.' + module, function() {
+    setupDivElement();
+
     it(element, function() {
       var src = imports + element + " { }\n";
-      var engine = loadQml(src);
-      var div = engine.rootElement;
-      var qml = engine.rootObject;
-      expect(div).not.toBe(undefined);
+      var qml = loadQml(src, this.div);
       if (options.dom) {
-        expect(div.className).toBe(element);
-        expect(div.qml).not.toBe(undefined);
-        expect(div.qml.Component).not.toBe(undefined);
-      } else {
-        expect(qml.Component).not.toBe(undefined);
+        expect(this.div.className).toBe(element);
+        expect(this.div.qml).not.toBe(undefined);
+        expect(this.div.qml).toBe(qml);
       }
-      div.remove();
+      expect(qml.Component).not.toBe(undefined);
     });
   });
 });
