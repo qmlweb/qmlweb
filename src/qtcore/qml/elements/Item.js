@@ -83,7 +83,8 @@ function QMLItem(meta) {
     
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
-
+    this.implicitWidthChanged.connect(this, updateHGeometry);
+    this.implicitHeightChanged.connect(this, updateVGeometry);
     this.focus = false;
 
     this.setupFocusOnDom = (function(element) {
