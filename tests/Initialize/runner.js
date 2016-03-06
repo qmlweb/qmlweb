@@ -71,6 +71,7 @@ testModule(modules, function(module, element, imports, options) {
         expect(this.div.className).toBe(element);
         expect(this.div.qml).not.toBe(undefined);
         expect(this.div.qml).toBe(qml);
+        expect(this.div.style.boxSizing).toBe('border-box');
       }
       expect(qml.Component).not.toBe(undefined);
     });
