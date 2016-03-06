@@ -1,7 +1,7 @@
 import QtQuick 2.5
 
 Rectangle {
-  width: 75
+  width: 80
   height: 15
   color: 'green'
 
@@ -33,5 +33,11 @@ Rectangle {
     border.color: 'red'
     width: 10
     height: 10
+  }
+  Rectangle {
+    x: 75
+    border.width: 2
+    width: 0
+    height: 0
   }
 }
