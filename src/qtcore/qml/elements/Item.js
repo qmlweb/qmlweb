@@ -78,6 +78,15 @@ function QMLItem(meta) {
     createSimpleProperty("real", this, "opacity");
     createSimpleProperty("bool", this, "clip");
     createSimpleProperty("bool", this, "focus");
+    
+    this.width = 0;
+    this.height = 0;
+    this.implicitHeight = 0;
+    this.implicitWidth = 0;
+    this.spacing = 0;
+    this.x = 0;
+    this.y = 0;
+    
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     
@@ -329,13 +338,7 @@ function QMLItem(meta) {
         this.dom.style.height = newVal ? newVal + "px" : "auto";
     });
 
-    this.width = 0;
-    this.height = 0;
-    this.implicitHeight = 0;
-    this.implicitWidth = 0;
     this.spacing = 0;
-    this.x = 0;
-    this.y = 0;
     this.anchors.margins = 0;
     this.visible = true;
     this.opacity = 1;
