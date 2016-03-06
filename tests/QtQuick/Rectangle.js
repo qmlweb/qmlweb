@@ -5,6 +5,7 @@ describe('QtQuick.Rectangle', function() {
   setupDivElement();
 
   itCanRender("Color");
+  itCanRender("Inherit");
 
   it('White', function() {
     load('White', this.div);

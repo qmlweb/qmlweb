@@ -61,7 +61,6 @@
     var result, expected, loaded = 0;
 
     var process = function() {
-      console.log("process");
       if (++loaded !== 2) return;
       callback(imagesEqual(result, expected));
     };
