@@ -10,7 +10,7 @@ describe('QtQuick.Timer', function() {
     qml.interval = 50;
     qml.yield = function(arg) {
       var t = new Date() - now;
-      expect(t).toBeRoughly(50, 0.5);
+      expect(t).toBeRoughly(50, 1);
       done();
     };
     var now = new Date();
@@ -22,7 +22,7 @@ describe('QtQuick.Timer', function() {
     qml.interval = 500;
     qml.yield = function(arg) {
       var t = new Date() - now;
-      expect(t).toBeRoughly(500, 0.05);
+      expect(t).toBeRoughly(500, 0.1);
       done();
     };
     var now = new Date();
