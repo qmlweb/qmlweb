@@ -24,6 +24,8 @@ function QMLItem(meta) {
     this.dom.qml = this;
     this.css = this.dom.style;
 
+    this.css.boxSizing = 'border-box';
+
     createSimpleProperty("list", this, "data");
     this.$defaultProperty = "data";
     createSimpleProperty("list", this, "children");
