@@ -30,4 +30,18 @@ describe('QMLEngine.scope', function() {
     var childB = contextVariable(qml, "childB");
     expect(childB.value).toBe(4);
   });
+
+  it('local var assigns doesnt kill properties', function() {
+    var qml = load('SafeFromLocals', this.div);
+    expect(qml.a).toBe('333');
+    expect(qml.b).toBe('b_init_value');
+    expect(qml.c).toBe('');
+    expect(qml.d).toBe('3local');
+  });
+
+  it('chained property assign is possible', function() {
+    var qml = load('SafeFromLocals', this.div);
+    expect(qml.p).toBe(17);
+    expect(qml.q).toBe(17);
+  });
 });
