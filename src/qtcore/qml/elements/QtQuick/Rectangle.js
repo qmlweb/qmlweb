@@ -33,7 +33,6 @@ registerQmlType({
     this.radius = 0;
     this.css.borderWidth ='0px';
     this.css.borderStyle = 'solid';
-    this.css.boxSizing = 'border-box';
     this.css.borderColor = 'black';
 
     this.$drawItem = function(c) {
