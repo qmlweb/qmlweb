@@ -25,7 +25,7 @@ Rectangle {
     // no width/heigth is set but border is set
     x: 45
     color: 'orange'
-    border.width: 1
+    border.width: 5
   }
   Rectangle {
     x: 60
