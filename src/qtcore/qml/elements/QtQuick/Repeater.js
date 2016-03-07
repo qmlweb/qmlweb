@@ -122,7 +122,6 @@ function QMLRepeater(meta) {
         var removed = self.$items.splice(startIndex, endIndex - startIndex);
         for (var index in removed) {
             removed[index].$delete();
-            removed[index].parent = undefined;
             removeChildProperties(removed[index]);
         }
     }
