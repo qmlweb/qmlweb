@@ -11,3 +11,5 @@ build/
 *.kdev4
 *kate-swp
 .idea
+dev
+*.autosave
