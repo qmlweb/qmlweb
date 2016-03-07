@@ -80,12 +80,21 @@ function QMLItem(meta) {
     createSimpleProperty("real", this, "opacity");
     createSimpleProperty("bool", this, "clip");
     createSimpleProperty("bool", this, "focus");
+    
+    this.width = 0;
+    this.height = 0;
+    this.implicitHeight = 0;
+    this.implicitWidth = 0;
+    this.x = 0;
+    this.y = 0;
+    
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
     this.implicitWidthChanged.connect(this, updateHGeometry);
     this.implicitHeightChanged.connect(this, updateVGeometry);
+    
     this.focus = false;
 
     this.setupFocusOnDom = (function(element) {
@@ -330,11 +339,7 @@ function QMLItem(meta) {
         this.css.height = newVal ? newVal + "px" : "auto";
     });
 
-    this.implicitHeight = 0;
-    this.implicitWidth = 0;
     this.spacing = 0;
-    this.x = 0;
-    this.y = 0;
     this.anchors.margins = 0;
     this.visible = true;
     this.opacity = 1;

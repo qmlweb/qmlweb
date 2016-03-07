@@ -5,7 +5,7 @@ function QMLProperty(type, obj, name) {
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
-    this.value = undefined;
+    this.val = undefined;
     this.type = type;
     this.animation = null;
 
@@ -50,7 +50,7 @@ QMLProperty.prototype.get = function() {
 }
 
 // Define setter
-QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope) {
+QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, componentScope, forceTheChange) {
     var i,
         oldVal = this.val;
 
@@ -92,7 +92,7 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
         this.val = constructors[this.type](newVal);
     }
 
-    if (this.val !== oldVal) {
+    if (forceTheChange || this.val !== oldVal) {
         if (this.animation && !fromAnimation) {
             this.animation.running = false;
             this.animation.$actions = [{

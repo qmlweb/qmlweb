@@ -26,7 +26,11 @@ registerQmlType({
         this.css.borderWidth = this.border.width + 'px';
     });
     this.border.widthChanged.connect(this, function(newVal) {
-        this.css.borderWidth = newVal + 'px';
+        if (this.width > 0 && this.height > 0){
+            this.css.borderWidth = newVal + "px";
+        } else {
+            this.css.borderWidth = "0px";
+        }
     });
 
     this.color = "white";
