@@ -3,5 +3,5 @@ describe('QtQuick.Repeater', function() {
   var itCanRender = prefixedRenderTester("QtQuick/qml/Text");
 
   setupDivElement();
-  itCanRender("Basic");
+  itCanRender.Test("Basic");
 });

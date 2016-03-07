@@ -7,9 +7,12 @@ function loadQmlFile(file, div, opts) {
 }
 
 function prefixedQmlLoader(prefix) {
-  return function(file, opts) {
-    return loadQmlFile('/base/tests/' + prefix + file + '.qml', opts);
+  var path = '/base/tests/' + prefix ;
+  var fn = function(file, opts) {
+    return loadQmlFile(path+ file + '.qml', opts);
   };
+  fn.path = path;
+  return fn;
 }
 
 function loadQml(src, div, opts) {
@@ -32,13 +35,22 @@ function setupDivElement() {
 function prefixedRenderTester(group) {
   var path = group.replace(".", "/");
   var prefix = "/base/tests/" + path;
-  return function(name) {
-    renderTest({
-      qml:  prefix + name + ".qml",
-      png: prefix + name + ".png",
-      name: path.split("/").pop() + name,
-      group: path
-    });
+  return {
+      Test: function(name) {
+        renderTest({
+          qml:  prefix + name + ".qml",
+          png: prefix + name + ".png",
+          name: path.split("/").pop() + name,
+          group: path
+        });
+      },
+      compare: function(div){
+        return function(name, callback) {
+          console.log("compareREnder", compareRender)
+          return compareRender(div, prefix + name + ".png", callback)
+        }
+      }
+
   };
 }
 

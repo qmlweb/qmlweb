@@ -13,36 +13,48 @@ Rectangle {
         color: "red"
     }
 
+    //Component.onCompleted: {
+    //  timer.start()
+    //}
+
     Timer{
         id: timer
         interval: 100
+        triggeredOnStart: false
         onTriggered: {
+            console.log("trigger")
             nested.width =  60
             test.expect(nested.width).toBe(60)
-            compareRender("bigger", function(equal){
+            test.compareRender("bigger", function(equal){
                 test.expect(equal).toBe(true);
             });
-            test.expect(false).toBe(true)
         }
+    }
+    function start(){
+      timer.start();
     }
 
     Describe {
         id: test
-        expectedCalls: 6
+        delay: 100
+        expectedCalls: 5
         function it_isRunFirst(){
-            timer.start();
-            console.log(1)
-            expect(true).toBe(false)
+
+            console.log("test 1")
+            test.expect(true).toBe(true)
+            console.log("hmm")
         }
         function it_compareScreenshot(){
-            compareRender("", function(equal){
+            console.log("Screenshot")
+            test.compareRender("", function(equal){
+                console.log("ScreenshotDone", equal)
                 expect(equal).toBe(true);
             });
         }
 
         function it_isRunSecond(){
             console.log(2)
-            expect(true).toBe(true)
+            test.expect(true).toBe(true)
         }
     }
 

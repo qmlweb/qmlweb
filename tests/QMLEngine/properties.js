@@ -66,8 +66,8 @@ describe('QMLEngine.properties', function() {
   });
 
   it('Iterated', function() {
-    var qml = load('Iterated', this.div);
-    expect(qml.count).toBe(3);
+    var qml = load('Iterate', this.div);
+    expect(qml.count > 4).toBe(true);
 
   });
 });

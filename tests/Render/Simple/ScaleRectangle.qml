@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import QtTest 1.0
+
 Rectangle {
   color: 'green'
   width: 60; height: 50

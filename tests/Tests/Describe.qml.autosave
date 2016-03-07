@@ -5,7 +5,7 @@ Item {
     id: describe
     property int expectedCalls
     property int __counter: 0
-    property int delay: 100
+    property int delay: 10
     property var jasmine
     property var functions: []
     property var compareRender

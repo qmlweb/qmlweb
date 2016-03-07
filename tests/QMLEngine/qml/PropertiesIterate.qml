@@ -4,7 +4,8 @@ Item {
   property int prop3: 30
   property int count: 0
   Component.onCompleted: {
-    for (var prop in parent) {
+    console.log("Completed!!")
+    for (var prop in this) {
       count += 1
     }
   }

@@ -46,7 +46,8 @@
     };
   }
 
-  window.compareRender = function(div, png, callback) {
+  window.compareScreenshot = function(div, png, callback) {
+    console.log("png", png)
     var tmp = png.replace("/base/tests/", "");
     var result, expected, loaded = 0;
 
@@ -59,12 +60,12 @@
     expected = document.createElement('img');
     expected.src = png;
     expected.onload = process;
-    return function() {
+    //return function() {
       result = screenshot(div, {
         fileName: tmp
       });
       result.onload = process;
-    };
+    //};
   };
 
   window.renderTest = function(test) {
@@ -75,7 +76,7 @@
     it("Render " + test.name, function(done) {
       var div = loadQmlFile(test.qml, this.div).dom;
 
-      var onTestLoad = compareRender(div, test.png, function(equal) {
+      var onTestLoad = compareScreenshot(div, test.png, function(equal) {
         expect(equal);
         done();
       });
