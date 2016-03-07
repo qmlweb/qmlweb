@@ -64,4 +64,10 @@ describe('QMLEngine.properties', function() {
     expect(qml.stringA).toBe("333");
     expect(typeof qml.stringA).toBe("string");
   });
+
+  it('Iterated', function() {
+    var qml = load('Iterated', this.div);
+    expect(qml.count).toBe(3);
+
+  });
 });
