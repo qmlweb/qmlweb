@@ -29,6 +29,19 @@ function setupDivElement() {
   });
 }
 
+function prefixedRenderTester(group) {
+  var path = group.replace(".", "/");
+  var prefix = "/base/tests/" + path;
+  return function(name) {
+    renderTest({
+      qml:  prefix + name + ".qml",
+      png: prefix + name + ".png",
+      name: path.split("/").pop() + name,
+      group: path
+    });
+  };
+}
+
 var customMatchers = {
   toBeRoughly: function(util, customEqualityTesters) {
     return {

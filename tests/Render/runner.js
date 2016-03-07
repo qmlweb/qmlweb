@@ -28,7 +28,10 @@
   Object.keys(tests).forEach(function(group) {
     describe('Render.' + group, function() {
       setupDivElement();
-      tests[group].forEach(renderTest);
+      tests[group].forEach(function(test) {
+        test.delayed = test.group.indexOf('Async') !== -1;
+        renderTest(test);
+      });
     });
   });
 })();
