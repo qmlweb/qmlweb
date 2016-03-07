@@ -11,7 +11,11 @@ module.exports = function(config) {
       'tests/*/**/*.js',
       { pattern: 'tests/*/**/qmldir', included: false },
       { pattern: 'tests/*/**/*.qml', included: false },
-      { pattern: 'tests/*/**/*.png', included: false }
+      { pattern: 'tests/*/**/*.png', included: false },
+      { pattern: 'tests/Tests/*.qml', included: false },
+      { pattern: 'tests/Tests/*.png', included: false },
+      //'tests/Tests/testtest.js'
+
     ],
     browsers: ['PhantomJSCustom'],
     reporters: process.env.COVERALLS_REPO_TOKEN ?
