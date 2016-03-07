@@ -21,21 +21,9 @@ QMLFlow.prototype.layoutChildren = function() {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
-    var children = [];
-    var child    =  undefined;
-    var QMLRepeater = getConstructor('QtQuick', '2.0', 'Repeater');
-    
-    for (var key in this.children){
-        child = this.children[key];    
-         
-        if ( child instanceof QMLRepeater) {
-             children = children.concat(child.children);
-         }
-         else{
-             children.push(child);   
-         }
-    }
-    
+    var children = this.children;
+    var child    = undefined;
+
     if (children.length == 0) return;
  
     var flowWidth = this.$isUsingImplicitWidth ? this.implicitWidth : this.width;
