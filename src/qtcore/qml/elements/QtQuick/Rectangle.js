@@ -12,27 +12,28 @@ registerQmlType({
     createSimpleProperty("color", this.border, "color");
     createSimpleProperty("int", this.border, "width");
 
+    this.border.color = 'black';
+    this.border.width = 1;
+
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.style.backgroundColor = newVal;
+        this.css.backgroundColor = newVal;
     });
     this.radiusChanged.connect(this, function(newVal) {
-        this.dom.style.borderRadius = newVal + "px";
+        this.css.borderRadius = newVal + 'px';
     });
     this.border.colorChanged.connect(this, function(newVal) {
-        this.dom.style.borderColor = newVal;
-        this.dom.style.borderStyle = this.border.width == 0 || newVal == "transparent"
-                                            ? "none" : "solid";
+        this.css.borderColor = newVal;
+        this.css.borderWidth = this.border.width + 'px';
     });
     this.border.widthChanged.connect(this, function(newVal) {
-        this.dom.style.borderWidth = newVal + "px";
-        this.dom.style.borderStyle = newVal == 0 || this.border.color == "transparent"
-                                            ? "none" : "solid";
+        this.css.borderWidth = newVal + 'px';
     });
 
     this.color = "white";
-    this.border.color = "transparent";
-    this.border.width = 1;
     this.radius = 0;
+    this.css.borderWidth ='0px';
+    this.css.borderStyle = 'solid';
+    this.css.borderColor = 'black';
 
     this.$drawItem = function(c) {
         c.save();

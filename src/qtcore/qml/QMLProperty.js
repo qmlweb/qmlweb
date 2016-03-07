@@ -103,7 +103,11 @@ QMLProperty.prototype.set = function(newVal, fromAnimation, objectScope, compone
             }];
             this.animation.running = true;
         }
-        this.changed(this.val, oldVal, this.name);
+        if (this.obj.$syncPropertyToRemote instanceof Function && !fromAnimation) { // is a remote object from e.g. a QWebChannel
+            this.obj.$syncPropertyToRemote(this.name, newVal);
+        } else {
+            this.changed(this.val, oldVal, this.name);
+        }
     }
 }
 

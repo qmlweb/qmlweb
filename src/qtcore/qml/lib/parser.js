@@ -269,11 +269,12 @@ function parse_js_number(num) {
         }
 };
 
-function JS_Parse_Error(message, line, col, pos) {
+function JS_Parse_Error(message, line, col, pos, comment) {
         this.message = message;
-        this.line = line;
+        this.line = line + 1;
         this.col = col;
         this.pos = pos;
+        this.comment = comment ? comment : "";
         try {
                 ({})();
         } catch(ex) {
@@ -282,16 +283,30 @@ function JS_Parse_Error(message, line, col, pos) {
 };
 
 JS_Parse_Error.prototype.toString = function() {
-        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n\n" + this.stack;
+        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n" + this.comment + "\n" + this.stack;
 };
 
-function js_error(message, line, col, pos) {
-        throw new JS_Parse_Error(message, line, col, pos);
+function js_error(message, line, col, pos, comment) {
+        throw new JS_Parse_Error(message, line, col, pos, comment);
 };
 
 function is_token(token, type, val) {
         return token.type == type && (val == null || token.value == val);
 };
+
+function extractLinesForErrorDiag(text, line)
+{
+  var r = "";
+  var lines = text.split("\n");
+
+  for (var i = line - 3; i <= line + 3; i++)
+  if (i >= 0 && i < lines.length ) {
+      var mark = ( i == line ) ? ">>" : "  ";
+      r += mark + i + "  " + lines[i] + "\n";
+  }
+
+  return r;
+}
 
 var EX_EOF = {};
 
@@ -377,7 +392,7 @@ function tokenizer($TEXT) {
         };
 
         function parse_error(err) {
-                js_error(err, S.tokline, S.tokcol, S.tokpos);
+                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline ) );
         };
 
         function read_num(prefix) {
@@ -719,10 +734,12 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
 
         function croak(msg, line, col, pos) {
                 var ctx = S.input.context();
+                var eLine = (line != null ? line : ctx.tokline);
                 js_error(msg,
-                         line != null ? line : ctx.tokline,
+                         eLine,
                          col != null ? col : ctx.tokcol,
-                         pos != null ? pos : ctx.tokpos);
+                         pos != null ? pos : ctx.tokpos,
+                         extractLinesForErrorDiag( S.text, eLine ) );
         };
 
         function token_error(token, msg) {
@@ -1121,7 +1138,10 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
         };
 
         function array_() {
-                return as("array", expr_list("]", !exigent_mode, true));
+                var from = S.token.pos,
+                    stat = expr_list("]", !exigent_mode, true),
+                    to = S.token.pos;
+                return as("array", stat, "[" + S.text.substr(from, to - from));
         };
 
         function object_() {
@@ -1675,7 +1695,7 @@ function convertToEngine(tree) {
         "name": function(src) {
             if (src == "true" || src == "false")
                 return src == "true";
-            return bindout(tree, src);
+            return new QMLBinding(src, ["name", src]);
         },
         "num": function(src) {
             return +src;
@@ -1683,12 +1703,28 @@ function convertToEngine(tree) {
         "string": function(src) {
             return String(src);
         },
-        "array": function(src) {
-            var val = [];
-            for (var i in src)
-                val.push(walk(src[i]));
-            return val;
-        },
+        "array": function(tree, src) {
+            var a = [];
+            var isList = false;
+            var hasBinding = false;
+            for (var i in tree) {
+                var val = bindout(tree[i]);
+                a.push(val);
+
+                if (val instanceof QMLMetaElement)
+                    isList = true;
+                else if (val instanceof QMLBinding)
+                    hasBinding = true;
+            }
+
+            if (hasBinding) {
+                if (isList)
+                    throw new TypeError("An array may either contain bindings or Element definitions.");
+                return new QMLBinding(src, tree);
+            }
+
+            return a;
+        }
     };
 
     function walk(tree) {
@@ -1706,25 +1742,14 @@ function convertToEngine(tree) {
 
     // Try to bind out tree and return static variable instead of binding
     function bindout(tree, binding) {
-        // Detect booleans
-        if (tree[1][0] == "name"
-            && (tree[1][1] == "true" || tree[1][1] == "false")) {
-            return tree[1][1] == "true";
-        }
-        switch(tree[1][0]) {
-            case "num":
-                return +tree[1][1];
-            case "string":
-                return String(tree[1][1]);
-            case "qmlelem":
-                return walk(tree[1]);
-            case "array":
-                var val = [];
-                for (var i in tree[1][1])
-                    val.push(walk(tree[1][1][i]));
-                return val;
-            default:
-                return new QMLBinding(binding, tree);
+        if (tree[0] === "stat") // We want to process the content of the statement
+            tree = tree[1];     // (but still handle the case, we get the content directly)
+        var type = tree[0];
+        var walker = walkers[type];
+        if (walker) {
+            return walker.apply(type, tree.slice(1));
+        } else {
+            return new QMLBinding(binding, tree);
         }
     }
 

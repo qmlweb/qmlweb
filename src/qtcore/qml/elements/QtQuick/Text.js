@@ -22,10 +22,10 @@ registerQmlType({
             || font.weight == Font.DemiBold
             || font.weight == Font.Black
             || font.bold) ? "bold " : "normal ";
-        css += font.pixelSize !== Undefined
+        css += font.pixelSize !== undefined
             ? font.pixelSize + "px "
             : (font.pointSize || 10) + "pt ";
-        css += this.lineHeight !== Undefined ? this.lineHeight + "px " : " ";
+        css += this.lineHeight !== undefined ? this.lineHeight + "px " : " ";
         css += (font.family || "sans-serif") + " ";
         return css;
     }
@@ -160,7 +160,7 @@ registerQmlType({
     function updateImplicitHeight() {
         var height;
 
-        if (this.text === Undefined || this.text === "") {
+        if (this.text === undefined || this.text === "") {
             height = 0;
         } else {
             height = this.dom ? this.dom.firstChild.offsetHeight : 0;
@@ -172,7 +172,7 @@ registerQmlType({
     function updateImplicitWidth() {
         var width;
 
-        if (this.text === Undefined || this.text === "")
+        if (this.text === undefined || this.text === "")
             width = 0;
         else
             width = this.dom ? this.dom.firstChild.offsetWidth : 0;

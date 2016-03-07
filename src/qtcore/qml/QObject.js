@@ -10,6 +10,9 @@ function QObject(parent) {
 
     this.objectId = objectIds++;
     this.$delete = function() {
+        if (this.$Component)
+          this.$Component.destruction();
+
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
             if (item.$delete) // It's a QObject
@@ -26,5 +29,10 @@ function QObject(parent) {
 
         if (this.$parent && this.$parent.$tidyupList)
             this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
+
+        // must do this:
+        // 1) parent will be notified and erase object from it's children.
+        // 2) DOM node will be removed.
+        this.parent = undefined;
     }
 }

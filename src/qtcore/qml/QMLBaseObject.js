@@ -14,6 +14,9 @@ function QMLBaseObject(meta) {
     engine.completedSignals.push(this.Component.completed);
     this.completed = this.Component.completed;
 
+    this.Component.destruction = Signal([]);
+    this.destruction = this.Component.destruction;
+
     // Component get own properties
     var attributes = [];
     for (var key in meta.object) {
@@ -55,3 +58,9 @@ function QMLBaseObject(meta) {
     this.getAttributes = function() { return (attributes); }
 }
 
+registerQmlType({
+    module: 'QtQuick',
+    name: 'QtObject',
+    versions: /.*/,
+    constructor: QMLBaseObject
+});

@@ -52,4 +52,11 @@ describe('QMLEngine.imports', function() {
     var qml = load('RecursiveInit4', this.div);
     expect(qml.log).toBe("");
   });
+
+  it('can be bound inside an array', function() {
+    var qml = load('Array', this.div);
+    expect(qml.bindingArray[3][1]).toBe(2);
+    qml.value++;
+    expect(qml.bindingArray[3][1]).toBe(3);
+  });
 });

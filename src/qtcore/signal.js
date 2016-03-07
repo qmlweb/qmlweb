@@ -14,7 +14,11 @@ global.Signal = function Signal(params, options) {
 
     var signal = function() {
         for (var i in connectedSlots)
-            connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+            try {
+                connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
+            } catch(err) {
+                console.log(err.message);
+            }
     };
     signal.parameters = params || [];
     signal.connect = function() {
@@ -29,6 +33,12 @@ global.Signal = function Signal(params, options) {
                 arguments[0].$tidyupList.push(this);
             connectedSlots.push({thisObj: arguments[0], slot: arguments[1]});
         }
+
+        // Notify object of connect
+        if (options.obj && options.obj.$connectNotify) {
+            options.obj.$connectNotify(options);
+        }
+
     }
     signal.disconnect = function() {
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
@@ -45,6 +55,11 @@ global.Signal = function Signal(params, options) {
                 connectedSlots.splice(i, 1);
                 i--; // We have removed an item from the list so the indexes shifted one backwards
             }
+        }
+
+        // Notify object of disconnect
+        if (options.obj && options.obj.$disconnectNotify) {
+            options.obj.$disconnectNotify(options);
         }
     }
     signal.isConnected = function() {

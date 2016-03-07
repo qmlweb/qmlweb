@@ -14,6 +14,12 @@ describe('QMLEngine.properties', function() {
     expect(qml.bigNumber).toEqual(100000000);
   });
 
+  it('undefined property has undefined value', function() {
+    var qml = load('Undefined', this.div);
+    expect(qml.theUndefined).toEqual(undefined);
+    expect(typeof qml.theUndefined).toEqual("undefined");
+  });
+
   it('can be aliased', function() {
     var qml = load('Alias', this.div);
     expect(qml.childX).toBe(125);
