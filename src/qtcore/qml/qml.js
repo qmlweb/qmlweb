@@ -319,10 +319,11 @@ function applyProperties(metaObject, item, objectScope, componentScope, forceThe
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
                 // Apply properties one by one, otherwise apply at once
-                applyProperties(value, item[i], objectScope, componentScope);
+                applyProperties(value, item[i], objectScope, componentScope, forceTheChange);
                 continue;
             }
         }
+
         if (item.$properties && i in item.$properties)
             item.$properties[i].set(value, true, objectScope, componentScope, forceTheChange);
         else if (i in item)
@@ -332,6 +333,7 @@ function applyProperties(metaObject, item, objectScope, componentScope, forceThe
         else
             console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
     }
+
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)
             item.$properties[item.$defaultProperty].set(metaObject.$children, true, objectScope, componentScope);
