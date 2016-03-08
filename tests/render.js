@@ -47,7 +47,7 @@
   }
 
   window.compareScreenshot = function(div, png, callback) {
-    console.log("png", png)
+    console.log("png", png);
     var tmp = png.replace("/base/tests/", "");
     var result, expected, loaded = 0;
 

@@ -70,4 +70,10 @@ describe('QMLEngine.properties', function() {
     expect(qml.count > 4).toBe(true);
 
   });
+  
+  it("can access properties of nested ancestors", function() {
+    var qml = load('WithDeepAncestry', this.div);
+    expect(qml.deep).toBe(22);
+    expect(qml.value).toBe(44);
+  });
 });
