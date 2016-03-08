@@ -52,8 +52,6 @@ Item {
         }
     }
 
-
-
     function expect(value){
       console.log("expect", value)
       if(jasmine !== undefined){
@@ -77,7 +75,7 @@ Item {
         var oldExp = exp.toBe.bind(exp);
         exp.toBe = function(value){
            __counter += 1
-           console.log("counter", __counter)
+           //console.log("counter", __counter)
            oldExp(value)
 
            if(__counter === expectedCalls){
@@ -88,18 +86,16 @@ Item {
         return exp
     }
 
-
-
     function qtExpect(value){
       return {
            toBe: function(expected){
                __counter += 1
-               console.log("counter", __counter)
+               //console.log("counter", __counter)
                if(expected !== value){
                    console.log("FAILED: expected " + expected + " to be " + value);
                }
                else console.log("PASS");
-               console.log("expectedCalls", expectedCalls, __counter)
+               //console.log("expectedCalls", expectedCalls, __counter)
                if(__counter === expectedCalls){
                    console.log("done")
                    done()

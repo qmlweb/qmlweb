@@ -13,13 +13,9 @@ Rectangle {
         color: "red"
     }
 
-    //Component.onCompleted: {
-    //  timer.start()
-    //}
-
     Timer{
         id: timer
-        interval: 100
+        interval: 200
         triggeredOnStart: false
         onTriggered: {
             console.log("trigger")
@@ -36,24 +32,21 @@ Rectangle {
 
     Describe {
         id: test
-        delay: 100
+        delay: 150
         expectedCalls: 5
         function it_isRunFirst(){
-
             console.log("test 1")
             test.expect(true).toBe(true)
-            console.log("hmm")
         }
         function it_compareScreenshot(){
-            console.log("Screenshot")
+            console.log("test 2 screenshot")
             test.compareRender("", function(equal){
-                console.log("ScreenshotDone", equal)
                 expect(equal).toBe(true);
             });
         }
 
         function it_isRunSecond(){
-            console.log(2)
+            console.log("test 3")
             test.expect(true).toBe(true)
         }
     }
