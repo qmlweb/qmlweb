@@ -1,34 +1,48 @@
 import QtQuick 2.5
 import QtQuick.Window 2.0
-Loader{
-    source: "../" + script
-    Component.onCompleted: {
-        console.log("completed")
-        console.log(script)
-        //timer.start()
-        //Qt.quit()
-    }
+Window {
+    id: window
+    visible: true
+    minimumWidth: 0
+    minimumHeight: 0
+    flags: Qt.FramelessWindowHint
 
-    onLoaded: {
-        console.log("load")
-        item.start()
-        for(var i in item.data){
-          var child = item.data[i]
-          if(child.toString().indexOf("Describe") === 0){
-              child.compareRender = function(tag, callback){
-                  var path = source.toString()
-                      .replace(".qml", "")
-                      .replace("file://", "")
-                  if(tag)
-                    path = path + "-" + tag
-                  console.log("grab" + path + ".png")
-                  shorty.shootFull(path+ ".png")
+    Loader{
+        opacity: 1
+        anchors.centerIn: parent
+        id: loader
+        source: "../" + script
 
-                  callback(true) //doesnt compare in qt only generate image
-              }
-              child.start()
-          }
+        onLoaded: {
+            window.height = item.height
+            window.width = item.width
+
+            if(item.start !== undefined)
+                item.start()
+            for(var i in item.data){
+                var child = item.data[i]
+                if(child.__isTest){
+                  child.compareRender = compare
+                  child.start()
+                }
+            }
+
+
         }
 
+        function compare(tag, callback){
+            //console.log(source);
+            var path = source.toString()
+                .replace(".qml", "")
+                .replace("file:///", "")
+                .replace("file://", "")
+            if(tag)
+                path = path + "-" + tag
+
+            console.log("COMPARE")
+            shorty.shootFull(path+ ".png", window)
+            callback(true) //doesnt compare in qt only generate image
+        }
     }
+
 }

@@ -1,11 +1,13 @@
-Describe {
+import QtQuick 2.0
+
+BaseTest {
     id: test
-    delay: 150
-    expectedCalls: 5
-    startupTimer.onTriggered: {
-      console.log("test screenshot")
-      test.compareRender("", function(equal){
-          expect(equal).toBe(true);
-      });
+    delay: 200
+
+    startTest: function(){
+        test.compareRender("", function(equal){
+            expect(equal).toBe(true);
+            testDone();
+        });
     }
 }
