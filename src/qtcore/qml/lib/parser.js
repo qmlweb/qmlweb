@@ -270,21 +270,20 @@ function parse_js_number(num) {
 };
 
 function JS_Parse_Error(message, line, col, pos, comment) {
-        this.message = message;
+
         this.line = line + 1;
         this.col = col;
         this.pos = pos;
         this.comment = comment ? comment : "";
+        this.message = message + " (line: " + line + ", col: " + col + ", pos: " + pos + ")" + "\n" + comment + "\n"
         try {
                 ({})();
         } catch(ex) {
                 this.stack = ex.stack;
         };
-};
 
-JS_Parse_Error.prototype.toString = function() {
-        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n" + this.comment + "\n" + this.stack;
 };
+JS_Parse_Error.prototype = new Error();
 
 function js_error(message, line, col, pos, comment) {
         throw new JS_Parse_Error(message, line, col, pos, comment);
@@ -1463,7 +1462,7 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             var moduleName = S.token.value;
             var isDottedNotation = (S.token.type == "name");
             next();
-            
+
             while (is("punc", ".")) {
                 next();
                 moduleName += "." + S.token.value;

@@ -187,19 +187,6 @@ function parse_js_number(num) {
     }
 };
 
-function JS_Parse_Error(message, filename, line, col, pos) {
-    this.message = message;
-    this.filename = filename;
-    this.line = line;
-    this.col = col;
-    this.pos = pos;
-    this.stack = new Error().stack;
-};
-
-JS_Parse_Error.prototype.toString = function() {
-    return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n\n" + this.stack;
-};
-
 function js_error(message, filename, line, col, pos) {
     throw new JS_Parse_Error(message, filename, line, col, pos);
 };
