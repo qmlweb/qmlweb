@@ -16,4 +16,17 @@ describe('QMLEngine.imports', function() {
     // #0ff and cyan doesn't work, because PhantomJS converts
     // them to rgb( 0,255,255 ).. how to compare colors?..
   });
+  it("can import from sibling directory", function() {
+    var qml = load("From/SiblingDir", this.div);
+    expect(qml.text).toBe("I'm simple");
+  });
+  it("can import from parent directory", function() {
+    var qml = load("From/ParentDir", this.div);
+    expect(qml.value).toBe(5);
+  });
+  it("can import from directory without qmldir file", function() {
+    var qml = load("NoQmldir", this.div);
+    expect(qml.value).toBe(67);
+  });
+
 });
