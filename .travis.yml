@@ -8,3 +8,7 @@ cache:
   directories:
     - $HOME/.npm/
     - node_modules
+before_install:
+  - npm install -g codecov
+after_success:
+  - codecov
