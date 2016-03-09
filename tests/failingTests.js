@@ -20,6 +20,7 @@ window.failingTests = {
     properties: [
       'alias have changed signal',
       'alias to id with same name',
+      'ChangedExpressionSignal',
       'StringConversion',
       'undefined property has undefined value'
     ]
