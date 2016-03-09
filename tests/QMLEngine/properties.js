@@ -64,4 +64,14 @@ describe('QMLEngine.properties', function() {
     expect(qml.stringA).toBe("333");
     expect(typeof qml.stringA).toBe("string");
   });
+
+  it('ChangedSignal', function() {
+    var qml = load('ChangedSignal', this.div);
+    expect(qml.result).toBe(69);
+  });
+
+  it('ChangedExpressionSignal', function() {
+    var qml = load('ChangedExpressionSignal', this.div);
+    expect(qml.counter).toBe(1);
+  });
 });
