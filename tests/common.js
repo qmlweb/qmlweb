@@ -1,5 +1,13 @@
 function loadQmlFile(file, div, opts) {
-  var engine = new QMLEngine(div, opts || {});
+  opts = opts || {};
+  var engine = new QMLEngine(div, opts);
+  console.log("opts", opts)
+  if (opts.paths) {
+    opts.paths.forEach(function(path) {
+      console.log("add imports")
+      engine.addImportPath(path);
+    });
+  }
   engine.loadFile(file);
   engine.start();
   document.body.appendChild(div);

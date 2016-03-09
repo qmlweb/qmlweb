@@ -95,11 +95,12 @@ QMLEngine = function (element, options) {
     // Load file, parse and construct (.qml or .qml.js)
     this.loadFile = function(file) {
         var tree;
-
+        console.log("load " + file)
         this.$basePath = this.extractBasePath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
         this.loadQMLTree(tree);
+        console.log("load " + file)
     }
 
     // parse and construct qml
@@ -120,7 +121,7 @@ QMLEngine = function (element, options) {
         component.$basePath = engine.$basePath;
         component.$imports = tree.$imports; // for later use
         component.$file = file; // just for debugging
-
+        console.log("load " + file)
         this.rootObject = component.createObject(null);
         component.finalizeImports(this.rootContext());
         this.$initializePropertyBindings();
@@ -182,15 +183,15 @@ QMLEngine = function (element, options) {
       Additional implicit input/output:
       * engine object variable `qmldirsContents` - used for caching, e.g. memory for previously loaded qmldir files
 
-      Output: 
+      Output:
       * engine object variable `qmldirs` - new records will be added there
 
-      Return value: 
+      Return value:
       * nothing
 
       Details:
 
-      For each of given import statements, loadImports 
+      For each of given import statements, loadImports
       1. computes qmldir file location according to http://doc.qt.io/qt-5/qtqml-syntax-imports.html
       2. calls `readQmlDir` for actual reading and parsing of qmldir file content
       3. gets `external` declarations of that qmldir file and pushes them to `engine.qmldirs` hash.
@@ -209,13 +210,13 @@ QMLEngine = function (element, options) {
       Q2: How we may access component object from here, to store qmldirs info in components logical scope, and not at engine scope?
       A2: Probably, answer is in Component.js and in global.loadImports
 
-      TODO 
+      TODO
       * We have to keep output in component scope, not in engine scope.
       * We have to add module "as"-names to component's names (which is possible after keeping imports in component scope).
       * Determine how this stuff is related to `global.loadImports`
       * Check A1
       * Make a complete picture of what going in with imports, including Component.js own imports loading
-      * Note importJs method in import.js 
+      * Note importJs method in import.js
     */
 
     this.loadImports = function(importsArray, currentFileDir) {
@@ -283,9 +284,9 @@ QMLEngine = function (element, options) {
                // add that dir to import path list
                // that means, lookup qml files in that failed dir by trying to load them directly
                // this is not the same behavior as in Qt for "url" schemes,
-               // but it is same as for ordirnal disk files. 
+               // but it is same as for ordirnal disk files.
                // So, we do it for experimental purposes.
-               if (nameIsDir) 
+               if (nameIsDir)
                  this.addImportPath( name + "/" );
 
                continue;
@@ -633,4 +634,3 @@ QMLEngine = function (element, options) {
         };
     }
 }
-

@@ -40,7 +40,7 @@ Window {
                 path = path + "-" + tag
 
             console.log("COMPARE")
-            shorty.shootFull(path+ ".png", window)
+            screenshot.shootFull(path+ ".png", window)
             callback(true) //doesnt compare in qt only generate image
         }
     }

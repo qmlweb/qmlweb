@@ -13,6 +13,7 @@ global.Qt = {
   // Load file, parse and construct as Component (.qml)
   //FIXME: remove the parameter executionContext and get it autonomously.
   createComponent: function(name, executionContext) {
+    console.log("createcomp: ", name);
     if (name in engine.components)
         return engine.components[name];
 
@@ -50,6 +51,7 @@ global.Qt = {
         console.error("A QML component must only contain one root element!");
 
     var component = new QMLComponent({ object: tree, context: executionContext });
+    console.log("components");
     component.$basePath = engine.extractBasePath( file );
     component.$imports = tree.$imports;
     component.$file = file; // just for debugging
@@ -67,7 +69,7 @@ global.Qt = {
     if (!url || !url.substr) // url is not a string object
       return url;
 
-    // Must check for cases: D:/, file://, http://, or slash at the beginning. 
+    // Must check for cases: D:/, file://, http://, or slash at the beginning.
     // This means the url is absolute => we have to skip processing (except removing dot segments).
     if (url == "" || url.indexOf(":/") != -1 || url.indexOf("/") == 0)
       return engine.removeDotSegments( url );

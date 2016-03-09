@@ -3,12 +3,14 @@ function contextVariable(obj, name) {
 }
 
 function qmlTest(load, name) {
-  it("QML: " + name, function(done) {
-    var qml = load(name, this.div);
+  it("QML TEST: " + name, function(done) {
+    var qml = load(name, this.div, {
+      paths: ["/base/tests/include"]
+    });
     var div = this.div;
     console.log("TEST", name)
 
-
+    console.log(qml);
     var test = contextVariable(qml, "test");
     test.compareRender = function(tag, callback) {
       console.log("compare", tag)

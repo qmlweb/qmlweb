@@ -8,6 +8,7 @@ function QMLContext() {
 }
 
 QMLComponent.prototype.createObject = function(parent, properties) {
+    
     var oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
     // change base path to current component base path

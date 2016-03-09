@@ -19,7 +19,7 @@ describe('QMLEngine.imports', function() {
 
   it("ImportPath", function() {
     load("AddImportPath", this.div, {
-      paths: ["tests/QMLEngine/qml/somefolder"]
+      paths: ["/base/tests/QMLEngine/qml/somefolder"]
     });
   });
 });

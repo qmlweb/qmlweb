@@ -1,7 +1,9 @@
 window.failingTests = {
   Render: {
     Async: [
-      'NumberAnimationAutorun'
+      'NumberAnimationAutorun',
+      'Image',
+      'NumberAnimation'
     ],
     Simple: [
       'RectangleBorderChildren',
@@ -21,6 +23,11 @@ window.failingTests = {
       'undefined property has undefined value'
     ]
   },
+  QtQuick: {
+    Text: [
+      'Render TextBasic'
+    ]
+  },
   Initialize: {
     QtQuick: [
       'Translate',
@@ -28,6 +35,7 @@ window.failingTests = {
       'Rotation',
       'Font',
       'AnimatedImage'
+
     ]
   }
 };
