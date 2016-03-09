@@ -269,25 +269,24 @@ function parse_js_number(num) {
         }
 };
 
-function JS_Parse_Error(message, line, col, pos, comment) {
-        this.message = message;
-        this.line = line + 1;
+function QMLParseError(message, line, col, pos, comment) {
+        line = line + 1
+        this.line = line;
         this.col = col;
         this.pos = pos;
         this.comment = comment ? comment : "";
+        this.message = message + " (line: " + line + ", col: " + col + ", pos: " + pos + ")" + "\n" + comment + "\n"
         try {
                 ({})();
         } catch(ex) {
                 this.stack = ex.stack;
         };
-};
 
-JS_Parse_Error.prototype.toString = function() {
-        return this.message + " (line: " + this.line + ", col: " + this.col + ", pos: " + this.pos + ")" + "\n" + this.comment + "\n" + this.stack;
 };
+QMLParseError.prototype = new Error();
 
 function js_error(message, line, col, pos, comment) {
-        throw new JS_Parse_Error(message, line, col, pos, comment);
+        throw new QMLParseError(message, line, col, pos, comment);
 };
 
 function is_token(token, type, val) {
@@ -302,7 +301,7 @@ function extractLinesForErrorDiag(text, line)
   for (var i = line - 3; i <= line + 3; i++)
   if (i >= 0 && i < lines.length ) {
       var mark = ( i == line ) ? ">>" : "  ";
-      r += mark + i + "  " + lines[i] + "\n";
+      r += mark + (i + 1) + "  " + lines[i] + "\n";
   }
 
   return r;
