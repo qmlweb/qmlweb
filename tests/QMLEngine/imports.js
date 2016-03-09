@@ -16,4 +16,10 @@ describe('QMLEngine.imports', function() {
     // #0ff and cyan doesn't work, because PhantomJS converts
     // them to rgb( 0,255,255 ).. how to compare colors?..
   });
+
+  it("ImportPath", function() {
+    load("AddImportPath", this.div, {
+      paths: ["tests/QMLEngine/qml/somefolder"]
+    });
+  });
 });
