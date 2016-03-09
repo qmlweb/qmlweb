@@ -13,4 +13,9 @@ describe('QMLEngine.parse', function() {
     expect(exception.comment).toContain("properly int error");
     expect(exception.line).toBe(4);
   });
+
+  it("can parse a function assigned to a var property", function() {
+    var qml = load('FunctionVar', this.div);
+    expect(typeof qml.aFunction).toBe("function");
+  });
 });
