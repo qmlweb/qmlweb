@@ -9,6 +9,9 @@ window.failingTests = {
     ]
   },
   QMLEngine: {
+    parse: [
+      'can parse a function assigned to a var property'
+    ],
     imports: [
       'Javascript',
       'RecursiveInit',
