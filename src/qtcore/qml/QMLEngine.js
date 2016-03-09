@@ -104,6 +104,11 @@ QMLEngine = function (element, options) {
 
     // parse and construct qml
     this.loadQML = function(src) {
+        
+        // #load [engine::loadQML] -> [engine::parseQML] : 1
+        // #load [engine::loadQML] -> [engine::loadQMLTree] : 2 arg1=parseQML.out
+        // #import [engine::loadQML] -> [engine::parseQML] : 1
+        // #import [engine::loadQML] -> [engine::loadQMLTree] : 2 arg1=parseQML.out
         this.loadQMLTree(parseQML(src));
     }
 
@@ -116,6 +121,8 @@ QMLEngine = function (element, options) {
         // Create and initialize objects
         var component = new QMLComponent({ object: tree, parent: null });
 
+        // #import [engine::loadQMLTree] -> [Component::new] : 1 arg1={ object: tree, parent: null }
+        // #import [engine::loadQMLTree] -> [engine::loadImports] : 2 arg1=tree.$imports
         this.loadImports( tree.$imports );
         component.$basePath = engine.$basePath;
         component.$imports = tree.$imports; // for later use
@@ -219,12 +226,16 @@ QMLEngine = function (element, options) {
     */
 
     this.loadImports = function(importsArray, currentFileDir) {
+        // #import [engine::loadImports] <-> [engine::qmldirsContents] :: default { "QtQuick":{}, "QtQuick.Controls":{} }
         if (!this.qmldirsContents) this.qmldirsContents = { "QtQuick":{}, "QtQuick.Controls":{} }; // cache
         // putting initial keys in qmldirsContents - is a hack. We should find a way to explain to qmlweb, is this built-in module or qmldir-style module.
 
+        // #import [engine::loadImports] <-> [engine::qmldirs]
         if (!this.qmldirs) this.qmldirs = {};                 // resulting components lookup table
 
         if (!importsArray || importsArray.length == 0) return;
+
+        // #import [engine::loadImports] <- [engine::$basePath] : use by default
         if (!currentFileDir) currentFileDir = this.$basePath;     // use this.$basePath by default
 
         for (var i=0; i<importsArray.length; i++) {
@@ -243,12 +254,15 @@ QMLEngine = function (element, options) {
                 if (name[ name.length-1 ] == "/")
                     name = name.substr( 0, name.length-1 ); // remove trailing slash as it required for `readQmlDir`
             }
-            // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
+            // if nameIsDir, we have also to add `name` to importPathList() for current component...
+            // this is done below, see this.addImportPath
 
             // check if we have already loaded that qmldir file
             if (this.qmldirsContents[ name ]) continue;
 
             var content = false;
+            // #import [engine::loadImports] -> [readQmlDir]
+            // #import [engine::loadImports] <- [engine::userAddedModulePaths] : in case of nameIsQualifiedModuleName
             if (nameIsQualifiedModuleName && this.userAddedModulePaths && this.userAddedModulePaths[ name ]) {
                 // 1. we have qualified module and user had configured path for that module with this.addModulePath
                 content = readQmlDir( this.userAddedModulePaths[ name ] );
@@ -263,6 +277,7 @@ QMLEngine = function (element, options) {
             else
             {
                 // 3. qt-style lookup for qualified module
+                // #import [engine::loadImports] <- [engine::importPathList] : iterate over dirs for qualified module name
                 var probableDirs = [currentFileDir].concat( this.importPathList() )
                 var diredName = name.replace( /\./g,"/" );
 
@@ -285,6 +300,7 @@ QMLEngine = function (element, options) {
                // this is not the same behavior as in Qt for "url" schemes,
                // but it is same as for ordirnal disk files. 
                // So, we do it for experimental purposes.
+               // #import [engine::loadImports] -> [engine::addImportPath]
                if (nameIsDir) 
                  this.addImportPath( name + "/" );
 
@@ -434,16 +450,21 @@ QMLEngine = function (element, options) {
     // please open qt site for documentation
     // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
+    // #import User -> [engine::addImportPath]
+    // #import [engine::addImportPath] -> [engine::userAddedImportPaths]
     this.addImportPath = function( dirpath ) {
         if (!this.userAddedImportPaths) this.userAddedImportPaths = [];
         this.userAddedImportPaths.push( dirpath );
     }
 
+    // #import User -> [engine::setImportPathList]
+    // #import [engine::setImportPathList] -> [engine::userAddedImportPaths] : reset
     this.setImportPathList = function( arrayOfDirs )
     {
         this.userAddedImportPaths = arrayOfDirs;
     }
 
+    // #import [engine::userAddedImportPaths] -> [engine::importPathList]
     this.importPathList = function() {
         return (this.userAddedImportPaths || []);
     }
@@ -452,6 +473,7 @@ QMLEngine = function (element, options) {
     // e.g. addModulePath( "QtQuick.Controls","http://someserver.com/controls" )
     // will force system to `import QtQuick.Controls` module from `http://someserver.com/controls/qmldir`
 
+    // #import [engine::addModulePath] -> [engine::userAddedModulePaths]
     this.addModulePath = function( moduleName, dirPath ) {
 
         // remove trailing slash as it required for `readQmlDir`

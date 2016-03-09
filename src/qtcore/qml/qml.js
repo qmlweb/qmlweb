@@ -91,6 +91,7 @@ global.mergeObjects = function (obj1, obj2) {
 global.perContextConstructors = {};
 
 global.loadImports = function (self, imports) {
+  console.log("global.loadImports called...")
   constructors = mergeObjects(modules.Main, null);
   for (var i = 0 ; i < imports.length ; ++i) {
     var moduleName = imports[i][1],

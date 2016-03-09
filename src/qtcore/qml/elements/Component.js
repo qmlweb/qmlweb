@@ -71,7 +71,11 @@ function QMLComponent(meta) {
       for (var i = 0 ; i < meta.object.$imports.length ; ++i) {
         loadImport(meta.object.$imports[i]);
       }
+      // #import [Component::new] -> [Component::moduleImports] : imports without js files
+      // #import [Component::new] -> [global::loadImports] : arg1=this, arg2=moduleImports
       loadImports(this, moduleImports);
+
+      // #import [Component::new] -> [global::finalizeImports] : arg1=this.$context
       if (typeof this.$context != 'undefined' && this.$context != null)
         this.finalizeImports(this.$context);
     }

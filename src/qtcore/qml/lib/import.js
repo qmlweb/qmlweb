@@ -129,6 +129,7 @@ readQmlDir = function (url) {
     // Q1: when this happen?
     var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";
 
+    // #import [readQmlDir] -> [getUrlContents] : arg1=qmldirFileUrl, skipExceptions=true
     var qmldir = getUrlContents( qmldirFileUrl, true), // loading url contents with skipping errors
         lines,
         line,
