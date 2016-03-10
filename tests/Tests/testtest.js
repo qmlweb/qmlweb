@@ -32,7 +32,9 @@ function qmlTest(load, name) {
 describe('Test.TestCase', function() {
   setupDivElement();
   var load = prefixedQmlLoader('Tests/');
-  qmlTest(load, "TestCase");
+  var renderTest = prefixedRenderTester('Tests/')
+  //renderTest.Test("TestCase")
+  qmlTest(load, "SimpleRenderTest");
   //var compare = prefixedRenderTester("Tests/").compare;
   //it("works", function(done) {
     // var qml = load("TestCase", this.div);

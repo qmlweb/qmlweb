@@ -8,14 +8,11 @@ Item {
     property var jasmine
     property int delay: 10
     property var startTest
-
+    property alias timer: startupTimer
     Timer{
         id: startupTimer
         interval: delay
         triggeredOnStart: false
-        onTriggered: {
-            parent.startTest()
-        }
     }
 
     function start(){

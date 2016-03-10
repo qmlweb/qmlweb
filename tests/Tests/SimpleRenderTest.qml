@@ -8,6 +8,6 @@ Item{
     }
     width: 25
     height: 25
-    RenderTest { id: test }
+    RenderTest { id: test; delay: 2000 }
 
 }

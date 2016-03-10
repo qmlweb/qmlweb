@@ -4,8 +4,7 @@ BaseTest {
     property bool isTest: true
     id: describe
     property var functions: []
-    startTest: _startTest //temporary workaround
-    function _startTest(){
+    timer.onTriggered: {
         console.log("START")
         findTests()
         run(0, function(){

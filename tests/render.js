@@ -1,11 +1,11 @@
 (function() {
   function screenshot(div, options) {
-    if (!window.top.callPhantom)
+    if(!window.top.callPhantom)
       return undefined;
 
     var rect0 = div.getBoundingClientRect();
     var rect1 = window.parent.document.getElementById('context')
-                                      .getBoundingClientRect();
+      .getBoundingClientRect();
     var offset = {
       width: div.offsetWidth,
       height: div.offsetHeight,
@@ -32,14 +32,14 @@
   }
 
   function imagesEqual(a, b) {
-    if (a.width !== b.width || a.height !== b.height)
+    if(a.width !== b.width || a.height !== b.height)
       return false;
 
     return image2data(a) === image2data(b);
   }
 
   function delayedFrames(callback, frames) {
-    if (frames === 0)
+    if(frames === 0)
       return callback;
     return function() {
       window.requestAnimationFrame(delayedFrames(callback, frames - 1));
@@ -53,35 +53,37 @@
 
     var process = function() {
       console.log("process");
-      if (++loaded !== 2) return;
+      if(++loaded !== 2) return;
       callback(imagesEqual(result, expected));
     };
 
     expected = document.createElement('img');
     expected.src = png;
     expected.onload = process;
-    //return function() {
-      result = screenshot(div, {
-        fileName: tmp
-      });
-      result.onload = process;
-    //};
+
+    result = screenshot(div, {
+      fileName: tmp
+    });
+    result.onload = process;
+
   };
 
   window.renderTest = function(test) {
-    if (!window.top.callPhantom) {
+    if(!window.top.callPhantom) {
       console.log('Render tests require PhantomJS');
       return;
     }
     it("Render " + test.name, function(done) {
       var div = loadQmlFile(test.qml, this.div).dom;
 
-      var onTestLoad = compareScreenshot(div, test.png, function(equal) {
-        expect(equal);
-        done();
-      });
+      var onTestLoad = function() {
+        compareScreenshot(div, test.png, function(equal) {
+          expect(equal);
+          done();
+        });
+      }
       if (test.delayed) {
-        window.onTestLoad = function(options) {
+        onTestLoad = function(options) {
           options = options || {};
           delayedFrames(onTestLoad, options.framesDelay || 0)();
         };
