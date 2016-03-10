@@ -10,7 +10,9 @@ describe('QMLEngine.parse', function() {
       exception = e;
     }
     expect(exception).not.toBe(null);
-    expect(exception.comment).toContain("properly int error");
+    expect(exception.message).toContain("properly int error:");
+    expect(exception.message).toContain("Unexpected token name");
+    expect(exception.message).toContain("line: 4");
     expect(exception.line).toBe(4);
   });
 
