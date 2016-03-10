@@ -5,12 +5,10 @@ function contextVariable(obj, name) {
 function qmlTest(load, name) {
   it("QML TEST: " + name, function(done) {
     var qml = load(name, this.div, {
-      paths: ["/base/tests/include"]
+      paths: [["common", "/base/tests/qml"]]
     });
     var div = this.div;
     console.log("TEST", name)
-
-    console.log(qml);
     var test = contextVariable(qml, "test");
     test.compareRender = function(tag, callback) {
       console.log("compare", tag)
@@ -34,7 +32,7 @@ function qmlTest(load, name) {
 describe('Test.TestCase', function() {
   setupDivElement();
   var load = prefixedQmlLoader('Tests/');
-  qmlTest(load, "SimpleRenderTest");
+  qmlTest(load, "TestCase");
   //var compare = prefixedRenderTester("Tests/").compare;
   //it("works", function(done) {
     // var qml = load("TestCase", this.div);

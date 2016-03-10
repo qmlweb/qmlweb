@@ -1,11 +1,11 @@
 function loadQmlFile(file, div, opts) {
-  opts = opts || {};
+  opts = opts != undefined ? opts : {};
   var engine = new QMLEngine(div, opts);
-  console.log("opts", opts)
+  console.log("opts", opts.paths)
   if (opts.paths) {
     opts.paths.forEach(function(path) {
       console.log("add imports")
-      engine.addImportPath(path);
+      engine.addImportPath(path[1]);
     });
   }
   engine.loadFile(file);
@@ -16,8 +16,8 @@ function loadQmlFile(file, div, opts) {
 
 function prefixedQmlLoader(prefix) {
   var path = '/base/tests/' + prefix ;
-  var fn = function(file, opts) {
-    return loadQmlFile(path+ file + '.qml', opts);
+  var fn = function(file, div, opts) {
+    return loadQmlFile(path+ file + '.qml', div, opts);
   };
   fn.path = path;
   return fn;

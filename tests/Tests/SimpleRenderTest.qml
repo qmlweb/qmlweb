@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "../qml"
 Item{
     Rectangle {
       color: 'red'
@@ -10,4 +11,3 @@ Item{
     RenderTest { id: test }
 
 }
-

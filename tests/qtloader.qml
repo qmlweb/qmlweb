@@ -34,7 +34,7 @@ Window {
             //console.log(source);
             var path = source.toString()
                 .replace(".qml", "")
-                .replace("file:///", "")
+                //.replace("file:///", "") //only on windows
                 .replace("file://", "")
             if(tag)
                 path = path + "-" + tag

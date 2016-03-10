@@ -14,8 +14,8 @@ module.exports = function(config) {
       { pattern: 'tests/*/**/*.png', included: false },
       { pattern: 'tests/Tests/*.qml', included: false },
       { pattern: 'tests/Tests/*.png', included: false },
-      'tests/Tests/testtest.js',
-      'tests/QMLEngine/imports.js'
+      'tests/Tests/testtest.js'
+      //'tests/QMLEngine/imports.js'
 
     ],
     browsers: ['PhantomJSCustom'],

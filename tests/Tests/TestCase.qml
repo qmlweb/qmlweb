@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../include"
+import "../qml"
 Rectangle {
     id: root
     width: 200

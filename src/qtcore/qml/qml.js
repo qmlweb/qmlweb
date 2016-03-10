@@ -144,7 +144,6 @@ function construct(meta) {
             var dProp; // Handle default properties
         } else {
             throw Error("No constructor found for " + meta.object.$class);
-            //console.log("No constructor found for " + meta.object.$class);
             return;
         }
     }
