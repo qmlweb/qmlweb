@@ -29,13 +29,36 @@ function setupDivElement() {
   });
 }
 
+function prefixedRenderTester(group) {
+  var path = group.replace(".", "/");
+  var prefix = "/base/tests/" + path;
+  return {
+    Test: function(name) {
+      renderTest({
+        qml: prefix + name + ".qml",
+        png: prefix + name + ".png",
+        name: path.split("/").pop() + name,
+        group: path
+      });
+    },
+    compare: function(div) {
+      return function(name, callback) {
+        console.log("compareREnder", compareRender);
+        return compareRender(div, prefix + name + ".png", callback);
+      };
+    }
+
+  };
+}
+
+
 var customMatchers = {
   toBeRoughly: function(util, customEqualityTesters) {
     return {
       compare: function(actual, expected, diff) {
         var result = {
           pass: actual > expected * (1 - diff) &&
-                actual < expected * (1 + diff)
+            actual < expected * (1 + diff)
         };
         if (result.pass) {
           result.message = actual + " is roughly equal to " + expected;
@@ -69,7 +92,7 @@ var customMatchers = {
   window.it = function(name) {
     if (isFailing(name)) {
       console.log('Test ' + current + '.' + name +
-                  ' is known to be failing. Skipping...');
+        ' is known to be failing. Skipping...');
       return;
     }
     itOrig.apply(this, arguments);
