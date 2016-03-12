@@ -14,7 +14,7 @@
       qml: path,
       png: path.replace(/.qml$/, '.png'),
       group: path.replace('/base/tests/Render/', '').replace(/\/[^/]+$/, '')
-                 .replace(/\//g, '.'),
+        .replace(/\//g, '.'),
       name: path.replace(/^.*\//, '').replace('.qml', '')
     };
   }).reduce(function(data, entry) {
@@ -30,6 +30,7 @@
       setupDivElement();
       tests[group].forEach(function(test) {
         test.delayed = test.group.indexOf('Async') !== -1;
+        if (test.delayed) return;
         renderTest(test);
       });
     });

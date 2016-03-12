@@ -29,6 +29,7 @@ function applyTestFunctions(path, testCase) {
       console.log(suffix, typeof render, callback);
       callback = render;
     }
+    path = path.replace("/qml/", "/png/");
     if (suffix !== "") {
       path += "-" + suffix;
     }
@@ -61,33 +62,33 @@ function qmlTest(load, name) {
 
 describe('Test.TestCase', function() {
   setupDivElement();
-  var load = prefixedQmlLoader('Tests/qml/');
-  var renderTest = prefixedRenderTester('Tests/qml/');
-  it("should execute tests in order", function(done) {
-    var qml = load("TestSequence", this.div, {
-      paths: [
-        ["common", "/base/tests/qml"]
-      ]
-    });
+  var load = prefixedQmlLoader('Tests/qml/Test');
+  var renderTest = prefixedRenderTester('Tests/qml/Test');
+  // it("should execute tests in order", function(done) {
+  //   var qml = load("TestSequence", this.div, {
+  //     paths: [
+  //       ["common", "/base/tests/qml"]
+  //     ]
+  //   });
+  //
+  //   expect(qml.value).toBe(1);
+  //   var test1 = qml.children[0];
+  //   applyTestFunctions(load.path, test1);
+  //   var test2 = qml.children[1];
+  //   applyTestFunctions(load.path, test2);
+  //   test1.start(function() {
+  //     expect(qml.value).toBe(2);
+  //     test2.start(function() {
+  //       expect(qml.value).toBe(3);
+  //       done();
+  //     });
+  //   });
+  //
+  // });
 
-    expect(qml.value).toBe(1);
-    var test1 = qml.children[0];
-    applyTestFunctions(load.path, test1);
-    var test2 = qml.children[1];
-    applyTestFunctions(load.path, test2);
-    test1.start(function() {
-      expect(qml.value).toBe(2);
-      test2.start(function() {
-        expect(qml.value).toBe(3);
-        done();
-      });
-    });
-
-  });
-
-  qmlTest(load, "BasicTestCase");
-  qmlTest(load, "SimpleRenderTest");
-  qmlTest(load, "TestRenderTest");
-  qmlTest(load, "ImageTest");
-  qmlTest(load, "TestManyRenders");
+  qmlTest(load, "RenderTest");
+  qmlTest(load, "FailingTest");
+  qmlTest(load, "RenderTest");
+  qmlTest(load, "Image");
+  qmlTest(load, "ManyRenders");
 });

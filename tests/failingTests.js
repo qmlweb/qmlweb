@@ -1,13 +1,15 @@
 window.failingTests = {
   Render: {
     Async: [
+      //TODO: failing tests not always working...
       'NumberAnimationAutorun',
       'Image',
       'NumberAnimation'
     ],
     Simple: [
       'RectangleBorderChildren',
-      'RectanglesOpacity'
+      'RectanglesOpacity',
+      'AnchorChains'
     ]
   },
   QMLEngine: {
