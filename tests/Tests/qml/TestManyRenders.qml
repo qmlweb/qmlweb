@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "../../qml"
+
 Rectangle {
   id: rect
   color: 'red'
@@ -8,24 +9,24 @@ Rectangle {
 
   RenderTest { name: "red" }
   TestCase {
-      name: "blue"
-      function test(done){
-          rect.color = 'blue'
-          compareRender(name, function(equal){
-              expect(equal).toBe(true);
-              done();
-          });
-      }
+    name: "blue"
+    function test(done) {
+      rect.color = 'blue'
+      compareRender(name, function(equal){
+        expect(equal).toBe(true);
+        done();
+      });
+    }
   }
 
   TestCase {
-      name: "green"
-      function test(done){
-          rect.color = 'green'
-          compareRender(name, function(equal){
-              expect(equal).toBe(true);
-              done();
-          });
-      }
+    name: "green"
+    function test(done) {
+      rect.color = 'green'
+      compareRender(name, function(equal){
+        expect(equal).toBe(true);
+        done();
+      });
+    }
   }
 }

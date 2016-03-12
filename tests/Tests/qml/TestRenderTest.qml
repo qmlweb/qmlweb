@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "../../qml"
-Item{
+
+Item {
     width: 25
     height: 25
     Rectangle {
@@ -9,6 +10,5 @@ Item{
       height: 25
     }
 
-    RenderTest {}
-
+    RenderTest { }
 }
