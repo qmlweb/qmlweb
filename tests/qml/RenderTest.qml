@@ -1,12 +1,13 @@
 import QtQuick 2.0
 
-BaseTest {
-    id: test
-    delay: 200
-    timer.onTriggered: {
-        test.compareRender("", function(equal){
+TestCase {
+  id: testCase
+    name: "render"
+    function test(done){
+      console.log("test fsdf " + testCase.name);
+        compareRender(name.replace(" ", "-"), function(equal){
             expect(equal).toBe(true);
-            testDone();
+            done();
         });
     }
 }

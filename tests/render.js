@@ -68,6 +68,7 @@
 
   };
 
+
   window.renderTest = function(test) {
     if(!window.top.callPhantom) {
       console.log('Render tests require PhantomJS');
