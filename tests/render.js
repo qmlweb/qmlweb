@@ -1,6 +1,6 @@
 (function() {
   function screenshot(div, options) {
-    if(!window.top.callPhantom)
+    if (!window.top.callPhantom)
       return undefined;
 
     var rect0 = div.getBoundingClientRect();
@@ -32,14 +32,14 @@
   }
 
   function imagesEqual(a, b) {
-    if(a.width !== b.width || a.height !== b.height)
+    if (a.width !== b.width || a.height !== b.height)
       return false;
 
     return image2data(a) === image2data(b);
   }
 
   function delayedFrames(callback, frames) {
-    if(frames === 0)
+    if (frames === 0)
       return callback;
     return function() {
       window.requestAnimationFrame(delayedFrames(callback, frames - 1));
@@ -53,7 +53,7 @@
 
     var process = function() {
       console.log("process");
-      if(++loaded !== 2) return;
+      if (++loaded !== 2) return;
       callback(imagesEqual(result, expected));
     };
 
@@ -70,7 +70,7 @@
 
 
   window.renderTest = function(test) {
-    if(!window.top.callPhantom) {
+    if (!window.top.callPhantom) {
       console.log('Render tests require PhantomJS');
       return;
     }
