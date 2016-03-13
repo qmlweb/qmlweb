@@ -4,7 +4,9 @@ TestCase {
   id: testCase
   name: "render"
   function test(done) {
-    console.log("test fsdf " + testCase.name);
+    var before = findFunction("before");
+    if(typeof before === "function") before();
+
     compareRender(name.replace(" ", "-"), function(equal) {
       expect(equal).toBe(true);
       done();

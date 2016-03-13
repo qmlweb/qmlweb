@@ -22,15 +22,21 @@ Item { //QtObject not implemented yet
     onTriggered: {
       //looks for a function named 'test' and executes it
       //the function can have an optional callback argument
-      for (var prop in testCase) {
-        if(prop !== "test") continue;
-        var testFunc = testCase[prop];
-        if(typeof testFunc !== 'function') continue;
+        var testFunc = findFunction("test");
         testFunc(testCase.done);
         if(testFunc.length === 0)
           testCase.done();
-      }
     }
+  }
+
+
+  function findFunction(name){
+      for (var prop in testCase) {
+        if(prop !== name) continue;
+        var testFunc = testCase[prop];
+        if(typeof testFunc !== 'function') continue;
+        return testFunc;
+      }
   }
 
   Timer {

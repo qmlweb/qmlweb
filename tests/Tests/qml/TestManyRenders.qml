@@ -7,16 +7,15 @@ Rectangle {
   width: 25
   height: 25
 
-  RenderTest { name: "red" }
-  TestCase {
-    name: "blue"
-    function test(done) {
-      rect.color = 'blue'
-      compareRender(name, function(equal){
-        expect(equal).toBe(true);
-        done();
-      });
-    }
+  RenderTest {
+      name: "red"
+  }
+
+  RenderTest {
+      name: "blue"
+      function before(){
+          rect.color = 'blue';
+      }
   }
 
   TestCase {

@@ -11,5 +11,5 @@ Rectangle {
     anchors.centerIn: parent
     color: "red"
   }
-  RenderTest { delay: 1000; timeout: 3000 }
+  RenderTest { delay: 500; timeout: 2000 }
 }

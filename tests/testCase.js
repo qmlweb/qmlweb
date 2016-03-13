@@ -9,16 +9,16 @@
     testCase.compareRender = function(suffix, render, callback) {
       //render parameter shouldnt affect anything, only used to disable
       //rendering on qt side.
-      console.log(suffix, typeof render, callback);
+      console.log(path, suffix, typeof render, callback);
       if (typeof render === "function") {
         console.log(suffix, typeof render, callback);
         callback = render;
       }
-      path = path.replace("/qml/", "/png/");
+      var pngPath = path.replace("/qml/", "/png/");
       if (suffix !== "") {
-        path += "-" + suffix.replace(" ", "_");
+        pngPath += "-" + suffix.replace(" ", "_");
       }
-      return compareScreenshot(testCase.parent.dom, path + ".png", callback);
+      return compareScreenshot(testCase.parent.dom, pngPath + ".png", callback);
     };
 
     testCase.jasmine = {

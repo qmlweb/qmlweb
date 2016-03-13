@@ -3,6 +3,6 @@ import "../../common"
 Image {
   source: 'Image.png'
   RenderTest {
-    delay: 200
+    delay: 50
   }
 }
