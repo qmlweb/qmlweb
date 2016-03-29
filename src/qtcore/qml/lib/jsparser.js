@@ -1,11 +1,4 @@
 (function() {
-  var uglify_parse;
-
-  if (typeof module !== 'undefined' && module.exports)
-    uglify_parse = require("uglify-js").parse;
-  else
-    uglify_parse = parse;
-
   global.importJavascriptInContext = function (jsData, $context) {
     with($context) {
       eval(jsData.source);
@@ -17,18 +10,19 @@
   }
 
   global.jsparse = function (source) {
-    var AST_Tree = uglify_parse(source);
     var obj = { exports: [], source: source };
+    var AST_Tree = qmlweb_parse(source, qmlweb_parse.JSResource);
+    var foo_function_scope = AST_Tree[2][2][3];
 
-    for (var i = 0 ; i < AST_Tree.body.length ; ++i) {
-      var element = AST_Tree.body[i];
+    for (var i = 0 ; i < foo_function_scope.length ; ++i) {
+      var item = foo_function_scope[i];
 
-      switch (element.__proto__.TYPE) {
-        case "VAR":
-          obj.exports.push(element.definitions[0].name.name);
+      switch (item[0]) {
+        case "var":
+          obj.exports.push(item[1][0][0]);
           break ;
-        case "Defun":
-          obj.exports.push(element.name.name);
+        case "defun":
+          obj.exports.push(item[1]);
           break ;
       }
     }
