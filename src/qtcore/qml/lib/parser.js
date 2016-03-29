@@ -58,7 +58,7 @@
  * - parseQML(src) -- parses QML source and returns it as output tree expected
  *   by the QML engine
  *
- * - qmlparse(src) -- parses QML source and returns tree a la uglifyjs parser.
+ * - qmlweb_parse(src) -- parses QML or JS source and returns tree a la uglifyjs parser.
  *   Currently used for debugging purposes.
  */
 
@@ -696,7 +696,9 @@ function NodeWithToken(str, start, end) {
 
 NodeWithToken.prototype.toString = function() { return this.name; };
 
-function qmlparse($TEXT, exigent_mode, embed_tokens) {
+qmlweb_parse.QMLDocument = 1;
+qmlweb_parse.JSResource = 2;
+function qmlweb_parse($TEXT, document_type, exigent_mode, embed_tokens) {
 
         var S = {
                 text        : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/^\uFEFF/, ''),
@@ -1494,6 +1496,14 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             return as("toplevel", imports, root);
         }
 
+        function jsdocument() {
+            var statements = [];
+            while (!is("eof")) {
+                statements.push(statement());
+            }
+            return as("jsresource", statements);
+        }
+
         function amIn(s) {
             console && console.log(s, clone(S), S.token.type, S.token.value);
         }
@@ -1502,7 +1512,11 @@ function qmlparse($TEXT, exigent_mode, embed_tokens) {
             next();
         }
 
-        return qmldocument();
+        if (document_type === qmlweb_parse.JSResource) {
+            return jsdocument();
+        } else {
+            return qmldocument();
+        }
 
 };
 
@@ -1757,10 +1771,10 @@ function convertToEngine(tree) {
 
 // Function to parse qml and output tree expected by engine
 function parseQML(src) {
-    var parsetree = qmlparse(src);
+    var parsetree = qmlweb_parse(src, qmlweb_parse.QmlDocument);
     return convertToEngine(parsetree);
 }
 
 if (typeof global != "undefined") {
-  global.qmlparse = qmlparse;
+  global.qmlweb_parse = qmlweb_parse;
 }
