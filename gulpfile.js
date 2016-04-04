@@ -29,6 +29,10 @@ var tests = [
   'tests/**/*.js'
 ];
 
+// This is required because other values confuse PhantomJS, and are sometimes
+// set by default by the system.
+process.env.QT_QPA_PLATFORM = '';
+
 gulp.task('build-dev', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
