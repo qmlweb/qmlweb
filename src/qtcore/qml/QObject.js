@@ -10,8 +10,8 @@ function QObject(parent) {
 
     this.objectId = objectIds++;
     this.$delete = function() {
-        if (this.$Component)
-          this.$Component.destruction();
+        if (this.Component)
+          this.Component.destruction();
 
         while (this.$tidyupList.length > 0) {
             var item = this.$tidyupList[0];
