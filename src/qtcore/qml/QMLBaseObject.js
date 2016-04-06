@@ -12,10 +12,8 @@ function QMLBaseObject(meta) {
     this.Component = new QObject(this);
     this.Component.completed = Signal([]);
     engine.completedSignals.push(this.Component.completed);
-    this.completed = this.Component.completed;
 
     this.Component.destruction = Signal([]);
-    this.destruction = this.Component.destruction;
 
     // Component get own properties
     var attributes = [];
