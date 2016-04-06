@@ -3,9 +3,6 @@ function QMLItem(meta) {
     var child,
         o, i;
 
-    this.completed = Signal();
-    this.completedAlreadyCalled = false;
-
     if (this.$parent === null) { // This is the root element. Initialize it.
         this.dom = engine.rootElement || document.body;
         this.dom.innerHTML = "";

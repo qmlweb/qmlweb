@@ -353,10 +353,6 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     // instanciations of this component, but not for its internal children
     if (metaObject.$defaultProperty)
         item.$defaultProperty = metaObject.$defaultProperty;
-    if (typeof item.completed != 'undefined' && item.completedAlreadyCalled == false) {
-      item.completedAlreadyCalled = true;
-      item.completed();
-    }
 }
 
 // ItemModel. EXPORTED.
