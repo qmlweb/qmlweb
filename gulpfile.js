@@ -16,6 +16,10 @@ var qtcoreSources = [
   'src/qtcore/qml/lib/import.js',
   'src/qtcore/*.js',
   'src/qtcore/qml/qml.js',
+  'src/qtcore/qml/QMLBaseObject.js',
+  'src/qtcore/qml/elements/Item.js',
+  'src/qtcore/qml/QMLPositioner.js',
+  'src/qtcore/qml/elements/QtQuick/Repeater.js',
   'src/qtcore/qml/**/*.js',
   'src/qmlweb/**/*.js',
   'src/helpers/encapsulate.end.js'
