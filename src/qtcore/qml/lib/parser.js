@@ -317,7 +317,47 @@ function replacerConsoleRange(str) {
     }
     return res;
 };
-
+function repeatString(_str, count) {
+    'use strict';
+    if (_str == null) {
+        throw new TypeError('can\'t convert ' + _str + ' to object');
+    }
+    var str = '' + _str;
+    count = +count;
+    if (count != count) {
+        count = 0;
+    }
+    if (count < 0) {
+        throw new RangeError('repeat count must be non-negative');
+    }
+    if (count == Infinity) {
+        throw new RangeError('repeat count must be less than infinity');
+    }
+    count = Math.floor(count);
+    if (str.length == 0 || count == 0) {
+        return '';
+    }
+    // Ensuring count is a 31-bit integer allows us to heavily optimize the
+    // main part. But anyway, most current (August 2014) browsers can't handle
+    // strings 1 << 28 chars or longer, so:
+    if (str.length * count >= 1 << 28) {
+        throw new RangeError('repeat count must not overflow maximum string size');
+    }
+    var rpt = '';
+    for (;;) {
+        if ((count & 1) == 1) {
+            rpt += str;
+        }
+        count >>>= 1;
+        if (count == 0) {
+            break;
+        }
+        str += str;
+    }
+    // Could we try:
+    // return Array(count + 1).join(_str);
+    return rpt;
+};
 function extractLinesForErrorDiag(code_text, line, column, options) {
     options || (options = {});
     var line_range = options.line_range << 0 || 3;
@@ -337,11 +377,11 @@ function extractLinesForErrorDiag(code_text, line, column, options) {
     var show_code = "";
 
     for (var index = show_start_line; index <= show_end_line; index++) {
-        var suffix = (index + 1 + ' '.repeat(index_len)).substr(0, index_len + 1);
+        var suffix = (index + 1 + repeatString(' ', index_len)).substr(0, index_len + 1);
         var one_line_code = codeLines[index];
         if (index === show_line_index) {
             var prefix = '>>';
-            one_line_code += '\n' + normal_c.repeat(prefix.length + suffix.length) +
+            one_line_code += '\n' + repeatString(normal_c, prefix.length + suffix.length) +
                 replacerConsoleRange(one_line_code.substr(0, column)) + // Replaced as blank character string
                 "∧";
         } else {
