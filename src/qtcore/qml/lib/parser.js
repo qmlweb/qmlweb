@@ -336,8 +336,8 @@ function extractLinesForErrorDiag(code_text, line, column, options) {
 
     var show_code = "";
 
-    for (var index = show_start_line + 1; index <= show_end_line; index++) {
-        var suffix = (index + ' '.repeat(index_len)).substr(0, index_len + 1);
+    for (var index = show_start_line; index <= show_end_line; index++) {
+        var suffix = (index + 1 + ' '.repeat(index_len)).substr(0, index_len + 1);
         var one_line_code = codeLines[index];
         if (index === show_line_index) {
             var prefix = '>>';
@@ -349,7 +349,6 @@ function extractLinesForErrorDiag(code_text, line, column, options) {
         }
         show_code += prefix + suffix + one_line_code + "\n";
     }
-
     return show_code
 };
 
