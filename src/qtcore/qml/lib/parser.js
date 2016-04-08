@@ -293,20 +293,65 @@ function js_error(message, line, col, pos, comment) {
 function is_token(token, type, val) {
         return token.type == type && (val == null || token.value == val);
 };
+// CJK characters in the console display longer lengths, calculate the length of a string of actual display
+var normal_c = " ";
+var cjk_c = "　";
+var cjk = function(char_code) {
+    return 0x4E00 <= char_code && char_code <= 0x9FFF ||
+        0x3400 <= char_code && char_code <= 0x4DFF ||
+        0x20000 <= char_code && char_code <= 0x2A6DF ||
+        0xF900 <= char_code && char_code <= 0xFAFF ||
+        0x2F800 <= char_code && char_code <= 0x2FA1F;
+};
+function replacerConsoleRange(str) {
+    var res = "";
+    for (var i = 0, len = str.length, cc; i < len; i += 1) {
+        cc = str.charCodeAt(i);
+        if (cc === 9) { // \t
+            res += '\t' // tab不管，否则不同的控制台下tab的长度是不一样的；除非在源码那边也进行修改
+        } else if (cjk(cc)) {
+            res += cjk_c
+        } else {
+            res += normal_c
+        }
+    }
+    return res;
+};
 
-function extractLinesForErrorDiag(text, line)
-{
-  var r = "";
-  var lines = text.split("\n");
+function extractLinesForErrorDiag(code_text, line, column, options) {
+    options || (options = {});
+    var line_range = options.line_range << 0 || 3;
 
-  for (var i = line - 3; i <= line + 3; i++)
-  if (i >= 0 && i < lines.length ) {
-      var mark = ( i == line ) ? ">>" : "  ";
-      r += mark + i + "  " + lines[i] + "\n";
-  }
+    var codeLines = code_text.split("\n");
 
-  return r;
-}
+    // Error line number index
+    var show_line_index = line;
+    // The starting line of the display code number
+    var show_start_line = Math.max(show_line_index - line_range, 0);
+    // End line of code displays the number of
+    var show_end_line = show_line_index + line_range;
+
+    // The number of characters required to display line, blank spaces + 1
+    var index_len = ("" + show_end_line).length + 1;
+
+    var show_code = "";
+
+    for (var index = show_start_line + 1; index <= show_end_line; index++) {
+        var suffix = (index + ' '.repeat(index_len)).substr(0, index_len + 1);
+        var one_line_code = codeLines[index];
+        if (index === show_line_index) {
+            var prefix = '>>';
+            one_line_code += '\n' + normal_c.repeat(prefix.length + suffix.length) +
+                replacerConsoleRange(one_line_code.substr(0, column)) + // Replaced as blank character string
+                "∧";
+        } else {
+            var prefix = '  ';
+        }
+        show_code += prefix + suffix + one_line_code + "\n";
+    }
+
+    return show_code
+};
 
 var EX_EOF = {};
 
@@ -392,7 +437,7 @@ function tokenizer($TEXT) {
         };
 
         function parse_error(err) {
-                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline ) );
+                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline, S.tokcol ) );
         };
 
         function read_num(prefix) {
@@ -736,12 +781,13 @@ function qmlweb_parse($TEXT, document_type, exigent_mode, embed_tokens) {
 
         function croak(msg, line, col, pos) {
                 var ctx = S.input.context();
-                var eLine = (line != null ? line : ctx.tokline);
+                var eLine = line != null ? line : ctx.tokline;
+                var eCol = col != null ? col : ctx.tokcol;
                 js_error(msg,
                          eLine,
-                         col != null ? col : ctx.tokcol,
+                         eCol,
                          pos != null ? pos : ctx.tokpos,
-                         extractLinesForErrorDiag( S.text, eLine ) );
+                         extractLinesForErrorDiag( S.text, eLine, eCol ) );
         };
 
         function token_error(token, msg) {
