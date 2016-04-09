@@ -1,7 +1,8 @@
 registerQmlType({
-    module: 'QtQuick',
+    module: 'QtQuick.Controls',
     name: 'ComboBox',
     versions: /.*/,
+    baseClass: QMLItem,
     constructor: QMLComboBox
 });
 
