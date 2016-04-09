@@ -269,17 +269,21 @@ global.Qt = {
   Key_Sleep: 95,
   Key_Zoom: 251,
   Key_Cancel: 3,
-
+  // Align
   AlignLeft: 0x0001,
   AlignRight: 0x0002,
   AlignHCenter: 0x0004,
   AlignJustify: 0x0008,
-
   AlignTop: 0x0020,
   AlignBottom: 0x0040,
   AlignVCenter: 0x0080,
-  AlignBaseline: 0x0100,
   AlignCenter: 0x0084,
+  AlignBaseline: 0x0100,
+  AlignAbsolute: 0x0010,
+  AlignLeading: 0x0001,
+  AlignTrailing: 0x0002,
+  AlignHorizontal_Mask: 0x001f,
+  AlignVertical_Mask: 0x01e0,
   // Screen
   PrimaryOrientation: 0,
   PortraitOrientation: 1,
