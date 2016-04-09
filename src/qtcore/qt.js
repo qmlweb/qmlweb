@@ -60,6 +60,36 @@ global.Qt = {
     return component;
   },
 
+  // TODO now we force to provide executionContext. Maybe it is better to compute if from parent if not provided?
+  createQmlObject: function(src, parent, file, executionContext) {
+        var tree = parseQML(src); //parseQML(src, file);
+
+        // Create and initialize objects
+
+        var component = new QMLComponent({ object: tree, parent: parent, context: executionContext });
+
+        engine.loadImports( tree.$imports );
+
+        if (!file) file = Qt.resolvedUrl("createQmlObject_function");
+        component.$basePath = engine.extractBasePath(file);
+        component.$imports = tree.$imports; // for later use
+        component.$file = file; // not just for debugging, but for basepath too, see above
+
+        var obj = component.createObject(parent);
+        obj.parent = parent;
+        parent.childrenChanged();
+
+        if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
+          // We don't call those on first creation, as they will be called
+          // by the regular creation-procedures at the right time.
+          engine.$initializePropertyBindings();
+
+          engine.callCompletedSignals();
+        }
+
+        return obj;
+  },
+
     // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   resolvedUrl: function(url)
