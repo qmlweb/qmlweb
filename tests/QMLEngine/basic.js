@@ -11,4 +11,10 @@ describe('QMLEngine.basic', function() {
     expect(qml.children[0].q).toBe(22);
     expect(this.div.innerText).toBe("I am an item created by createQmlObject");
   });
+
+  it('Component.onCompleted handlers of dynamically created objects get called', function() {
+    var qml = load('CompletedOfDynamicObjects', this.div);
+    expect(qml.children.length).toBe(1);
+    expect(qml.color).toBe('cyan');
+  });
 });
