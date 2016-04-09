@@ -1,13 +1,16 @@
 registerQmlType({
-    module: 'QtQuick',
+    module: 'QtQuick.Window',
     name: 'Screen',
     versions: /.*/,
+    baseClass: QMLItem,
     constructor: QMLScreen
 });
 
 function QMLScreen(meta) {
     QMLItem.call(this, meta);
     var self = this;
+
+    // TODO: rewrite as an attached object and forbid constructing
 
     createSimpleProperty("int", this, "desktopAvailableHeight");
     createSimpleProperty("int", this, "desktopAvailableWidth");
