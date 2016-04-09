@@ -19,6 +19,7 @@ window.failingTests = {
     ],
     properties: [
       'alias have changed signal',
+      'alias propagates it\'s changed signal back to referenced property',
       'alias to id with same name',
       'ChangedExpressionSignal',
       'StringConversion',

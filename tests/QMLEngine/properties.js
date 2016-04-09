@@ -34,6 +34,14 @@ describe('QMLEngine.properties', function() {
     expect(qml.log).toBe("childX changed to 44!");
   });
 
+  it('alias propagates it\'s changed signal back to referenced property',
+    function() {
+      var qml = load('AliasChangedBack', this.div);
+      qml.go();
+      expect(qml.thechild.x).toBe(100);
+    }
+  );
+
   it('alias to id', function() {
     var qml = load('AliasToId', this.div);
     expect(qml.childA.x).toBe(125);
