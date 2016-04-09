@@ -44,4 +44,18 @@ describe('QMLEngine.scope', function() {
     expect(qml.p).toBe(17);
     expect(qml.q).toBe(17);
   });
+
+  it('object id should override same-named property of base object',
+    function() {
+      var qml = load('Override', this.div);
+      expect(qml.getFooWidth()).toBe(200);
+    }
+  );
+
+  it('object id should NOT override same-named property in base object scope',
+    function() {
+      var qml = load('Override', this.div);
+      expect(qml.getFooVal()).toBe(42);
+    }
+  );
 });

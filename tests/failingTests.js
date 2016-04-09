@@ -23,6 +23,9 @@ window.failingTests = {
       'ChangedExpressionSignal',
       'StringConversion',
       'undefined property has undefined value'
+    ],
+    scope: [
+      'object id should override same-named property of base object'
     ]
   },
   Initialize: {
