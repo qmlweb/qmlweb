@@ -2,6 +2,7 @@ registerQmlType({
   module:   'QtQuick.Controls',
   name:     'ScrollView',
   versions: /.*/,
+  baseClass: QMLItem,
   constructor: function QMLScrollView(meta) {
     QMLItem.call(this, meta);
 
