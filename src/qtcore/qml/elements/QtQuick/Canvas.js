@@ -1,15 +1,11 @@
-/**
- *
- * Canvas   TODO
- *
- * Currently only a skeleton implementation
- *
- */
+// TODO
+// Currently only a skeleton implementation
 
 registerQmlType({
     module: 'QtQuick',
     name: 'Canvas',
     versions: /.*/,
+    baseClass: QMLItem,
     constructor: function(meta) {
         QMLItem.call(this, meta);
 
