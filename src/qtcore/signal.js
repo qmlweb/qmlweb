@@ -41,6 +41,8 @@ global.Signal = function Signal(params, options) {
 
     }
     signal.disconnect = function() {
+        // callType meaning: 1 = function  2 = string  3 = object with string method  4 = object with function
+
         var callType = arguments.length == 1 ? (arguments[0] instanceof Function ? 1 : 2)
                        : (typeof arguments[1] == 'string' || arguments[1] instanceof String) ? 3 : 4;
         for (var i = 0; i < connectedSlots.length; i++) {
