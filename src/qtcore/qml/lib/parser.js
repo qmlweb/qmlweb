@@ -293,20 +293,92 @@ function js_error(message, line, col, pos, comment) {
 function is_token(token, type, val) {
         return token.type == type && (val == null || token.value == val);
 };
+// CJK characters in the console display longer lengths, calculate the length of a string of actual display
+var normal_c = " ";
+var cjk_c = "　";
+function isCjk(char_code) {
+    return 0x4E00 <= char_code && char_code <= 0x9FFF ||
+        0x3400 <= char_code && char_code <= 0x4DFF ||
+        0x20000 <= char_code && char_code <= 0x2A6DF ||
+        0xF900 <= char_code && char_code <= 0xFAFF ||
+        0x2F800 <= char_code && char_code <= 0x2FA1F;
+};
+function fillWithWhitespace(str) {
+    var res = "";
+    for (var i = 0, len = str.length, cc; i < len; i += 1) {
+        cc = str.charCodeAt(i);
+        if (cc === 9) { // \t
+            res += '\t' // Ignore TAB, or else in a different console TAB length is not the same. ~~Unless there are modifications in the source code, the source TAB replaced by a fixed length spaces~~
+        } else if (isCjk(cc)) {
+            res += cjk_c
+        } else {
+            res += normal_c
+        }
+    }
+    return res;
+};
+// reference from [MDN | String/repeat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat).
+// Internal use only, ignoring the type of judgment, increase speed
+function repeatString(str, count) {
+    'use strict';
+    var rpt = '';
+    for (;;) {
+        if ((count & 1) == 1) {
+            rpt += str;
+        }
+        count >>>= 1;
+        if (count == 0) {
+            break;
+        }
+        str += str;
+    }
+    return rpt;
+};
+function extractLinesForErrorDiag(code_text, line, column, options) {
+    options || (options = {});
 
-function extractLinesForErrorDiag(text, line)
-{
-  var r = "";
-  var lines = text.split("\n");
+    var line_range = options.line_range << 0 /*parse to Int*/ || 3;
 
-  for (var i = line - 3; i <= line + 3; i++)
-  if (i >= 0 && i < lines.length ) {
-      var mark = ( i == line ) ? ">>" : "  ";
-      r += mark + i + "  " + lines[i] + "\n";
-  }
+    var codeLines = code_text.split("\n");
 
-  return r;
-}
+    // The starting line index.
+    var show_start_line = Math.max(line - line_range, 0);
+    // The end line index.
+    var show_end_line = line + line_range;
+
+    // The number of characters required to display LineNumber, blank spaces + 1
+    /* Show like:
+          8  CODE
+          9  CODE
+        >>10 CODE
+          11 CODE
+    */
+    var index_len = ("" + show_end_line).length + 1;
+
+    var show_code = "";
+
+    for (var index = show_start_line; index <= show_end_line; index++) {
+
+        // LineNumber
+        var suffix = (index + 1 + repeatString(' ', index_len)).substr(0, index_len + 1);
+
+        var one_line_code = codeLines[index];
+
+        // Line error
+        if (index === line) {
+            // May be '>> ' will be better
+            var prefix = '>>';
+            one_line_code += '\n' + repeatString(normal_c, prefix.length + suffix.length) +
+                // Replace code as Whitespace String
+                fillWithWhitespace(one_line_code.substr(0, column)) +
+                "∧";
+        } else {
+            prefix = '  ';
+        }
+        show_code += prefix + suffix + one_line_code + "\n";
+    }
+    return show_code
+};
 
 var EX_EOF = {};
 
@@ -392,7 +464,7 @@ function tokenizer($TEXT) {
         };
 
         function parse_error(err) {
-                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline ) );
+                js_error(err, S.tokline, S.tokcol, S.tokpos, extractLinesForErrorDiag( S.text, S.tokline, S.tokcol ) );
         };
 
         function read_num(prefix) {
@@ -736,12 +808,13 @@ function qmlweb_parse($TEXT, document_type, exigent_mode, embed_tokens) {
 
         function croak(msg, line, col, pos) {
                 var ctx = S.input.context();
-                var eLine = (line != null ? line : ctx.tokline);
+                var eLine = line != null ? line : ctx.tokline;
+                var eCol = col != null ? col : ctx.tokcol;
                 js_error(msg,
                          eLine,
-                         col != null ? col : ctx.tokcol,
+                         eCol,
                          pos != null ? pos : ctx.tokpos,
-                         extractLinesForErrorDiag( S.text, eLine ) );
+                         extractLinesForErrorDiag( S.text, eLine, eCol ) );
         };
 
         function token_error(token, msg) {
