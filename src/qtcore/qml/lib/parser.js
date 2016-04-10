@@ -296,7 +296,7 @@ function is_token(token, type, val) {
 // CJK characters in the console display longer lengths, calculate the length of a string of actual display
 var normal_c = " ";
 var cjk_c = "　";
-var cjk = function(char_code) {
+function isCjk(char_code) {
     return 0x4E00 <= char_code && char_code <= 0x9FFF ||
         0x3400 <= char_code && char_code <= 0x4DFF ||
         0x20000 <= char_code && char_code <= 0x2A6DF ||
@@ -309,7 +309,7 @@ function fillWithWhitespace(str) {
         cc = str.charCodeAt(i);
         if (cc === 9) { // \t
             res += '\t' // Ignore TAB, or else in a different console TAB length is not the same. ~~Unless there are modifications in the source code, the source TAB replaced by a fixed length spaces~~
-        } else if (cjk(cc)) {
+        } else if (isCjk(cc)) {
             res += cjk_c
         } else {
             res += normal_c
