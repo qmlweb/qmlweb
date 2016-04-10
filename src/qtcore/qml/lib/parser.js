@@ -303,12 +303,12 @@ var cjk = function(char_code) {
         0xF900 <= char_code && char_code <= 0xFAFF ||
         0x2F800 <= char_code && char_code <= 0x2FA1F;
 };
-function replacerConsoleRange(str) {
+function fillWithWhitespace(str) {
     var res = "";
     for (var i = 0, len = str.length, cc; i < len; i += 1) {
         cc = str.charCodeAt(i);
         if (cc === 9) { // \t
-            res += '\t' // tab不管，否则不同的控制台下tab的长度是不一样的；除非在源码那边也进行修改
+            res += '\t' // Ignore TAB, or else in a different console TAB length is not the same. ~~Unless there are modifications in the source code, the source TAB replaced by a fixed length spaces~~
         } else if (cjk(cc)) {
             res += cjk_c
         } else {
@@ -317,32 +317,10 @@ function replacerConsoleRange(str) {
     }
     return res;
 };
-function repeatString(_str, count) {
+// reference from [MDN | String/repeat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat).
+// Internal use only, ignoring the type of judgment, increase speed
+function repeatString(str, count) {
     'use strict';
-    if (_str == null) {
-        throw new TypeError('can\'t convert ' + _str + ' to object');
-    }
-    var str = '' + _str;
-    count = +count;
-    if (count != count) {
-        count = 0;
-    }
-    if (count < 0) {
-        throw new RangeError('repeat count must be non-negative');
-    }
-    if (count == Infinity) {
-        throw new RangeError('repeat count must be less than infinity');
-    }
-    count = Math.floor(count);
-    if (str.length == 0 || count == 0) {
-        return '';
-    }
-    // Ensuring count is a 31-bit integer allows us to heavily optimize the
-    // main part. But anyway, most current (August 2014) browsers can't handle
-    // strings 1 << 28 chars or longer, so:
-    if (str.length * count >= 1 << 28) {
-        throw new RangeError('repeat count must not overflow maximum string size');
-    }
     var rpt = '';
     for (;;) {
         if ((count & 1) == 1) {
@@ -354,44 +332,51 @@ function repeatString(_str, count) {
         }
         str += str;
     }
-    // Could we try:
-    // return Array(count + 1).join(_str);
     return rpt;
 };
 function extractLinesForErrorDiag(code_text, line, column, options) {
     options || (options = {});
-    var line_range = options.line_range << 0 || 3;
+    var line_range = options.line_range << 0 /*parse to Int*/ || 3;
 
     var codeLines = code_text.split("\n");
 
-    // Error line number index
-    var show_line_index = line;
-    // The starting line of the display code number
-    var show_start_line = Math.max(show_line_index - line_range, 0);
-    // End line of code displays the number of
-    var show_end_line = show_line_index + line_range;
+    // The starting line index.
+    var show_start_line = Math.max(line - line_range, 0);
+    // The end line index.
+    var show_end_line = line + line_range;
 
-    // The number of characters required to display line, blank spaces + 1
+    // The number of characters required to display LineNumber, blank spaces + 1
+    /* Show like:
+  8  CODE
+  9  CODE
+>>10 CODE
+  11 CODE
+    */
     var index_len = ("" + show_end_line).length + 1;
 
     var show_code = "";
 
     for (var index = show_start_line; index <= show_end_line; index++) {
+        // LineNumber
         var suffix = (index + 1 + repeatString(' ', index_len)).substr(0, index_len + 1);
+
         var one_line_code = codeLines[index];
-        if (index === show_line_index) {
+
+        // Line error
+        if (index === line) {
+            // May be '>> ' will be better
             var prefix = '>>';
             one_line_code += '\n' + repeatString(normal_c, prefix.length + suffix.length) +
-                replacerConsoleRange(one_line_code.substr(0, column)) + // Replaced as blank character string
+                // Replace code as Whitespace String
+                fillWithWhitespace(one_line_code.substr(0, column)) +
                 "∧";
         } else {
-            var prefix = '  ';
+            prefix = '  ';
         }
         show_code += prefix + suffix + one_line_code + "\n";
     }
     return show_code
 };
-
 var EX_EOF = {};
 
 function tokenizer($TEXT) {
