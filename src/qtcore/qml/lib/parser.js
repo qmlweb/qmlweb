@@ -336,6 +336,7 @@ function repeatString(str, count) {
 };
 function extractLinesForErrorDiag(code_text, line, column, options) {
     options || (options = {});
+
     var line_range = options.line_range << 0 /*parse to Int*/ || 3;
 
     var codeLines = code_text.split("\n");
@@ -347,16 +348,17 @@ function extractLinesForErrorDiag(code_text, line, column, options) {
 
     // The number of characters required to display LineNumber, blank spaces + 1
     /* Show like:
-  8  CODE
-  9  CODE
->>10 CODE
-  11 CODE
+          8  CODE
+          9  CODE
+        >>10 CODE
+          11 CODE
     */
     var index_len = ("" + show_end_line).length + 1;
 
     var show_code = "";
 
     for (var index = show_start_line; index <= show_end_line; index++) {
+
         // LineNumber
         var suffix = (index + 1 + repeatString(' ', index_len)).substr(0, index_len + 1);
 
@@ -377,6 +379,7 @@ function extractLinesForErrorDiag(code_text, line, column, options) {
     }
     return show_code
 };
+
 var EX_EOF = {};
 
 function tokenizer($TEXT) {
