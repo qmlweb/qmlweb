@@ -3,6 +3,7 @@ lib/
 coverage/
 tmp/
 build/
+dev/
 *~
 *.bak
 *.log
@@ -12,3 +13,4 @@ build/
 *kate-swp
 .idea
 .arcconfig
+*.autosave

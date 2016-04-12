@@ -1,8 +1,5 @@
 window.failingTests = {
   Render: {
-    Async: [
-      'NumberAnimationAutorun'
-    ],
     Simple: [
       'RectangleBorderChildren',
       'RectanglesOpacity'

@@ -1,5 +1,12 @@
 function loadQmlFile(file, div, opts) {
-  var engine = new QMLEngine(div, opts || {});
+  opts = opts != undefined ? opts : {};
+  var engine = new QMLEngine(div, opts);
+  window.qmlEngine = engine; //really ugly
+  if (opts.paths) {
+    opts.paths.forEach(function(path) {
+      engine.addImportPath(path[1]);
+    });
+  }
   engine.loadFile(file);
   engine.start();
   document.body.appendChild(div);
@@ -7,9 +14,12 @@ function loadQmlFile(file, div, opts) {
 }
 
 function prefixedQmlLoader(prefix) {
-  return function(file, opts) {
-    return loadQmlFile('/base/tests/' + prefix + file + '.qml', opts);
+  var path = '/base/tests/' + prefix;
+  var fn = function(file, div, opts) {
+    return loadQmlFile(path + file + '.qml', div, opts);
   };
+  fn.path = path;
+  return fn;
 }
 
 function loadQml(src, div, opts) {
@@ -29,13 +39,36 @@ function setupDivElement() {
   });
 }
 
+function prefixedRenderTester(group) {
+  var path = group.replace(".", "/");
+  var prefix = "/base/tests/" + path;
+  return {
+    Test: function(name) {
+      renderTest({
+        qml: prefix + name + ".qml",
+        png: prefix + name + ".png",
+        name: path.split("/").pop() + name,
+        group: path
+      });
+    },
+    compare: function(div) {
+      return function(name, callback) {
+        console.log("compareREnder", compareRender);
+        return compareRender(div, prefix + name + ".png", callback);
+      };
+    }
+
+  };
+}
+
+
 var customMatchers = {
   toBeRoughly: function(util, customEqualityTesters) {
     return {
       compare: function(actual, expected, diff) {
         var result = {
           pass: actual > expected * (1 - diff) &&
-                actual < expected * (1 + diff)
+            actual < expected * (1 + diff)
         };
         if (result.pass) {
           result.message = actual + " is roughly equal to " + expected;
@@ -69,7 +102,7 @@ var customMatchers = {
   window.it = function(name) {
     if (isFailing(name)) {
       console.log('Test ' + current + '.' + name +
-                  ' is known to be failing. Skipping...');
+        ' is known to be failing. Skipping...');
       return;
     }
     itOrig.apply(this, arguments);
