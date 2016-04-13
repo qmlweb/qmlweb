@@ -69,11 +69,11 @@ registerQmlType({
             self.mouseY = mouse.y;
             self.pressed = true;
         }
-        this.pressedButtons = mouse.button;
+        self.pressedButtons = mouse.button;
     }
     this.dom.onmouseup = function(e) {
         self.pressed = false;
-        this.pressedButtons = 0;
+        self.pressedButtons = 0;
     }
     this.dom.onmouseover = function(e) {
         self.containsMouse = true;
