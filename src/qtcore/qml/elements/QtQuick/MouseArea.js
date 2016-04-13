@@ -83,16 +83,6 @@ registerQmlType({
         self.containsMouse = false;
         self.exited();
     }
-    this.dom.onmouseover = function(e) {
-        self.containsMouse = true;
-        self.dom.style.cursor = cursorShapeToCSS();
-        self.entered();
-    }
-    this.dom.onmouseout = function(e) {
-        self.containsMouse = false;
-        self.dom.style.cursor = "auto";
-        self.exited();
-    }
     this.dom.onmousemove = function(e) {
         if (self.enabled && (self.hoverEnabled || self.pressed)) {
             var mouse = eventToMouse(e);
@@ -133,5 +123,9 @@ registerQmlType({
         }
         return cursor;
     }
+
+    this.cursorShapeChanged.connect(function() {
+      self.dom.style.cursor = cursorShapeToCSS();
+    });
   }
 });
