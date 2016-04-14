@@ -20,4 +20,12 @@ describe('QMLEngine.parse', function() {
     var qml = load('FunctionVar', this.div);
     expect(typeof qml.aFunction).toBe("function");
   });
+
+  it("can define signals from a QML component", function() {
+    var qml = load('Signal', this.div);
+    expect(qml.simpleSignal).not.toBe(undefined);
+    expect(qml.signalWithParams).not.toBe(undefined);
+    expect(typeof qml.simpleSignal.connect).toBe("function");
+    expect(typeof qml.signalWithParams.connect).toBe("function");
+  });
 });
