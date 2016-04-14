@@ -6,7 +6,7 @@ describe('QMLEngine.imports', function() {
     load('Javascript', this.div);
     expect(this.div.offsetWidth).toBe(20);
     expect(this.div.offsetHeight).toBe(10);
-    expect(this.div.style.backgroundColor).toBe('magenta');
+    expect(this.div.style.backgroundColor).toBe('rgb(255, 0, 255)');
   });
   it('Qmldir', function() {
     load('Qmldir', this.div);

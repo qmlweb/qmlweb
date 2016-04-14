@@ -54,8 +54,8 @@ function QMLComponent(meta) {
         var src = importDesc[1];
         var js;
 
-        if (typeof qmlEngine.$basePath != 'undefined')
-          src = qmlEngine.$basePath + src;
+        if (typeof engine.$basePath != 'undefined')
+          src = engine.$basePath + src;
         if (typeof qrc[src] != 'undefined')
           js = qrc[src];
         else

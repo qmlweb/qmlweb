@@ -104,7 +104,7 @@ function QMLItem(meta) {
         this.$context.activeFocus = this;
       } else if (document.qmlFocus == this) {
         document.getElementsByTagName("BODY")[0].focus();
-        document.qmlFocus = qmlEngine.rootContext().base;
+        document.qmlFocus = engine.rootContext().base;
         this.$context.activeFocus = null;
       }
     }).bind(this));

@@ -12,10 +12,10 @@
   global.jsparse = function (source) {
     var obj = { exports: [], source: source };
     var AST_Tree = qmlweb_parse(source, qmlweb_parse.JSResource);
-    var foo_function_scope = AST_Tree[2][2][3];
+    var main_scope = AST_Tree[1];
 
-    for (var i = 0 ; i < foo_function_scope.length ; ++i) {
-      var item = foo_function_scope[i];
+    for (var i = 0 ; i < main_scope.length ; ++i) {
+      var item = main_scope[i];
 
       switch (item[0]) {
         case "var":

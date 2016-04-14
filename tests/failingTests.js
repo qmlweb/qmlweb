@@ -14,7 +14,6 @@ window.failingTests = {
       'can parse a function assigned to a var property'
     ],
     imports: [
-      'Javascript',
       'RecursiveInit',
       'RecursiveInit2'
     ],

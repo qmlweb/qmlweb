@@ -460,7 +460,7 @@ QMLEngine = function (element, options) {
         if (name in this.components)
             return this.components[name];
 
-        var file = qmlEngine.$basePath + name + ".qml";
+        var file = engine.$basePath + name + ".qml";
 
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
