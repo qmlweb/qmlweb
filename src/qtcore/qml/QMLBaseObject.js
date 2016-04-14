@@ -4,7 +4,6 @@ function QMLBaseObject(meta) {
     var i,
         prop;
 
-    this.$draw = function(){};
     this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
 

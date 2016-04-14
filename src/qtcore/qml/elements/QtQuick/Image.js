@@ -127,17 +127,6 @@ function QMLImage(meta) {
 
     this.mirrorChanged.connect  (this, updateMirroring);
     this.fillModeChanged.connect(this, updateFillMode);
-    this.$drawItem = function(c) {
-        updateFillMode();
-
-        if (this.status == this.Image.Ready) {
-            c.save();
-            c.drawImage(img, this.left, this.top, this.width, this.height);
-            c.restore();
-        } else {
-            console.log("Waiting for image to load");
-        }
-    }
 }
 
 registerQmlType({

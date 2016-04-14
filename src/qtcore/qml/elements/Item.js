@@ -356,35 +356,6 @@ function QMLItem(meta) {
             this.implicitWidth = this.dom.offsetWidth;
         }
     }
-
-    this.$draw = function(c) {
-        var i;
-        if (this.visible !== false) { // Undefined means inherit, means true
-            if (this.$drawItem ) {
-                var rotRad = (this.rotation || 0) / 180 * Math.PI,
-                    rotOffsetX = Math.sin(rotRad) * this.width,
-                    rotOffsetY = Math.sin(rotRad) * this.height;
-                c.save();
-
-                // Handle rotation
-                // todo: implement transformOrigin
-                c.globalAlpha = this.opacity;
-                c.translate(this.left + rotOffsetX, this.top + rotOffsetY);
-                c.rotate(rotRad);
-                c.translate(-this.left, -this.top);
-                // Leave offset for drawing...
-                this.$drawItem(c);
-                c.translate(-rotOffsetX, -rotOffsetY);
-                c.restore();
-            }
-            for (i = 0; i < this.children.length; i++) {
-                if (this.children[i]
-                    && this.children[i].$draw) {
-                    this.children[i].$draw(c);
-                }
-            }
-        }
-    }
 }
 inherit(QMLItem, QMLBaseObject);
 

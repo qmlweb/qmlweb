@@ -489,15 +489,6 @@ QMLEngine = function (element, options) {
         this.bindedProperties = [];
     }
 
-    this.$getTextMetrics = function(text, fontCss)
-    {
-        canvas.save();
-        canvas.font = fontCss;
-        var metrics = canvas.measureText(text);
-        canvas.restore();
-        return metrics;
-    }
-
     // Return a path to load the file
     this.$resolvePath = function(file)
     {
@@ -534,12 +525,6 @@ QMLEngine = function (element, options) {
     this.size = function()
     {
         return { width: this.rootObject.getWidth(), height: this.rootObject.getHeight() };
-    }
-
-    // Performance measurements
-    this.$perfDraw = function(canvas)
-    {
-        this.rootObject.$draw(canvas);
     }
 
 //----------Private Methods----------

@@ -35,33 +35,5 @@ registerQmlType({
     this.css.borderWidth ='0px';
     this.css.borderStyle = 'solid';
     this.css.borderColor = 'black';
-
-    this.$drawItem = function(c) {
-        c.save();
-        c.fillStyle = this.color;
-        c.strokeStyle = this.border.color;
-        c.lineWidth = this.border.width;
-
-        if (!this.radius) {
-            c.fillRect(this.left, this.top, this.width, this.height);
-            c.strokeRect(this.left, this.top, this.width, this.height);
-        } else {
-            var r = this.left + this.width;
-            var b = this.top + this.height;
-            c.beginPath();
-            c.moveTo(this.left + this.radius, this.top);
-            c.lineTo(r - this.radius, this.top);
-            c.quadraticCurveTo(r, this.top, r, this.top + this.radius);
-            c.lineTo(r, this.top + this.height - this.radius);
-            c.quadraticCurveTo(r, b, r - this.radius, b);
-            c.lineTo(this.left + this.radius, b);
-            c.quadraticCurveTo(this.left, b, this.left, b - this.radius);
-            c.lineTo(this.left, this.top + this.radius);
-            c.quadraticCurveTo(this.left, this.top, this.left + this.radius, this.top);
-            c.stroke();
-            c.fill();
-        }
-        c.restore();
-    }
   }
 });
