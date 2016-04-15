@@ -93,35 +93,33 @@ registerQmlType({
     }
 
     function cursorShapeToCSS(){
-        var cursor = "auto";
         switch (self.cursorShape) {
-          case Qt.ArrowCursor: cursor = "default"; break;
-          case Qt.UpArrowCursor: cursor = "auto";break;
-          case Qt.CrossCursor: cursor = "crosshair";break;
-          case Qt.WaitCursor: cursor = "wait";break;
-          case Qt.IBeamCursor: cursor = "auto";break;
-          case Qt.SizeVerCursor: cursor = "auto";break;
-          case Qt.SizeHorCursor: cursor = "auto";break;
-          case Qt.SizeBDiagCursor: cursor = "auto";break;
-          case Qt.SizeFDiagCursor: cursor = "auto";break;
-          case Qt.SizeAllCursor: cursor = "auto";break;
-          case Qt.BlankCursor: cursor = "auto";break;
-          case Qt.SplitVCursor: cursor = "auto";break;
-          case Qt.SplitHCursor: cursor = "auto";break;
-          case Qt.PointingHandCursor: cursor = "pointer";break;
-          case Qt.ForbiddenCursor: cursor = "not-allowed";break;
-          case Qt.WhatsThisCursor: cursor = "auto";break;
-          case Qt.BusyCursor: cursor = "progress";break;
-          case Qt.OpenHandCursor: cursor = "auto";break;
-          case Qt.ClosedHandCursor: cursor = "move";break;
-          case Qt.DragCopyCursor: cursor = "auto";break;
-          case Qt.DragMoveCursor: cursor = "auto";break;
-          case Qt.DragLinkCursor: cursor = "auto";break;
-          case Qt.LastCursor: cursor = "auto";break;
-          case Qt.BitmapCursor: cursor = "auto";break;
-          case Qt.CustomCursor: cursor = "auto";  break;
+          case Qt.ArrowCursor: return 'default';
+          case Qt.UpArrowCursor: return 'n-resize';
+          case Qt.CrossCursor: return 'crosshair';
+          case Qt.WaitCursor: return 'wait';
+          case Qt.IBeamCursor: return 'text';
+          case Qt.SizeVerCursor: return 'ew-resize';
+          case Qt.SizeHorCursor: return 'ns-resize';
+          case Qt.SizeBDiagCursor: return 'nesw-resize';
+          case Qt.SizeFDiagCursor: return 'nwse-resize';
+          case Qt.SizeAllCursor: return 'all-scroll';
+          case Qt.BlankCursor: return 'none';
+          case Qt.SplitVCursor: return 'row-resize';
+          case Qt.SplitHCursor: return 'col-resize';
+          case Qt.PointingHandCursor: return 'pointer';
+          case Qt.ForbiddenCursor: return 'not-allowed';
+          case Qt.WhatsThisCursor: return 'help';
+          case Qt.BusyCursor: return 'progress';
+          case Qt.OpenHandCursor: return 'grab';
+          case Qt.ClosedHandCursor: return 'grabbing';
+          case Qt.DragCopyCursor: return 'copy';
+          case Qt.DragMoveCursor: return 'move';
+          case Qt.DragLinkCursor: return 'alias';
+          //case Qt.BitmapCursor: return 'auto';
+          //case Qt.CustomCursor: return 'auto';
         }
-        return cursor;
+        return 'auto';
     }
 
     this.cursorShapeChanged.connect(function() {
