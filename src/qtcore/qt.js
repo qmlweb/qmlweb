@@ -11,8 +11,7 @@ global.Qt = {
     page.focus();
   },
   // Load file, parse and construct as Component (.qml)
-  //FIXME: remove the parameter executionContext and get it autonomously.
-  createComponent: function(name, executionContext) {
+  createComponent: function(name) {
     if (name in engine.components)
         return engine.components[name];
 
@@ -49,7 +48,7 @@ global.Qt = {
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
 
-    var component = new QMLComponent({ object: tree, context: executionContext });
+    var component = new QMLComponent({ object: tree, context: _executionContext });
     component.$basePath = engine.extractBasePath( file );
     component.$imports = tree.$imports;
     component.$file = file; // just for debugging
@@ -60,13 +59,12 @@ global.Qt = {
     return component;
   },
 
-  // TODO now we force to provide executionContext. Maybe it is better to compute if from parent if not provided?
-  createQmlObject: function(src, parent, file, executionContext) {
+  createQmlObject: function(src, parent, file) {
         var tree = parseQML(src); //parseQML(src, file);
 
         // Create and initialize objects
 
-        var component = new QMLComponent({ object: tree, parent: parent, context: executionContext });
+        var component = new QMLComponent({ object: tree, parent: parent, context: _executionContext });
 
         engine.loadImports( tree.$imports );
 
