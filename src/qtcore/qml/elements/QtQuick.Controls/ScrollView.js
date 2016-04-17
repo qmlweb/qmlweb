@@ -1,9 +1,4 @@
-registerQmlType({
-  module:   'QtQuick.Controls',
-  name:     'ScrollView',
-  versions: /.*/,
-  baseClass: QMLItem,
-  constructor: function QMLScrollView(meta) {
+function QMLScrollView(meta) {
     QMLItem.call(this, meta);
 
     var self = this;
@@ -37,34 +32,10 @@ registerQmlType({
     });
 
     this.horizontalScrollBarPolicyChanged.connect(this, function(newPolicy) {
-        var newVal = "auto";
-        switch (newPolicy){
-            case Qt.ScrollBarAsNeeded:
-                newVal = "auto";
-                break;
-            case Qt.ScrollBarAlwaysOff:
-                newVal = "hidden";
-                break;
-            case Qt.ScrollBarAlwaysOn:
-                newVal = "scroll";
-                break;
-        }
-        this.css.overflowX = newVal;
+        this.css.overflowX = this.scrollBarPolicyToCssOverflow(newPolicy);
     });
     this.verticalScrollBarPolicyChanged.connect(this, function(newPolicy) {
-        var newVal = "auto";
-        switch (newPolicy) {
-            case Qt.ScrollBarAsNeeded:
-                newVal = "auto";
-                break;
-            case Qt.ScrollBarAlwaysOff:
-                newVal = "hidden";
-                break;
-            case Qt.ScrollBarAlwaysOn:
-                newVal= "scroll";
-                break;
-        }
-        this.css.overflowY = newVal;
+        this.css.overflowY = this.scrollBarPolicyToCssOverflow(newPolicy);
     });
 
     this.styleChanged.connect(this, function(newStyle){});
@@ -92,5 +63,24 @@ registerQmlType({
     this.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.horizontalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.style = undefined;
-  }
+}
+
+QMLScrollView.prototype.scrollBarPolicyToCssOverflow = function(policy) {
+    switch (newPolicy) {
+        case Qt.ScrollBarAsNeeded:
+            return 'auto';
+        case Qt.ScrollBarAlwaysOff:
+            return 'hidden';
+        case Qt.ScrollBarAlwaysOn:
+            return 'scroll';
+    }
+    return 'auto';
+};
+
+registerQmlType({
+  module:   'QtQuick.Controls',
+  name:     'ScrollView',
+  versions: /.*/,
+  baseClass: QMLItem,
+  constructor: QMLScrollView
 });
