@@ -18,6 +18,10 @@ function QMLRepeater(meta) {
 
     this.model = 0;
     this.count = 0;
+    this.$listDom = document.createElement("ul");
+    this.$listDom.style.listStyleType = "none";
+    this.dom.appendChild(this.$listDom);
+	
 
     this.itemAt = function(index) {
         return this.$items[index];
@@ -31,7 +35,15 @@ function QMLRepeater(meta) {
     }
     function insertChildren(startIndex, endIndex) {
         for (var index = startIndex; index < endIndex; index++) {
-            var newItem = self.delegate.createObject(self);
+
+            var newItem = self.delegate.createObject(self);          
+			var entry = document.createElement("li");
+			
+			//entry.innerHTML = newItem.dom.innerHTML;
+			entry.appendChild( newItem.dom );
+			self.$listDom.appendChild(entry);
+			//newItem.parent = entry;
+			newItem.dom.style.position = "relative";
 
             createSimpleProperty("int", newItem, "index");
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
@@ -42,7 +54,7 @@ function QMLRepeater(meta) {
             }
 
             self.container().children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
-            newItem.parent = self.container();
+       //-igan     newItem.parent = self.container();
             self.container().childrenChanged();
             self.$items.splice(index, 0, newItem);
 
@@ -60,6 +72,7 @@ function QMLRepeater(meta) {
             self.$items[i].index = i;
 
         self.count = self.$items.length;
+        self._childrenInserted();
     }
 
     function applyModel() {

@@ -10,6 +10,21 @@ registerQmlType({
 
     createSimpleProperty("enum", this, "orientation");
     createSimpleProperty("real", this, "spacing");
+    createSimpleProperty("Component", this, "header");  // TODO: implement
+    createSimpleProperty("Item", this, "headerItem");  // TODO: implement
+    createSimpleProperty("enumeration", this, "headerPositioning");  // TODO: implement
+    
+    createSimpleProperty("Component", this, "footer");  // TODO: implement
+    createSimpleProperty("Item", this, "footerItem");  // TODO: implement
+    createSimpleProperty("enumeration", this, "footerPositioning");  // TODO: implement
+
+/* TODO:
+section
+section.property : string
+section.criteria : enumeration
+section.delegate : Component
+section.labelPositioning : enumeration
+*/
 
     this.container = function() { return self; }
     this.modelChanged.connect(styleChanged);
@@ -17,19 +32,21 @@ registerQmlType({
     this.orientationChanged.connect(styleChanged);
     this.spacingChanged.connect(styleChanged);
 
-    this._childrenInserted.connect(applyStyleOnItem)
+    this._childrenInserted.connect(styleChanged)
 
     function applyStyleOnItem($item) {
-      $item.dom.style.position = 'initial';
+      $item.css.position = 'initial';
       if (self.orientation == Qt.Horizontal) {
-        $item.dom.style.display = 'inline-block';
+        $item.css.display = 'inline-block';
         if ($item != self.$items[0])
-          $item.dom.style["margin-left"] = self.spacing + "px";
+          $item.dom.parentElement.style["margin-left"] = self.spacing + "px";
       }
       else {
-        $item.dom.style.display = 'block';
-        if ($item != self.$items[0])
-          $item.dom.style["margin-top"] = self.spacing + "px";
+        $item.css.display = 'block';
+        if ($item != self.$items[0]) {
+			// $item.dom.parentElement is <li>
+          $item.dom.parentElement.style["margin-top"] = self.spacing + "px";
+		}
       }
     }
 
