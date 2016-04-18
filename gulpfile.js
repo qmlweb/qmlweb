@@ -5,11 +5,11 @@ var changed = require('gulp-changed');
 var order = require('gulp-order');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var iife = require('gulp-iife');
 var eslint = require('gulp-eslint');
 var karma = require('karma');
 
 var qtcoreSources = [
-  'src/helpers/encapsulate.begin.js',
   'src/qtcore/qml/QMLBinding.js',
   'src/qtcore/qml/lib/parser.js',
   'src/qtcore/qml/lib/import.js',
@@ -20,8 +20,7 @@ var qtcoreSources = [
   'src/qtcore/qml/QMLPositioner.js',
   'src/qtcore/qml/elements/QtQuick/Repeater.js',
   'src/qtcore/qml/**/*.js',
-  'src/qmlweb/**/*.js',
-  'src/helpers/encapsulate.end.js'
+  'src/qmlweb/**/*.js'
 ];
 
 var tests = [
@@ -37,6 +36,11 @@ gulp.task('build-dev', function() {
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
              .pipe(concat('qt.js'))
+             .pipe(iife({
+                useStrict: false,
+                params: ['global'],
+                args: ['typeof global != \'undefined\' ? global : window']
+             }))
              .pipe(changed('./lib'))
              .pipe(sourcemaps.write('./'))
              .pipe(gulp.dest('./lib'));
