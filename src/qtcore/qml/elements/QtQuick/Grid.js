@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name: 'Grid',
   versions: /.*/,
-  baseClass: QMLPositioner,
+  baseClass: 'Positioner',
   constructor: QMLGrid
 });
 

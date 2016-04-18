@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Row',
   versions: /.*/,
-  baseClass: QMLPositioner,
+  baseClass: 'Positioner',
   constructor: QMLRow
 });
 

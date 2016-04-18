@@ -22,6 +22,6 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Column',
   versions: /.*/,
-  baseClass: QMLPositioner,
+  baseClass: 'Positioner',
   constructor: QMLColumn
 });

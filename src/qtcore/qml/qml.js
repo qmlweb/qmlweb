@@ -24,6 +24,8 @@ var modules = {
     Main: constructors
   };
 
+const dependants = {};
+
 // Helper. Adds a type to the constructor list
 global.registerGlobalQmlType = function (name, type) {
   global[type.name]  = type;
@@ -35,7 +37,36 @@ global.registerGlobalQmlType = function (name, type) {
 global.registerQmlType = function(options) {
   if (typeof options != 'object') {
     registerGlobalQmlType(arguments[0], arguments[1]);
-  } else {
+    return;
+  }
+
+  if (typeof options.baseClass === 'string') {
+    // TODO: Does not support version specification (yet?)
+    var baseModule, baseName;
+    const dot = options.baseClass.lastIndexOf('.');
+    if (dot === -1) {
+      baseModule = options.module;
+      baseName = options.baseClass;
+    } else {
+      baseModule = options.baseClass.substring(0, dot);
+      baseName = options.baseClass.substring(dot + 1);
+    }
+    const found = (modules[baseModule] || [])
+                    .filter(descr => descr.name === baseName);
+    if (found.length > 0) {
+      // Ok, we found our base class
+      options.baseClass = found[0].constructor;
+    } else {
+      // Base class not found, delay the loading
+      const baseId = [baseModule, baseName].join('.');
+      if (!dependants.hasOwnProperty(baseId)) {
+        dependants[baseId] = [];
+      }
+      dependants[baseId].push(options);
+      return;
+    }
+  }
+
     var moduleDescriptor = {
       name:        options.name,
       versions:    options.versions,
@@ -49,6 +80,11 @@ global.registerQmlType = function(options) {
     if (typeof options.baseClass !== 'undefined') {
       inherit(options.constructor, options.baseClass);
     }
+
+  const id = [options.module, options.name].join('.');
+  if (dependants.hasOwnProperty(id)) {
+    dependants[id].forEach(opt => global.registerQmlType(opt));
+    dependants[id].length = 0;
   }
 };
 
