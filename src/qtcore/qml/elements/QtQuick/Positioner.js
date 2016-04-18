@@ -8,7 +8,6 @@ function QMLPositioner(meta) {
 
     this.spacing = 0;
 }
-inherit(QMLPositioner, QMLItem);
 
 QMLPositioner.slotChildrenChanged = function() {
     for (var i = 0; i < this.children.length; i++) {
@@ -24,3 +23,10 @@ QMLPositioner.slotChildrenChanged = function() {
     }
 }
 
+registerQmlType({
+  module: 'QtQuick',
+  name:   'Positioner',
+  versions: /.*/,
+  baseClass: QMLItem,
+  constructor: QMLPositioner
+});

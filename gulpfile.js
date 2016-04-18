@@ -19,7 +19,7 @@ var qtcoreSources = [
   'src/qtcore/qml/qml.js',
   'src/qtcore/qml/QMLBaseObject.js',
   'src/qtcore/qml/elements/Item.js',
-  'src/qtcore/qml/QMLPositioner.js',
+  'src/qtcore/qml/elements/QtQuick/Positioner.js',
   'src/qtcore/qml/elements/QtQuick/Repeater.js',
   'src/qtcore/qml/**/*.js'
 ];
