@@ -6,7 +6,9 @@ var order = require('gulp-order');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var iife = require('gulp-iife');
+var babel = require('gulp-babel');
 var eslint = require('gulp-eslint');
+var replace = require('gulp-replace');
 var karma = require('karma');
 
 var qtcoreSources = [
@@ -35,7 +37,9 @@ gulp.task('build-dev', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
+             .pipe(babel())
              .pipe(concat('qt.js'))
+             .pipe(replace(/"use strict";/g, ''))
              .pipe(iife({
                 useStrict: false,
                 params: ['global'],

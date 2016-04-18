@@ -1,0 +1,8 @@
+{
+  "presets": ["es2015"],
+  "ignore": [
+    "src/qtcore/qml/qt.js",
+    "src/qtcore/qml/lib/parser.js",
+    "src/qtcore/qml/lib/jsparser.js"
+  ]
+}
