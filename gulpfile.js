@@ -21,8 +21,7 @@ var qtcoreSources = [
   'src/qtcore/qml/elements/Item.js',
   'src/qtcore/qml/QMLPositioner.js',
   'src/qtcore/qml/elements/QtQuick/Repeater.js',
-  'src/qtcore/qml/**/*.js',
-  'src/qmlweb/**/*.js'
+  'src/qtcore/qml/**/*.js'
 ];
 
 var tests = [
