@@ -50,23 +50,6 @@
  */
 (function() {
 
-function parseQML(file) {
-    var contents = getUrlContents(file + ".js");
-    if (contents) {
-        console.log("Using pre-processed content for " + file);
-        return new Function("return " + contents)();
-    } else {
-        contents = getUrlContents(file);
-        if (contents) {
-            // todo: use parser/compiler here
-            console.log("todo: add parser to import.js " + file);
-        } else {
-            console.log("warn: Fetch failed for " + file);
-        }
-    }
-}
-
-
 /**
  * Get URL contents. EXPORTED.
  * @param url {String} Url to fetch.
