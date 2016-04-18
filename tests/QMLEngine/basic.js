@@ -12,9 +12,11 @@ describe('QMLEngine.basic', function() {
     expect(this.div.innerText).toBe("variable from context = 42");
   });
 
-  it('Component.onCompleted handlers of dynamically created objects get called', function() {
-    var qml = load('CompletedOfDynamicObjects', this.div);
-    expect(qml.children.length).toBe(1);
-    expect(qml.color).toBe('cyan');
-  });
+  it('Component.onCompleted handlers of dynamically created objects get called',
+    function() {
+      var qml = load('CompletedOfDynamicObjects', this.div);
+      expect(qml.children.length).toBe(1);
+      expect(qml.color).toBe('cyan');
+    }
+  );
 });
