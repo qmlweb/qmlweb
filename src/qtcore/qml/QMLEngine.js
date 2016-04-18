@@ -17,10 +17,6 @@ QMLEngine = function (element, options) {
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
     this.running = false;
 
-    // Mouse Handling
-    this.mouseAreas = [];
-    this.oldMousePos = {x:0, y:0};
-
     // List of available Components
     this.components = {};
 
@@ -62,8 +58,6 @@ QMLEngine = function (element, options) {
     {
         var i;
         if (this.operationState == QMLOperationState.Running) {
-            element.removeEventListener("touchstart", touchHandler);
-            element.removeEventListener("mousemove", mousemoveHandler);
             clearInterval(tickerId);
             this.operationState = QMLOperationState.Idle;
             for (i = 0; i < whenStop.length; i++) {
@@ -525,58 +519,6 @@ QMLEngine = function (element, options) {
     }
 
 //----------Private Methods----------
-    // In JS we cannot easily access public members from
-    // private members so self acts as a bridge
-    var self = this;
-
-    // Listen also to touchstart events on supporting devices
-    // Makes clicks more responsive (do not wait for click event anymore)
-    function touchHandler(e)
-    {
-        // preventDefault also disables pinching and scrolling while touching
-        // on qml application
-        e.preventDefault();
-        var at = {
-            layerX: e.touches[0].pageX - element.offsetLeft,
-            layerY: e.touches[0].pageY - element.offsetTop,
-            button: 1
-        }
-        element.onclick(at);
-
-    }
-
-    function mousemoveHandler(e)
-    {
-        var i;
-        for (i in self.mouseAreas) {
-            var l = self.mouseAreas[i];
-            if (l && l.hoverEnabled
-                  && (self.oldMousePos.x >= l.left
-                      && self.oldMousePos.x <= l.right
-                      && self.oldMousePos.y >= l.top
-                      && self.oldMousePos.y <= l.bottom)
-                  && !(e.pageX - element.offsetLeft >= l.left
-                       && e.pageX - element.offsetLeft <= l.right
-                       && e.pageY - element.offsetTop >= l.top
-                       && e.pageY - element.offsetTop <= l.bottom) )
-                l.exited();
-        }
-        for (i in self.mouseAreas) {
-            var l = self.mouseAreas[i];
-            if (l && l.hoverEnabled
-                  && (e.pageX - element.offsetLeft >= l.left
-                      && e.pageX - element.offsetLeft <= l.right
-                      && e.pageY - element.offsetTop >= l.top
-                      && e.pageY - element.offsetTop <= l.bottom)
-                  && !(self.oldMousePos.x >= l.left
-                       && self.oldMousePos.x <= l.right
-                       && self.oldMousePos.y >= l.top
-                       && self.oldMousePos.y <= l.bottom))
-                l.entered();
-        }
-        self.oldMousePos = { x: e.pageX - element.offsetLeft,
-                            y: e.pageY - element.offsetTop };
-    }
 
     function tick()
     {
