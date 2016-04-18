@@ -5,7 +5,8 @@ window.failingTests = {
     ],
     Simple: [
       'RectangleBorderChildren',
-      'RectanglesOpacity'
+      'RectanglesOpacity',
+      'ZeroOpacityLayout'
     ]
   },
   QMLEngine: {
