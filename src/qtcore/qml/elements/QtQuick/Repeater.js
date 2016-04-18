@@ -3,11 +3,11 @@ function QMLRepeater(meta) {
     var self = this;
     var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
-    createSimpleProperty("Component", this, "delegate");
+    createProperty({ type: "Component", object: this, name: "delegate" });
     this.container = function() { return this.parent; }
     this.$defaultProperty = "delegate";
-    createSimpleProperty("variant", this, "model");
-    createSimpleProperty("int", this, "count");
+    createProperty({ type: "variant", object: this, name: "model", initialValue: 0 });
+    createProperty({ type: "int", object: this, name: "count", initialValue: 0 });
     this.$completed = false;
     this.$items = []; // List of created items
     this._childrenInserted = Signal();
@@ -15,9 +15,6 @@ function QMLRepeater(meta) {
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);
     this.parentChanged.connect(applyModel);
-
-    this.model = 0;
-    this.count = 0;
 
     this.itemAt = function(index) {
         return this.$items[index];
@@ -33,11 +30,11 @@ function QMLRepeater(meta) {
         for (var index = startIndex; index < endIndex; index++) {
             var newItem = self.delegate.createObject(self);
 
-            createSimpleProperty("int", newItem, "index");
+            createProperty({ type: "int", object: newItem, name: "index" });
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
             for (var i in model.roleNames) {
                 if (typeof newItem.$properties[model.roleNames[i]] == 'undefined')
-                  createSimpleProperty("variant", newItem, model.roleNames[i]);
+                  createProperty({ type: "variant", object: newItem, name: model.roleNames[i] });
                 newItem.$properties[model.roleNames[i]].set(model.data(index, model.roleNames[i]), QMLProperty.ReasonInit, newItem, self.model.$context);
             }
 

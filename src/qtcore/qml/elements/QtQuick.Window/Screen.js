@@ -12,16 +12,16 @@ function QMLScreen(meta) {
 
     // TODO: rewrite as an attached object and forbid constructing
 
-    createSimpleProperty("int", this, "desktopAvailableHeight");
-    createSimpleProperty("int", this, "desktopAvailableWidth");
-    createSimpleProperty("real", this, "devicePixelRatio");
-    createSimpleProperty("int", this, "height");
-    createSimpleProperty("string", this, "name");
-    createSimpleProperty("enum", this, "orientation");
-    createSimpleProperty("enum", this, "orientationUpdateMask");
-    createSimpleProperty("real", this, "pixelDensity");
-    createSimpleProperty("enum", this, "primaryOrientation");
-    createSimpleProperty("int", this, "width");
+    createProperty({ type: "int", object: this, name: "desktopAvailableHeight" });
+    createProperty({ type: "int", object: this, name: "desktopAvailableWidth" });
+    createProperty({ type: "real", object: this, name: "devicePixelRatio" });
+    createProperty({ type: "int", object: this, name: "height" });
+    createProperty({ type: "string", object: this, name: "name" });
+    createProperty({ type: "enum", object: this, name: "orientation" });
+    createProperty({ type: "enum", object: this, name: "orientationUpdateMask" });
+    createProperty({ type: "real", object: this, name: "pixelDensity" });
+    createProperty({ type: "enum", object: this, name: "primaryOrientation" });
+    createProperty({ type: "int", object: this, name: "width" });
 
     this.Component.completed.connect(this, updateSC);
 

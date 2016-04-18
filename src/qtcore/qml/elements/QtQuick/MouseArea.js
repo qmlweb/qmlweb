@@ -15,26 +15,20 @@ registerQmlType({
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
 
-    createSimpleProperty("variant", this, "acceptedButtons");
-    createSimpleProperty("bool", this, "enabled");
-    createSimpleProperty("bool", this, "hoverEnabled");
-    createSimpleProperty("real", this, "mouseX");
-    createSimpleProperty("real", this, "mouseY");
-    createSimpleProperty("bool", this, "pressed");
-    createSimpleProperty("bool", this, "containsMouse");
-    createSimpleProperty("variant", this, "pressedButtons");
-    createSimpleProperty("enum", this, "cursorShape");
+    createProperty({ type: "variant", object: this, name: "acceptedButtons", initialValue: Qt.LeftButton });
+    createProperty({ type: "bool", object: this, name: "enabled", initialValue: true });
+    createProperty({ type: "bool", object: this, name: "hoverEnabled", initialValue: false });
+    createProperty({ type: "real", object: this, name: "mouseX", initialValue: 0 });
+    createProperty({ type: "real", object: this, name: "mouseY", initialValue: 0 });
+    createProperty({ type: "bool", object: this, name: "pressed", initialValue: false });
+    createProperty({ type: "bool", object: this, name: "containsMouse", initialValue: false });
+    createProperty({ type: "variant", object: this, name: "pressedButtons", initialValue: 0 });
+    createProperty({ type: "enum", object: this, name: "cursorShape", initialValue: Qt.ArrowCursor });
 
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();
     this.exited = Signal();
     this.positionChanged = Signal([{type: "variant", name: "mouse"}]);
-
-    this.acceptedButtons = Qt.LeftButton;
-    this.enabled = true;
-    this.hoverEnabled = false;
-    this.containsMouse = false;
-    this.cursorShape = Qt.ArrowCursor;
 
     function eventToMouse(e) {
         return {

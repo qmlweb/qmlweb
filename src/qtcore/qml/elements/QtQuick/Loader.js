@@ -21,13 +21,13 @@ registerQmlType({
 
         var self = this;
 
-        createSimpleProperty('bool', this, 'active');
-        createSimpleProperty('bool', this, 'asynchronous');
-        createSimpleProperty('var', this, 'item');
-        createSimpleProperty('real', this, 'progress');
-        createSimpleProperty('url', this, 'source');
-        createSimpleProperty('Component', this, 'sourceComponent');
-        createSimpleProperty('enum', this, 'status');
+        createProperty({ type: 'bool', object: this, name: 'active' });
+        createProperty({ type: 'bool', object: this, name: 'asynchronous' });
+        createProperty({ type: 'var', object: this, name: 'item' });
+        createProperty({ type: 'real', object: this, name: 'progress' });
+        createProperty({ type: 'url', object: this, name: 'source' });
+        createProperty({ type: 'Component', object: this, name: 'sourceComponent' });
+        createProperty({ type: 'enum', object: this, name: 'status' });
 
         this.active = true;
         this.asynchronous = false;

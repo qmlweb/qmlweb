@@ -8,8 +8,8 @@ registerQmlType({
     var QMLRepeater = getConstructor('QtQuick', '2.0', 'Repeater');
     QMLRepeater.call(this, meta);
 
-    createSimpleProperty("enum", this, "orientation");
-    createSimpleProperty("real", this, "spacing");
+    createProperty({ type: "enum", object: this, name: "orientation" });
+    createProperty({ type: "real", object: this, name: "spacing" });
 
     this.container = function() { return self; }
     this.modelChanged.connect(styleChanged);

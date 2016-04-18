@@ -6,7 +6,7 @@ registerQmlType({
   constructor: function QMLSettings(meta) {
     QMLItem.call(this, meta);
 
-    createSimpleProperty("string", this, "category");
+    createProperty({ type: "string", object: this, name: "category" });
 
     if (typeof window.localStorage == 'undefined')
       return ;

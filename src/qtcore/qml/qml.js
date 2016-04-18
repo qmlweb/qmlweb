@@ -175,24 +175,19 @@ function construct(meta) {
 
 /**
  * Create property getters and setters for object.
- * @param {Object} obj Object for which gsetters will be set
- * @param {String} propName Property name
- * @param {Object} [options] Options that allow finetuning of the property
  */
-function createSimpleProperty(type, obj, propName, options) {
+function createProperty(data) {
+    var type = data.type;
+    var propName = data.name;
+    var obj = data.object;
     var prop = new QMLProperty(type, obj, propName);
     var getter, setter;
 
-    if (typeof options == 'undefined')
-      options = {};
-    else if (typeof options != 'object')
-      options = { default: options }
-
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
-    obj.$properties[propName].set(options.default);
+    obj.$properties[propName].set(data.initialValue);
     getter = function()       { return obj.$properties[propName].get(); };
-    if (!options.readOnly)
+    if (!data.readOnly)
       setter = function(newVal) { return obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
     else {
       setter = function(newVal) {
@@ -312,7 +307,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                     componentScope[i] = item[i];
                 continue;
             } else if (value instanceof QMLAliasDefinition) {
-                createSimpleProperty("alias", item, i);
+                createProperty({ type: "alias", object: item, name: i });
                 item.$properties[i].componentScope = componentScope;
                 item.$properties[i].val = value;
                 item.$properties[i].get = function() {
@@ -326,7 +321,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                 }
                 continue;
             } else if (value instanceof QMLPropertyDefinition) {
-                createSimpleProperty(value.type, item, i);
+                createProperty({ type: value.type, object: item, name: i });
                 item.$properties[i].set(value.value, QMLProperty.ReasonInit, objectScope, componentScope);
                 continue;
             } else if (item[i] && value instanceof QMLMetaPropertyGroup) {

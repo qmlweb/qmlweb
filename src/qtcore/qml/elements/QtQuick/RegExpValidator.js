@@ -6,7 +6,7 @@ registerQmlType({
   constructor: function QMLRegExpValidator(meta) {
     QMLItem.call(this, meta);
 
-    createSimpleProperty("var", this, "regExp");
+    createProperty({ type: "var", object: this, name: "regExp" });
 
     this.validate = (function(string) {
       if (typeof this.regExp == 'undefined' || this.regExp == null)

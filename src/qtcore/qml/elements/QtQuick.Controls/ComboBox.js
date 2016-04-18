@@ -13,12 +13,12 @@ function QMLComboBox(meta) {
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
 
-    createSimpleProperty("int", this, "count");
-    createSimpleProperty("int", this, "currentIndex");
-    createSimpleProperty("string", this, "currentText");
-    createSimpleProperty("array", this, "menu");
-    createSimpleProperty("array", this, "model");
-    createSimpleProperty("bool", this, "pressed");
+    createProperty({ type: "int", object: this, name: "count" });
+    createProperty({ type: "int", object: this, name: "currentIndex" });
+    createProperty({ type: "string", object: this, name: "currentText" });
+    createProperty({ type: "array", object: this, name: "menu" });
+    createProperty({ type: "array", object: this, name: "model" });
+    createProperty({ type: "bool", object: this, name: "pressed" });
 
     this.count = 0;
     this.currentIndex = 0;

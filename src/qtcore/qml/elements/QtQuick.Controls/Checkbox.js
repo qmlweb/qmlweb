@@ -15,9 +15,9 @@ registerQmlType({
     this.dom.style.pointerEvents = "auto";
     this.dom.firstChild.style.verticalAlign = "text-bottom";
 
-    createSimpleProperty("string", this, "text");
-    createSimpleProperty("bool", this, "checked");
-    createSimpleProperty("color", this, "color");
+    createProperty({ type: "string", object: this, name: "text" });
+    createProperty({ type: "bool", object: this, name: "checked" });
+    createProperty({ type: "color", object: this, name: "color" });
 
     this.Component.completed.connect(this, function() {
         this.implicitHeight = this.dom.offsetHeight;

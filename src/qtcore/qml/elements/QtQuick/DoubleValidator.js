@@ -10,10 +10,10 @@ registerQmlType({
   constructor: function QMLDoubleValidator(meta) {
     QMLItem.call(this, meta);
 
-    createSimpleProperty("real", this, "bottom");
-    createSimpleProperty("real", this, "top");
-    createSimpleProperty("int",  this, "decimals");
-    createSimpleProperty("enum", this, "notation");
+    createProperty({ type: "real", object: this, name: "bottom" });
+    createProperty({ type: "real", object: this, name: "top" });
+    createProperty({ type: "int",  object: this, name: "decimals" });
+    createProperty({ type: "enum", object: this, name: "notation" });
     this.bottom   = -Infinity;
     this.top      = Infinity;
     this.decimals = 1000;

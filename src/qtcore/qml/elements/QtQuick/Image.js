@@ -20,31 +20,20 @@ function QMLImage(meta) {
     }
 
     // no-op properties
-    createSimpleProperty("bool", this, "asynchronous");
-    createSimpleProperty("bool", this, "cache");
-    createSimpleProperty("bool", this, "smooth");
+    createProperty({ type: "bool", object: this, name: "asynchronous", initialValue: true });
+    createProperty({ type: "bool", object: this, name: "cache", initialValue: true });
+    createProperty({ type: "bool", object: this, name: "smooth", initialValue: true });
 
-    createSimpleProperty("enum", this, "fillMode");
-    createSimpleProperty("bool", this, "mirror");
-    createSimpleProperty("real", this, "progress");
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
+    createProperty({ type: "enum", object: this, name: "fillMode", initialValue: this.Image.Stretch });
+    createProperty({ type: "bool", object: this, name: "mirror", initialValue: false });
+    createProperty({ type: "real", object: this, name: "progress", initialValue: 0 });
+    createProperty({ type: "url", object: this, name: "source", initialValue: "" });
+    createProperty({ type: "enum", object: this, name: "status", initialValue: this.Image.Null });
 
     this.sourceSize = new QObject(this);
 
-    createSimpleProperty("int", this.sourceSize, "width");
-    createSimpleProperty("int", this.sourceSize, "height");
-
-    this.asynchronous = true;
-    this.cache = true;
-    this.smooth = true;
-    this.fillMode = this.Image.Stretch;
-    this.mirror = false;
-    this.progress = 0;
-    this.source = "";
-    this.status = this.Image.Null;
-    this.sourceSize.width = 0;
-    this.sourceSize.height = 0;
+    createProperty({ type: "int", object: this.sourceSize, name: "width", initialValue: 0 });
+    createProperty({ type: "int", object: this.sourceSize, name: "height", initialValue: 0 });
 
     // Bind status to img element
     img.onload = function() {

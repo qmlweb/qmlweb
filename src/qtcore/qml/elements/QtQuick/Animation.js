@@ -6,15 +6,10 @@ function QMLAnimation(meta) {
         Infinite: -1
     };
 
-    createSimpleProperty("bool", this, "alwaysRunToEnd");
-    createSimpleProperty("int", this, "loops");
-    createSimpleProperty("bool", this, "paused");
-    createSimpleProperty("bool", this, "running");
-
-    this.alwaysRunToEnd = false;
-    this.loops = 1;
-    this.paused = false;
-    this.running = false;
+    createProperty({ type: "bool", object: this, name: "alwaysRunToEnd", initialValue: false });
+    createProperty({ type: "int", object: this, name: "loops", initialValue: 1 });
+    createProperty({ type: "bool", object: this, name: "paused", initialValue: false });
+    createProperty({ type: "bool", object: this, name: "running", initialValue: false });
 
     // Methods
     this.restart = function() {

@@ -25,17 +25,17 @@ registerQmlType({
     this.dom.firstChild.style.width = this.dom.firstChild.style.height = "100%";
     this.dom.firstChild.style.margin = "0";
 
-    createSimpleProperty("bool",   this, "autoPlay");
-    createSimpleProperty("enum",   this, "fillMode");
-    createSimpleProperty("int",    this, "duration");
-    createSimpleProperty("int",    this, "position");
-    createSimpleProperty("bool",   this, "muted");
-    createSimpleProperty("real",   this, "playbackRate");
-    createSimpleProperty("enum",   this, "playbackState");
-    createSimpleProperty("string", this, "source");
-    createSimpleProperty("real",   this, "volume");
-    createSimpleProperty("enum",   this, "status");
-    createSimpleProperty("enum",   this, "error");
+    createProperty({ type: "bool",   object: this, name: "autoPlay" });
+    createProperty({ type: "enum",   object: this, name: "fillMode" });
+    createProperty({ type: "int",    object: this, name: "duration" });
+    createProperty({ type: "int",    object: this, name: "position" });
+    createProperty({ type: "bool",   object: this, name: "muted" });
+    createProperty({ type: "real",   object: this, name: "playbackRate" });
+    createProperty({ type: "enum",   object: this, name: "playbackState" });
+    createProperty({ type: "string", object: this, name: "source" });
+    createProperty({ type: "real",   object: this, name: "volume" });
+    createProperty({ type: "enum",   object: this, name: "status" });
+    createProperty({ type: "enum",   object: this, name: "error" });
     this.status = MediaPlayer.NoMedia;
     this.error = MediaPlayer.NoError;
     this.fillMode = VideoOutput.PreserveAspectFit;

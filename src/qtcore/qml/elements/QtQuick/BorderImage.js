@@ -19,24 +19,15 @@ registerQmlType({
         Error: 4
     }
 
-    createSimpleProperty("url", this, "source");
-    createSimpleProperty("enum", this, "status");
+    createProperty({ type: "url", object: this, name: "source", initialValue: "" });
+    createProperty({ type: "enum", object: this, name: "status", initialValue: this.BorderImage.Null });
     this.border = new QObject(this);
-    createSimpleProperty("int", this.border, "left");
-    createSimpleProperty("int", this.border, "right");
-    createSimpleProperty("int", this.border, "top");
-    createSimpleProperty("int", this.border, "bottom");
-    createSimpleProperty("enum", this, "horizontalTileMode");
-    createSimpleProperty("enum", this, "verticalTileMode");
-
-    this.source = "";
-    this.status = this.BorderImage.Null;
-    this.border.left = 0;
-    this.border.right = 0;
-    this.border.top = 0;
-    this.border.bottom = 0;
-    this.horizontalTileMode = this.BorderImage.Stretch;
-    this.verticalTileMode = this.BorderImage.Stretch;
+    createProperty({ type: "int", object: this.border, name: "left", initialValue: 0 });
+    createProperty({ type: "int", object: this.border, name: "right", initialValue: 0 });
+    createProperty({ type: "int", object: this.border, name: "top", initialValue: 0 });
+    createProperty({ type: "int", object: this.border, name: "bottom", initialValue: 0 });
+    createProperty({ type: "enum", object: this, name: "horizontalTileMode", initialValue: this.BorderImage.Stretch });
+    createProperty({ type: "enum", object: this, name: "verticalTileMode", initialValue: this.BorderImage.Stretch });
 
     this.sourceChanged.connect(this, function() {
         this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
