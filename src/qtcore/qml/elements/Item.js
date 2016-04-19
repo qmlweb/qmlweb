@@ -111,14 +111,14 @@ function QMLItem(meta) {
     this.$isUsingImplicitHeight = true;
 
     this.anchors = new QObject(this);
-    createProperty("real", this.anchors, "left");
-    createProperty("real", this.anchors, "right");
-    createProperty("real", this.anchors, "top");
-    createProperty("real", this.anchors, "bottom");
-    createProperty("real", this.anchors, "horizontalCenter");
-    createProperty("real", this.anchors, "verticalCenter");
-    createProperty("real", this.anchors, "fill");
-    createProperty("real", this.anchors, "centerIn");
+    createProperty("var", this.anchors, "left");
+    createProperty("var", this.anchors, "right");
+    createProperty("var", this.anchors, "top");
+    createProperty("var", this.anchors, "bottom");
+    createProperty("var", this.anchors, "horizontalCenter");
+    createProperty("var", this.anchors, "verticalCenter");
+    createProperty("Item", this.anchors, "fill");
+    createProperty("Item", this.anchors, "centerIn");
     createProperty("real", this.anchors, "margins");
     createProperty("real", this.anchors, "leftMargin");
     createProperty("real", this.anchors, "rightMargin");
