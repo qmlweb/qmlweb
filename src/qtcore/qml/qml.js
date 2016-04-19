@@ -215,18 +215,13 @@ function construct(meta) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createProperty(type, obj, propName, options) {
+function createProperty(type, obj, propName, options = {}) {
     var prop = new QMLProperty(type, obj, propName);
     var getter, setter;
 
-    if (typeof options == 'undefined')
-      options = {};
-    else if (typeof options != 'object')
-      options = { initialValue: options }
-
     obj[propName + "Changed"] = prop.changed;
     obj.$properties[propName] = prop;
-    obj.$properties[propName].set(options.initialValue);
+    obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
     getter = function()       { return obj.$properties[propName].get(); };
     if (!options.readOnly)
       setter = function(newVal) { obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };

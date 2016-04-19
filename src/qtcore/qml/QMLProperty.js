@@ -53,6 +53,16 @@ QMLProperty.prototype.get = function() {
     return this.val;
 }
 
+const typeInitialValues = {
+  int: 0,
+  real: 0,
+  double: 0,
+  string: '',
+  bool: false,
+  list: [],
+  url: ''
+};
+
 // Define setter
 QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope) {
     var i,
@@ -81,6 +91,12 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
             this.binding = null;
         if (newVal instanceof Array)
             newVal = newVal.slice(); // Copies the array
+    }
+
+    if (reason === QMLProperty.ReasonInit && typeof newVal === 'undefined') {
+      if (typeInitialValues.hasOwnProperty(this.type)) {
+        newVal = typeInitialValues[this.type];
+      }
     }
 
     if (constructors[this.type] == QMLList) {
