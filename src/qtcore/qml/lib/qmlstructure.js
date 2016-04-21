@@ -162,7 +162,7 @@ function convertToEngine(tree) {
             return new QMLMethod(src);
         },
         "qmlpropdef": function(name, type, tree, src) {
-            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : "");
+            return new QMLPropertyDefinition(type, tree ? bindout(tree, src) : undefined);
         },
         "qmlaliasdef": function(name, objName, propName) {
             return new QMLAliasDefinition(objName, propName);

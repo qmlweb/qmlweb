@@ -19,8 +19,7 @@ window.failingTests = {
     properties: [
       'alias to id with same name',
       'ChangedExpressionSignal',
-      'StringConversion',
-      'undefined property has undefined value'
+      'StringConversion'
     ],
     scope: [
       'object id should override same-named property of base object'
