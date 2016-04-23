@@ -36,14 +36,13 @@ function QMLRepeater(meta) {
     function insertChildren(startIndex, endIndex) {
         for (var index = startIndex; index < endIndex; index++) {
 
-            var newItem = self.delegate.createObject(self);          
+            var newItem = self.delegate.createObject(self);
+            newItem.dom.style.position = "relative";
+                    
 			var entry = document.createElement("li");
-			
-			//entry.innerHTML = newItem.dom.innerHTML;
 			entry.appendChild( newItem.dom );
+			
 			self.$listDom.appendChild(entry);
-			//newItem.parent = entry;
-			newItem.dom.style.position = "relative";
 
             createSimpleProperty("int", newItem, "index");
             var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
@@ -54,7 +53,7 @@ function QMLRepeater(meta) {
             }
 
             self.container().children.splice(self.parent.children.indexOf(self) - self.$items.length + index, 0, newItem);
-       //-igan     newItem.parent = self.container();
+			//-igan     newItem.parent = self.container();
             self.container().childrenChanged();
             self.$items.splice(index, 0, newItem);
 
