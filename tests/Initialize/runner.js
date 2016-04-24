@@ -7,9 +7,7 @@ describe('Initialize.loadQml', function() {
 });
 
 var modules = {
-  "QtQuick": {
-    _version: "2.5",
-    _depends: {},
+  'QtQuick 2.5': {
     AnimatedImage: {},
     Animation: {},
     Behavior: {},
@@ -45,46 +43,44 @@ var modules = {
     Transition: {},
     Translate: {}
   },
-  'QtQuick.Controls': {
-    _version: '1.4',
-    _depends: {},
+  'QtQuick.Controls 1.4': {
     Button: { dom: true },
     CheckBox: { dom: true },
     ComboBox: { dom: true },
     ScrollView: { dom: true },
     TextField: { dom: true }
   },
-  'QtMultimedia': {
-    _version: '5.6',
-    _depends: {},
+  'QtMultimedia 5.6': {
     Video: { dom: true }
   },
-  'QtWebSockets': {
-    _version: '1.0',
-    _depends: {},
+  'QtWebSockets 1.0': {
     WebSocket: {}
   },
-  'Qt.labs.settings': {
-    _version: '1.0',
-    _depends: {},
+  'Qt.labs.settings 1.0': {
     Settings: {}
   },
-  'QmlWeb.Dom': {
-    _version: '1.0',
-    _depends: {},
+  'QmlWeb.Dom 1.0': {
     DomElement: { dom: true }
   }
 };
 
 function testModule(modules, testFunc) {
-  Object.keys(modules).forEach(function(module) {
-    var imports = "import " + module + " " + modules[module]._version + "\n";
-    for (var i in module._depends) {
+  Object.keys(modules).forEach(function(key) {
+    var module = modules[key];
+    if (module._version) {
+      module._name = key;
+    } else {
+      var split = key.split(' ');
+      module._name = split[0];
+      module._version = split[1];
+    }
+    var imports = 'import ' + module._name + ' ' + module._version + '\n';
+    for (var i in module._depends || []) {
       imports += "import " + module._depends[i] + "\n";
     }
-    Object.keys(modules[module]).forEach(function(element) {
+    Object.keys(module).forEach(function(element) {
       if (element[0] === "_") return;
-      testFunc(module, element, imports, modules[module][element]);
+      testFunc(module._name, element, imports, module[element]);
     });
   });
 }
