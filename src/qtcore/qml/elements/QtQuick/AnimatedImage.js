@@ -3,7 +3,7 @@ registerQmlType({
   name:     'AnimatedImage',
   versions: /.*/,
   baseClass: QMLImage,
-  constructors: function QMLAnimatedImage(meta) {
+  constructor: function QMLAnimatedImage(meta) {
     QMLImage.call(this, meta);
   }
 });
