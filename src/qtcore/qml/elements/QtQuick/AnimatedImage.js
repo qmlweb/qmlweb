@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'AnimatedImage',
   versions: /.*/,
-  baseClass: QMLImage,
+  baseClass: 'Image',
   constructor: function QMLAnimatedImage(meta) {
     QMLImage.call(this, meta);
   }

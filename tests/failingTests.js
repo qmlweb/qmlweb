@@ -30,8 +30,7 @@ window.failingTests = {
       'Translate',
       'Scale',
       'Rotation',
-      'Font',
-      'AnimatedImage'
+      'Font'
     ]
   }
 };

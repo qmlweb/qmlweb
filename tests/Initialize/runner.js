@@ -8,7 +8,7 @@ describe('Initialize.loadQml', function() {
 
 var modules = {
   'QtQuick 2.5': {
-    AnimatedImage: {},
+    AnimatedImage: { dom: true },
     Animation: {},
     Behavior: {},
     BorderImage: {},
