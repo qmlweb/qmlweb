@@ -1,3 +1,5 @@
+import QtQuick 2.0
+
 Item {
   property int intProperty: 10
   property double doubleProperty: 0.5

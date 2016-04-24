@@ -1,3 +1,5 @@
+import QtQuick 2.0
+
 Item {
   id: parentItem
   property int value: 100

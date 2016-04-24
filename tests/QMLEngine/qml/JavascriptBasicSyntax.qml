@@ -1,3 +1,5 @@
+import QtQuick 2.0
+
 Item {
   //this is a line comment
   /*

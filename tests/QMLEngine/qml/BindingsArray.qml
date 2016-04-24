@@ -1,3 +1,5 @@
+import QtQuick 2.0
+
 Item {
   id: main
   property int value: 5
