@@ -44,6 +44,35 @@ var modules = {
     Timer: {},
     Transition: {},
     Translate: {}
+  },
+  'QtQuick.Controls': {
+    _version: '1.4',
+    _depends: {},
+    Button: { dom: true },
+    CheckBox: { dom: true },
+    ComboBox: { dom: true },
+    ScrollView: { dom: true },
+    TextField: { dom: true }
+  },
+  'QtMultimedia': {
+    _version: '5.6',
+    _depends: {},
+    Video: { dom: true }
+  },
+  'QtWebSockets': {
+    _version: '1.0',
+    _depends: {},
+    WebSocket: {}
+  },
+  'Qt.labs.settings': {
+    _version: '1.0',
+    _depends: {},
+    Settings: {}
+  },
+  'QmlWeb.Dom': {
+    _version: '1.0',
+    _depends: {},
+    DomElement: { dom: true }
   }
 };
 
