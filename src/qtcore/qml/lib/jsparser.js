@@ -1,12 +1,15 @@
 (function() {
   global.importJavascriptInContext = function (jsData, $context) {
-    with($context) {
-      eval(jsData.source);
+    // TODO: pass more objects to the scope?
+    (new Function('jsData', '$context', `
+      with ($context) {
+        ${jsData.source}
+      }
       for (var i = 0 ; i < jsData.exports.length ; ++i) {
         var symbolName = jsData.exports[i];
         $context[symbolName] = eval(symbolName);
       }
-    }
+    `))(jsData, $context);
   }
 
   global.jsparse = function (source) {
