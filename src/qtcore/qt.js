@@ -222,7 +222,6 @@ global.Qt = {
   Key_VolumeDown: 182,
   Key_VolumeUp: 183,
   Key_VolumeMute: 181,
-  Key_Yes: 0,
   Key_multiply: 106,
   Key_add: 107,
   Key_substract: 109,
