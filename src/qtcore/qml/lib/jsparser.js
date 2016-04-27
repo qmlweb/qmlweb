@@ -1,4 +1,3 @@
-(function() {
   global.importJavascriptInContext = function (jsData, $context) {
     // TODO: pass more objects to the scope?
     (new Function('jsData', '$context', `
@@ -31,5 +30,3 @@
     }
     return obj;
   }
-
-})();
