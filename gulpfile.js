@@ -14,6 +14,7 @@ var karma = require('karma');
 var qtcoreSources = [
   'src/qtcore/qml/QMLBinding.js',
   'src/qtcore/qml/lib/parser.js',
+  'src/qtcore/qml/lib/qmlstructure.js',
   'src/qtcore/qml/lib/import.js',
   'src/qtcore/*.js',
   'src/qtcore/qml/qml.js',
