@@ -75,6 +75,7 @@ QMLEngine = function (element, options) {
         var src = getUrlContents(file);
 
         if (src) {
+            loadParser();
             console.log('Loading file [', file, ']');
             qrc[file] = qmlweb_parse(src, qmlweb_parse.QMLDocument);
         } else {

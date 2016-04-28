@@ -10,6 +10,7 @@
 
   global.jsparse = function (source) {
     var obj = { exports: [], source: source };
+    loadParser();
     var AST_Tree = qmlweb_parse(source, qmlweb_parse.JSResource);
     var main_scope = AST_Tree[1];
 

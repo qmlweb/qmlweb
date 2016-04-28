@@ -3,8 +3,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
-      'tmp/qmlweb.parser.covered.js',
       'tmp/qt.covered.js',
+      { pattern: 'tmp/qmlweb.*.js', included: false },
       { pattern: 'tmp/*.js.map', included: false },
       'tests/common.js',
       'tests/failingTests.js',

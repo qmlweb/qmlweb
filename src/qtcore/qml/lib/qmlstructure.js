@@ -238,7 +238,30 @@ function convertToEngine(tree) {
 
 // Function to parse qml and output tree expected by engine
 function parseQML(src, file) {
+    loadParser();
     qmlweb_parse.nowParsingFile = file;
     var parsetree = qmlweb_parse(src, qmlweb_parse.QmlDocument);
     return convertToEngine(parsetree);
+}
+
+function loadParser() {
+  if (typeof qmlweb_parse !== 'undefined')
+    return;
+
+  console.log('Loading parser...');
+  var tags = document.getElementsByTagName('script');
+  for (let i in tags) {
+    if (tags[i].src && tags[i].src.indexOf('/qt.') !== -1) {
+      let src = tags[i].src.replace('/qt.', '/qmlweb.parser.');
+      // TODO: rewrite to async loading
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', src, false);
+      xhr.send(null);
+      if (xhr.status !== 200 && xhr.status !== 0) { // 0 if accessing with file://
+          throw new Error('Could not load QmlWeb parser!');
+      }
+      (new Function(xhr.responseText))();
+      return;
+    }
+  }
 }
