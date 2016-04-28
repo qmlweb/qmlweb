@@ -14,7 +14,6 @@ const istanbul = require('gulp-istanbul');
 
 const qtcoreSources = [
   'src/qtcore/qml/QMLBinding.js',
-  'src/qtcore/qml/lib/parser.js',
   'src/qtcore/qml/lib/qmlstructure.js',
   'src/qtcore/qml/lib/import.js',
   'src/qtcore/*.js',
@@ -22,6 +21,11 @@ const qtcoreSources = [
   'src/qtcore/qml/QMLBaseObject.js',
   'src/qtcore/qml/elements/Item.js',
   'src/qtcore/qml/**/*.js'
+];
+
+const licenseSources = [
+  'LICENSE',
+  'node_modules/qmlweb-parser/LICENSE'
 ];
 
 const tests = [
@@ -32,7 +36,29 @@ const tests = [
 // set by default by the system.
 process.env.QT_QPA_PLATFORM = '';
 
-gulp.task('build-covered', function() {
+gulp.task('license', function() {
+  return gulp.src(licenseSources)
+             .pipe(order(licenseSources, { base: __dirname }))
+             .pipe(concat('LICENSE'))
+             .pipe(changed('./lib'))
+             .pipe(gulp.dest('./lib'));
+});
+
+gulp.task('parser', function() {
+  return gulp.src('node_modules/qmlweb-parser/lib/*.js')
+             .pipe(gulp.dest('./lib'));
+});
+
+gulp.task('parser-covered', function() {
+  // This file is not covered here on a purpose.
+  // Name *.covered.js is required to autoload from qt.covered.js.
+  return gulp.src('node_modules/qmlweb-parser/lib/qmlweb.parser.js')
+             .pipe(rename('qmlweb.parser.covered.js'))
+             .pipe(changed('./tmp'))
+             .pipe(gulp.dest('./tmp'));
+});
+
+gulp.task('qmlweb-covered', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
@@ -53,7 +79,7 @@ gulp.task('build-covered', function() {
              .pipe(gulp.dest('./tmp'));
 });
 
-gulp.task('build-dev', function() {
+gulp.task('qmlweb-dev', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
@@ -70,7 +96,7 @@ gulp.task('build-dev', function() {
              .pipe(gulp.dest('./lib'));
 });
 
-gulp.task('build', ['build-dev'], function() {
+gulp.task('qmlweb', ['qmlweb-dev'], function() {
   return gulp.src('./lib/qt.js')
              .pipe(rename('qt.min.js'))
              .pipe(changed('./lib'))
@@ -80,12 +106,22 @@ gulp.task('build', ['build-dev'], function() {
              .pipe(gulp.dest('./lib'));
 });
 
+gulp.task('build-covered', ['parser-covered', 'qmlweb-covered']);
+
+gulp.task('build-dev', ['parser', 'qmlweb-dev']);
+
+gulp.task('build', ['license', 'parser', 'qmlweb']);
+
 gulp.task('watch', ['build'], function() {
-  gulp.watch(qtcoreSources, ['build']);
+  gulp.watch(qtcoreSources, ['qmlweb']);
+  gulp.watch(parserSources, ['parser']);
+  gulp.watch(licenseSources, ['license']);
 });
 
 gulp.task('watch-dev', ['build-dev'], function() {
-  gulp.watch(qtcoreSources, ['build-dev']);
+  gulp.watch(qtcoreSources, ['qmlweb-dev']);
+  gulp.watch(parserSources, ['parser-dev']);
+  gulp.watch(licenseSources, ['license']);
 });
 
 gulp.task('lint-tests', function() {
