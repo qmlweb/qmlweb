@@ -83,8 +83,8 @@ gulp.task('qmlweb-dev', function() {
   return gulp.src(qtcoreSources)
              .pipe(order(qtcoreSources, { base: __dirname }))
              .pipe(sourcemaps.init())
-             .pipe(babel())
              .pipe(concat('qt.js'))
+             .pipe(babel())
              .pipe(replace(/"use strict";/g, ''))
              .pipe(iife({
                useStrict: false,
@@ -108,9 +108,9 @@ gulp.task('qmlweb', ['qmlweb-dev'], function() {
 
 gulp.task('build-covered', ['parser-covered', 'qmlweb-covered']);
 
-gulp.task('build-dev', ['parser', 'qmlweb-dev']);
+gulp.task('build-dev', ['qmlweb-dev', 'parser', 'license']);
 
-gulp.task('build', ['license', 'parser', 'qmlweb']);
+gulp.task('build', ['qmlweb', 'parser', 'license']);
 
 gulp.task('watch', ['build'], function() {
   gulp.watch(qtcoreSources, ['qmlweb']);
@@ -120,7 +120,7 @@ gulp.task('watch', ['build'], function() {
 
 gulp.task('watch-dev', ['build-dev'], function() {
   gulp.watch(qtcoreSources, ['qmlweb-dev']);
-  gulp.watch(parserSources, ['parser-dev']);
+  gulp.watch(parserSources, ['parser']);
   gulp.watch(licenseSources, ['license']);
 });
 
