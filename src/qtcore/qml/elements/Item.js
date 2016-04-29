@@ -333,6 +333,12 @@ function QMLItem(meta) {
     this.heightChanged.connect(this, function(newVal) {
         this.css.height = newVal ? newVal + "px" : "auto";
     });
+    this.implicitWidthChanged.connect(this, function(newVal) {
+        if (this.$isUsingImplicitWidth) this.css.width = newVal ? newVal + "px" : "auto";
+    });
+    this.implicitHeightChanged.connect(this, function(newVal) {
+        if (this.$isUsingImplicitHeight) this.css.height = newVal ? newVal + "px" : "auto";
+    });
 
     this.implicitHeight = 0;
     this.implicitWidth = 0;
