@@ -38,6 +38,7 @@ var modules = {
     State: {},
     SystemPalette: {},
     Text: { dom: true },
+    TextEdit: { dom: true },
     TextInput: { dom: true },
     Timer: {},
     Transition: {},
@@ -48,7 +49,13 @@ var modules = {
     CheckBox: { dom: true },
     ComboBox: { dom: true },
     ScrollView: { dom: true },
+    TextArea: { dom: true },
     TextField: { dom: true }
+  },
+  'QtGraphicalEffects 1.0': {
+    FastBlur: { dom: true }
+  },
+  'QtMobility 1.2': {
   },
   'QtMultimedia 5.6': {
     Video: { dom: true }
@@ -58,6 +65,9 @@ var modules = {
   },
   'Qt.labs.settings 1.0': {
     Settings: {}
+  },
+  'QmlWeb 1.0': {
+    RestModel: {}
   },
   'QmlWeb.Dom 1.0': {
     DomElement: { dom: true }
