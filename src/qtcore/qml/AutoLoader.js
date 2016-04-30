@@ -7,7 +7,7 @@ global.addEventListener('load', function() {
 
     if (source != null) {
       global.qmlEngine = new QMLEngine();
-      qmlEngine.loadFile(source);
+      qmlEngine.loadFile(source, null);
       qmlEngine.start();
       break ;
     }

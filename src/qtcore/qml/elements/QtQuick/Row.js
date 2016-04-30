@@ -20,6 +20,9 @@ QMLRow.prototype.layoutChildren = function() {
         i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
         endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
         step = this.layoutDirection == 1 ? -1 : 1;
+
+    if (this.children.length == 0) return;
+
     for (; i !== endPoint; i += step) {
         var child = this.children[i];
         if (!(child.visible && child.width && child.height))
@@ -29,6 +32,7 @@ QMLRow.prototype.layoutChildren = function() {
         child.x = curPos;
         curPos += child.width + this.spacing;
     }
-    this.implicitHeight = maxHeight;
-    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
+
+    if (this.$isUsingImplicitHeight) this.implicitHeight = maxHeight;
+    if (this.$isUsingImplicitWidth)  this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
 }

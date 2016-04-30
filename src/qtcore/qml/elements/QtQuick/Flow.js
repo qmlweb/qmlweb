@@ -20,6 +20,9 @@ QMLFlow.prototype.layoutChildren = function() {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
+
+    if (children.length == 0) return;
+
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (!(child.visible && child.width && child.height))
@@ -27,7 +30,7 @@ QMLFlow.prototype.layoutChildren = function() {
 
         if (this.flow == this.Flow.LeftToRight) {
             if (curHPos + child.width > this.width) {
-                curHPos = 0;
+                if (this.$isUsingImplicitWidth == false ) curHPos = 0;
                 curVPos += rowSize + this.spacing;
                 rowSize = 0;
             }
@@ -39,7 +42,7 @@ QMLFlow.prototype.layoutChildren = function() {
             curHPos += child.width + this.spacing;
         } else {
             if (curVPos + child.height > this.height) {
-                curVPos = 0;
+                if (this.$isUsingImplicitHeight == false ) curVPos = 0;
                 curHPos += rowSize + this.spacing;
                 rowSize = 0;
             }
@@ -51,9 +54,11 @@ QMLFlow.prototype.layoutChildren = function() {
             curVPos += child.height + this.spacing;
         }
     }
-    if (this.flow == 0)
+
+    if (this.$isUsingImplicitHeight)
         this.implicitHeight = curVPos + rowSize;
-    else
+
+    if (this.$isUsingImplicitWidth)
         this.implicitWidth = curHPos + rowSize;
 }
 
