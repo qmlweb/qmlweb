@@ -4,10 +4,7 @@
       with ($context) {
         ${jsData.source}
       }
-      for (var i = 0 ; i < jsData.exports.length ; ++i) {
-        var symbolName = jsData.exports[i];
-        $context[symbolName] = eval(symbolName);
-      }
+      ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join('')}
     `))(jsData, $context);
   }
 
