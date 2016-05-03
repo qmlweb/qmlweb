@@ -12,6 +12,7 @@ var modules = {
     Animation: {},
     Behavior: {},
     BorderImage: {},
+    Canvas: { dom: true },
     Column: { dom: true },
     DoubleValidator: {},
     Flow: {},
