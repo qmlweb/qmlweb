@@ -21,6 +21,9 @@ QMLRow.prototype.layoutChildren = function() {
         i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
         endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
         step = this.layoutDirection == 1 ? -1 : 1;
+
+    if (this.children.length == 0) return;
+
     for (; i !== endPoint; i += step) {
         var child = this.children[i];
         if (!(child.visible && child.width && child.height))

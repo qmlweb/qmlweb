@@ -5,6 +5,7 @@ function QMLColumn(meta) {
 QMLColumn.prototype.layoutChildren = function() {
     var curPos = 0,
         maxWidth = 0;
+    if (this.children.length === 0) return;
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (!(child.visible && child.width && child.height))
