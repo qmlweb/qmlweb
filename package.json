@@ -28,10 +28,10 @@
     "phantomjs-prebuilt": "^2.1.4"
   },
   "scripts": {
-    "lint": "./node_modules/.bin/gulp lint",
-    "test": "./node_modules/.bin/gulp test",
-    "build": "./node_modules/.bin/gulp build",
-    "watch": "./node_modules/.bin/gulp watch"
+    "lint": "gulp lint",
+    "test": "gulp test",
+    "build": "gulp build",
+    "watch": "gulp watch"
   },
   "files": [
     "AUTHORS",
