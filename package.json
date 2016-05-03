@@ -45,6 +45,7 @@
     "src/**/*.qml",
     "tests/**/*.js",
     "tests/**/*.png",
-    "tests/**/*.qml"
+    "tests/**/*.qml",
+    "gulpfile.js"
   ]
 }
