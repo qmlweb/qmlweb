@@ -10,6 +10,7 @@ var babel = require('gulp-babel');
 var eslint = require('gulp-eslint');
 var replace = require('gulp-replace');
 var karma = require('karma');
+var istanbul = require('gulp-istanbul');
 
 var qtcoreSources = [
   'src/qtcore/qml/QMLBinding.js',
@@ -30,6 +31,27 @@ var tests = [
 // This is required because other values confuse PhantomJS, and are sometimes
 // set by default by the system.
 process.env.QT_QPA_PLATFORM = '';
+
+gulp.task('build-covered', function() {
+  return gulp.src(qtcoreSources)
+             .pipe(order(qtcoreSources, { base: __dirname }))
+             .pipe(sourcemaps.init())
+             .pipe(istanbul({
+               // This is what karma uses
+               coverageVariable: '__coverage__'
+             }))
+             .pipe(babel())
+             .pipe(concat('qt.covered.js'))
+             .pipe(replace(/["']use strict["'];/g, ''))
+             .pipe(iife({
+               useStrict: false,
+               params: ['global'],
+               args: ['typeof global != \'undefined\' ? global : window']
+             }))
+             .pipe(changed('./tmp'))
+             .pipe(sourcemaps.write('./'))
+             .pipe(gulp.dest('./tmp'));
+});
 
 gulp.task('build-dev', function() {
   return gulp.src(qtcoreSources)
@@ -75,7 +97,7 @@ gulp.task('lint-tests', function() {
 
 gulp.task('lint', ['lint-tests']);
 
-gulp.task('test', ['lint', 'build'], function(done) {
+gulp.task('test', ['lint', 'build-covered'], function(done) {
   new karma.Server({
     singleRun: true,
     configFile: __dirname + '/karma.conf.js'

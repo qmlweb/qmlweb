@@ -3,8 +3,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
-      'lib/qt.js',
-      { pattern: 'lib/qt.js.map', included: false },
+      'tmp/qt.covered.js',
+      { pattern: 'tmp/qt.covered.js.map', included: false },
       'tests/common.js',
       'tests/failingTests.js',
       'tests/*/**/*.js',
@@ -19,9 +19,6 @@ module.exports = function(config) {
     coverageReporter: {
       type: 'lcov',
       dir: 'coverage/'
-    },
-    preprocessors: {
-      'lib/qt.js': ['coverage']
     },
     customLaunchers: {
       PhantomJSCustom: {
