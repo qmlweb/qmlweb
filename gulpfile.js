@@ -1,18 +1,18 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var rename = require('gulp-rename');
-var changed = require('gulp-changed');
-var order = require('gulp-order');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var iife = require('gulp-iife');
-var babel = require('gulp-babel');
-var eslint = require('gulp-eslint');
-var replace = require('gulp-replace');
-var karma = require('karma');
-var istanbul = require('gulp-istanbul');
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const rename = require('gulp-rename');
+const changed = require('gulp-changed');
+const order = require('gulp-order');
+const uglify = require('gulp-uglify');
+const sourcemaps = require('gulp-sourcemaps');
+const iife = require('gulp-iife');
+const babel = require('gulp-babel');
+const eslint = require('gulp-eslint');
+const replace = require('gulp-replace');
+const karma = require('karma');
+const istanbul = require('gulp-istanbul');
 
-var qtcoreSources = [
+const qtcoreSources = [
   'src/qtcore/qml/QMLBinding.js',
   'src/qtcore/qml/lib/parser.js',
   'src/qtcore/qml/lib/qmlstructure.js',
@@ -24,7 +24,7 @@ var qtcoreSources = [
   'src/qtcore/qml/**/*.js'
 ];
 
-var tests = [
+const tests = [
   'tests/**/*.js'
 ];
 
@@ -61,9 +61,9 @@ gulp.task('build-dev', function() {
              .pipe(concat('qt.js'))
              .pipe(replace(/"use strict";/g, ''))
              .pipe(iife({
-                useStrict: false,
-                params: ['global'],
-                args: ['typeof global != \'undefined\' ? global : window']
+               useStrict: false,
+               params: ['global'],
+               args: ['typeof global != \'undefined\' ? global : window']
              }))
              .pipe(changed('./lib'))
              .pipe(sourcemaps.write('./'))
