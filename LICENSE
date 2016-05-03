@@ -2,8 +2,7 @@ QMLWEB project is released under the "new" BSD license. As there was no
 organization behind the project, I stripped out related parts of license text.
 It's a lawyer talk, I hope I got it right.
 
----
-
+"""
 Copyright (c) 2012, Lauri Paimen
 Copyright (c) 2013, Anton Kreuzkamp
 All rights reserved.
@@ -28,3 +27,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
