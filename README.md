@@ -95,9 +95,9 @@ registerQmlType({
     var self = this;
 
     // Managing properties
-    createSimpleProperty("string", this, "name"); // creates a property 'name' of type string
-    createSimpleProperty("var", this, "data"); // creates a property 'data' of undefined type
-    this.name = 'default name'; // sets a default value for the property 'name'
+    createProperty("var", this, "data"); // creates a property 'data' of undefined type
+    // creates a property 'name' of type string, with a default value
+    createProperty("string", this, "name", { initialValue: 'default name' });
 
     // Signals
     this.somethingHappened = Signal(); // creates a signal somethingHappened
