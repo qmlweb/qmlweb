@@ -14,6 +14,11 @@ function QMLPropertyChanges(meta) {
         });
     }
 }
-inherit(QMLPropertyChanges, QMLBaseObject);
 
-registerQmlType('PropertyChanges', QMLPropertyChanges);
+registerQmlType({
+  module: 'QtQuick',
+  name: 'PropertyChanges',
+  versions: /.*/,
+  baseClass: 'QtObject',
+  constructor: QMLPropertyChanges
+});

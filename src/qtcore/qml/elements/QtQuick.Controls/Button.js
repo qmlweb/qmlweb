@@ -28,6 +28,11 @@ function QMLButton(meta) {
         self.clicked();
     }
 }
-inherit(QMLButton, QMLItem);
 
-registerQmlType('Button', QMLButton);
+registerQmlType({
+  module: 'QtQuick.Controls',
+  name: 'Button',
+  versions: /.*/,
+  baseClass: 'QtQuick.Item',
+  constructor: QMLButton
+});

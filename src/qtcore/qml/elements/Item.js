@@ -351,6 +351,11 @@ function QMLItem(meta) {
         }
     }
 }
-inherit(QMLItem, QMLBaseObject);
 
-constructors['Item'] = QMLItem;
+registerQmlType({
+  module: 'QtQuick',
+  name: 'Item',
+  versions: /.*/,
+  baseClass: 'QtObject',
+  constructor: QMLItem
+});

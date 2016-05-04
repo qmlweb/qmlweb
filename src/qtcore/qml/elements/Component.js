@@ -87,7 +87,12 @@ function QMLComponent(meta) {
         this.finalizeImports(this.$context);
     }
 }
-inherit(QMLComponent, QMLBaseObject);
 
-registerQmlType('Component',   QMLComponent);
-
+registerQmlType({
+  global: true,
+  module: 'QtQml',
+  name: 'Component',
+  versions: /.*/,
+  baseClass: 'QtQuick.QtObject',
+  constructor: QMLComponent
+});
