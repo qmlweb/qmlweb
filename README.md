@@ -88,9 +88,10 @@ When implementing new features, you may need to get away from QML and create you
 registerQmlType({
   module:   'MyModule',
   name:     'MyTypeName',
+  baseClass: 'QtQuick.Item',
   versions: /^1(\.[0-3])?$/, // that regexp must match the version number for the import to work
   constructor: function(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     var self = this;
 
