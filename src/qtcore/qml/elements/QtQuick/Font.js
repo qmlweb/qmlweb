@@ -10,16 +10,14 @@ registerQmlType({
     createProperty("string", this, "family", {initialValue: 'sans-serif'});
     createProperty("bool", this, "italic");
     createProperty("real", this, "letterSpacing");
-    createProperty("int", this, "pixelSize");
+    createProperty("int", this, "pixelSize", {initialValue: 13});
     createProperty("real", this, "pointSize", {initialValue: 10});
     createProperty("bool", this, "strikeout");
     createProperty("bool", this, "underline");
     createProperty("enum", this, "weight");
     createProperty("real", this, "wordSpacing");
+    var sizeLock = false;
 
-        this.pointSizeChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontSize = newVal + "pt";
-        });
         this.boldChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontWeight =
                 parent.font.weight !== undefined ? parent.font.weight :
@@ -40,17 +38,18 @@ registerQmlType({
         this.letterSpacingChanged.connect(function(newVal) {
             parent.dom.firstChild.style.letterSpacing = newVal !== undefined ? newVal + "px" : "";
         });
-        this.pixelSizeChanged.connect(function(newVal) {
-            var val = newVal !== undefined ? newVal + "px "
-                : (parent.font.pointSize || 10) + "pt";
+        this.pixelSizeChanged.connect(newVal => {
+            if (!sizeLock) {
+              this.pointSize = newVal * 0.75;
+            }
+            const val = newVal + 'px';
             parent.dom.style.fontSize = val;
             parent.dom.firstChild.style.fontSize = val;
         });
-        this.pointSizeChanged.connect(function(newVal) {
-            var val = parent.font.pixelSize !== undefined ? parent.font.pixelSize + "px "
-                : (newVal || 10) + "pt";
-            parent.dom.style.fontSize = val;
-            parent.dom.firstChild.style.fontSize = val;
+        this.pointSizeChanged.connect(newVal => {
+            sizeLock = true;
+            this.pixelSize = Math.round(newVal / 0.75);
+            sizeLock = false;
         });
         this.strikeoutChanged.connect(function(newVal) {
             parent.dom.firstChild.style.textDecoration = newVal
