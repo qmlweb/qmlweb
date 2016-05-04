@@ -90,4 +90,4 @@ function QMLComponent(meta) {
 inherit(QMLComponent, QMLBaseObject);
 
 registerQmlType('Component',   QMLComponent);
-registerQmlType('QMLDocument', QMLComponent);
+

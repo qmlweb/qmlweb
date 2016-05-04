@@ -17,8 +17,7 @@ var GETTER = "__defineGetter__",
       'enum':      Number,
       url:         String,
       variant:     QMLVariant,
-      'var':       QMLVariant,
-      QMLDocument: QMLComponent
+      'var':       QMLVariant
     };
 var modules = {
     Main: constructors

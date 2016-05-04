@@ -88,7 +88,7 @@ function convertToEngine(tree) {
 
     var walkers = {
         "toplevel": function(imports, statement) {
-            var item = { $class: "QMLDocument" };
+            var item = { $class: "Component" };
             item.$imports = imports;
             item.$children = [ walk(statement) ];
             return item;
