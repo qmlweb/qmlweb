@@ -254,11 +254,3 @@ registerQmlType({
   baseClass: 'Item',
   constructor: QMLTextEdit
 });
-
-registerQmlType({ // non-standard, to be removed!
-  module:   'QtQuick.Controls',
-  name:     'TextArea',
-  versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: QMLTextEdit
-});
