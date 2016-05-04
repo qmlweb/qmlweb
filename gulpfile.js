@@ -22,6 +22,10 @@ const qtcoreSources = [
   'src/modules/**/*.js'
 ];
 
+const parserSources = [
+  'node_modules/qmlweb-parser/lib/*'
+];
+
 const licenseSources = [
   'LICENSE',
   'node_modules/qmlweb-parser/LICENSE'
@@ -44,7 +48,7 @@ gulp.task('license', function() {
 });
 
 gulp.task('parser', function() {
-  return gulp.src('node_modules/qmlweb-parser/lib/*')
+  return gulp.src(parserSources)
              .pipe(gulp.dest('./lib'));
 });
 
