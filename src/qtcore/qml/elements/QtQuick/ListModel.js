@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'ListModel',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtObject',
   constructor: function QMLListModel(meta) {
     QMLBaseObject.call(this, meta);
     var self = this,

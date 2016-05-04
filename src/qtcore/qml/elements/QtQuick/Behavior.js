@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Behavior',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtObject',
   constructor: function QMLBehavior(meta) {
     QMLBaseObject.call(this, meta);
 

@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Rectangle',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: function QMLRectangle(meta) {
     QMLItem.call(this, meta);
 

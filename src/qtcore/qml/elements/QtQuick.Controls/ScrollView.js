@@ -81,6 +81,6 @@ registerQmlType({
   module:   'QtQuick.Controls',
   name:     'ScrollView',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'QtQuick.Item',
   constructor: QMLScrollView
 });

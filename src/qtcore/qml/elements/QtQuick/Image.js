@@ -122,6 +122,6 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Image',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: QMLImage
 });

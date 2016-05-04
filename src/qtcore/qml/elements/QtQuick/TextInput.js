@@ -6,7 +6,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'TextInput',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: function QMLTextInput(meta) {
     QMLItem.call(this, meta);
 

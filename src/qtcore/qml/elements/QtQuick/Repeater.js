@@ -134,6 +134,6 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Repeater',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: QMLRepeater
 });

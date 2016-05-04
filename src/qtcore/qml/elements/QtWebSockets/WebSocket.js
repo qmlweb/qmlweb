@@ -5,7 +5,7 @@ registerQmlType({
   module:   'QtWebSockets',
   name:     'WebSocket',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtQuick.QtObject',
   constructor: function QMLWebSocket(meta) {
     QMLBaseObject.call(this, meta);
 

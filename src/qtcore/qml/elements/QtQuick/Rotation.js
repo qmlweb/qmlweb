@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Rotation',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtObject',
   constructor: function QMLRotation(meta) {
     QMLBaseObject.call(this, meta);
 

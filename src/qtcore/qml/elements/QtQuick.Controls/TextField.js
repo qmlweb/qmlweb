@@ -14,7 +14,7 @@ registerQmlType({
     module: 'QtQuick.Controls',
     name: 'TextField',
     versions: /.*/,
-    baseClass: QMLItem,
+    baseClass: 'QtQuick.Item',
     constructor: QMLTextInput
 });
 

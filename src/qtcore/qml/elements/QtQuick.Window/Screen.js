@@ -2,7 +2,7 @@ registerQmlType({
     module: 'QtQuick.Window',
     name: 'Screen',
     versions: /.*/,
-    baseClass: QMLItem,
+    baseClass: 'QtQuick.Item',
     constructor: QMLScreen
 });
 

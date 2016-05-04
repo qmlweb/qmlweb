@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'IntValidator',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: function QMLIntValidator(meta) {
     QMLItem.call(this, meta);
 

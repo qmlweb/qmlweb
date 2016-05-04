@@ -17,7 +17,7 @@ registerQmlType({
   module: 'QtQuick',
   name: 'SystemPalette',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtObject',
   constructor: function QMLSystemPalette(meta) {
     QMLBaseObject.call(this, meta);
 

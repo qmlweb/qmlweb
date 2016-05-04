@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'State',
   versions: /.*/,
-  baseClass: QMLBaseObject,
+  baseClass: 'QtObject',
   constructor: function QMLState(meta) {
     QMLBaseObject.call(this, meta);
 

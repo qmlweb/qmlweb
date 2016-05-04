@@ -25,6 +25,6 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Positioner',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: QMLPositioner
 });

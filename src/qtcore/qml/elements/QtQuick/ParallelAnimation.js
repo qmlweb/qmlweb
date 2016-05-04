@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'ParallelAnimation',
   versions: /.*/,
-  baseClass: QMLAnimation,
+  baseClass: 'Animation',
   constructor: function QMLParallelAnimation(meta) {
     var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
     QMLAnimation.call(this, meta);

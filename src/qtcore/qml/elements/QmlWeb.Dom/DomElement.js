@@ -12,6 +12,6 @@ registerQmlType({
     module: 'QmlWeb.Dom',
     name: 'DomElement',
     versions: /.*/,
-    baseClass: QMLItem,
+    baseClass: 'QtQuick.Item',
     constructor: QMLDomElement
 });

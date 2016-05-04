@@ -6,7 +6,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'DoubleValidator',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: function QMLDoubleValidator(meta) {
     QMLItem.call(this, meta);
 

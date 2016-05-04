@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Text',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'Item',
   constructor: function QMLText(meta) {
     QMLItem.call(this, meta);
 

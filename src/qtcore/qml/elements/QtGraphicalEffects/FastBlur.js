@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtGraphicalEffects',
   name:     'FastBlur',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'QtQuick.Item',
   constructor: function QMLFastBlur(meta) {
     QMLItem.call(this, meta);
 

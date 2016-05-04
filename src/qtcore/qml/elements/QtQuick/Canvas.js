@@ -5,7 +5,7 @@ registerQmlType({
     module: 'QtQuick',
     name: 'Canvas',
     versions: /.*/,
-    baseClass: QMLItem,
+    baseClass: 'Item',
     constructor: function(meta) {
         QMLItem.call(this, meta);
 

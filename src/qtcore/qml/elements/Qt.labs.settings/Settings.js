@@ -2,7 +2,7 @@ registerQmlType({
   module: 'Qt.labs.settings',
   name:   'Settings',
   versions: /.*/,
-  baseClass: QMLItem,
+  baseClass: 'QtQuick.Item',
   constructor: function QMLSettings(meta) {
     QMLItem.call(this, meta);
 
