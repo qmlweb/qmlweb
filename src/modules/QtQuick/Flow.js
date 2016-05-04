@@ -1,5 +1,5 @@
 function QMLFlow(meta) {
-    QMLPositioner.call(this, meta);
+    callSuper(this, meta);
 
     this.Flow = {
         LeftToRight: 0,

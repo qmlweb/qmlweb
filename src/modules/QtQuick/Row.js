@@ -7,7 +7,7 @@ registerQmlType({
 });
 
 function QMLRow(meta) {
-    QMLPositioner.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("enum", this, "layoutDirection", {initialValue: 0});
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

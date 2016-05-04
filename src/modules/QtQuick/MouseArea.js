@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLMouseArea(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var self = this;
 
     this.dom.style.pointerEvents = "all";

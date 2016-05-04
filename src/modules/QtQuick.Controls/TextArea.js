@@ -1,5 +1,5 @@
 function QMLTextArea(meta) {
-  QMLTextEdit.call(this, meta);
+  callSuper(this, meta);
 }
 
 registerQmlType({

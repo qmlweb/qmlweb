@@ -4,8 +4,8 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtQuick.Item',
   constructor: function QMLGeoLocation(meta) {
+    callSuper(this, meta);
     var self = this;
-    QMLItem.call(this, meta);
 
     createProperty("double", this, "accuracy");
     createProperty("double", this, "altitude");

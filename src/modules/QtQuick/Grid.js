@@ -7,7 +7,7 @@ registerQmlType({
 });
 
 function QMLGrid(meta) {
-    QMLPositioner.call(this, meta);
+    callSuper(this, meta);
 
     this.Grid = {
         LeftToRight: 0,

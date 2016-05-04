@@ -1,5 +1,5 @@
 function QMLRepeater(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var self = this;
     var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 

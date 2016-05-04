@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLFontLoader(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     // Exports.
     this.FontLoader = {

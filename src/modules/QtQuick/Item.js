@@ -1,5 +1,5 @@
 function QMLItem(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
     var child,
         o, i;
 

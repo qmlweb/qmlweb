@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLTranslate(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("real", this, "x");
     createProperty("real", this, "y");

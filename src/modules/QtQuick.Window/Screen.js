@@ -7,7 +7,7 @@ registerQmlType({
 });
 
 function QMLScreen(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var self = this;
 
     // TODO: rewrite as an attached object and forbid constructing

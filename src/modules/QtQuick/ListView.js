@@ -4,9 +4,8 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Repeater',
   constructor: function QMLListView(meta) {
+    callSuper(this, meta);
     var self = this;
-    var QMLRepeater = getConstructor('QtQuick', '2.0', 'Repeater');
-    QMLRepeater.call(this, meta);
 
     createProperty("enum", this, "orientation");
     createProperty("real", this, "spacing");

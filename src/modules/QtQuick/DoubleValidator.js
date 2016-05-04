@@ -8,7 +8,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLDoubleValidator(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("real", this, "bottom");
     createProperty("real", this, "top");

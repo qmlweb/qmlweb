@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLListModel(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
     var self = this,
     firstItem = true;
     var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');

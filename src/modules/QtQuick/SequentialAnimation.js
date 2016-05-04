@@ -4,8 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Animation',
   constructor: function QMLSequentialAnimation(meta) {
-    var QMLAnimation = getConstructor('QtQuick', '2.0', 'Animation');
-    QMLAnimation.call(this, meta);
+    callSuper(this, meta);
     var curIndex,
         passedLoops,
         i,

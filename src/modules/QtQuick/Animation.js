@@ -1,5 +1,5 @@
 function QMLAnimation(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     // Exports
     this.Animation = {

@@ -1,5 +1,5 @@
 function QMLColumn(meta) {
-    QMLPositioner.call(this, meta);
+    callSuper(this, meta);
 }
 
 QMLColumn.prototype.layoutChildren = function() {

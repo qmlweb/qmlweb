@@ -14,11 +14,11 @@ registerQmlType({
   versions: /^5\./,
   baseClass: 'QtQuick.Item',
   constructor: function QMLVideo(meta) {
+    callSuper(this, meta);
+
     var domVideo;
     var runningEventListener = 0;
     var volumeBackup;
-
-    QMLItem.call(this, meta);
 
     this.dom.innerHTML = "<video></video>";
     domVideo = this.dom.firstChild;

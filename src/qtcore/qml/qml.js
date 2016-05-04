@@ -154,6 +154,11 @@ global.inherit = function(constructor, baseClass) {
   constructor.prototype.constructor = baseClass;
 }
 
+function callSuper(self, meta) {
+  meta.super = meta.super.prototype.constructor;
+  meta.super.call(self, meta);
+}
+
 /**
  * QML Object constructor.
  * @param {Object} meta Meta information about the object and the creation context
@@ -164,7 +169,9 @@ function construct(meta) {
         component;
 
     if (meta.object.$class in constructors) {
+        meta.super = constructors[meta.object.$class];
         item = new constructors[meta.object.$class](meta);
+        meta.super = undefined;
     }
     else {
         // Load component from file. Please look at import.js for main notes.

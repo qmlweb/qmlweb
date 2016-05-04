@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLTimer(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
     var prevTrigger,
         self = this;
 

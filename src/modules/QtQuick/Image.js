@@ -1,5 +1,5 @@
 function QMLImage(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var img = new Image(),
         self = this;
 

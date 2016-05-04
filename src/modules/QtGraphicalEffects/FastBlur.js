@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtQuick.Item',
   constructor: function QMLFastBlur(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     var previousSource = null;
     var filterObject;

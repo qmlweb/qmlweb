@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLIntValidator(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("int", this, "bottom");
     createProperty("int", this, "top");

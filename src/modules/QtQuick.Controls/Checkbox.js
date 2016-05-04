@@ -4,8 +4,8 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtQuick.Item',
   constructor: function QMLCheckbox(meta) {
+    callSuper(this, meta);
     this.dom = document.createElement("label");
-    QMLItem.call(this, meta);
     var self = this;
 
     var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');

@@ -1,5 +1,5 @@
 function QMLPropertyChanges(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("QtObject", this, "target");
     createProperty("bool", this, "explicit");

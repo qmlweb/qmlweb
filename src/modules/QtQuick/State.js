@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLState(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("string", this, "name");
     createProperty("list", this, "changes");

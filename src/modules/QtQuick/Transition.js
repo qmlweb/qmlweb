@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLTransition(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("list", this, "animations");
     this.$defaultProperty = "animations";

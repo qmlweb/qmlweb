@@ -1,5 +1,5 @@
 function QMLPositioner(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("int", this, "spacing");
     this.spacingChanged.connect(this, this.layoutChildren);

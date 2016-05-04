@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLRegExpValidator(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("var", this, "regExp");
 

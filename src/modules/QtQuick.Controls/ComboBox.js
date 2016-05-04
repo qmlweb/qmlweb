@@ -7,7 +7,7 @@ registerQmlType({
 });
 
 function QMLComboBox(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var self = this;
 
     this.dom.style.pointerEvents = "auto";

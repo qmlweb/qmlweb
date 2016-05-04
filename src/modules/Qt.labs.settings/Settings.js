@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtQuick.Item',
   constructor: function QMLSettings(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("string", this, "category");
 

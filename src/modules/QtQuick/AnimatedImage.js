@@ -4,6 +4,6 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Image',
   constructor: function QMLAnimatedImage(meta) {
-    QMLImage.call(this, meta);
+    callSuper(this, meta);
   }
 });

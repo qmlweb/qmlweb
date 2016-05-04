@@ -1,6 +1,6 @@
 function QMLButton(meta) {
+    callSuper(this, meta);
     this.dom = document.createElement("button");
-    QMLItem.call(this, meta);
     var self = this;
 
     this.dom.style.pointerEvents = "auto";

@@ -4,9 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Animation',
   constructor: function QMLNumberAnimation(meta) {
-    var QMLPropertyAnimation = getConstructor('QtQuick', '2.0', 'PropertyAnimation');
-
-    QMLPropertyAnimation.call(this, meta);
+    callSuper(this, meta);
     var at = 0,
         loop = 0,
         self = this;

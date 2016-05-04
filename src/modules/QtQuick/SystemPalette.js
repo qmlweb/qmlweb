@@ -19,7 +19,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLSystemPalette(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("enum", this, "colorGroup");
 

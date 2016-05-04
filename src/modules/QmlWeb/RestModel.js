@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtQuick.Item',
   constructor: function QMLRestModel(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
     var self = this;
     var attributes = this.getAttributes();
 

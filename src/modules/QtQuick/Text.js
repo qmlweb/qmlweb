@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLText(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     // We create another span inside the text to distinguish the actual
     // (possibly html-formatted) text from child elements

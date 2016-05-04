@@ -1,7 +1,7 @@
 function QMLDomElement(meta) {
+    callSuper(this, meta);
     var tagName = meta.object.tagName || 'div';
     this.dom = document.createElement(tagName);
-    QMLItem.call(this, meta);
 
     createProperty('string', this, 'tagName');
 

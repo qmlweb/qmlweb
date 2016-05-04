@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLRectangle(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     createProperty("color", this, "color", {initialValue: 'white'});
     createProperty("real", this, "radius");

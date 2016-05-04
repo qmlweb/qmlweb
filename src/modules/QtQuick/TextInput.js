@@ -8,7 +8,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'Item',
   constructor: function QMLTextInput(meta) {
-    QMLItem.call(this, meta);
+    callSuper(this, meta);
 
     var self = this;
 

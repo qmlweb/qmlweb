@@ -4,7 +4,7 @@ registerQmlType({
   versions: /.*/,
   baseClass: 'QtObject',
   constructor: function QMLListElement(meta) {
-    QMLBaseObject.call(this, meta);
+    callSuper(this, meta);
 
     for (var i in meta.object) {
         if (i[0] != "$") {
