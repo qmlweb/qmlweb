@@ -41,6 +41,7 @@
     "misc/**/*.png",
     "lib/**/*.js",
     "lib/**/*.js.map",
+    "lib/LICENSE",
     "src/**/*.js",
     "src/**/*.qml",
     "tests/**/*.js",
