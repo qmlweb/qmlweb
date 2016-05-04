@@ -18,8 +18,6 @@ const qtcoreSources = [
   'src/qtcore/qml/lib/import.js',
   'src/qtcore/*.js',
   'src/qtcore/qml/qml.js',
-  'src/qtcore/qml/QMLBaseObject.js',
-  'src/qtcore/qml/elements/Item.js',
   'src/qtcore/qml/**/*.js'
 ];
 
