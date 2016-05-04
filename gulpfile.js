@@ -45,7 +45,7 @@ gulp.task('license', function() {
 });
 
 gulp.task('parser', function() {
-  return gulp.src('node_modules/qmlweb-parser/lib/*.js')
+  return gulp.src('node_modules/qmlweb-parser/lib/*')
              .pipe(gulp.dest('./lib'));
 });
 
