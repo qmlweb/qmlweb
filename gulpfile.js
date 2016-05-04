@@ -18,7 +18,8 @@ const qtcoreSources = [
   'src/qtcore/qml/lib/import.js',
   'src/qtcore/*.js',
   'src/qtcore/qml/qml.js',
-  'src/qtcore/qml/**/*.js'
+  'src/qtcore/qml/**/*.js',
+  'src/modules/**/*.js'
 ];
 
 const licenseSources = [
