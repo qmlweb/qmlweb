@@ -107,9 +107,6 @@ global.Qt = {
     // The 2-nd argument of the callers we hope is context object
     // e.g. see calling signature of bindings and signals
 
-    // Actually Qt cpp code is doing the same; the difference is that they know calling context
-    // https://qt.gitorious.org/qt/qtdeclarative/source/eeaba26596d447c531dfac9d6e6bf5cfe4537813:src/qml/qml/v8/qqmlbuiltinfunctions.cpp#L833
-
     var detectedBasePath = "";
     var currentCaller = Qt.resolvedUrl.caller;
     var maxcount = 10;
