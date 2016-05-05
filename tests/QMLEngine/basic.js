@@ -19,4 +19,14 @@ describe('QMLEngine.basic', function() {
       expect(qml.color).toBe('cyan');
     }
   );
+
+  it('Qt.resolvedUrl', function() {
+    var qml = load('ResolvedUrl', this.div);
+    expect(qml.outer).toBe('/base/tests/');
+    expect(qml.current).toBe(qml.outer + 'QMLEngine/qml/');
+    expect(qml.inner1).toBe(qml.current + 'foo/bar');
+    expect(qml.inner2).toBe(qml.current + 'foo/bar/');
+    expect(qml.inner3).toBe(qml.current + 'foo/foo/lol/');
+    expect(qml.full).toBe('http://example.com/bar');
+  });
 });
