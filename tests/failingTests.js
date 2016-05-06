@@ -5,10 +5,6 @@ window.failingTests = {
     ]
   },
   QMLEngine: {
-    imports: [
-      'RecursiveInit',
-      'RecursiveInit2'
-    ],
     properties: [
       'alias to id with same name',
       'ChangedExpressionSignal',
