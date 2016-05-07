@@ -77,6 +77,9 @@ function QMLItem(meta) {
     createProperty("real", this, "opacity", {initialValue: 1});
     createProperty("bool", this, "clip");
     createProperty("bool", this, "focus");
+
+    createProperty("real", this, "$opacity", {initialValue: 1});
+
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
@@ -311,9 +314,6 @@ function QMLItem(meta) {
     this.visibleChanged.connect(this, function(newVal) {
         this.css.visibility = newVal ? "inherit" : "hidden";
     });
-    this.opacityChanged.connect(this, function(newVal) {
-        this.css.opacity = newVal;
-    });
     this.clipChanged.connect(this, function(newVal) {
         this.css.overflow = newVal ? "hidden" : "visible";
     });
@@ -332,6 +332,12 @@ function QMLItem(meta) {
     this.heightChanged.connect(this, function(newVal) {
         this.css.height = newVal ? newVal + "px" : "auto";
     });
+
+    this.Component.completed.connect(this, this.$calculateOpacity);
+    this.opacityChanged.connect(this, this.$calculateOpacity);
+    if (this.$parent) {
+      this.$parent.$opacityChanged.connect(this, this.$calculateOpacity);
+    }
 
     this.spacing = 0;
     this.$revertActions = [];
@@ -352,6 +358,18 @@ function QMLItem(meta) {
         }
     }
 }
+
+QMLItem.prototype.$calculateOpacity = function() {
+  // TODO: reset all opacity on layer.enabled changed
+  if (false) { // TODO: check layer.enabled
+    this.css.opacity = this.opacity;
+  }
+  const parentOpacity = (this.$parent && this.$parent.$opacity) || 1;
+  this.$opacity = this.opacity * parentOpacity;
+  if (this.impl) {
+    this.impl.style.opacity = this.$opacity;
+  }
+};
 
 registerQmlType({
   module: 'QtQuick',

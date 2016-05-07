@@ -2,9 +2,6 @@ window.failingTests = {
   Render: {
     Async: [
       'NumberAnimationAutorun'
-    ],
-    Simple: [
-      'RectanglesOpacity'
     ]
   },
   QMLEngine: {
