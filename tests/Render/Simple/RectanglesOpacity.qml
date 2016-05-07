@@ -7,7 +7,7 @@ Rectangle {
   Item {
     opacity: 0.5
     Rectangle {
-      color: 'green'
+      color: '#0f0'
       width: 50
       height: 50
     }
