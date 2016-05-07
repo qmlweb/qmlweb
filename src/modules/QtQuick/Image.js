@@ -35,6 +35,11 @@ function QMLImage(meta) {
     createProperty("int", this.sourceSize, "width");
     createProperty("int", this.sourceSize, "height");
 
+    const bg = this.impl = document.createElement('div');
+    bg.style.pointerEvents = 'none';
+    bg.style.height = '100%';
+    this.dom.appendChild(bg);
+
     // Bind status to img element
     img.onload = function() {
         var w = img.naturalWidth;
@@ -57,34 +62,34 @@ function QMLImage(meta) {
       switch (val) {
         default:
         case this.Image.Stretch:
-          this.dom.style.backgroundRepeat   = 'auto';
-          this.dom.style.backgroundSize     = '100% 100%';
-          this.dom.style.backgroundPosition = 'auto';
+          bg.style.backgroundRepeat   = 'auto';
+          bg.style.backgroundSize     = '100% 100%';
+          bg.style.backgroundPosition = 'auto';
           break ;
         case this.Image.Tile:
-          this.dom.style.backgroundRepeat   = 'auto';
-          this.dom.style.backgroundSize     = 'auto';
-          this.dom.style.backgroundPosition = 'auto';
+          bg.style.backgroundRepeat   = 'auto';
+          bg.style.backgroundSize     = 'auto';
+          bg.style.backgroundPosition = 'auto';
           break ;
         case this.Image.PreserveAspectFit:
-          this.dom.style.backgroundRepeat   = 'no-repeat';
-          this.dom.style.backgroundSize     = 'contain';
-          this.dom.style.backgroundPosition = 'center';
+          bg.style.backgroundRepeat   = 'no-repeat';
+          bg.style.backgroundSize     = 'contain';
+          bg.style.backgroundPosition = 'center';
           break ;
         case this.Image.PreserveAspectCrop:
-          this.dom.style.backgroundRepeat   = 'no-repeat';
-          this.dom.style.backgroundSize     = 'cover';
-          this.dom.style.backgroundPosition = 'center';
+          bg.style.backgroundRepeat   = 'no-repeat';
+          bg.style.backgroundSize     = 'cover';
+          bg.style.backgroundPosition = 'center';
           break ;
         case this.Image.TileVertically:
-          this.dom.style.backgroundRepeat   = 'repeat-y';
-          this.dom.style.backgroundSize     = '100% auto';
-          this.dom.style.backgroundPosition = 'auto';
+          bg.style.backgroundRepeat   = 'repeat-y';
+          bg.style.backgroundSize     = '100% auto';
+          bg.style.backgroundPosition = 'auto';
           break ;
         case this.Image.TileHorizontally:
-          this.dom.style.backgroundRepeat   = 'repeat-x';
-          this.dom.style.backgroundSize     = 'auto 100%';
-          this.dom.style.backgroundPosition = 'auto';
+          bg.style.backgroundRepeat   = 'repeat-x';
+          bg.style.backgroundSize     = 'auto 100%';
+          bg.style.backgroundPosition = 'auto';
           break ;
       }
     }
@@ -107,7 +112,7 @@ function QMLImage(meta) {
     this.sourceChanged.connect(this, function(val) {
         this.progress = 0;
         this.status = this.Image.Loading;
-        this.dom.style.backgroundImage="url('" + engine.$resolvePath(val) + "')";
+        bg.style.backgroundImage="url('" + engine.$resolvePath(val) + "')";
         img.src = engine.$resolvePath(val);
         if (img.complete)
           this.status = this.Image.Ready;
