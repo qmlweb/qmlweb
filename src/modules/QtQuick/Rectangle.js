@@ -14,6 +14,7 @@ registerQmlType({
     createProperty("int", this.border, "width", {initialValue: 1});
 
     const bg = document.createElement('div');
+    bg.style.pointerEvents = 'none';
     bg.style.position = 'absolute';
     bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = '0px';
     bg.style.borderWidth ='0px';
