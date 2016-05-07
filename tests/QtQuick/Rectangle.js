@@ -4,8 +4,8 @@ describe('QtQuick.Rectangle', function() {
 
   it('White', function() {
     load('White', this.div);
-    expect(this.div.innerHTML).toBe('');
-    expect(this.div.style.backgroundColor).toBe('white');
+    expect(this.div.children[0].innerHTML).toBe('');
+    expect(this.div.children[0].style.backgroundColor).toBe('white');
     expect(this.div.offsetWidth).toBe(200);
     expect(this.div.offsetHeight).toBe(100);
     expect(this.div.clientWidth).toBe(200);
@@ -13,10 +13,10 @@ describe('QtQuick.Rectangle', function() {
   });
   it('Color', function() {
     load('Color', this.div);
-    expect(this.div.style.backgroundColor).toBe('red');
+    expect(this.div.children[0].style.backgroundColor).toBe('red');
   });
   it('Transparent', function() {
     load('Transparent', this.div);
-    expect(this.div.style.backgroundColor).toBe('transparent');
+    expect(this.div.children[0].style.backgroundColor).toBe('transparent');
   });
 });

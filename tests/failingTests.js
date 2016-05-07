@@ -4,7 +4,6 @@ window.failingTests = {
       'NumberAnimationAutorun'
     ],
     Simple: [
-      'RectangleBorderChildren',
       'RectanglesOpacity'
     ]
   },

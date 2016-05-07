@@ -13,26 +13,27 @@ registerQmlType({
     createProperty("color", this.border, "color", {initialValue: 'black'});
     createProperty("int", this.border, "width", {initialValue: 1});
 
-    this.border.color = 'black';
-    this.border.width = 1;
+    const bg = document.createElement('div');
+    bg.style.position = 'absolute';
+    bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = '0px';
+    bg.style.borderWidth ='0px';
+    bg.style.borderStyle = 'solid';
+    bg.style.borderColor = 'black';
+    bg.style.backgroundColor = 'white';
+    this.dom.appendChild(bg);
 
     this.colorChanged.connect(this, function(newVal) {
-        this.css.backgroundColor = QMLColor(newVal);
+        bg.style.backgroundColor = QMLColor(newVal);
     });
     this.radiusChanged.connect(this, function(newVal) {
-        this.css.borderRadius = newVal + 'px';
+        bg.style.borderRadius = newVal + 'px';
     });
     this.border.colorChanged.connect(this, function(newVal) {
-        this.css.borderColor = QMLColor(newVal);
-        this.css.borderWidth = this.border.width + 'px';
+        bg.style.borderColor = QMLColor(newVal);
+        bg.style.borderWidth = this.border.width + 'px';
     });
     this.border.widthChanged.connect(this, function(newVal) {
-        this.css.borderWidth = newVal + 'px';
+        bg.style.borderWidth = newVal + 'px';
     });
-
-    this.colorChanged(this.color);
-    this.css.borderWidth ='0px';
-    this.css.borderStyle = 'solid';
-    this.css.borderColor = 'black';
   }
 });
