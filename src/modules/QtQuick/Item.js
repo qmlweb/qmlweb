@@ -19,6 +19,7 @@ function QMLItem(meta) {
     this.dom.style.pointerEvents = "none";
     this.dom.className = meta.object.$class + (this.id ? " " + this.id : "");
     this.css = this.dom.style;
+    this.impl = null; // Store the actually drawn element
 
     this.css.boxSizing = 'border-box';
 

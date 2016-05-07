@@ -16,14 +16,13 @@ registerQmlType({
   constructor: function QMLVideo(meta) {
     callSuper(this, meta);
 
-    var domVideo;
     var runningEventListener = 0;
     var volumeBackup;
 
-    this.dom.innerHTML = "<video></video>";
-    domVideo = this.dom.firstChild;
-    this.dom.firstChild.style.width = this.dom.firstChild.style.height = "100%";
-    this.dom.firstChild.style.margin = "0";
+    const domVideo = this.impl = document.createElement('video');
+    domVideo.style.width = domVideo.style.height = "100%";
+    domVideo.style.margin = "0";
+    this.dom.appendChild(domVideo);
 
     createProperty("bool",   this, "autoPlay");
     createProperty("enum",   this, "fillMode");

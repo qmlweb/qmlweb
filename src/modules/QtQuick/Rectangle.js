@@ -13,7 +13,7 @@ registerQmlType({
     createProperty("color", this.border, "color", {initialValue: 'black'});
     createProperty("int", this.border, "width", {initialValue: 1});
 
-    const bg = document.createElement('div');
+    const bg = this.impl = document.createElement('div');
     bg.style.pointerEvents = 'none';
     bg.style.position = 'absolute';
     bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = '0px';

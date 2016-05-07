@@ -6,11 +6,11 @@ registerQmlType({
   constructor: function QMLText(meta) {
     callSuper(this, meta);
 
-    // We create another span inside the text to distinguish the actual
-    // (possibly html-formatted) text from child elements
-    this.dom.innerHTML = "<span></span>";
-    this.dom.firstChild.style.width = "100%";
-    this.dom.firstChild.style.height = "100%";
+    const fc = this.impl = document.createElement('span');
+    fc.style.pointerEvents = 'none';
+    fc.style.width = '100%';
+    fc.style.height = '100%';
+    this.dom.appendChild(fc);
 
     this.Text = {
         // Wrap Mode
@@ -43,79 +43,79 @@ registerQmlType({
     createProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.firstChild.style.color = QMLColor(newVal);
+        fc.style.color = QMLColor(newVal);
     });
     this.textChanged.connect(this, function(newVal) {
-        this.dom.firstChild.innerHTML = newVal;
+        fc.innerHTML = newVal;
     });
     this.lineHeightChanged.connect(this, function(newVal) {
-        this.dom.firstChild.style.lineHeight = newVal + "px";
+        fc.style.lineHeight = newVal + "px";
     });
     this.wrapModeChanged.connect(this, function(newVal) {
         switch (newVal) {
             case 0:
-                this.dom.firstChild.style.whiteSpace = "pre";
+                fc.style.whiteSpace = "pre";
                 break;
             case 1:
-                this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                this.dom.firstChild.style.wordWrap = "normal";
+                fc.style.whiteSpace = "pre-wrap";
+                fc.style.wordWrap = "normal";
                 break;
             case 2:
-                this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                this.dom.firstChild.style.wordBreak = "break-all";
+                fc.style.whiteSpace = "pre-wrap";
+                fc.style.wordBreak = "break-all";
                 break;
             case 3:
-                this.dom.firstChild.style.whiteSpace = "pre-wrap";
-                this.dom.firstChild.style.wordWrap = "break-word";
+                fc.style.whiteSpace = "pre-wrap";
+                fc.style.wordWrap = "break-word";
         };
         // AlignJustify doesn't work with pre/pre-wrap, so we decide the
         // lesser of the two evils to be ignoring "\n"s inside the text.
         if (this.horizontalAlignment == "justify")
-            this.dom.firstChild.style.whiteSpace = "normal";
+            fc.style.whiteSpace = "normal";
     });
     this.horizontalAlignmentChanged.connect(this, function(newVal) {
         this.dom.style.textAlign = newVal;
         // AlignJustify doesn't work with pre/pre-wrap, so we decide the
         // lesser of the two evils to be ignoring "\n"s inside the text.
         if (newVal == "justify")
-            this.dom.firstChild.style.whiteSpace = "normal";
+            fc.style.whiteSpace = "normal";
     });
     this.styleChanged.connect(this, function(newVal) {
         switch (newVal) {
             case 0:
-                this.dom.firstChild.style.textShadow = "none";
+                fc.style.textShadow = "none";
                 break;
             case 1:
                 var color = this.styleColor;
-                this.dom.firstChild.style.textShadow = "1px 0 0 " + color
+                fc.style.textShadow = "1px 0 0 " + color
                     + ", -1px 0 0 " + color
                     + ", 0 1px 0 " + color
                     + ", 0 -1px 0 " + color;
                 break;
             case 2:
-                this.dom.firstChild.style.textShadow = "1px 1px 0 " + this.styleColor;
+                fc.style.textShadow = "1px 1px 0 " + this.styleColor;
                 break;
             case 3:
-                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + this.styleColor;
+                fc.style.textShadow = "-1px -1px 0 " + this.styleColor;
         };
     });
     this.styleColorChanged.connect(this, function(newVal) {
         newVal = QMLColor(newVal);
         switch (this.style) {
             case 0:
-                this.dom.firstChild.style.textShadow = "none";
+                fc.style.textShadow = "none";
                 break;
             case 1:
-                this.dom.firstChild.style.textShadow = "1px 0 0 " + newVal
+                fc.style.textShadow = "1px 0 0 " + newVal
                     + ", -1px 0 0 " + newVal
                     + ", 0 1px 0 " + newVal
                     + ", 0 -1px 0 " + newVal;
                 break;
             case 2:
-                this.dom.firstChild.style.textShadow = "1px 1px 0 " + newVal;
+                fc.style.textShadow = "1px 1px 0 " + newVal;
                 break;
             case 3:
-                this.dom.firstChild.style.textShadow = "-1px -1px 0 " + newVal;
+                fc.style.textShadow = "-1px -1px 0 " + newVal;
         };
     });
 
@@ -139,7 +139,6 @@ registerQmlType({
         if (typeof this.text == undefined || this.text === "" || !this.dom) {
              this.implicitHeigh = this.implicitWidth = 0;
         } else {
-            var fc = this.dom.firstChild;
             this.implicitHeight = fc.offsetHeight;
             this.implicitWidth = fc.offsetWidth;
         }
