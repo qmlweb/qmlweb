@@ -25,12 +25,15 @@ function QMLTextInput(meta) {
 
     this.font = new getConstructor('QtQuick', '2.0', 'Font')(this);
 
-    this.dom.innerHTML = "<input type=\"text\" disabled/>"
-    this.dom.firstChild.style.pointerEvents = "auto";
-    this.dom.firstChild.style.margin = "0";
-    this.dom.firstChild.style.width = "100%";
+    const input = this.impl = document.createElement('input');
+    input.type = 'text';
+    input.disabled = true;
+    input.style.pointerEvents = "auto";
+    input.style.margin = "0";
+    input.style.width = "100%";
+    this.dom.appendChild(input);
 
-    this.setupFocusOnDom(this.dom.firstChild);
+    this.setupFocusOnDom(input);
 
     createProperty("string", this, "text");
     createProperty("int", this, "maximumLength");
@@ -40,24 +43,24 @@ function QMLTextInput(meta) {
     this.accepted = Signal();
     this.readOnly = false;
     this.maximumLength = -1;
-    this.dom.firstChild.disabled = false;
+    input.disabled = false;
 
     this.Component.completed.connect(this, function () {
-        this.implicitWidth = this.dom.firstChild.offsetWidth;
-        this.implicitHeight = this.dom.firstChild.offsetHeight;
+        this.implicitWidth = input.offsetWidth;
+        this.implicitHeight = input.offsetHeight;
     });
 
     this.textChanged.connect(this, function (newVal) {
-        this.dom.firstChild.value = newVal;
+        input.value = newVal;
     });
 
     this.echoModeChanged.connect(this, (function (newVal) {
         switch (newVal) {
         case TextField.Normal:
-            this.dom.firstChild.type = "text";
+            input.type = "text";
             break;
         case TextField.Password:
-            this.dom.firstChild.type = "password";
+            input.type = "password";
             break;
         }
     }).bind(this));
@@ -65,11 +68,11 @@ function QMLTextInput(meta) {
     this.maximumLengthChanged.connect(this, function (newVal) {
         if (newVal < 0)
             newVal = null;
-        this.dom.firstChild.maxLength = newVal;
+        input.maxLength = newVal;
     });
 
     this.readOnlyChanged.connect(this, function (newVal) {
-        this.dom.firstChild.disabled = newVal;
+        input.disabled = newVal;
     });
 
     this.Keys.pressed.connect(this, (function (e) {
@@ -94,6 +97,6 @@ function QMLTextInput(meta) {
         }
     }
 
-    this.dom.firstChild.oninput = updateValue;
-    this.dom.firstChild.onpropertychanged = updateValue;
+    input.oninput = updateValue;
+    input.onpropertychanged = updateValue;
 }

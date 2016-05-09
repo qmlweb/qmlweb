@@ -87,22 +87,23 @@ function QMLTextEdit(meta) {
     this.redoStack = [];
     this.redoStackPosition = -1;
 
-    this.dom.innerHTML = "<textarea></textarea>"
-    this.dom.firstChild.style.pointerEvents = "auto";
-    this.dom.firstChild.style.width = "100%";
-    this.dom.firstChild.style.height = "100%";
+    const textarea = this.impl = document.createElement('textarea');
+    textarea.style.pointerEvents = "auto";
+    textarea.style.width = "100%";
+    textarea.style.height = "100%";
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
-    this.dom.firstChild.style.margin = "0";
-    this.dom.firstChild.disabled = false;
+    textarea.style.margin = "0";
+    textarea.disabled = false;
+    this.dom.appendChild(textarea);
 
     this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.firstChild.offsetWidth;
-        this.implicitHeight = this.dom.firstChild.offsetHeight;
+        this.implicitWidth = textarea.offsetWidth;
+        this.implicitHeight = textarea.offsetHeight;
     });
 
     this.textChanged.connect(this, function(newVal) {
-        this.dom.firstChild.value = newVal;
+        textarea.value = newVal;
     });
 
     // Signals
@@ -239,11 +240,11 @@ function QMLTextEdit(meta) {
         updateCss(self);
     }
 
-    this.dom.firstChild.oninput = updateValue;
-    this.dom.firstChild.onpropertychanged = updateValue;
+    textarea.oninput = updateValue;
+    textarea.onpropertychanged = updateValue;
 
     this.colorChanged.connect(this, function(newVal) {
-        this.dom.firstChild.style.color = newVal;
+        textarea.style.color = newVal;
     });
 }
 
