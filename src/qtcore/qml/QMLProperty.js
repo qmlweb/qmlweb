@@ -87,7 +87,7 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
             return;
         }
     } else {
-        if (!reason != QMLProperty.ReasonAnimation)
+        if (reason != QMLProperty.ReasonAnimation)
             this.binding = null;
         if (newVal instanceof Array)
             newVal = newVal.slice(); // Copies the array
