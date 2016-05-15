@@ -1,27 +1,28 @@
-var GETTER = "__defineGetter__",
-    SETTER = "__defineSetter__",
-    // Property that is currently beeing evaluated. Used to get the information
-    // which property called the getter of a certain other property for
-    // evaluation and is thus dependant on it.
-    evaluatingProperty = undefined,
-    _executionContext = null,
-    // All object constructors
-    constructors = {
-      'int':       QMLInteger,
-      real:        Number,
-      'double':    Number,
-      string:      String,
-      'bool':      Boolean,
-      list:        QMLList,
-      color:       QMLColor,
-      'enum':      Number,
-      url:         String,
-      variant:     QMLVariant,
-      'var':       QMLVariant
-    };
-var modules = {
-    Main: constructors
-  };
+// Property that is currently beeing evaluated. Used to get the information
+// which property called the getter of a certain other property for
+// evaluation and is thus dependant on it.
+var evaluatingProperty;
+
+var _executionContext = null;
+
+// All object constructors
+var constructors = {
+  'int': QMLInteger,
+  real: Number,
+  'double': Number,
+  string: String,
+  'bool': Boolean,
+  list: QMLList,
+  color: QMLColor,
+  'enum': Number,
+  url: String,
+  variant: QMLVariant,
+  'var': QMLVariant
+};
+
+const modules = {
+  Main: constructors
+};
 
 const dependants = {};
 
@@ -245,54 +246,32 @@ function createProperty(type, obj, propName, options = {}) {
 /**
  * Set up simple getter function for property
  */
-var setupGetter,
-    setupSetter,
-    setupGetterSetter;
-(function() {
 
-// todo: What's wrong with Object.defineProperty on some browsers?
-// Object.defineProperty is the standard way to setup getters and setters.
-// However, the following way to use Object.defineProperty don't work on some
-// webkit-based browsers, namely Safari, iPad, iPhone and Nokia N9 browser.
-// Chrome, firefox and opera still digest them fine.
+function setupGetter(obj, propName, func) {
+  Object.defineProperty(obj, propName, {
+    get: func,
+    configurable: true,
+    enumerable: true
+  });
+}
 
-// So, if the deprecated __defineGetter__ is available, use those, and if not
-// use the standard Object.defineProperty (IE for example).
+function setupSetter(obj, propName, func) {
+  Object.defineProperty(obj, propName, {
+    set: func,
+    configurable: true,
+    enumerable: false
+  });
+}
 
-    var useDefineProperty = !(Object[GETTER] && Object[SETTER]);
+function setupGetterSetter(obj, propName, getter, setter) {
+  Object.defineProperty(obj, propName, {
+    get: getter,
+    set: setter,
+    configurable: true,
+    enumerable: false
+  });
+}
 
-    if (useDefineProperty) {
-
-        if (!Object.defineProperty) {
-            console.log("No __defineGetter__ or defineProperty available!");
-        }
-
-        setupGetter = function(obj, propName, func) {
-            Object.defineProperty(obj, propName,
-                { get: func, configurable: true, enumerable: true } );
-        }
-        setupSetter = function(obj, propName, func) {
-            Object.defineProperty(obj, propName,
-                { set: func, configurable: true, enumerable: false });
-        }
-        setupGetterSetter = function(obj, propName, getter, setter) {
-            Object.defineProperty(obj, propName,
-                {get: getter, set: setter, configurable: true, enumerable: false });
-        }
-    } else {
-        setupGetter = function(obj, propName, func) {
-            obj[GETTER](propName, func);
-        }
-        setupSetter = function(obj, propName, func) {
-            obj[SETTER](propName, func);
-        }
-        setupGetterSetter = function(obj, propName, getter, setter) {
-            obj[GETTER](propName, getter);
-            obj[SETTER](propName, setter);
-        }
-    }
-
-})();
 /**
  * Apply properties from metaObject to item.
  * @param {Object} metaObject Source of properties
