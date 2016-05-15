@@ -128,7 +128,7 @@ gulp.task('watch-dev', ['build-dev'], function() {
 });
 
 gulp.task('lint-tests', function() {
-  gulp.src(tests)
+  return gulp.src(tests)
       .pipe(eslint())
       .pipe(eslint.formatEach('compact', process.stderr))
       .pipe(eslint.failAfterError());
