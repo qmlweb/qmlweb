@@ -6,6 +6,13 @@ global.Qt = {
       + Math.round(b * 255) + ","
       + a + ")";
   },
+  hsla: function(h,s,l,a) {
+    return "hsla("
+      + Math.round(h * 360) + ","
+      + Math.round(s * 100) + "%,"
+      + Math.round(l * 100) + "%,"
+      + a + ")";
+  },
   openUrlExternally: function(url) {
     page = window.open(url, '_blank');
     page.focus();
