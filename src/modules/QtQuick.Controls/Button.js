@@ -11,14 +11,14 @@ function QMLButton(meta) {
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
-        this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+        this.implicitWidth = this.dom.offsetWidth;
+        this.implicitHeight = this.dom.offsetHeight;
     });
     this.textChanged.connect(this, function(newVal) {
         this.dom.firstChild.innerHTML = newVal;
         //TODO: Replace those statically sized borders
-        this.implicitWidth = this.dom.firstChild.offsetWidth + 20;
-        this.implicitHeight = this.dom.firstChild.offsetHeight + 5;
+        this.implicitWidth = this.dom.offsetWidth;
+        this.implicitHeight = this.dom.offsetHeight;
     });
     this.enabledChanged.connect(this, function(newVal) {
         this.dom.disabled = !newVal;
