@@ -91,7 +91,12 @@ function QMLTextEdit(meta) {
     textarea.style.pointerEvents = "auto";
     textarea.style.width = "100%";
     textarea.style.height = "100%";
-    textarea.style.padding = "0";
+    textarea.style.boxSizing = 'border-box';
+    textarea.style.borderWidth = '0';
+    textarea.style.background = 'none';
+    textarea.style.outline = 'none';
+    textarea.style.resize = 'none';
+    textarea.style.padding = '0'; // TODO: padding/*Padding props from Qt 5.6
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     textarea.style.margin = "0";
