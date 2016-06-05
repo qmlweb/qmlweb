@@ -5,8 +5,6 @@ function QMLButton(meta) {
     button.style.pointerEvents = 'auto';
     this.dom.appendChild(button);
 
-    var self = this;
-
     createProperty("string", this, "text");
     createProperty("bool", this, "enabled", {initialValue: true});
     this.clicked = Signal();
@@ -25,7 +23,7 @@ function QMLButton(meta) {
         button.disabled = !newVal;
     });
 
-    button.onclick = function(e) {
+    button.onclick = () => {
         this.clicked();
     }
 }
