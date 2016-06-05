@@ -4,7 +4,6 @@ function QMLButton(meta) {
     var self = this;
 
     this.dom.style.pointerEvents = "auto";
-    this.dom.innerHTML = "<span></span>";
 
     createProperty("string", this, "text");
     createProperty("bool", this, "enabled", {initialValue: true});
@@ -15,7 +14,7 @@ function QMLButton(meta) {
         this.implicitHeight = this.dom.offsetHeight;
     });
     this.textChanged.connect(this, function(newVal) {
-        this.dom.firstChild.innerHTML = newVal;
+        this.dom.textContent = newVal;
         //TODO: Replace those statically sized borders
         this.implicitWidth = this.dom.offsetWidth;
         this.implicitHeight = this.dom.offsetHeight;
