@@ -1,30 +1,32 @@
 function QMLButton(meta) {
     callSuper(this, meta);
-    this.dom = document.createElement("button");
-    var self = this;
 
-    this.dom.style.pointerEvents = "auto";
+    const button = this.impl = document.createElement('button');
+    button.style.pointerEvents = 'auto';
+    this.dom.appendChild(button);
+
+    var self = this;
 
     createProperty("string", this, "text");
     createProperty("bool", this, "enabled", {initialValue: true});
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
-        this.implicitWidth = this.dom.offsetWidth;
-        this.implicitHeight = this.dom.offsetHeight;
+        this.implicitWidth = button.offsetWidth;
+        this.implicitHeight = button.offsetHeight;
     });
     this.textChanged.connect(this, function(newVal) {
-        this.dom.textContent = newVal;
+        button.textContent = newVal;
         //TODO: Replace those statically sized borders
-        this.implicitWidth = this.dom.offsetWidth;
-        this.implicitHeight = this.dom.offsetHeight;
+        this.implicitWidth = button.offsetWidth;
+        this.implicitHeight = button.offsetHeight;
     });
     this.enabledChanged.connect(this, function(newVal) {
-        this.dom.disabled = !newVal;
+        button.disabled = !newVal;
     });
 
-    this.dom.onclick = function(e) {
-        self.clicked();
+    button.onclick = function(e) {
+        this.clicked();
     }
 }
 
