@@ -25,7 +25,7 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-spec-reporter": "~0.0.24",
     "phantomjs-prebuilt": "^2.1.4",
-    "qmlweb-parser": "^0.1.0"
+    "qmlweb-parser": "^0.1.1"
   },
   "scripts": {
     "lint": "gulp lint",
