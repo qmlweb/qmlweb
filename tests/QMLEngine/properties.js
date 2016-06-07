@@ -57,6 +57,11 @@ describe('QMLEngine.properties', function() {
     load('NamedSignal', this.div);
   });
 
+  it('works when named signal', function() {
+    var qml = load('NamedSignalValues', this.div);
+    expect(qml.signal).toBe(20);
+  });
+
   /* in Qml, when assigning non-string value to string property,
      is convert's new value to string. */
   it('StringConversion', function() {

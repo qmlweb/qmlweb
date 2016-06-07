@@ -14,6 +14,7 @@ window.failingTests = {
     ],
     properties: [
       'alias to id with same name',
+      'works when named signal',
       'ChangedExpressionSignal',
       'StringConversion'
     ],
