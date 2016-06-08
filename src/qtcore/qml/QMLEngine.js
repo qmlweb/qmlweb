@@ -97,12 +97,12 @@ QMLEngine = function (element, options) {
         this.$basePath = this.extractBasePath(file);
         this.ensureFileIsLoadedInQrc(file);
         tree = convertToEngine(qrc[file]);
-        this.loadQMLTree(tree, parentComponent);
+        this.loadQMLTree(tree, parentComponent, file);
     }
 
     // parse and construct qml
     this.loadQML = function(src, file) { // file is not required; only for debug purposes
-        this.loadQMLTree(parseQML(src, file));
+        this.loadQMLTree(parseQML(src, file), null, file);
     }
 
     this.loadQMLTree = function(tree, parentComponent = null, file = undefined) {
