@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Transition',
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: 'QtQml.QtObject',
   constructor: function QMLTransition(meta) {
     callSuper(this, meta);
 

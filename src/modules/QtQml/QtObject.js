@@ -49,7 +49,7 @@ function QMLBaseObject(meta) {
 }
 
 registerQmlType({
-    module: 'QtQuick',
+    module: 'QtQml',
     name: 'QtObject',
     versions: /.*/,
     constructor: QMLBaseObject

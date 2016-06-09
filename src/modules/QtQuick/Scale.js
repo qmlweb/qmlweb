@@ -2,7 +2,7 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Scale',
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: 'QtQml.QtObject',
   constructor: function QMLScale(meta) {
     callSuper(this, meta);
 

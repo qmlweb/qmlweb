@@ -391,6 +391,6 @@ registerQmlType({
   module: 'QtQuick',
   name: 'Item',
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: 'QtQml.QtObject',
   constructor: QMLItem
 });

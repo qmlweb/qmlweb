@@ -93,6 +93,6 @@ registerQmlType({
   module: 'QtQml',
   name: 'Component',
   versions: /.*/,
-  baseClass: 'QtQuick.QtObject',
+  baseClass: 'QtObject',
   constructor: QMLComponent
 });

@@ -19,6 +19,6 @@ registerQmlType({
   module: 'QtQuick',
   name: 'PropertyChanges',
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: 'QtQml.QtObject',
   constructor: QMLPropertyChanges
 });

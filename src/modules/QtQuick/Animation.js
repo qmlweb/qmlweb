@@ -37,6 +37,6 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Animation',
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: 'QtQml.QtObject',
   constructor: QMLAnimation
 });
