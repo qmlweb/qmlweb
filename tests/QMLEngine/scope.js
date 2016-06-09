@@ -58,4 +58,11 @@ describe('QMLEngine.scope', function() {
       expect(qml.getFooVal()).toBe(42);
     }
   );
+
+  it('item id should NOT change property value with the same name',
+    function() {
+      var qml = load('IdOverProperty', this.div);
+      expect(qml.boo).toBe('42');
+    }
+  );
 });
