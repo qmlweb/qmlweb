@@ -1,16 +1,3 @@
-/**
- *
- * Loader is used to dynamically load QML components.
- *
- * Loader can load a QML file (using the source property)
- * or a Component object (using the sourceComponent property).
- * It is useful for delaying the creation of a component until
- * it is required: for example, when a component should be created
- * on demand, or when a component should not be created unnecessarily
- * for performance reasons.
- *
- */
-
 registerQmlType({
     module: 'QtQuick',
     name: 'Loader',
@@ -19,65 +6,57 @@ registerQmlType({
     constructor: function(meta) {
         callSuper(this, meta);
 
-        var self = this;
-
-        createProperty('bool', this, 'active');
+        createProperty('bool', this, 'active', {initialValue: true});
         createProperty('bool', this, 'asynchronous');
         createProperty('var', this, 'item');
         createProperty('real', this, 'progress');
         createProperty('url', this, 'source');
         createProperty('Component', this, 'sourceComponent');
-        createProperty('enum', this, 'status');
+        createProperty('enum', this, 'status', {initialValue: 1});
 
-        this.active = true;
-        this.asynchronous = false;
-        this.item = undefined;
-        this.progress = 0.0;
-        this.source = undefined;
-        this.sourceComponent = undefined;
-        this.status = 1;
-        this.sourceUrl = '';
+        let sourceUrl = '';
 
         this.loaded = Signal();
 
-        this.activeChanged.connect(function(newVal) {
-            if (self.active) {
-                if (self.source)
-                    sourceChanged();
-                else if (self.sourceComponent)
-                    sourceComponentChanged();
-            } else {
+        this.activeChanged.connect(() => {
+            if (!this.active) {
                 unload();
+                return;
+            }
+            if (this.source) {
+                sourceChanged();
+            } else if (this.sourceComponent) {
+                sourceComponentChanged();
             }
         });
 
-        this.sourceChanged.connect(function(newVal) {
-            if (!self.active)// || (newVal == self.sourceUrl && self.item !== undefined) ) //todo
-            {
-                console.log(' Loader isn\'t active.');
+        this.sourceChanged.connect(newVal => {
+            // if (newVal == sourceUrl && this.item !== undefined) return // TODO
+            if (!this.active) {
                 return;
             }
 
             unload();
 
-            if (self.source.length > 0) {
-               var fileName = newVal.lastIndexOf('.qml') === newVal.length - 4 ? newVal.substring(0, newVal.length - 4) : '';
-
-               if (fileName !== '') {
-                   var tree = engine.loadComponent(fileName);
-                   var meta = { object: tree, context: self, parent: self };
-
-                   var qmlComponent = new QMLComponent(meta);
-                   var loadedComponent = createComponentObject(qmlComponent, self);
-
-                   self.sourceComponent = loadedComponent;
-                   self.sourceUrl = newVal;
-               }
+            // TODO: we require '.qml' for now, that should be fixed
+            if (newVal.length <= 4) { // 0
+                return;
             }
+            if (newVal.substr(newVal.length - 4, 4) !== '.qml') {
+                return;
+            }
+            var fileName = newVal.substring(0, newVal.length - 4);
+
+            var tree = engine.loadComponent(fileName);
+            var meta = { object: tree, context: this, parent: this };
+            var qmlComponent = new QMLComponent(meta);
+            var loadedComponent = createComponentObject(qmlComponent, this);
+            this.sourceComponent = loadedComponent;
+            sourceUrl = newVal;
         });
 
-        this.sourceComponentChanged.connect(function(newItem) {
-            if (!self.active) {
+        this.sourceComponentChanged.connect(newItem => {
+            if (!this.active) {
                 return;
             }
 
@@ -86,22 +65,19 @@ registerQmlType({
             var qmlComponent = newItem;
 
             if (newItem instanceof QMLComponent) {
-                  var meta = { object: newItem.$metaObject, context: self, parent: self };
+                  var meta = { object: newItem.$metaObject, context: this, parent: this };
                   qmlComponent = construct(meta);
             }
 
-            qmlComponent.parent = self;
-            self.item = qmlComponent;
+            qmlComponent.parent = this;
+            this.item = qmlComponent;
 
             updateGeometry();
 
-            if (self.item) {
-                self.loaded();
+            if (this.item) {
+                this.loaded();
             }
         });
-
-        this.widthChanged.connect(function(newWidth) { updateGeometry(); });
-        this.heightChanged.connect(function(newHeight) { updateGeometry(); });
 
         function createComponentObject(qmlComponent, parent) {
             var newComponent = qmlComponent.createObject(parent);
@@ -110,8 +86,8 @@ registerQmlType({
             qmlComponent.finalizeImports();
 
              if (engine.operationState !== QMLOperationState.Init) {
-             //   We don't call those on first creation, as they will be called
-             //   by the regular creation-procedures at the right time.
+                // We don't call those on first creation, as they will be called
+                // by the regular creation-procedures at the right time.
                 engine.$initializePropertyBindings();
                 callOnCompleted(newComponent);
              }
@@ -119,39 +95,40 @@ registerQmlType({
             return newComponent;
         }
 
-        function updateGeometry() {
+        const updateGeometry = () => {
             // Loader size doesn't exist
-            if (!self.width) {
-                self.width = self.item ? self.item.width : 0;
-            } else {
+            if (!this.width) {
+                this.width = this.item ? this.item.width : 0;
+            } else if (this.item) {
                 // Loader size exists
-                if (self.item) self.item.width = self.width;
+                this.item.width = this.width;
             }
 
-            if (!self.height) {
-                self.height = self.item ? self.item.height : 0;
-            } else {
+            if (!this.height) {
+                this.height = this.item ? this.item.height : 0;
+            } else if (this.item) {
                 // Loader size exists
-                if (self.item) self.item.height = self.height;
+                this.item.height = this.height;
             }
         }
+        this.widthChanged.connect(updateGeometry);
+        this.heightChanged.connect(updateGeometry);
 
-        function unload() {
-          if (self.item) {
-            self.item.$delete();
-            self.item.parent = undefined;
-            self.item = undefined;
+        const unload = () => {
+          if (this.item) {
+            this.item.$delete();
+            this.item.parent = undefined;
+            this.item = undefined;
           }
         }
 
         function callOnCompleted(child) {
             child.Component.completed();
-            for (var i = 0; i < child.children.length; i++)
-                callOnCompleted(child.children[i]);
+            child.children.forEach(callOnCompleted);
         }
 
         this.setSource = function(url, options) {
-            this.sourceUrl = url;
+            sourceUrl = url;
             this.props = options;
             this.source = url;
         }
