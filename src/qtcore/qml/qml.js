@@ -132,6 +132,10 @@ global.perContextConstructors = {};
 
 global.loadImports = function (self, imports) {
   constructors = mergeObjects(modules.Main, null);
+  if (imports.filter(row => row[1] === 'QtQml').length === 0 &&
+      imports.filter(row => row[1] === 'QtQuick').length === 1) {
+    imports.push(['qmlimport', 'QtQml', 2, '', true]);
+  }
   for (var i = 0 ; i < imports.length ; ++i) {
     var moduleName = imports[i][1],
         moduleVersion = imports[i][2],
