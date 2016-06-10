@@ -63,6 +63,7 @@ global.registerQmlType = function(options) {
   }
 
   options.constructor.$qmlTypeInfo = {
+    enums: options.enums,
     defaultProperty: options.defaultProperty,
     properties: options.properties
   };
@@ -169,6 +170,12 @@ function callSuper(self, meta) {
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
 
+  if (info.enums) {
+    // TODO: not exported to the whole file scope yet
+    Object.keys(info.enums).forEach(name => {
+      self[name] = info.enums[name];
+    });
+  }
   if (info.properties) {
     Object.keys(info.properties).forEach(name => {
       let desc = info.properties[name];
