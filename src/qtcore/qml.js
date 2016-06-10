@@ -499,7 +499,3 @@ JSItemModel = function() {
 // Stuff below defines QML things
 // -----------------------------------------------------------------------------
 
-// Helper
-function unboundMethod() {
-    console.log("Unbound method for", this);
-}
