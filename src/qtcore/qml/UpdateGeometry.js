@@ -1,8 +1,8 @@
 function updateHGeometry(newVal, oldVal, propName) {
     var anchors = this.anchors || this;
-    if (this.$updatingGeometry)
+    if (this.$updatingHGeometry)
         return;
-    this.$updatingGeometry = true;
+    this.$updatingHGeometry = true;
 
     var t, w, width, x, left, hC, right,
         lM = anchors.leftMargin || anchors.margins,
@@ -94,16 +94,16 @@ function updateHGeometry(newVal, oldVal, propName) {
     if (width !== undefined)
         this.width = width;
 
-    this.$updatingGeometry = false;
+    this.$updatingHGeometry = false;
 
     if (this.parent) updateChildrenRect(this.parent);
 }
 
 function updateVGeometry(newVal, oldVal, propName) {
     var anchors = this.anchors || this;
-    if (this.$updatingGeometry)
+    if (this.$updatingVGeometry)
         return;
-    this.$updatingGeometry = true;
+    this.$updatingVGeometry = true;
 
     var t, w, height, y, top, vC, bottom,
         tM = anchors.topMargin || anchors.margins,
@@ -195,7 +195,7 @@ function updateVGeometry(newVal, oldVal, propName) {
     if (height !== undefined)
         this.height = height;
 
-    this.$updatingGeometry = false;
+    this.$updatingVGeometry = false;
 
     if (this.parent) updateChildrenRect(this.parent);
 }
