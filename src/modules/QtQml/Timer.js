@@ -27,19 +27,22 @@ registerQmlType({
         }
     }
 
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            prevTrigger = (new Date).getTime();
+    /* This ensures that if the user toggles the "running" property manually,
+     * the timer will trigger. */
+    this.runningChanged.connect(this, function() {
+        if (this.running) {
+            prevTrigger = new Date().getTime();
             if (this.triggeredOnStart) {
                 trigger();
             }
         }
+    })
+
+    this.start = function() {
+        this.running = true;
     }
     this.stop = function() {
-        if (this.running) {
-            this.running = false;
-        }
+        this.running = false;
     }
     this.restart = function() {
         this.stop();
