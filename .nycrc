@@ -1,0 +1,6 @@
+{
+  "coverageVariable": "__coverage__",
+  "require": [
+    "babel-register"
+  ]
+}

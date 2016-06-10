@@ -9,7 +9,6 @@ const iife = require("gulp-iife");
 const babel = require("gulp-babel");
 const replace = require("gulp-replace");
 const karma = require("karma");
-const istanbul = require("gulp-istanbul");
 const path = require("path");
 
 const qtcoreSources = [
@@ -60,21 +59,18 @@ gulp.task("parser-covered", () =>
 gulp.task("qmlweb-covered", () =>
   gulp.src(qtcoreSources)
     .pipe(order(qtcoreSources, { base: __dirname }))
-    .pipe(sourcemaps.init())
-    .pipe(istanbul({
-      // This is what karma uses
-      coverageVariable: "__coverage__"
+    .pipe(babel({
+      presets: ["es2015"],
+      plugins: ["istanbul"]
     }))
     .pipe(concat("qt.covered.js"))
     .pipe(changed("./tmp"))
-    .pipe(babel())
     .pipe(replace(/["']use strict["'];/g, ""))
     .pipe(iife({
       useStrict: false,
       params: ["global"],
       args: ["typeof global != \"undefined\" ? global : window"]
     }))
-    .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./tmp"))
 );
 
