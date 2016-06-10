@@ -62,6 +62,18 @@ global.registerQmlType = function(options) {
     }
   }
 
+  if (typeof options === 'function') {
+    options = {
+      module: options.module,
+      name: options.element,
+      versions: options.versions,
+      baseClass: options.baseClass,
+      enums: options.enums,
+      properties: options.properties,
+      constructor: options
+    }
+  };
+
   options.constructor.$qmlTypeInfo = {
     enums: options.enums,
     defaultProperty: options.defaultProperty,
