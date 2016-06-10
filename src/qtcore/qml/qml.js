@@ -158,7 +158,7 @@ global.loadImports = function (self, imports) {
 global.inherit = function(constructor, baseClass) {
   var oldProto = constructor.prototype;
   constructor.prototype = Object.create(baseClass.prototype);
-  Object.keys(oldProto).forEach(function(prop) {
+  Object.getOwnPropertyNames(oldProto).forEach(prop => {
     constructor.prototype[prop] = oldProto[prop];
   });
   constructor.prototype.constructor = baseClass;
