@@ -62,6 +62,11 @@ global.registerQmlType = function(options) {
     }
   }
 
+  options.constructor.$qmlTypeInfo = {
+    defaultProperty: options.defaultProperty,
+    properties: options.properties
+  };
+
   if (options.global) {
     registerGlobalQmlType(options.name, options.constructor);
   } else {
@@ -160,8 +165,22 @@ global.inherit = function(constructor, baseClass) {
 }
 
 function callSuper(self, meta) {
+  const info = meta.super.$qmlTypeInfo || {};
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
+
+  if (info.properties) {
+    Object.keys(info.properties).forEach(name => {
+      let desc = info.properties[name];
+      if (typeof desc === 'string') {
+        desc = {type: desc};
+      }
+      createProperty(desc.type, self, name, desc);
+    });
+  }
+  if (info.defaultProperty) {
+    self.$defaultProperty = info.defaultProperty;
+  }
 }
 
 /**
