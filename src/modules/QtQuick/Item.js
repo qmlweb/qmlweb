@@ -23,13 +23,6 @@ function QMLItem(meta) {
 
     this.css.boxSizing = 'border-box';
 
-    createProperty("list", this, "data");
-    this.$defaultProperty = "data";
-    createProperty("list", this, "children");
-    createProperty("list", this, "resources");
-    createProperty("Item", this, "parent");
-    this.children = [];
-    this.resources = [];
     this.parentChanged.connect(this, function(newParent, oldParent) {
         if (oldParent) {
             oldParent.children.splice(oldParent.children.indexOf(this), 1);
@@ -57,28 +50,6 @@ function QMLItem(meta) {
 
     if (this.$isComponentRoot)
       createProperty("var", this, "activeFocus");
-    createProperty("real", this, "x");
-    createProperty("real", this, "y");
-    createProperty("real", this, "width");
-    createProperty("real", this, "height");
-    createProperty("real", this, "implicitWidth");
-    createProperty("real", this, "implicitHeight");
-    createProperty("real", this, "left");
-    createProperty("real", this, "right");
-    createProperty("real", this, "top");
-    createProperty("real", this, "bottom");
-    createProperty("real", this, "horizontalCenter");
-    createProperty("real", this, "verticalCenter");
-    createProperty("real", this, "rotation");
-    createProperty("real", this, "scale", {initialValue: 1});
-    createProperty("real", this, "z");
-    createProperty("list", this, "transform");
-    createProperty("bool", this, "visible", {initialValue: true});
-    createProperty("real", this, "opacity", {initialValue: 1});
-    createProperty("bool", this, "clip");
-    createProperty("bool", this, "focus");
-
-    createProperty("real", this, "$opacity", {initialValue: 1});
 
     this.xChanged.connect(this, updateHGeometry);
     this.yChanged.connect(this, updateVGeometry);
@@ -152,9 +123,6 @@ function QMLItem(meta) {
     createProperty("real", this.childrenRect, "width"); // TODO ro
     createProperty("real", this.childrenRect, "height"); // TODO ro
 
-    createProperty("list", this, "states");
-    createProperty("string", this, "state");
-    createProperty("list", this, "transitions");
     this.stateChanged.connect(this, function(newVal, oldVal) {
         var oldState, newState, i, j, k;
         for (i = 0; i < this.states.length; i++)
@@ -392,5 +360,36 @@ registerQmlType({
   name: 'Item',
   versions: /.*/,
   baseClass: 'QtQml.QtObject',
+  properties: {
+    $opacity: {type: 'real', initialValue: 1},
+    parent: 'Item',
+    state: 'string',
+    states: 'list',
+    transitions: 'list',
+    data: 'list',
+    children: 'list',
+    resources: 'list',
+    transform: 'list',
+    x: 'real',
+    y: 'real',
+    z: 'real',
+    width: 'real',
+    height: 'real',
+    implicitWidth: 'real',
+    implicitHeight: 'real',
+    left: 'real',
+    right: 'real',
+    top: 'real',
+    bottom: 'real',
+    horizontalCenter: 'real',
+    verticalCenter: 'real',
+    rotation: 'real',
+    scale: {type: 'real', initialValue: 1},
+    opacity: {type: 'real', initialValue: 1},
+    visible: {type: 'bool', initialValue: true},
+    clip: 'bool',
+    focus: 'bool'
+  },
+  defaultProperty: 'data',
   constructor: QMLItem
 });
