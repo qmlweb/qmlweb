@@ -28,4 +28,13 @@ describe('QtQuick.Timer', function() {
     var now = new Date();
     qml.start();
   });
+
+  it("can set Timer.running = true to start", function(done) {
+    var qml = load("Running", this.div);
+    qml.yield = function(succeed) {
+      expect(succeed).toBe(true);
+      done();
+    };
+    qml.start();
+  });
 });
