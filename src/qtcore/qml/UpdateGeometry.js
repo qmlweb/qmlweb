@@ -18,6 +18,8 @@ function updateHGeometry(newVal, oldVal, propName) {
     if ((t = anchors.fill) !== undefined) {
         if (!t.$properties.left.changed.isConnected(this, updateHGeometry))
             t.$properties.left.changed.connect(this, updateHGeometry);
+        if (!t.$properties.right.changed.isConnected(this, updateHGeometry))
+            t.$properties.right.changed.connect(this, updateHGeometry);
         if (!t.$properties.width.changed.isConnected(this, updateHGeometry))
             t.$properties.width.changed.connect(this, updateHGeometry);
 
@@ -119,6 +121,8 @@ function updateVGeometry(newVal, oldVal, propName) {
     if ((t = anchors.fill) !== undefined) {
         if (!t.$properties.top.changed.isConnected(this, updateVGeometry))
             t.$properties.top.changed.connect(this, updateVGeometry);
+        if (!t.$properties.bottom.changed.isConnected(this, updateVGeometry))
+            t.$properties.bottom.changed.connect(this, updateVGeometry);
         if (!t.$properties.height.changed.isConnected(this, updateVGeometry))
             t.$properties.height.changed.connect(this, updateVGeometry);
 
