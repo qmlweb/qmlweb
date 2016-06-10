@@ -1,19 +1,18 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Animation",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  enums: {
+QmlWeb.registerQmlType(class Animation {
+  static module = "QtQuick";
+  static versions = /.*/;
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     Animation: { Infinite: -1 },
     Easing: QmlWeb.Easing
-  },
-  properties: {
+  };
+  static properties = {
     alwaysRunToEnd: "bool",
     loops: { type: "int", initialValue: 1 },
     paused: "bool",
     running: "bool"
-  }
-}, class {
+  };
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
   }
