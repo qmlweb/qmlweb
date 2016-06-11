@@ -60,8 +60,10 @@ function QMLComponent(meta) {
           src = engine.$basePath + src;
         if (typeof qrc[src] != 'undefined')
           js = qrc[src];
-        else
-          js = global.jsparse(getUrlContents(src));
+        else {
+          loadParser();
+          js = qmlweb_jsparse(getUrlContents(src));
+        }
         if (importDesc[3] !== "") {
           $context[importDesc[3]] = {};
           importJavascriptInContext(js, $context[importDesc[3]]);
