@@ -34,7 +34,11 @@ global.registerGlobalQmlType = function (name, type) {
 };
 
 // Helper. Register a type to a module
-global.registerQmlType = function(options) {
+global.registerQmlType = function(options, constructor) {
+  if (constructor !== undefined) {
+    options.constructor = constructor;
+  }
+
   if (typeof options.baseClass === 'string') {
     // TODO: Does not support version specification (yet?)
     var baseModule, baseName;
