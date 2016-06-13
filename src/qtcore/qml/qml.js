@@ -288,8 +288,11 @@ function createProperty(type, obj, propName, options = {}) {
       }
     }
     setupGetterSetter(obj, propName, getter, setter);
-    if (obj.$isComponentRoot)
+    if (obj.$isComponentRoot) {
         setupGetterSetter(obj.$context, propName, getter, setter);
+        if (obj.$context.__proto__)
+          setupGetterSetter(obj.$context.__proto__, propName, getter, setter);
+    }
 }
 
 /**
