@@ -28,5 +28,4 @@ describe('QMLEngine.imports', function() {
     var qml = load("NoQmldir", this.div);
     expect(qml.value).toBe(67);
   });
-
 });

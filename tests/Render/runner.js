@@ -7,8 +7,9 @@
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
   function screenshot(div, options) {
-    if (!window.top.callPhantom)
+    if (!window.top.callPhantom) {
       return undefined;
+    }
 
     var rect0 = div.getBoundingClientRect();
     var rect1 = window.parent.document.getElementById('context')
@@ -39,21 +40,23 @@
   }
 
   function imagesEqual(a, b) {
-    if (a.width !== b.width || a.height !== b.height)
+    if (a.width !== b.width || a.height !== b.height) {
       return false;
+    }
 
     return image2data(a) === image2data(b);
   }
 
   function delayedFrames(callback, frames) {
-    if (frames === 0)
+    if (frames === 0) {
       return callback;
+    }
     return function() {
       window.requestAnimationFrame(delayedFrames(callback, frames - 1));
     };
   }
 
-  var regex = new RegExp('^/base/tests/Render/.*\.qml$');
+  var regex = new RegExp('^/base/tests/Render/.*\\.qml$');
   var tests = Object.keys(window.__karma__.files).filter(function(path) {
     return regex.test(path);
   }).map(function(path) {
@@ -65,8 +68,9 @@
       name: path.replace(/^.*\//, '').replace('.qml', '')
     };
   }).reduce(function(data, entry) {
-    if (!data.hasOwnProperty(entry.group))
+    if (!data.hasOwnProperty(entry.group)) {
       data[entry.group] = [];
+    }
 
     data[entry.group].push(entry);
     return data;
@@ -78,7 +82,9 @@
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
           var div = loadQmlFile(test.qml, this.div).dom;
-          var result, expected, loaded = 0;
+          var result;
+          var expected;
+          var loaded = 0;
 
           var process = function() {
             if (++loaded !== 2) return;
@@ -109,4 +115,4 @@
       });
     });
   });
-})();
+}());

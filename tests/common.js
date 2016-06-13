@@ -74,4 +74,4 @@ var customMatchers = {
     }
     itOrig.apply(this, arguments);
   };
-})();
+}());
