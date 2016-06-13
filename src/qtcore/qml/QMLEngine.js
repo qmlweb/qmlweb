@@ -300,7 +300,7 @@ QMLEngine = function (element, options) {
     }
 
     this.rootContext = function() {
-      return this.rootObject.$context;
+      return global.qmlEngine.doc.$context;
     }
 
     this.focusedElement = (function() {

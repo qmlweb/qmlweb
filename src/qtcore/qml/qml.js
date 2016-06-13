@@ -251,6 +251,10 @@ function construct(meta) {
         }
     }
 
+    if (!global.qmlEngine.doc) {
+        global.qmlEngine.doc = item;
+    }
+
     // id
     if (meta.object.id)
         setupGetterSetter(meta.context, meta.object.id, function() { return item; }, function() {});
