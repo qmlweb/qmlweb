@@ -322,6 +322,30 @@ function setupGetterSetter(obj, propName, getter, setter) {
   });
 }
 
+function connectSignal(item, signalName, value, objectScope, componentScope) {
+    if (!item[signalName]) {
+        console.warn("No signal called " + signalName + " found!");
+        return;
+    }
+    else if (typeof item[signalName].connect != 'function') {
+        console.warn(signalName + " is not a signal!");
+        return;
+    }
+    if (!value.eval) {
+        var params = "";
+        for (var j in item[signalName].parameters) {
+            params += j==0 ? "" : ", ";
+            params += item[signalName].parameters[j].name;
+        }
+        value.src = "(function(" + params + ") { _executionContext = __executionContext;" + value.src + "})";
+        value.isFunction = false;
+        value.compile();
+    }
+    var slot = value.eval(objectScope, componentScope);
+    item[signalName].connect(item, slot);
+    return slot;
+}
+
 /**
  * Apply properties from metaObject to item.
  * @param {Object} metaObject Source of properties
@@ -359,25 +383,11 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
         // slots
         if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
             var signalName =  i[2].toLowerCase() + i.slice(3);
-            if (!item[signalName]) {
-                console.warn("No signal called " + signalName + " found!");
-                continue;
-            }
-            else if (typeof item[signalName].connect != 'function') {
-                console.warn(signalName + " is not a signal!");
-                continue;
-            }
-            if (!value.eval) {
-                var params = "";
-                for (var j in item[signalName].parameters) {
-                    params += j==0 ? "" : ", ";
-                    params += item[signalName].parameters[j].name;
+            if (!connectSignal(item, signalName, value, objectScope, componentScope)) {
+                if (item.$setCustomSlot) {
+                    item.$setCustomSlot(signalName, value, objectScope, componentScope);
                 }
-                value.src = "(function(" + params + ") { _executionContext = __executionContext;" + value.src + "})";
-                value.isFunction = false;
-                value.compile();
             }
-            item[signalName].connect(item, value.eval(objectScope, componentScope));
             continue;
         }
 
