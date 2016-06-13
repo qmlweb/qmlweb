@@ -1,25 +1,96 @@
+parser: babel-eslint
+plugins: ["babel"]
 extends: eslint:recommended
 rules:
+  array-bracket-spacing: 2
+  array-callback-return: 2
+  arrow-body-style: 2
+  babel/arrow-parens: [2, "as-needed"]
+  brace-style: 0
   camelcase: 2
+  comma-dangle: [2, "only-multiline"]
+  comma-spacing: 2
   comma-style: [2, "last"]
+  consistent-return: 2
+  curly: [2, "multi-line"]
+  dot-notation: 2
   eol-last: 2
-  indent: [2, 2]
+  eqeqeq: 2
+  indent: [2, 2, { "SwitchCase": 1 }]
+  key-spacing: 2
   keyword-spacing: 2
   max-len: [2, 80]
+  new-cap: 2
+  newline-per-chained-call: 0
+  new-parens: 2
+  no-alert: 2
+  no-array-constructor: 2
+  no-caller: 2
+  no-case-declarations: 2
+  no-catch-shadow: 2
+  no-confusing-arrow: [2, {"allowParens": true}]
   no-console: 0
+  no-constant-condition: 2
+  no-dupe-class-members: 2
+  no-duplicate-imports: 2
   no-eval: 2
   no-extend-native: 2
+  no-extra-bind: 2
   no-extra-parens: 2
+  no-implied-eval: 2
+  no-iterator: 2
+  no-labels: 2
   no-lone-blocks: 2
   no-lonely-if: 2
   no-loop-func: 2
+  no-mixed-spaces-and-tabs: 2
   no-multiple-empty-lines: 2
   no-multi-spaces: 2
+  no-multi-str: 2
+  no-native-reassign: 2
+  no-nested-ternary: 0
+  no-new: 2
+  no-new-func: 2
+  no-new-object: 2
+  no-new-wrappers: 2
+  no-octal-escape: 2
+  no-param-reassign: 0
+  no-proto: 2
+  no-return-assign: 2
+  no-script-url: 2
+  no-sequences: 2
+  no-shadow: 0
+  no-shadow-restricted-names: 2
+  no-spaced-func: 2
   no-trailing-spaces: 2
   no-undef: 0
+  no-undef-init: 2
+  no-underscore-dangle: 0
+  no-unneeded-ternary: 2
+  no-unused-expressions: 2
   no-unused-vars: 0
+  no-use-before-define: 0
+  no-useless-constructor: 2
+  no-useless-escape: 2
+  no-var: 2
+  no-with: 2
   object-curly-spacing: [2, "always"]
+  object-shorthand: 2
+  one-var: [2, "never"]
+  padded-blocks: [2, "never"]
+  prefer-arrow-callback: 2
+  prefer-const: 2
+  prefer-rest-params: 2
+  prefer-template: 2
+  quote-props: [0, "as-needed"]
+  quotes: [0, "single"]
+  radix: 2
   semi: 2
+  semi-spacing: 2
   space-before-blocks: 2
   space-before-function-paren: [2, "never"]
+  space-infix-ops: 0
+  space-in-parens: 2
+  space-unary-ops: 2
+  wrap-iife: 2
   yoda: 2
