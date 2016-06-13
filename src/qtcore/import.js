@@ -26,37 +26,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 
-/*
- * Misc classes for importing files.
- *
- * Currently the file contains a lot of unused code for future
- * purposes. Most of it can be rewritten as there is now Javascript parser
- * available.
- *
- * Exports:
- *
- * - getUrlContents(url) -- get URL contents. Returns contents or false in
- *   error.
- *
- * - Some other stuff not currently used/needed.
- *
- *
- */
-(function() {
-
 /**
  * Get URL contents. EXPORTED.
  * @param url {String} Url to fetch.
  * @param skipExceptions {bool} when turned on, ignore exeptions and return false. This feature is used by readQmlDir.
  * @private
  * @return {mixed} String of contents or false in errors.
- *
- * Q1: can someone provide use-case when we need caching here?
- * A1:
- * Q2: should errors be cached? (now they aren't)
- * A2:
- 
- * Q3: split getUrlContents into: getUrlContents, getUrlContentsWithCaching, getUrlContentsWithoutErrors..
  */
 getUrlContents = function (url, skipExceptions) {
     if (typeof urlContentCache[url] == 'undefined') {
@@ -154,5 +129,3 @@ readQmlDir = function (url) {
     }
     return {internals: internals, externals: externals};
 }
-
-})();
