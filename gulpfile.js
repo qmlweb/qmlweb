@@ -38,75 +38,75 @@ const tests = [
 // set by default by the system.
 process.env.QT_QPA_PLATFORM = '';
 
-gulp.task('license', function() {
-  return gulp.src(licenseSources)
-             .pipe(order(licenseSources, { base: __dirname }))
-             .pipe(concat('LICENSE'))
-             .pipe(changed('./lib'))
-             .pipe(gulp.dest('./lib'));
-});
+gulp.task('license', () =>
+  gulp.src(licenseSources)
+    .pipe(order(licenseSources, { base: __dirname }))
+    .pipe(concat('LICENSE'))
+    .pipe(changed('./lib'))
+    .pipe(gulp.dest('./lib'))
+);
 
-gulp.task('parser', function() {
-  return gulp.src(parserSources)
-             .pipe(gulp.dest('./lib'));
-});
+gulp.task('parser', () =>
+  gulp.src(parserSources)
+    .pipe(gulp.dest('./lib'))
+);
 
-gulp.task('parser-covered', function() {
+gulp.task('parser-covered', () =>
   // This file is not covered here on a purpose.
   // Name *.covered.js is required to autoload from qt.covered.js.
-  return gulp.src('node_modules/qmlweb-parser/lib/qmlweb.parser.js')
-             .pipe(rename('qmlweb.parser.covered.js'))
-             .pipe(changed('./tmp'))
-             .pipe(gulp.dest('./tmp'));
-});
+  gulp.src('node_modules/qmlweb-parser/lib/qmlweb.parser.js')
+    .pipe(rename('qmlweb.parser.covered.js'))
+    .pipe(changed('./tmp'))
+    .pipe(gulp.dest('./tmp'))
+);
 
-gulp.task('qmlweb-covered', function() {
-  return gulp.src(qtcoreSources)
-             .pipe(order(qtcoreSources, { base: __dirname }))
-             .pipe(sourcemaps.init())
-             .pipe(istanbul({
-               // This is what karma uses
-               coverageVariable: '__coverage__'
-             }))
-             .pipe(babel())
-             .pipe(concat('qt.covered.js'))
-             .pipe(replace(/["']use strict["'];/g, ''))
-             .pipe(iife({
-               useStrict: false,
-               params: ['global'],
-               args: ['typeof global != \'undefined\' ? global : window']
-             }))
-             .pipe(changed('./tmp'))
-             .pipe(sourcemaps.write('./'))
-             .pipe(gulp.dest('./tmp'));
-});
+gulp.task('qmlweb-covered', () =>
+  gulp.src(qtcoreSources)
+    .pipe(order(qtcoreSources, { base: __dirname }))
+    .pipe(sourcemaps.init())
+    .pipe(istanbul({
+      // This is what karma uses
+      coverageVariable: '__coverage__'
+    }))
+    .pipe(babel())
+    .pipe(concat('qt.covered.js'))
+    .pipe(replace(/["']use strict["'];/g, ''))
+    .pipe(iife({
+      useStrict: false,
+      params: ['global'],
+      args: ['typeof global != \'undefined\' ? global : window']
+    }))
+    .pipe(changed('./tmp'))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./tmp'))
+);
 
-gulp.task('qmlweb-dev', function() {
-  return gulp.src(qtcoreSources)
-             .pipe(order(qtcoreSources, { base: __dirname }))
-             .pipe(sourcemaps.init())
-             .pipe(concat('qt.js'))
-             .pipe(babel())
-             .pipe(replace(/"use strict";/g, ''))
-             .pipe(iife({
-               useStrict: false,
-               params: ['global'],
-               args: ['typeof global != \'undefined\' ? global : window']
-             }))
-             .pipe(changed('./lib'))
-             .pipe(sourcemaps.write('./'))
-             .pipe(gulp.dest('./lib'));
-});
+gulp.task('qmlweb-dev', () =>
+  gulp.src(qtcoreSources)
+    .pipe(order(qtcoreSources, { base: __dirname }))
+    .pipe(sourcemaps.init())
+    .pipe(concat('qt.js'))
+    .pipe(babel())
+    .pipe(replace(/"use strict";/g, ''))
+    .pipe(iife({
+      useStrict: false,
+      params: ['global'],
+      args: ['typeof global != \'undefined\' ? global : window']
+    }))
+    .pipe(changed('./lib'))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./lib'))
+);
 
-gulp.task('qmlweb', ['qmlweb-dev'], function() {
-  return gulp.src('./lib/qt.js')
-             .pipe(rename('qt.min.js'))
-             .pipe(changed('./lib'))
-             .pipe(sourcemaps.init({ loadMaps: true }))
-             .pipe(uglify())
-             .pipe(sourcemaps.write('./'))
-             .pipe(gulp.dest('./lib'));
-});
+gulp.task('qmlweb', ['qmlweb-dev'], () =>
+  gulp.src('./lib/qt.js')
+    .pipe(rename('qt.min.js'))
+    .pipe(changed('./lib'))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./lib'))
+);
 
 gulp.task('build-covered', ['parser-covered', 'qmlweb-covered']);
 
@@ -114,43 +114,43 @@ gulp.task('build-dev', ['qmlweb-dev', 'parser', 'license']);
 
 gulp.task('build', ['qmlweb', 'parser', 'license']);
 
-gulp.task('watch', ['build'], function() {
+gulp.task('watch', ['build'], () => {
   gulp.watch(qtcoreSources, ['qmlweb']);
   gulp.watch(parserSources, ['parser']);
   gulp.watch(licenseSources, ['license']);
 });
 
-gulp.task('watch-dev', ['build-dev'], function() {
+gulp.task('watch-dev', ['build-dev'], () => {
   gulp.watch(qtcoreSources, ['qmlweb-dev']);
   gulp.watch(parserSources, ['parser']);
   gulp.watch(licenseSources, ['license']);
 });
 
-gulp.task('lint-tests', function() {
-  return gulp.src(tests)
-      .pipe(eslint())
-      .pipe(eslint.formatEach('compact', process.stderr))
-      .pipe(eslint.failAfterError());
-});
+gulp.task('lint-tests', () =>
+  gulp.src(tests)
+    .pipe(eslint())
+    .pipe(eslint.formatEach('compact', process.stderr))
+    .pipe(eslint.failAfterError())
+);
 
 gulp.task('lint', ['lint-tests']);
 
-gulp.task('test', ['lint', 'build-covered'], function(done) {
+gulp.task('test', ['lint', 'build-covered'], done => {
   new karma.Server({
     singleRun: true,
     configFile: __dirname + '/karma.conf.js'
-  }, function(code) {
+  }, code => {
     process.exit(code);
   }).start();
 });
 
-gulp.task('test-watch', ['watch-dev'], function(done) {
+gulp.task('test-watch', ['watch-dev'], done => {
   new karma.Server({
     configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
 
-gulp.task('test-debug', ['watch-dev'], function(done) {
+gulp.task('test-debug', ['watch-dev'], done => {
   new karma.Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: ['PhantomJSCustom', 'Chrome'],
