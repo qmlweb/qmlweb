@@ -106,7 +106,7 @@ readQmlDir = function (url) {
     // Q1: when this happen?
     var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";
 
-    if (!qrc.includesFile(qmldirFileUrl))
+    if (!qrc.hasOwnProperty(qmldirFileUrl))
       qrc[qmldirFileUrl] = getUrlContents(qmldirFileUrl, true); // loading url contents with skipping errors
     var qmldir = qrc[qmldirFileUrl],
         lines,

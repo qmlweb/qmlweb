@@ -71,7 +71,7 @@ QMLEngine = function (element, options) {
 
 
     this.ensureFileIsLoadedInQrc = function(file) {
-      if (!qrc.includesFile(file)) {
+      if (!qrc.hasOwnProperty(file)) {
         var src = getUrlContents(file);
 
         if (src) {
