@@ -154,7 +154,6 @@ gulp.task('test-debug', ['watch-dev'], done => {
   new karma.Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: ['PhantomJSCustom', 'Chrome'],
-    preprocessors: {},
     reporters: ['progress'],
     debug: true
   }, done).start();
