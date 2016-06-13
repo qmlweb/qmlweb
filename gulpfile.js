@@ -13,12 +13,11 @@ const karma = require('karma');
 const istanbul = require('gulp-istanbul');
 
 const qtcoreSources = [
-  'src/qtcore/qml/QMLBinding.js',
-  'src/qtcore/qml/qmlstructure.js',
-  'src/qtcore/qml/import.js',
+  'src/qtcore/QMLBinding.js',
+  'src/qtcore/qmlstructure.js',
+  'src/qtcore/import.js',
+  'src/qtcore/qml.js',
   'src/qtcore/*.js',
-  'src/qtcore/qml/qml.js',
-  'src/qtcore/qml/*.js',
   'src/modules/**/*.js'
 ];
 
