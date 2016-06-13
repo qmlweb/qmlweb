@@ -8,7 +8,8 @@
 [![Bower](https://img.shields.io/bower/v/qmlweb.svg)](http://bower.io/search/?q=qmlweb)
 [![GitHub tag](https://img.shields.io/github/tag/qmlweb/qmlweb.svg)](https://github.com/qmlweb/qmlweb/releases)
 
-CSS and HTML are boring and lame. And they suck at designing cool, interactive interfaces. Qt came up with a much better answer for its renowned framework: `QML`, a declarative language perfect for designing UIs (and much more). Here's a sample of how QML looks like:
+This project aims at bringing the power of QML to the web browser.
+Here's a sample of how QML looks like:
 
 ```QML
 import QtQuick 2.0
@@ -26,8 +27,6 @@ Rectangle {
    }
 }
 ```
-
-This project aims at bringing the power of QML to the web browser.
 
 ## How to use
 #### Add the library to your web page
