@@ -2,11 +2,9 @@ registerQmlType({
     module: 'QtQuick.Controls',
     name: 'ComboBox',
     versions: /.*/,
-    baseClass: 'QtQuick.Item',
-    constructor: QMLComboBox
-});
-
-function QMLComboBox(meta) {
+    baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
 
@@ -77,4 +75,5 @@ function QMLComboBox(meta) {
         self.accepted();
         self.activated(index);
     };
-}
+  }
+});

@@ -1,10 +1,10 @@
-function QMLContext() {
-    this.nameForObject = function(obj) {
+class QMLContext {
+  nameForObject(obj) {
         for (var name in this) {
             if (this[name] == obj)
                 return name;
         }
-    }
+  }
 }
 
 QMLComponent.getAttachedObject = function() { // static

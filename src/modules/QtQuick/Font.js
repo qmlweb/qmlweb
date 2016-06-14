@@ -2,8 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Font',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLFont(parent) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(parent) {
     QObject.call(this);
     createProperty("bool", this, "bold");
     createProperty("enum", this, "capitalization", {initialValue: 0});

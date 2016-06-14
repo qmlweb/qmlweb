@@ -2,11 +2,9 @@ registerQmlType({
     module: 'QtQuick.Window',
     name: 'Screen',
     versions: /.*/,
-    baseClass: 'QtQuick.Item',
-    constructor: QMLScreen
-});
-
-function QMLScreen(meta) {
+    baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
 
@@ -37,4 +35,5 @@ function QMLScreen(meta) {
         self.primaryOrientation =  Qt.PrimaryOrientation;
         self.width = window.innerWidth;
     }
-}
+  }
+});

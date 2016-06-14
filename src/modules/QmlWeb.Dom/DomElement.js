@@ -1,4 +1,10 @@
-function QMLDomElement(meta) {
+registerQmlType({
+  module: "QmlWeb.Dom",
+  name: "DomElement",
+  versions: /.*/,
+  baseClass: "QtQuick.Item"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var tagName = meta.object.tagName || 'div';
     this.dom = document.createElement(tagName);
@@ -6,12 +12,5 @@ function QMLDomElement(meta) {
     createProperty('string', this, 'tagName');
 
     // TODO: support properties, styles, perhaps changing the tagName
-}
-
-registerQmlType({
-    module: 'QmlWeb.Dom',
-    name: 'DomElement',
-    versions: /.*/,
-    baseClass: 'QtQuick.Item',
-    constructor: QMLDomElement
+  }
 });

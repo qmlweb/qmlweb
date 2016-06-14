@@ -17,8 +17,9 @@ registerQmlType({
   module: 'QtQuick',
   name: 'SystemPalette',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLSystemPalette(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("enum", this, "colorGroup");

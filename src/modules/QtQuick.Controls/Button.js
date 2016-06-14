@@ -1,4 +1,10 @@
-function QMLButton(meta) {
+registerQmlType({
+  module: "QtQuick.Controls",
+  name: "Button",
+  versions: /.*/,
+  baseClass: "QtQuick.Item"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     const button = this.impl = document.createElement('button');
@@ -26,12 +32,5 @@ function QMLButton(meta) {
     button.onclick = () => {
         this.clicked();
     }
-}
-
-registerQmlType({
-  module: 'QtQuick.Controls',
-  name: 'Button',
-  versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: QMLButton
+  }
 });

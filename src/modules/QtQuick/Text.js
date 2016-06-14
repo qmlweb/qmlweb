@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Text',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLText(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     const fc = this.impl = document.createElement('span');

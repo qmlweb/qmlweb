@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'AnimatedImage',
   versions: /.*/,
-  baseClass: 'Image',
-  constructor: function QMLAnimatedImage(meta) {
+  baseClass: 'Image'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
   }
 });

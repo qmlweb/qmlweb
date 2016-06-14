@@ -2,11 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name: 'Grid',
   versions: /.*/,
-  baseClass: 'Positioner',
-  constructor: QMLGrid
-});
-
-function QMLGrid(meta) {
+  baseClass: 'Positioner'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     this.Grid = {
@@ -23,9 +21,8 @@ function QMLGrid(meta) {
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
-}
-
-QMLGrid.prototype.layoutChildren = function() {
+  }
+  layoutChildren() {
     var visibleItems = [],
         r = 0, c = 0,
         colWidth = [],
@@ -121,4 +118,5 @@ QMLGrid.prototype.layoutChildren = function() {
 
     this.implicitWidth = gridWidth;
     this.implicitHeight = gridHeight;
-}
+  }
+});

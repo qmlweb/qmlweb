@@ -1,4 +1,10 @@
-function QMLTextEdit(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "TextEdit",
+  versions: /.*/,
+  baseClass: "Item"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     var self = this;
@@ -252,12 +258,5 @@ function QMLTextEdit(meta) {
     this.colorChanged.connect(this, function(newVal) {
         textarea.style.color = newVal;
     });
-}
-
-registerQmlType({
-  module:   'QtQuick',
-  name:     'TextEdit',
-  versions: /.*/,
-  baseClass: 'Item',
-  constructor: QMLTextEdit
+  }
 });

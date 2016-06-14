@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Translate',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLTranslate(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("real", this, "x");

@@ -1,4 +1,10 @@
-function QMLScrollView(meta) {
+registerQmlType({
+  module: "QtQuick.Controls",
+  name: "ScrollView",
+  versions: /.*/,
+  baseClass: "QtQuick.Item"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     var self = this;
@@ -63,9 +69,8 @@ function QMLScrollView(meta) {
     this.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.horizontalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.style = undefined;
-}
-
-QMLScrollView.prototype.scrollBarPolicyToCssOverflow = function(policy) {
+  }
+  scrollBarPolicyToCssOverflow(policy) {
     switch (policy) {
         case Qt.ScrollBarAsNeeded:
             return 'auto';
@@ -75,12 +80,5 @@ QMLScrollView.prototype.scrollBarPolicyToCssOverflow = function(policy) {
             return 'scroll';
     }
     return 'auto';
-};
-
-registerQmlType({
-  module:   'QtQuick.Controls',
-  name:     'ScrollView',
-  versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: QMLScrollView
+  }
 });

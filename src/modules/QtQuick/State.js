@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'State',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLState(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("string", this, "name");

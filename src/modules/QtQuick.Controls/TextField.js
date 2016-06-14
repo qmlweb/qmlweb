@@ -14,11 +14,9 @@ registerQmlType({
     module: 'QtQuick.Controls',
     name: 'TextField',
     versions: /.*/,
-    baseClass: 'QtQuick.Item',
-    constructor: QMLTextInput
-});
-
-function QMLTextInput(meta) {
+    baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     var self = this;
@@ -100,4 +98,5 @@ function QMLTextInput(meta) {
 
     input.oninput = updateValue;
     input.onpropertychanged = updateValue;
-}
+  }
+});

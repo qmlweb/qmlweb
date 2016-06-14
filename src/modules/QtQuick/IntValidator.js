@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'IntValidator',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLIntValidator(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("int", this, "bottom");
@@ -24,4 +25,3 @@ registerQmlType({
     }).bind(this);
   }
 });
-

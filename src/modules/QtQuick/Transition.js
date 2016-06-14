@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Transition',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLTransition(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("list", this, "animations");

@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'SequentialAnimation',
   versions: /.*/,
-  baseClass: 'Animation',
-  constructor: function QMLSequentialAnimation(meta) {
+  baseClass: 'Animation'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var curIndex,
         passedLoops,

@@ -2,8 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name:   'MouseArea',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLMouseArea(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
 

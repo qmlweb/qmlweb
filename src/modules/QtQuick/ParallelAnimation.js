@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'ParallelAnimation',
   versions: /.*/,
-  baseClass: 'Animation',
-  constructor: function QMLParallelAnimation(meta) {
+  baseClass: 'Animation'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var curIndex,
         passedLoops,

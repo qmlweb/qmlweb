@@ -2,8 +2,9 @@ registerQmlType({
   module: 'Qt.labs.settings',
   name:   'Settings',
   versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: function QMLSettings(meta) {
+  baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("string", this, "category");

@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'BorderImage',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLBorderImage(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
 

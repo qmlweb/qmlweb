@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'RegExpValidator',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLRegExpValidator(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("var", this, "regExp");

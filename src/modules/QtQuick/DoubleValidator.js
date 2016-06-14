@@ -6,8 +6,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'DoubleValidator',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: function QMLDoubleValidator(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("real", this, "bottom");
@@ -57,4 +58,3 @@ registerQmlType({
     }).bind(this);
   }
 });
-

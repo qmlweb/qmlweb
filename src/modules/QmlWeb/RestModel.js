@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QmlWeb',
   name:     'RestModel',
   versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: function QMLRestModel(meta) {
+  baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
     var attributes = this.getAttributes();

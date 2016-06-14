@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtMobility',
   name:     'GeoLocation',
   versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: function QMLGeoLocation(meta) {
+  baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var self = this;
 

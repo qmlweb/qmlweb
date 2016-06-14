@@ -2,8 +2,9 @@ registerQmlType({
     module: 'QtQuick',
     name: 'Loader',
     versions: /.*/,
-    baseClass: 'Item',
-    constructor: function(meta) {
+    baseClass: 'Item'
+  }, class {
+    constructor(meta) {
         callSuper(this, meta);
 
         createProperty('bool', this, 'active', {initialValue: true});

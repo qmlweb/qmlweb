@@ -1,4 +1,10 @@
-function QMLFlow(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "Flow",
+  versions: /.*/,
+  baseClass: "Positioner"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     this.Flow = {
@@ -13,9 +19,9 @@ function QMLFlow(meta) {
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
-}
+  }
 
-QMLFlow.prototype.layoutChildren = function() {
+  layoutChildren() {
     var curHPos = 0,
         curVPos = 0,
         rowSize = 0;
@@ -54,12 +60,5 @@ QMLFlow.prototype.layoutChildren = function() {
         this.implicitHeight = curVPos + rowSize;
     else
         this.implicitWidth = curHPos + rowSize;
-}
-
-registerQmlType({
-  module:      'QtQuick',
-  name:        'Flow',
-  versions:    /.*/,
-  baseClass: 'Positioner',
-  constructor: QMLFlow
+  }
 });

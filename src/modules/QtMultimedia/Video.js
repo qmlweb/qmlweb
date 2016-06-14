@@ -12,8 +12,9 @@ registerQmlType({
   module: 'QtMultimedia',
   name:   'Video',
   versions: /^5\./,
-  baseClass: 'QtQuick.Item',
-  constructor: function QMLVideo(meta) {
+  baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     var runningEventListener = 0;

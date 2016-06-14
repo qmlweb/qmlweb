@@ -1,4 +1,10 @@
-function QMLPropertyChanges(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "PropertyChanges",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("QtObject", this, "target");
@@ -13,12 +19,5 @@ function QMLPropertyChanges(meta) {
             value: value
         });
     }
-}
-
-registerQmlType({
-  module: 'QtQuick',
-  name: 'PropertyChanges',
-  versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: QMLPropertyChanges
+  }
 });

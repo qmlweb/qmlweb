@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick.Controls',
   name:     'CheckBox',
   versions: /.*/,
-  baseClass: 'QtQuick.Item',
-  constructor: function QMLCheckbox(meta) {
+  baseClass: 'QtQuick.Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     const label = this.impl = document.createElement('label');

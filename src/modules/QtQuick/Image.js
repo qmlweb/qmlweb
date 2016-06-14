@@ -1,4 +1,10 @@
-function QMLImage(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "Image",
+  versions: /.*/,
+  baseClass: "Item"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var img = new Image(),
         self = this;
@@ -121,12 +127,5 @@ function QMLImage(meta) {
 
     this.mirrorChanged.connect  (this, updateMirroring);
     this.fillModeChanged.connect(this, updateFillMode);
-}
-
-registerQmlType({
-  module: 'QtQuick',
-  name:   'Image',
-  versions: /.*/,
-  baseClass: 'Item',
-  constructor: QMLImage
+  }
 });

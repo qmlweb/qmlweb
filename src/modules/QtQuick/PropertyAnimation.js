@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'PropertyAnimation',
   versions: /.*/,
-  baseClass: 'Animation',
-  constructor: function QMLPropertyAnimation(meta) {
+  baseClass: 'Animation'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("int", this, "duration", {initialValue: 250});
@@ -225,4 +226,3 @@ registerQmlType({
     }
   }
 });
-

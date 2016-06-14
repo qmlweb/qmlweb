@@ -2,8 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Behavior',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLBehavior(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("Animation", this, "animation");

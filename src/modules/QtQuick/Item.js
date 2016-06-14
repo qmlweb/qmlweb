@@ -1,4 +1,41 @@
-function QMLItem(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "Item",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  properties: {
+    $opacity: { type: "real", initialValue: 1 },
+    parent: "Item",
+    state: "string",
+    states: "list",
+    transitions: "list",
+    data: "list",
+    children: "list",
+    resources: "list",
+    transform: "list",
+    x: "real",
+    y: "real",
+    z: "real",
+    width: "real",
+    height: "real",
+    implicitWidth: "real",
+    implicitHeight: "real",
+    left: "real",
+    right: "real",
+    top: "real",
+    bottom: "real",
+    horizontalCenter: "real",
+    verticalCenter: "real",
+    rotation: "real",
+    scale: { type: "real", initialValue: 1 },
+    opacity: { type: "real", initialValue: 1 },
+    visible: { type: "bool", initialValue: true },
+    clip: "bool",
+    focus: "bool"
+  },
+  defaultProperty: "data"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
     var child,
         o, i;
@@ -341,9 +378,8 @@ function QMLItem(meta) {
             this.dom.updateQmlGeometry();
         }
     }
-}
-
-QMLItem.prototype.$calculateOpacity = function() {
+  }
+  $calculateOpacity() {
   // TODO: reset all opacity on layer.enabled changed
   if (false) { // TODO: check layer.enabled
     this.css.opacity = this.opacity;
@@ -353,43 +389,5 @@ QMLItem.prototype.$calculateOpacity = function() {
   if (this.impl) {
     this.impl.style.opacity = this.$opacity;
   }
-};
-
-registerQmlType({
-  module: 'QtQuick',
-  name: 'Item',
-  versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  properties: {
-    $opacity: {type: 'real', initialValue: 1},
-    parent: 'Item',
-    state: 'string',
-    states: 'list',
-    transitions: 'list',
-    data: 'list',
-    children: 'list',
-    resources: 'list',
-    transform: 'list',
-    x: 'real',
-    y: 'real',
-    z: 'real',
-    width: 'real',
-    height: 'real',
-    implicitWidth: 'real',
-    implicitHeight: 'real',
-    left: 'real',
-    right: 'real',
-    top: 'real',
-    bottom: 'real',
-    horizontalCenter: 'real',
-    verticalCenter: 'real',
-    rotation: 'real',
-    scale: {type: 'real', initialValue: 1},
-    opacity: {type: 'real', initialValue: 1},
-    visible: {type: 'bool', initialValue: true},
-    clip: 'bool',
-    focus: 'bool'
-  },
-  defaultProperty: 'data',
-  constructor: QMLItem
+  }
 });

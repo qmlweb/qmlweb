@@ -2,8 +2,9 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Scale',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLScale(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("real", this, "xScale");

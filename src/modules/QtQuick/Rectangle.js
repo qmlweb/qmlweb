@@ -2,11 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Rectangle',
   versions: /.*/,
-  baseClass: 'Item',
-  constructor: QMLRectangle
-});
-
-function QMLRectangle(meta) {
+  baseClass: 'Item'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("color", this, "color", {initialValue: 'white'});
@@ -53,9 +51,8 @@ function QMLRectangle(meta) {
     this.heightChanged.connect(this, function(newVal){
        this.$updateBorder(this.border.width);
     });
-}
-
-QMLRectangle.prototype.$updateBorder = function(newBorderWidth) {
+  }
+  $updateBorder(newBorderWidth) {
     const bg = this.dom.firstChild;
 
     // ignore negative and 0px border width
@@ -109,4 +106,5 @@ QMLRectangle.prototype.$updateBorder = function(newBorderWidth) {
         bg.style.borderLeftWidth = leftRight;
         bg.style.borderRightWidth = leftRight;
     }
-};
+  }
+});

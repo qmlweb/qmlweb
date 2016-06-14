@@ -2,19 +2,16 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Row',
   versions: /.*/,
-  baseClass: 'Positioner',
-  constructor: QMLRow
-});
-
-function QMLRow(meta) {
+  baseClass: 'Positioner'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("enum", this, "layoutDirection", {initialValue: 0});
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
-}
-
-QMLRow.prototype.layoutChildren = function() {
+  }
+  layoutChildren() {
     var curPos = 0,
         maxHeight = 0,
         // When layoutDirection is RightToLeft we need oposite order
@@ -32,4 +29,5 @@ QMLRow.prototype.layoutChildren = function() {
     }
     this.implicitHeight = maxHeight;
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
-}
+  }
+});

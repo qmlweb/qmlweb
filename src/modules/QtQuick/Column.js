@@ -1,8 +1,13 @@
-function QMLColumn(meta) {
+registerQmlType({
+  module: "QtQuick",
+  name: "Column",
+  versions: /.*/,
+  baseClass: "Positioner"
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
-}
-
-QMLColumn.prototype.layoutChildren = function() {
+  }
+  layoutChildren() {
     var curPos = 0,
         maxWidth = 0;
     for (var i = 0; i < this.children.length; i++) {
@@ -16,12 +21,5 @@ QMLColumn.prototype.layoutChildren = function() {
     }
     this.implicitWidth = maxWidth;
     this.implicitHeight = curPos - this.spacing; // We want no spacing at the bottom side
-}
-
-registerQmlType({
-  module: 'QtQuick',
-  name:   'Column',
-  versions: /.*/,
-  baseClass: 'Positioner',
-  constructor: QMLColumn
+  }
 });

@@ -2,8 +2,9 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Rotation',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
-  constructor: function QMLRotation(meta) {
+  baseClass: 'QtQml.QtObject'
+}, class {
+  constructor(meta) {
     callSuper(this, meta);
 
     createProperty("real", this, "angle");
