@@ -1,6 +1,9 @@
 // Base object for all qml elements
-function QMLBaseObject(meta) {
-    QObject.call(this, meta.parent);
+
+class QMLBaseObject extends QObject {
+  constructor(meta) {
+    super(meta.parent);
+
     var i,
         prop;
 
@@ -46,6 +49,7 @@ function QMLBaseObject(meta) {
     this.Keys.yesPressed = Signal();
 
     this.getAttributes = function() { return (attributes); }
+  }
 }
 
 registerQmlType({
