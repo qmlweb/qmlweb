@@ -1,4 +1,5 @@
-function QMLProperty(type, obj, name) {
+class QMLProperty {
+  constructor(type, obj, name) {
     this.obj = obj;
     this.name = name;
     this.changed = Signal([], {obj:obj});
@@ -13,6 +14,7 @@ function QMLProperty(type, obj, name) {
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this object.
     this.$tidyupList = [];
+  }
 }
 
 QMLProperty.ReasonUser = 0;
@@ -179,5 +181,3 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
         }
     }
 }
-
-
