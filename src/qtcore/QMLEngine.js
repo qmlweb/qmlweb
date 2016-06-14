@@ -216,8 +216,16 @@ QMLEngine = function (element, options) {
     */
 
     this.loadImports = function(importsArray, currentFileDir) {
-        if (!this.qmldirsContents) this.qmldirsContents = { "QtQuick":{}, "QtQuick.Controls":{} }; // cache
-        // putting initial keys in qmldirsContents - is a hack. We should find a way to explain to qmlweb, is this built-in module or qmldir-style module.
+        if (!this.qmldirsContents) {
+            this.qmldirsContents = {}; // cache
+
+            // putting initial keys in qmldirsContents - is a hack. We should find a way to explain to qmlweb, is this built-in module or qmldir-style module.
+            for (const module in modules) {
+                if (module !== 'Main') {
+                    this.qmldirsContents[module] = {};
+                }
+            }
+        }
 
         if (!this.qmldirs) this.qmldirs = {};                 // resulting components lookup table
 
