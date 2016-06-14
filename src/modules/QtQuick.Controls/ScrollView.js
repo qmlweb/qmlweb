@@ -66,7 +66,7 @@ function QMLScrollView(meta) {
 }
 
 QMLScrollView.prototype.scrollBarPolicyToCssOverflow = function(policy) {
-    switch (newPolicy) {
+    switch (policy) {
         case Qt.ScrollBarAsNeeded:
             return 'auto';
         case Qt.ScrollBarAlwaysOff:
