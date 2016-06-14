@@ -1,5 +1,5 @@
-// TODO
-function QMLColor(val) {
+// TODO complete implementation (with attributes `r`,`g` and `b`).
+function QColor(val) {
   if (typeof val === "number") {
     // we assume it is int value and must be converted to css hex with padding
     // http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript

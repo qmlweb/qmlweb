@@ -14,12 +14,13 @@ const istanbul = require('gulp-istanbul');
 const path = require('path');
 
 const qtcoreSources = [
-  'src/qtcore/QmlWeb.js',
-  'src/qtcore/QMLBinding.js',
-  'src/qtcore/qmlstructure.js',
-  'src/qtcore/import.js',
-  'src/qtcore/qml.js',
-  'src/qtcore/*.js',
+  'src/engine/QmlWeb.js',
+  'src/engine/QMLBinding.js',
+  'src/engine/qmlstructure.js',
+  'src/engine/import.js',
+  'src/engine/qml.js',
+  'src/engine/*.js',
+  'src/qtbase/*.js',
   'src/modules/**/*.js'
 ];
 

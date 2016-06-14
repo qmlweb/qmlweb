@@ -43,7 +43,7 @@ registerQmlType({
     createProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
-        fc.style.color = QMLColor(newVal);
+        fc.style.color = QColor(newVal);
     });
     this.textChanged.connect(this, function(newVal) {
         fc.innerHTML = newVal;
@@ -100,7 +100,7 @@ registerQmlType({
         };
     });
     this.styleColorChanged.connect(this, function(newVal) {
-        newVal = QMLColor(newVal);
+        newVal = QColor(newVal);
         switch (this.style) {
             case 0:
                 fc.style.textShadow = "none";

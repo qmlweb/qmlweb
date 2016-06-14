@@ -16,7 +16,7 @@ var constructors = {
   string: String,
   'bool': Boolean,
   list: QMLList,
-  color: QMLColor,
+  color: QColor,
   'enum': Number,
   url: String,
   variant: QMLVariant,
@@ -478,36 +478,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
 }
 
-// ItemModel. EXPORTED.
-const JSItemModel = function() {
-    this.roleNames = [];
-
-    this.setRoleNames = function(names) {
-        this.roleNames = names;
-    }
-
-    this.dataChanged = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
-    ]);
-    this.rowsInserted = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
-    ]);
-    this.rowsMoved = Signal([
-        {type:"int", name:"sourceStartIndex"},
-        {type:"int", name:"sourceEndIndex"},
-        {type:"int", name:"destinationIndex"}
-    ]);
-    this.rowsRemoved = Signal([
-        {type:"int", name:"startIndex"},
-        {type:"int", name:"endIndex"}
-    ]);
-    this.modelReset = Signal();
-}
-
 QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
-QmlWeb.JSItemModel = JSItemModel;
