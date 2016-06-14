@@ -55,7 +55,7 @@ rules:
   no-new-wrappers: 2
   no-octal-escape: 2
   no-param-reassign: 0
-  no-proto: 2
+  no-proto: 0
   no-return-assign: 2
   no-script-url: 2
   no-sequences: 2
