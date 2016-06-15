@@ -56,6 +56,7 @@ global.Qt = {
     if (tree.$children.length !== 1)
         console.error("A QML component must only contain one root element!");
 
+    const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
     var component = new QMLComponent({ object: tree, context: _executionContext });
     component.$basePath = engine.extractBasePath( file );
     component.$imports = tree.$imports;
@@ -72,6 +73,7 @@ global.Qt = {
 
         // Create and initialize objects
 
+        const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
         var component = new QMLComponent({ object: tree, parent: parent, context: _executionContext });
 
         engine.loadImports( tree.$imports );

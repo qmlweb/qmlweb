@@ -153,6 +153,7 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
     if (constructors[this.type] == QMLList) {
         this.val = QMLList({ object: newVal, parent: this.obj, context: componentScope });
     } else if (newVal instanceof QMLMetaElement) {
+        const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
         if (constructors[newVal.$class] == QMLComponent || constructors[this.type] == QMLComponent)
             this.val = new QMLComponent({ object: newVal, parent: this.obj, context: componentScope });
         else

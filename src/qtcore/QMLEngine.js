@@ -112,6 +112,7 @@ QMLEngine = function (element, options) {
         }
 
         // Create and initialize objects
+        const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
         var component = new QMLComponent({ object: tree, parent: parentComponent });
 
         this.loadImports( tree.$imports );
