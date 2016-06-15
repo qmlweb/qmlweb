@@ -41,7 +41,7 @@ function QMLTextEdit(meta) {
     createProperty('enum', this, 'verticalAlignment');
     createProperty('enum', this, 'wrapMode');
 
-    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
 
     this.activeFocusOnPress = true;

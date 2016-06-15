@@ -21,7 +21,7 @@ registerQmlType({
 
     var self = this;
 
-    var QMLFont = new getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
 
     createProperty("string", this, "text");

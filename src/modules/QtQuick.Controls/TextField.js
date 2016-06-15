@@ -23,7 +23,8 @@ function QMLTextInput(meta) {
 
     var self = this;
 
-    this.font = new getConstructor('QtQuick', '2.0', 'Font')(this);
+    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
+    this.font = new QMLFont(this);
 
     const input = this.impl = document.createElement('input');
     input.type = 'text';
