@@ -11,6 +11,7 @@ const eslint = require('gulp-eslint');
 const replace = require('gulp-replace');
 const karma = require('karma');
 const istanbul = require('gulp-istanbul');
+const path = require('path');
 
 const qtcoreSources = [
   'src/qtcore/QMLBinding.js',
@@ -138,7 +139,7 @@ gulp.task('lint', ['lint-tests']);
 gulp.task('test', ['lint', 'build-covered'], done => {
   new karma.Server({
     singleRun: true,
-    configFile: __dirname + '/karma.conf.js'
+    configFile: path.join(__dirname, 'karma.conf.js')
   }, code => {
     process.exit(code);
   }).start();
@@ -146,13 +147,13 @@ gulp.task('test', ['lint', 'build-covered'], done => {
 
 gulp.task('test-watch', ['watch-dev'], done => {
   new karma.Server({
-    configFile: __dirname + '/karma.conf.js'
+    configFile: path.join(__dirname, 'karma.conf.js')
   }, done).start();
 });
 
 gulp.task('test-debug', ['watch-dev'], done => {
   new karma.Server({
-    configFile: __dirname + '/karma.conf.js',
+    configFile: path.join(__dirname, 'karma.conf.js'),
     browsers: ['PhantomJSCustom', 'Chrome'],
     reporters: ['progress'],
     debug: true
