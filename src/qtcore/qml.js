@@ -89,7 +89,8 @@ global.registerQmlType = function(options, constructor) {
 
   if (options.global) {
     registerGlobalQmlType(options.name, options.constructor);
-  } else {
+  }
+
     var moduleDescriptor = {
       name:        options.name,
       versions:    options.versions,
@@ -99,7 +100,7 @@ global.registerQmlType = function(options, constructor) {
     if (typeof modules[options.module] == 'undefined')
       modules[options.module] = [];
     modules[options.module].push(moduleDescriptor);
-  }
+
 
     if (typeof options.baseClass !== 'undefined') {
       inherit(options.constructor, options.baseClass);
