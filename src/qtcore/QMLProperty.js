@@ -107,6 +107,7 @@ const typeInitialValues = {
   string: '',
   bool: false,
   list: [],
+  enum: 0,
   url: ''
 };
 
