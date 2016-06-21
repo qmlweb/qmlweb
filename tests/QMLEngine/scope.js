@@ -65,4 +65,11 @@ describe("QMLEngine.scope", function() {
       expect(qml.boo).toBe("42");
     }
   );
+
+  it("item id of a component should be in scope",
+    function() {
+      var qml = load("ComponentId", this.div);
+      expect(qml.bar).toBe(42);
+    }
+  );
 });
