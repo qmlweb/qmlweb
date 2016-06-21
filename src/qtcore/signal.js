@@ -18,7 +18,7 @@ global.Signal = function Signal(params, options) {
             try {
                 connectedSlots[i].slot.apply(connectedSlots[i].thisObj, arguments);
             } catch(err) {
-                console.log(err.message);
+                console.log("Signal slot error:", err, Function.prototype.toString.call(connectedSlots[i].slot));
             }
         popEvalStack();
     };
