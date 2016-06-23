@@ -2,7 +2,13 @@ registerQmlType({
   module:   'QtQuick',
   name:     'BorderImage',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    source: "url",
+    horizontalTileMode: { type: "enum", initialValue: "stretch" }, // BorderImage.Stretch
+    verticalTileMode: { type: "enum", initialValue: "stretch" }, // BorderImage.Stretch
+    status: { type: "enum", initialValue: 1 } // BorderImage.Null
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -20,15 +26,11 @@ registerQmlType({
         Error: 4
     }
 
-    createProperty("url", this, "source");
-    createProperty("enum", this, "status", {initialValue: this.BorderImage.Null});
     this.border = new QObject(this);
     createProperty("int", this.border, "left");
     createProperty("int", this.border, "right");
     createProperty("int", this.border, "top");
     createProperty("int", this.border, "bottom");
-    createProperty("enum", this, "horizontalTileMode", {initialValue: this.BorderImage.Stretch});
-    createProperty("enum", this, "verticalTileMode", {initialValue: this.BorderImage.Stretch});
 
     this.sourceChanged.connect(this, function() {
         this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";

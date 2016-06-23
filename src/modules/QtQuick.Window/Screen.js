@@ -2,24 +2,25 @@ registerQmlType({
     module: 'QtQuick.Window',
     name: 'Screen',
     versions: /.*/,
-    baseClass: 'QtQuick.Item'
+    baseClass: "QtQuick.Item",
+    properties: {
+      name: "string",
+      orientation: "enum",
+      orientationUpdateMask: "enum",
+      primaryOrientation: "enum",
+      pixelDensity: "real",
+      devicePixelRatio: "real",
+      desktopAvailableHeight: "int",
+      desktopAvailableWidth: "int",
+      height: "int",
+      width: "int"
+    }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var self = this;
 
     // TODO: rewrite as an attached object and forbid constructing
-
-    createProperty("int", this, "desktopAvailableHeight");
-    createProperty("int", this, "desktopAvailableWidth");
-    createProperty("real", this, "devicePixelRatio");
-    createProperty("int", this, "height");
-    createProperty("string", this, "name");
-    createProperty("enum", this, "orientation");
-    createProperty("enum", this, "orientationUpdateMask");
-    createProperty("real", this, "pixelDensity");
-    createProperty("enum", this, "primaryOrientation");
-    createProperty("int", this, "width");
 
     this.Component.completed.connect(this, updateSC);
 

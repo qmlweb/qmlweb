@@ -2,7 +2,11 @@ registerQmlType({
   module: "QtQuick.Controls",
   name: "Button",
   versions: /.*/,
-  baseClass: "QtQuick.Item"
+  baseClass: "QtQuick.Item",
+  properties: {
+    text: "string",
+    enabled: { type: "bool", initialValue: true }
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -11,8 +15,6 @@ registerQmlType({
     button.style.pointerEvents = 'auto';
     this.dom.appendChild(button);
 
-    createProperty("string", this, "text");
-    createProperty("bool", this, "enabled", {initialValue: true});
     this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {

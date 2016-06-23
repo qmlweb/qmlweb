@@ -14,7 +14,14 @@ registerQmlType({
     module: 'QtQuick.Controls',
     name: 'TextField',
     versions: /.*/,
-    baseClass: 'QtQuick.Item'
+    baseClass: "QtQuick.Item",
+  properties: {
+    text: "string",
+    maximumLength: "int",
+    readOnly: { type: "bool", initialValue: -1 },
+    validator: "var",
+    echoMode: "enum"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -34,14 +41,7 @@ registerQmlType({
 
     this.setupFocusOnDom(input);
 
-    createProperty("string", this, "text");
-    createProperty("int", this, "maximumLength");
-    createProperty("bool", this, "readOnly");
-    createProperty("var", this, "validator");
-    createProperty("enum", this, "echoMode");
     this.accepted = Signal();
-    this.readOnly = false;
-    this.maximumLength = -1;
     input.disabled = false;
 
     this.Component.completed.connect(this, function () {

@@ -2,7 +2,18 @@ registerQmlType({
   module: 'QtQuick',
   name:   'MouseArea',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    acceptedButtons: { type: "variant", initialValue: 1 }, // Qt.LeftButton
+    enabled: { type: "bool", initialValue: true },
+    hoverEnabled: "bool",
+    mouseX: "real",
+    mouseY: "real",
+    pressed: "bool",
+    containsMouse: "bool",
+    pressedButtons: { type: "variant", initialValue: 0 },
+    cursorShape: "enum" // Qt.ArrowCursor
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -15,16 +26,6 @@ registerQmlType({
     // as that doesn't affect the mouse handling.
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
-
-    createProperty("variant", this, "acceptedButtons", {initialValue: Qt.LeftButton});
-    createProperty("bool", this, "enabled", {initialValue: true});
-    createProperty("bool", this, "hoverEnabled");
-    createProperty("real", this, "mouseX");
-    createProperty("real", this, "mouseY");
-    createProperty("bool", this, "pressed");
-    createProperty("bool", this, "containsMouse");
-    createProperty("variant", this, "pressedButtons", {initialValue: 0});
-    createProperty("enum", this, "cursorShape", {initialValue: Qt.ArrowCursor});
 
     this.clicked = Signal([{type: "variant", name: "mouse"}]);
     this.entered = Signal();

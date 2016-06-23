@@ -2,7 +2,11 @@ registerQmlType({
   module:   'QtQuick',
   name:     'ParallelAnimation',
   versions: /.*/,
-  baseClass: 'Animation'
+  baseClass: "Animation",
+  properties: {
+    animations: "list"
+  },
+  defaultProperty: "animations"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -11,8 +15,6 @@ registerQmlType({
         i;
 
     this.Animation = { Infinite: Math.Infinite }
-    createProperty("list", this, "animations");
-    this.$defaultProperty = "animations";
     this.$runningAnimations = 0;
 
     this.animationsChanged.connect(this, function() {

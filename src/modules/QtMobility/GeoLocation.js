@@ -2,21 +2,22 @@ registerQmlType({
   module:   'QtMobility',
   name:     'GeoLocation',
   versions: /.*/,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    accuracy: "double",
+    altitude: "double",
+    altitudeAccuracy: "double",
+    heading: "double",
+    latitude: "double",
+    longitude: "double",
+    speed: "double",
+    timestamp: "date",
+    label: "string"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var self = this;
-
-    createProperty("double", this, "accuracy");
-    createProperty("double", this, "altitude");
-    createProperty("double", this, "altitudeAccuracy");
-    createProperty("double", this, "heading");
-    createProperty("string", this, "label");
-    createProperty("double", this, "latitude");
-    createProperty("double", this, "longitude");
-    createProperty("double", this, "speed");
-    createProperty("date",   this, "timestamp");
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition

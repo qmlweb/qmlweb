@@ -2,7 +2,12 @@ registerQmlType({
   module:   'QtQuick',
   name:     'FontLoader',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    name: "string",
+    source: "url",
+    status: "enum" // FontLoader.Null
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -15,12 +20,6 @@ registerQmlType({
         Loading: 2,
         Error: 3
     }
-
-    createProperty("string", this, "name");
-    createProperty("url", this, "source");
-    createProperty("enum", this, "status");
-
-    this.status = this.FontLoader.Null;
 
     var self = this,
         domStyle = document.createElement('style'),

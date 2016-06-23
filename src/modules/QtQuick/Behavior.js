@@ -2,14 +2,15 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Behavior',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    animation: "Animation",
+    enabled: { type: "bool", initialValue: true }
+  },
+  defaultProperty: "animation"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("Animation", this, "animation");
-    this.$defaultProperty = "animation";
-    createProperty("bool", this, "enabled", {initialValue: true});
 
     this.animationChanged.connect(this, function(newVal) {
         newVal.target = this.$parent;

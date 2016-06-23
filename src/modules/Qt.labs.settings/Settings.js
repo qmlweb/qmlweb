@@ -2,12 +2,13 @@ registerQmlType({
   module: 'Qt.labs.settings',
   name:   'Settings',
   versions: /.*/,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    category: "string"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("string", this, "category");
 
     if (typeof window.localStorage == 'undefined')
       return ;

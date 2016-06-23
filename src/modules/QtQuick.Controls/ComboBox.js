@@ -2,7 +2,15 @@ registerQmlType({
     module: 'QtQuick.Controls',
     name: 'ComboBox',
     versions: /.*/,
-    baseClass: 'QtQuick.Item'
+    baseClass: "QtQuick.Item",
+  properties: {
+    count: "int",
+    currentIndex: "int",
+    currentText: "string",
+    menu: { type: "array", initialValue: [] },
+    model: { type: "array", initialValue: [] },
+    pressed: "bool"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -10,20 +18,6 @@ registerQmlType({
 
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
-
-    createProperty("int", this, "count");
-    createProperty("int", this, "currentIndex");
-    createProperty("string", this, "currentText");
-    createProperty("array", this, "menu");
-    createProperty("array", this, "model");
-    createProperty("bool", this, "pressed");
-
-    this.count = 0;
-    this.currentIndex = 0;
-    this.currentText = "";
-    this.menu = [];
-    this.model = [];
-    this.pressed = false;
 
     var updateCB = function(){
         var head = "<select>";

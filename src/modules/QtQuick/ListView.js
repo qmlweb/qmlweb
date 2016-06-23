@@ -2,14 +2,15 @@ registerQmlType({
   module:   'QtQuick',
   name:     'ListView',
   versions: /.*/,
-  baseClass: 'Repeater'
+  baseClass: "Repeater",
+  properties: {
+    orientation: "enum",
+    spacing: "real"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var self = this;
-
-    createProperty("enum", this, "orientation");
-    createProperty("real", this, "spacing");
 
     this.container = function() { return self; }
     this.modelChanged.connect(styleChanged);

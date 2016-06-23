@@ -17,19 +17,32 @@ registerQmlType({
   module: 'QtQuick',
   name: 'SystemPalette',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    alternateBase: { type: "color", readOnly: true },
+    base: { type: "color", readOnly: true },
+    button: { type: "color", readOnly: true },
+    buttonText: { type: "color", readOnly: true },
+    dark: { type: "color", readOnly: true },
+    highlight: { type: "color", readOnly: true },
+    highlightedText: { type: "color", readOnly: true },
+    light: { type: "color", readOnly: true },
+    mid: { type: "color", readOnly: true },
+    midlight: { type: "color", readOnly: true },
+    shadow: { type: "color", readOnly: true },
+    text: { type: "color", readOnly: true },
+    window: { type: "color", readOnly: true },
+    windowText: { type: "color", readOnly: true },
+
+    colorGroup: "enum"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
-    createProperty("enum", this, "colorGroup");
 
     var attrs    = [ 'alternateBase', 'base', 'button', 'buttonText', 'dark', 'highlight', 'highlightedText', 'light', 'mid', 'midlight', 'shadow', 'text', 'window', 'windowText' ];
     var platform = 'OSX';
-
-    for (var i = 0 ; i < attrs.length ; ++i)
-      createProperty("color", this, attrs[i], { readOnly: true });
-    createProperty("enum", this, "colorGroup");
 
     this.colorGroupChanged.connect(this, (function (newVal) {
       this.$canEditReadOnlyProperties = true;

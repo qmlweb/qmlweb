@@ -2,18 +2,19 @@ registerQmlType({
   module:   'QtQuick',
   name:     'PropertyAnimation',
   versions: /.*/,
-  baseClass: 'Animation'
+  baseClass: "Animation",
+  properties: {
+    duration: { type: "int", initialValue: 250 },
+    from: "real",
+    to: "real",
+    properties: "string",
+    property: "string",
+    target: "QtObject",
+    targets: "list"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("int", this, "duration", {initialValue: 250});
-    createProperty("real", this, "from");
-    createProperty("string", this, "properties");
-    createProperty("string", this, "property");
-    createProperty("QtObject", this, "target");
-    createProperty("list", this, "targets");
-    createProperty("real", this, "to");
 
     this.easing = new QObject(this);
     createProperty("enum", this.easing, "type", {initialValue: Easing.Linear});

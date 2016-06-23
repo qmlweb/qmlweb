@@ -2,7 +2,18 @@ registerQmlType({
   module: "QtQuick.Controls",
   name: "ScrollView",
   versions: /.*/,
-  baseClass: "QtQuick.Item"
+  baseClass: "QtQuick.Item",
+  properties: {
+    contentItem: "Item",
+    flickableItem: "Item", // TODO  0) implement it  1) make it read-only
+    viewport: "Item", // TODO
+    frameVisible: "bool",
+    highlightOnFocus: "bool", // TODO test
+    verticalScrollBarPolicy: "enum",
+    horizontalScrollBarPolicy: "enum",
+    style: "Component" // TODO
+  },
+  defaultProperty: "contentItem"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -11,16 +22,6 @@ registerQmlType({
 
     this.css.pointerEvents = "auto";
     this.setupFocusOnDom(this.dom);
-
-    createProperty("Item", this, "contentItem");
-    this.$defaultProperty = "contentItem";
-    createProperty("Item", this, "flickableItem"); //TODO  0) implement it  1) make it read-only
-    createProperty("Item", this, "viewport"); //TODO
-    createProperty("bool", this, "frameVisible");
-    createProperty("bool", this, "highlightOnFocus"); //TODO test
-    createProperty("enum", this, "verticalScrollBarPolicy");
-    createProperty("enum", this, "horizontalScrollBarPolicy");
-    createProperty("Component", this, "style"); //TODO
 
     this.contentItemChanged.connect(this, function(newItem){
         if (typeof newItem !== undefined) {

@@ -2,12 +2,14 @@ registerQmlType({
   module: "QtQuick",
   name: "Positioner",
   versions: /.*/,
-  baseClass: "Item"
+  baseClass: "Item",
+  properties: {
+    spacing: "int"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
-    createProperty("int", this, "spacing");
     this.spacingChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(this, this.layoutChildren);
     this.childrenChanged.connect(() => {

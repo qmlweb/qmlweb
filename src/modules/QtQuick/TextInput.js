@@ -6,7 +6,14 @@ registerQmlType({
   module:   'QtQuick',
   name:     'TextInput',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    text: "string",
+    maximumLength: { type: "int", initialValue: -1 },
+    readOnly: "bool",
+    validator: "var",
+    echoMode: "enum" // TextInput.Normal
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -30,11 +37,6 @@ registerQmlType({
 
     this.setupFocusOnDom(input);
 
-    createProperty("string", this, "text");
-    createProperty("int", this, "maximumLength", {initialValue: -1});
-    createProperty("bool",   this, "readOnly");
-    createProperty("var",    this, "validator");
-    createProperty("enum",   this, "echoMode");
     this.accepted = Signal();
     input.disabled = false;
 

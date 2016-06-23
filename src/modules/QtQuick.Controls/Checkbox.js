@@ -2,7 +2,12 @@ registerQmlType({
   module:   'QtQuick.Controls',
   name:     'CheckBox',
   versions: /.*/,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    text: "string",
+    checked: "bool",
+    color: "color"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -24,10 +29,6 @@ registerQmlType({
 
     const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
-
-    createProperty("string", this, "text");
-    createProperty("bool", this, "checked");
-    createProperty("color", this, "color");
 
     this.Component.completed.connect(this, function() {
         this.implicitHeight = label.offsetHeight;

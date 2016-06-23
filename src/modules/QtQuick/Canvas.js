@@ -5,30 +5,22 @@ registerQmlType({
     module: 'QtQuick',
     name: 'Canvas',
     versions: /.*/,
-    baseClass: 'Item'
+    baseClass: "Item",
+  properties: {
+    available: { type: "bool", initialValue: true },
+    canvasSize: { type: "var", initialValue: [0, 0] },
+    canvasWindow: { type: "var", initialValue: [0, 0, 0, 0] },
+    context: { type: "var", initialValue: {} },
+    contextType: { type: "string", initialValue: "contextType" },
+    renderStrategy: "enum",
+    renderTarget: "enum",
+    tileSize: { type: "var", initialValue: [0, 0] }
+  }
 }, class {
   constructor(meta) {
         callSuper(this, meta);
 
         var self = this;
-
-        createProperty('bool', this, 'available');
-        createProperty('var', this, 'canvasSize');
-        createProperty('var', this, 'canvasWindow');
-        createProperty('var', this, 'context');
-        createProperty('string', this, 'contextType');
-        createProperty('enum', this, 'renderStrategy');
-        createProperty('enum', this, 'renderTarget');
-        createProperty('var', this, 'tileSize');
-
-        this.available = true;
-        this.canvasSize = [0, 0];
-        this.canvasWindow = [0, 0, 0, 0];
-        this.context = {};
-        this.contextType = "contextType";
-        this.renderStrategy = 0;
-        this.renderTarget = 0;
-        this.tileSize = [0, 0];
 
         this.imageLoaded = Signal();
         this.paint = Signal([{type: "var", name: "region"}]);

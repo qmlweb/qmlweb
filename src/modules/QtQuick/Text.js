@@ -2,7 +2,16 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Text',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    color: "color",
+    text: "string",
+    lineHeight: "real",
+    wrapMode: "enum",
+    horizontalAlignment: "enum",
+    style: "enum",
+    styleColor: "color"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -34,14 +43,6 @@ registerQmlType({
 
     const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font   = new QMLFont(this);
-
-    createProperty("color", this, "color");
-    createProperty("string", this, "text");
-    createProperty("real", this, "lineHeight");
-    createProperty("enum", this, "wrapMode");
-    createProperty("enum", this, "horizontalAlignment");
-    createProperty("enum", this, "style");
-    createProperty("color", this, "styleColor");
 
     this.colorChanged.connect(this, function(newVal) {
         fc.style.color = QColor(newVal);

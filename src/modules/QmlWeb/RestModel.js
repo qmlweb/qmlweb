@@ -2,21 +2,18 @@ registerQmlType({
   module:   'QmlWeb',
   name:     'RestModel',
   versions: /.*/,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    url: "string",
+    isLoading: "bool",
+    mimeType: { type: "string", initialValue: "application/json" },
+    queryMimeType: { type: "string", initialValue: "application/x-www-urlencoded" }
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var self = this;
     var attributes = this.getAttributes();
-
-    createProperty("string", this, "url");
-    createProperty("bool",   this, "isLoading");
-    createProperty("string", this, "mimeType");
-    createProperty("string", this, "queryMimeType");
-
-    this.mimeType      = "application/json";
-    this.queryMimeType = "application/x-www-urlencoded";
-    this.isLoading     = false;
     this.attributes    = attributes;
 
     this.fetched = Signal();

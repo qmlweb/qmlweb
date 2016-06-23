@@ -2,18 +2,17 @@ registerQmlType({
   module:   'QtGraphicalEffects',
   name:     'FastBlur',
   versions: /.*/,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    radius: "real",
+    source: { type: "var", initialValue: null }
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
     var previousSource = null;
     var filterObject;
-
-    createProperty("real", this, "radius");
-    createProperty("var",  this, "source");
-    this.radius = 0;
-    this.source = null;
 
     var updateFilterObject = (function() {
       filterObject = {

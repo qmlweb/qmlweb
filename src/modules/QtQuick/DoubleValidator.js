@@ -6,19 +6,16 @@ registerQmlType({
   module:   'QtQuick',
   name:     'DoubleValidator',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    bottom: { type: "real", initialValue: -Infinity },
+    top: { type: "real", initialValue: Infinity },
+    decimals: { type: "int", initialValue: 1000 },
+    notation: { type: "enum", initialValue: 2 } // DoubleValidator.ScientificNotation
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("real", this, "bottom");
-    createProperty("real", this, "top");
-    createProperty("int",  this, "decimals");
-    createProperty("enum", this, "notation");
-    this.bottom   = -Infinity;
-    this.top      = Infinity;
-    this.decimals = 1000;
-    this.notation = DoubleValidator.ScientificNotation;
 
     var standardRegExp   = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
     var scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;

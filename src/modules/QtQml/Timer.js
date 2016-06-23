@@ -2,17 +2,18 @@ registerQmlType({
   module:   'QtQml',
   name:     'Timer',
   versions: /.*/,
-  baseClass: 'QtObject'
+  baseClass: "QtObject",
+  properties: {
+    interval: { type: "int", initialValue: 1000 },
+    repeat: "bool",
+    running: "bool",
+    triggeredOnStart: "bool"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var prevTrigger,
         self = this;
-
-    createProperty("int", this, "interval", {initialValue: 1000});
-    createProperty("bool", this, "repeat");
-    createProperty("bool", this, "running");
-    createProperty("bool", this, "triggeredOnStart");
 
     // Create trigger as simple property. Reading the property triggers
     // the function!

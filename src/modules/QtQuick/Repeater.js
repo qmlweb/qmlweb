@@ -2,7 +2,13 @@ registerQmlType({
   module: "QtQuick",
   name: "Repeater",
   versions: /.*/,
-  baseClass: "Item"
+  baseClass: "Item",
+  properties: {
+    delegate: "Component",
+    model: { type: "variant", initialValue: 0 },
+    count: "int"
+  },
+  defaultProperty: "delegate"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -11,11 +17,7 @@ registerQmlType({
 
     this.parent = meta.parent; // TODO: some (all ?) of the components including Repeater needs to know own parent at creation time. Please consider this major change.
 
-    createProperty("Component", this, "delegate");
     this.container = function() { return this.parent; }
-    this.$defaultProperty = "delegate";
-    createProperty("variant", this, "model", {initialValue: 0});
-    createProperty("int", this, "count");
     this.$completed = false;
     this.$items = []; // List of created items
     this._childrenInserted = Signal();

@@ -2,7 +2,17 @@ registerQmlType({
   module: "QtQuick",
   name: "Image",
   versions: /.*/,
-  baseClass: "Item"
+  baseClass: "Item",
+  properties: {
+    asynchronous: { type: "bool", initialValue: true },
+    cache: { type: "bool", initialValue: true },
+    smooth: { type: "bool", initialValue: true },
+    fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
+    mirror: "bool",
+    progress: "real",
+    source: "url",
+    status: { type: "enum", initialValue: 1 } // Image.Null
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -24,17 +34,6 @@ registerQmlType({
         Loading: 3,
         Error: 4
     }
-
-    // no-op properties
-    createProperty("bool", this, "asynchronous", {initialValue: true});
-    createProperty("bool", this, "cache", {initialValue: true});
-    createProperty("bool", this, "smooth", {initialValue: true});
-
-    createProperty("enum", this, "fillMode", {initialValue: this.Image.Stretch});
-    createProperty("bool", this, "mirror");
-    createProperty("real", this, "progress");
-    createProperty("url", this, "source");
-    createProperty("enum", this, "status", {initialValue: this.Image.Null});
 
     this.sourceSize = new QObject(this);
 

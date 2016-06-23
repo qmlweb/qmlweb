@@ -2,18 +2,19 @@ registerQmlType({
     module: 'QtQuick',
     name: 'Loader',
     versions: /.*/,
-    baseClass: 'Item'
+    baseClass: "Item",
+    properties: {
+      active: { type: "bool", initialValue: true },
+      asynchronous: "bool",
+      item: "var",
+      progress: "real",
+      source: "url",
+      sourceComponent: "Component",
+      status: { type: "enum", initialValue: 1 }
+    }
   }, class {
     constructor(meta) {
         callSuper(this, meta);
-
-        createProperty('bool', this, 'active', {initialValue: true});
-        createProperty('bool', this, 'asynchronous');
-        createProperty('var', this, 'item');
-        createProperty('real', this, 'progress');
-        createProperty('url', this, 'source');
-        createProperty('Component', this, 'sourceComponent');
-        createProperty('enum', this, 'status', {initialValue: 1});
 
         let sourceUrl = '';
 

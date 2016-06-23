@@ -2,16 +2,18 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Transition',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    animations: "list",
+    from: { type: "string", initialValue: "*" },
+    to: { type: "string", initialValue: "*" },
+    reversible: "bool"
+  },
+  defaultProperty: "animations"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
-    createProperty("list", this, "animations");
-    this.$defaultProperty = "animations";
-    createProperty("string", this, "from", {initialValue: '*'});
-    createProperty("string", this, "to", {initialValue: '*'});
-    createProperty("bool", this, "reversible");
     this.$item = this.$parent;
 
     this.$start = function(actions) {

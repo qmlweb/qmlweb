@@ -2,13 +2,14 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Scale',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    xScale: "real",
+    yScale: "real"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("real", this, "xScale");
-    createProperty("real", this, "yScale");
 
     this.origin = new QObject(this);
     createProperty("real", this.origin, "x");

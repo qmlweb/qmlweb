@@ -2,13 +2,14 @@ registerQmlType({
   module: 'QtQuick',
   name:   'Rectangle',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    color: { type: "color", initialValue: "white" },
+    radius: "real"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("color", this, "color", {initialValue: 'white'});
-    createProperty("real", this, "radius");
 
     this.border = new QObject(this);
     createProperty("color", this.border, "color", {initialValue: 'black'});

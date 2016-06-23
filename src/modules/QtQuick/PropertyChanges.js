@@ -2,14 +2,15 @@ registerQmlType({
   module: "QtQuick",
   name: "PropertyChanges",
   versions: /.*/,
-  baseClass: "QtQml.QtObject"
+  baseClass: "QtQml.QtObject",
+  properties: {
+    target: "QtObject",
+    explicit: "bool",
+    restoreEntryValues: { type: "bool", initialValue: true }
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("QtObject", this, "target");
-    createProperty("bool", this, "explicit");
-    createProperty("bool", this, "restoreEntryValues", {initialValue: true});
 
     this.$actions = [];
 

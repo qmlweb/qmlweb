@@ -2,16 +2,18 @@ registerQmlType({
   module:   'QtQuick',
   name:     'State',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    name: "string",
+    changes: "list",
+    extend: "string",
+    when: "bool"
+  },
+  defaultProperty: "changes"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
-    createProperty("string", this, "name");
-    createProperty("list", this, "changes");
-    this.$defaultProperty = "changes";
-    createProperty("string", this, "extend");
-    createProperty("bool", this, "when");
     this.$item = this.$parent;
 
     this.whenChanged.connect(this, function(newVal) {

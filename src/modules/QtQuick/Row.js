@@ -2,12 +2,14 @@ registerQmlType({
   module:   'QtQuick',
   name:     'Row',
   versions: /.*/,
-  baseClass: 'Positioner'
+  baseClass: "Positioner",
+  properties: {
+    layoutDirection: "enum"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
-    createProperty("enum", this, "layoutDirection", {initialValue: 0});
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
   }

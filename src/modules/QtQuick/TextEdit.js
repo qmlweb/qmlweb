@@ -2,90 +2,53 @@ registerQmlType({
   module: "QtQuick",
   name: "TextEdit",
   versions: /.*/,
-  baseClass: "Item"
+  baseClass: "Item",
+  properties: {
+    activeFocusOnPress: { type: "bool", initialValue: true },
+    baseUrl: "url",
+    canPaste: "bool",
+    canRedo: "bool",
+    canUndo: "bool",
+    color: { type: "color", initialValue: "white" },
+    contentHeight: "real",
+    contentWidth: "real",
+    cursorDelegate: "Component",
+    cursorPosition: "int",
+    cursorRectangle: "rectangle",
+    cursorVisible: { type: "bool", initialValue: true },
+    effectiveHorizontalAlignment: "enum",
+    horizontalAlignment: "enum",
+    hoveredLink: "string",
+    inputMethodComposing: "bool",
+    inputMethodHints: "enum",
+    length: "int",
+    lineCount: "int",
+    mouseSelectionMode: "enum",
+    persistentSelection: "bool",
+    readOnly: "bool",
+    renderType: "enum",
+    selectByKeyboard: { type: "bool", initialValue: true },
+    selectByMouse: "bool",
+    selectedText: "string",
+    selectedTextColor: { type: "color", initialValue: "yellow" },
+    selectionColor: { type: "color", initialValue: "pink" },
+    selectionEnd: "int",
+    selectionStart: "int",
+    text: "string",
+    textDocument: "TextDocument",
+    textFormat: "enum",
+    textMargin: "real",
+    verticalAlignment: "enum",
+    wrapMode: "enum"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
 
     var self = this;
 
-    // Properties
-    createProperty('bool', this, 'activeFocusOnPress');
-    createProperty('url', this, 'baseUrl');
-    createProperty('bool', this, 'canPaste');
-    createProperty('bool', this, 'canRedo');
-    createProperty('bool', this, 'canUndo');
-    createProperty('color', this, 'color');
-    createProperty('real', this, 'contentHeight');
-    createProperty('real', this, 'contentWidth');
-    createProperty('Component', this, 'cursorDelegate');
-    createProperty('int', this, 'cursorPosition');
-    createProperty('rectangle', this, 'cursorRectangle');
-    createProperty('bool', this, 'cursorVisible');
-    createProperty('enum', this, 'effectiveHorizontalAlignment');
-    createProperty('enum', this, 'horizontalAlignment');
-    createProperty('string', this, 'hoveredLink');
-    createProperty('bool', this, 'inputMethodComposing');
-    createProperty('enum', this, 'inputMethodHints');
-    createProperty('int', this, 'length');
-    createProperty('int', this, 'lineCount');
-    createProperty('enum', this, 'mouseSelectionMode');
-    createProperty('bool', this, 'persistentSelection');
-    createProperty('bool', this, 'readOnly');
-    createProperty('enum', this, 'renderType');
-    createProperty('bool', this, 'selectByKeyboard');
-    createProperty('bool', this, 'selectByMouse');
-    createProperty('string', this, 'selectedText');
-    createProperty('color', this, 'selectedTextColor');
-    createProperty('color', this, 'selectionColor');
-    createProperty('int', this, 'selectionEnd');
-    createProperty('int', this, 'selectionStart');
-    createProperty('string', this, 'text');
-    createProperty('TextDocument', this, 'textDocument');
-    createProperty('enum', this, 'textFormat');
-    createProperty('real', this, 'textMargin');
-    createProperty('enum', this, 'verticalAlignment');
-    createProperty('enum', this, 'wrapMode');
-
     const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
-
-    this.activeFocusOnPress = true;
-    this.baseUrl = undefined;
-    this.canPaste = false;
-    this.canRedo = false;
-    this.canUndo = false;
-    this.color = 'white';
-    this.contentHeight = 0;
-    this.contentWidth = 0;
-    this.cursorDelegate = undefined;
-    this.cursorPosition = 0;
-    this.cursorRectangle = undefined;
-    this.cursorVisible = true;
-    this.effectiveHorizontalAlignment = undefined;
-    this.horizontalAlignment = undefined;
-    this.hoveredLink = undefined;
-    this.inputMethodComposing = undefined;
-    this.inputMethodHints = undefined;
-    this.length = 0;
-    this.lineCount = 0;
-    this.mouseSelectionMode = undefined;
-    this.persistentSelection = false;
-    this.readOnly = false;
-    this.renderType = undefined;
-    this.selectByKeyboard = true;
-    this.selectByMouse = false;
-    this.selectedText = undefined;
-    this.selectedTextColor = 'yellow';
-    this.selectionColor = 'pink';
-    this.selectionEnd = 0;
-    this.selectionStart = 0;
-    this.text = '';
-    this.textDocument = undefined;
-    this.textFormat = undefined;
-    this.textMargin = 0;
-    this.verticalAlignment = undefined;
-    this.wrapMode = undefined;
 
     // Undo / Redo stacks;
     this.undoStack = [];
@@ -120,11 +83,11 @@ registerQmlType({
 
     // Signals
     this.linkActivated = Signal([{
-        type: 'string',
+        type: "string",
         name: 'link'
     }]);
     this.linkHovered = Signal([{
-        type: 'string',
+        type: "string",
         name: 'link'
     }]);
 

@@ -12,7 +12,20 @@ registerQmlType({
   module: 'QtMultimedia',
   name:   'Video',
   versions: /^5\./,
-  baseClass: 'QtQuick.Item'
+  baseClass: "QtQuick.Item",
+  properties: {
+    source: "string",
+    duration: "int",
+    position: "int",
+    autoPlay: "bool",
+    muted: "bool",
+    volume: "real",
+    playbackRate: "real",
+    playbackState: "enum", // MediaPlayer.StoppedState
+    fillMode: "enum", // VideoOutput.PreserveAspectFit
+    status: "enum", // MediaPlayer.NoMedia
+    error: "enum" // MediaPlayer.NoError
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -25,24 +38,8 @@ registerQmlType({
     domVideo.style.margin = "0";
     this.dom.appendChild(domVideo);
 
-    createProperty("bool",   this, "autoPlay");
-    createProperty("enum",   this, "fillMode");
-    createProperty("int",    this, "duration");
-    createProperty("int",    this, "position");
-    createProperty("bool",   this, "muted");
-    createProperty("real",   this, "playbackRate");
-    createProperty("enum",   this, "playbackState");
-    createProperty("string", this, "source");
-    createProperty("real",   this, "volume");
-    createProperty("enum",   this, "status");
-    createProperty("enum",   this, "error");
-    this.status = MediaPlayer.NoMedia;
-    this.error = MediaPlayer.NoError;
-    this.fillMode = VideoOutput.PreserveAspectFit;
     this.volume = domVideo.volume;
     this.duration = domVideo.duration;
-    this.playbackState = MediaPlayer.StoppedState;
-    this.muted = false;
 
     this.paused  = Signal();
     this.playing = Signal();

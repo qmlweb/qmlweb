@@ -2,7 +2,7 @@ registerQmlType({
   module: 'QtQuick',
   name: 'Animation',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject',
+  baseClass: "QtQml.QtObject",
   enums: {
     Animation: {
       Infinite: -1

@@ -2,7 +2,12 @@ registerQmlType({
   module: 'QtQuick',
   name:   'ListModel',
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject",
+  properties: {
+    count: "int",
+    $items: "list"
+  },
+  defaultProperty: "$items"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -10,9 +15,6 @@ registerQmlType({
     firstItem = true;
     var QMLListElement = getConstructor('QtQuick', '2.0', 'ListElement');
 
-    createProperty("int", this, "count");
-    createProperty("list", this, "$items");
-    this.$defaultProperty = "$items";
     this.$model = new JSItemModel();
 
     this.$itemsChanged.connect(this, function(newVal) {

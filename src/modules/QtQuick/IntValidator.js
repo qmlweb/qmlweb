@@ -2,15 +2,14 @@ registerQmlType({
   module:   'QtQuick',
   name:     'IntValidator',
   versions: /.*/,
-  baseClass: 'Item'
+  baseClass: "Item",
+  properties: {
+    bottom: { type: "int", initialValue: -2147483647 },
+    top: { type: "int", initialValue: 2147483647 }
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    createProperty("int", this, "bottom");
-    createProperty("int", this, "top");
-    this.bottom = -2147483647;
-    this.top    = 2147483647;
 
     this.validate = (function(string) {
       var regExp     = /^(-|\+)?\s*[0-9]+$/;

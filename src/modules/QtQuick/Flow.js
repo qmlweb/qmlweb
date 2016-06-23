@@ -2,7 +2,11 @@ registerQmlType({
   module: "QtQuick",
   name: "Flow",
   versions: /.*/,
-  baseClass: "Positioner"
+  baseClass: "Positioner",
+  properties: {
+    flow: "enum", // Flow.LeftToRight
+    layoutDirection: "enum" // Flow.LeftToRight
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -11,9 +15,6 @@ registerQmlType({
         LeftToRight: 0,
         TopToBottom: 1
     }
-
-    createProperty("enum", this, "flow", {initialValue: this.Flow.LeftToRight});
-    createProperty("enum", this, "layoutDirection", {initialValue: 0});
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

@@ -2,7 +2,13 @@ registerQmlType({
   module: 'QtQuick',
   name: 'Grid',
   versions: /.*/,
-  baseClass: 'Positioner'
+  baseClass: "Positioner",
+  properties: {
+    columns: "int",
+    rows: "int",
+    flow: "enum",
+    layoutDirection: "enum"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
@@ -12,10 +18,6 @@ registerQmlType({
         TopToBottom: 1
     }
 
-    createProperty("int", this, "columns");
-    createProperty("int", this, "rows");
-    createProperty("enum", this, "flow", {initialValue: 0});
-    createProperty("enum", this, "layoutDirection", {initialValue: 0});
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);
