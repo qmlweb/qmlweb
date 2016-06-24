@@ -194,6 +194,10 @@ function callSuper(self, meta) {
     // TODO: not exported to the whole file scope yet
     Object.keys(info.enums).forEach(name => {
       self[name] = info.enums[name];
+
+      if (!global[name]) {
+        global[name] = self[name]; // HACK
+      }
     });
   }
   if (info.properties) {
