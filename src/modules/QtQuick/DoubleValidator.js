@@ -1,12 +1,11 @@
-global.DoubleValidator = {
-  StandardNotation: 1, ScientificNotation: 2
-};
-
 registerQmlType({
   module:   'QtQuick',
   name:     'DoubleValidator',
   versions: /.*/,
   baseClass: "Item",
+  enums: {
+    DoubleValidator: { StandardNotation: 1, ScientificNotation: 2 }
+  },
   properties: {
     bottom: { type: "real", initialValue: -Infinity },
     top: { type: "real", initialValue: Infinity },

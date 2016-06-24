@@ -6,6 +6,9 @@ registerQmlType({
   name:     'WebSocket',
   versions: /.*/,
   baseClass: "QtQml.QtObject",
+  enums: {
+    WebSocket: { Connecting: 0, Open: 1, Closing: 2, Closed: 3, Error: 4 }
+  },
   properties: {
     active: "bool",
     status: { type: "enum", initialValue: 3 }, // WebSocket.Closed
@@ -15,16 +18,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    // Exports.
-    this.WebSocket = {
-        // status
-        Connecting: 0,
-        Open: 1,
-        Closing: 2,
-        Closed: 3,
-        Error: 4
-    }
 
     this.textMessageReceived = Signal([{type: "string", name: "message"}]);
 

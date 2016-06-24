@@ -3,6 +3,13 @@ registerQmlType({
   name:     'Text',
   versions: /.*/,
   baseClass: "Item",
+  enums: {
+    Text: {
+      NoWrap: 0, WordWrap: 1, WrapAnywhere: 2, Wrap: 3, WrapAtWordBoundaryOrAnywhere: 3,
+      AlignLeft: "left", AlignRight: "right", AlignHCenter: "center", AlignJustify: "justify",
+      Normal: 0, Outline: 1, Raised: 2, Sunken: 3
+    }
+  },
   properties: {
     color: "color",
     text: "string",
@@ -21,25 +28,6 @@ registerQmlType({
     fc.style.width = '100%';
     fc.style.height = '100%';
     this.dom.appendChild(fc);
-
-    this.Text = {
-        // Wrap Mode
-        NoWrap: 0,
-        WordWrap: 1,
-        WrapAnywhere: 2,
-        Wrap: 3,
-        WrapAtWordBoundaryOrAnywhere: 3, // COMPAT
-        // Horizontal-Alignment
-        AlignLeft: "left",
-        AlignRight: "right",
-        AlignHCenter: "center",
-        AlignJustify: "justify",
-        // Style
-        Normal: 0,
-        Outline: 1,
-        Raised: 2,
-        Sunken: 3
-    }
 
     const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
     this.font   = new QMLFont(this);

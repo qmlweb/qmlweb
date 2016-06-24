@@ -1,9 +1,3 @@
-window.SystemPalette = {
-  Active:   "active",
-  Inactive: "inactive",
-  Disabled: "disabled"
-};
-
 const platformsDetectors = [
   //{ name: 'W8',      regexp: /Windows NT 6\.2/ },
   //{ name: 'W7',      regexp: /Windows NT 6\.1/ },
@@ -18,6 +12,11 @@ registerQmlType({
   name: 'SystemPalette',
   versions: /.*/,
   baseClass: "QtQml.QtObject",
+  enums: {
+    SystemPalette: {
+      Active: "active", Inactive: "inactive", Disabled: "disabled"
+    }
+  },
   properties: {
     alternateBase: { type: "color", readOnly: true },
     base: { type: "color", readOnly: true },

@@ -3,6 +3,9 @@ registerQmlType({
   name: 'Grid',
   versions: /.*/,
   baseClass: "Positioner",
+  enums: {
+    Grid: { LeftToRight: 0, TopToBottom: 1 }
+  },
   properties: {
     columns: "int",
     rows: "int",
@@ -12,11 +15,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    this.Grid = {
-        LeftToRight: 0,
-        TopToBottom: 1
-    }
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);

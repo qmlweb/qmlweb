@@ -3,6 +3,12 @@ registerQmlType({
   name:     'BorderImage',
   versions: /.*/,
   baseClass: "Item",
+  enums: {
+    BorderImage: {
+      Stretch: "stretch", Repeat: "repeat", Round: "round",
+      Null: 1, Ready: 2, Loading: 3, Error: 4
+    }
+  },
   properties: {
     source: "url",
     horizontalTileMode: { type: "enum", initialValue: "stretch" }, // BorderImage.Stretch
@@ -13,18 +19,6 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
     var self = this;
-
-    this.BorderImage = {
-        // tileMode
-        Stretch: "stretch",
-        Repeat: "repeat",
-        Round: "round",
-        // status
-        Null: 1,
-        Ready: 2,
-        Loading: 3,
-        Error: 4
-    }
 
     this.border = new QObject(this);
     createProperty("int", this.border, "left");

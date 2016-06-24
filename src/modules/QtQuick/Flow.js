@@ -3,6 +3,9 @@ registerQmlType({
   name: "Flow",
   versions: /.*/,
   baseClass: "Positioner",
+  enums: {
+    Flow: { LeftToRight: 0, TopToBottom: 1 }
+  },
   properties: {
     flow: "enum", // Flow.LeftToRight
     layoutDirection: "enum" // Flow.LeftToRight
@@ -10,11 +13,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    this.Flow = {
-        LeftToRight: 0,
-        TopToBottom: 1
-    }
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

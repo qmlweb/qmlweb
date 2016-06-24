@@ -1,12 +1,11 @@
-global.TextInput = {
-  Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3
-};
-
 registerQmlType({
   module:   'QtQuick',
   name:     'TextInput',
   versions: /.*/,
   baseClass: "Item",
+  enums: {
+    TextInput: { Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3 }
+  },
   properties: {
     text: "string",
     maximumLength: { type: "int", initialValue: -1 },

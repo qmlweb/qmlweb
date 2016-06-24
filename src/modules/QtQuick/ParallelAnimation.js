@@ -3,6 +3,9 @@ registerQmlType({
   name:     'ParallelAnimation',
   versions: /.*/,
   baseClass: "Animation",
+  enums: {
+    Animation: { Infinite: Math.Infinite }
+  },
   properties: {
     animations: "list"
   },
@@ -14,7 +17,6 @@ registerQmlType({
         passedLoops,
         i;
 
-    this.Animation = { Infinite: Math.Infinite }
     this.$runningAnimations = 0;
 
     this.animationsChanged.connect(this, function() {

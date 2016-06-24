@@ -3,6 +3,9 @@ registerQmlType({
   name:     'FontLoader',
   versions: /.*/,
   baseClass: "QtQml.QtObject",
+  enums: {
+    FontLoader: { Null: 0, Ready: 1, Loading: 2, Error: 3 }
+  },
   properties: {
     name: "string",
     source: "url",
@@ -11,15 +14,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    // Exports.
-    this.FontLoader = {
-        // status
-        Null: 0,
-        Ready: 1,
-        Loading: 2,
-        Error: 3
-    }
 
     var self = this,
         domStyle = document.createElement('style'),

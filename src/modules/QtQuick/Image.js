@@ -3,6 +3,14 @@ registerQmlType({
   name: "Image",
   versions: /.*/,
   baseClass: "Item",
+  enums: {
+    Image: {
+      Stretch: 1, PreserveAspectFit: 2, PreserveAspectCrop: 3,
+      Tile: 4, TileVertically: 5, TileHorizontally: 6,
+
+      Null: 1, Ready: 2, Loading: 3, Error: 4
+    }
+  },
   properties: {
     asynchronous: { type: "bool", initialValue: true },
     cache: { type: "bool", initialValue: true },
@@ -18,22 +26,6 @@ registerQmlType({
     callSuper(this, meta);
     var img = new Image(),
         self = this;
-
-    // Exports.
-    this.Image = {
-        // fillMode
-        Stretch: 1,
-        PreserveAspectFit: 2,
-        PreserveAspectCrop: 3,
-        Tile: 4,
-        TileVertically: 5,
-        TileHorizontally: 6,
-        // status
-        Null: 1,
-        Ready: 2,
-        Loading: 3,
-        Error: 4
-    }
 
     this.sourceSize = new QObject(this);
 
