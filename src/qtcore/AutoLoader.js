@@ -1,4 +1,4 @@
-global.addEventListener('load', function() {
+window.addEventListener('load', () => {
   var metaTags = document.getElementsByTagName('BODY');
 
   for (var i = 0 ; i < metaTags.length ; ++i) {
