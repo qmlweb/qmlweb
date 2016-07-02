@@ -18,10 +18,8 @@ registerQmlType({
     createProperty("real", this, "wordSpacing");
     var sizeLock = false;
 
-        this.boldChanged.connect(function(newVal) {
-            parent.dom.firstChild.style.fontWeight =
-                parent.font.weight !== undefined ? parent.font.weight :
-                newVal ? "bold" : "normal";
+        this.boldChanged.connect(newVal => {
+            this.weight = newVal ? 75 : 50; // Font.Bold : Font.Normal;
         });
         this.capitalizationChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontVariant =
@@ -67,8 +65,8 @@ registerQmlType({
         });
         this.weightChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontWeight =
-                newVal !== undefined ? newVal :
-                parent.font.bold ? "bold" : "normal";
+                newVal === 75 ? 'bold' : 'normal';
+            // TODO: support other font weights
         });
         this.wordSpacingChanged.connect(function(newVal) {
             parent.dom.firstChild.style.wordSpacing = newVal !== undefined ? newVal + "px" : "";

@@ -127,6 +127,7 @@ registerQmlType({
 
     this.textChanged.connect(this, updateImplicit);
     this.font.boldChanged.connect(this, updateImplicit);
+    this.font.weightChanged.connect(this, updateImplicit);
     this.font.pixelSizeChanged.connect(this, updateImplicit);
     this.font.pointSizeChanged.connect(this, updateImplicit);
     this.font.familyChanged.connect(this, updateImplicit);
