@@ -1,5 +1,5 @@
 function loadQmlFile(file, div, opts) {
-  var engine = new QMLEngine(div, opts || {});
+  var engine = new QmlWeb.QMLEngine(div, opts || {});
   engine.loadFile(file);
   engine.start();
   document.body.appendChild(div);
@@ -13,7 +13,7 @@ function prefixedQmlLoader(prefix) {
 }
 
 function loadQml(src, div, opts) {
-  var engine = new QMLEngine(div, opts || {});
+  var engine = new QmlWeb.QMLEngine(div, opts || {});
   engine.loadQML(src);
   engine.start();
   document.body.appendChild(div);

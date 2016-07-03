@@ -233,13 +233,13 @@ function convertToEngine(tree) {
 // Function to parse qml and output tree expected by engine
 function parseQML(src, file) {
     loadParser();
-    qmlweb_parse.nowParsingFile = file;
-    var parsetree = qmlweb_parse(src, qmlweb_parse.QmlDocument);
+    QmlWeb.parse.nowParsingFile = file;
+    var parsetree = QmlWeb.parse(src, QmlWeb.parse.QmlDocument);
     return convertToEngine(parsetree);
 }
 
 function loadParser() {
-  if (typeof qmlweb_parse !== 'undefined')
+  if (typeof QmlWeb.parse !== 'undefined')
     return;
 
   console.log('Loading parser...');
@@ -255,6 +255,10 @@ function loadParser() {
           throw new Error('Could not load QmlWeb parser!');
       }
       (new Function(xhr.responseText))();
+      // TODO: remove in 0.2, qmlweb.parser should set
+      //  QmlWeb.parse and QmlWeb.jsparse if QmlWeb is defined
+      QmlWeb.parse = QmlWeb.parse || qmlweb_parse;
+      QmlWeb.jsparse = QmlWeb.jsparse || qmlweb_jsparse;
       return;
     }
   }

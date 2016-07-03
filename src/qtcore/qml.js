@@ -30,14 +30,14 @@ const modules = {
 const dependants = {};
 
 // Helper. Adds a type to the constructor list
-global.registerGlobalQmlType = function (name, type) {
-  global[type.name]  = type;
+function registerGlobalQmlType(name, type) {
+  QmlWeb[type.name]  = type;
   constructors[name] = type;
   modules.Main[name] = type;
 };
 
 // Helper. Register a type to a module
-global.registerQmlType = function(options, constructor) {
+function registerQmlType(options, constructor) {
   if (constructor !== undefined) {
     options.constructor = constructor;
   }
@@ -108,12 +108,12 @@ global.registerQmlType = function(options, constructor) {
 
   const id = [options.module, options.name].join('.');
   if (dependants.hasOwnProperty(id)) {
-    dependants[id].forEach(opt => global.registerQmlType(opt));
+    dependants[id].forEach(opt => registerQmlType(opt));
     dependants[id].length = 0;
   }
 };
 
-global.getConstructor = function (moduleName, version, name) {
+function getConstructor(moduleName, version, name) {
   if (typeof modules[moduleName] != 'undefined') {
     for (var i = 0 ; i < modules[moduleName].length ; ++i) {
       var type = modules[moduleName][i];
@@ -125,7 +125,7 @@ global.getConstructor = function (moduleName, version, name) {
   return null;
 };
 
-global.collectConstructorsForModule = function (moduleName, version) {
+function collectConstructorsForModule(moduleName, version) {
   var constructors = {};
 
   if (typeof modules[moduleName] == 'undefined') {
@@ -142,7 +142,7 @@ global.collectConstructorsForModule = function (moduleName, version) {
   return constructors;
 };
 
-global.mergeObjects = function (obj1, obj2) {
+function mergeObjects(obj1, obj2) {
   var mergedObject = {};
 
   if (typeof obj1 != 'undefined' && obj1 != null) {
@@ -154,9 +154,9 @@ global.mergeObjects = function (obj1, obj2) {
   return mergedObject;
 }
 
-global.perContextConstructors = {};
+const perContextConstructors = {};
 
-global.loadImports = function (self, imports) {
+function loadImports(self, imports) {
   constructors = mergeObjects(modules.Main, null);
   if (imports.filter(row => row[1] === 'QtQml').length === 0 &&
       imports.filter(row => row[1] === 'QtQuick').length === 1) {
@@ -176,7 +176,7 @@ global.loadImports = function (self, imports) {
   perContextConstructors[self.objectId] = constructors;
 }
 
-global.inherit = function(constructor, baseClass) {
+function inherit(constructor, baseClass) {
   var oldProto = constructor.prototype;
   constructor.prototype = Object.create(baseClass.prototype);
   Object.getOwnPropertyNames(oldProto).forEach(prop => {
@@ -479,7 +479,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
 }
 
 // ItemModel. EXPORTED.
-JSItemModel = function() {
+const JSItemModel = function() {
     this.roleNames = [];
 
     this.setRoleNames = function(names) {
@@ -506,7 +506,8 @@ JSItemModel = function() {
     this.modelReset = Signal();
 }
 
-// -----------------------------------------------------------------------------
-// Stuff below defines QML things
-// -----------------------------------------------------------------------------
-
+QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
+QmlWeb.registerQmlType = registerQmlType;
+QmlWeb.getConstructor = getConstructor;
+QmlWeb.loadImports = loadImports;
+QmlWeb.JSItemModel = JSItemModel;

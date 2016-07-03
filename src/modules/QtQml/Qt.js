@@ -1,4 +1,4 @@
-global.Qt = {
+const Qt = {
   rgba: function(r,g,b,a) {
     return "rgba("
       + Math.round(r * 255) + ","
@@ -354,4 +354,6 @@ global.Qt = {
   ScrollBarAsNeeded: 0,
   ScrollBarAlwaysOff: 1,
   ScrollBarAlwaysOn: 2
-}
+};
+
+QmlWeb.Qt = Qt;

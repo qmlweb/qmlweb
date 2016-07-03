@@ -6,9 +6,9 @@ window.addEventListener('load', () => {
     var source  = metaTag.getAttribute('data-qml');
 
     if (source != null) {
-      global.qmlEngine = new QMLEngine();
-      qmlEngine.loadFile(source);
-      qmlEngine.start();
+      QmlWeb.qmlEngine = new QMLEngine();
+      QmlWeb.qmlEngine.loadFile(source);
+      QmlWeb.qmlEngine.start();
       break ;
     }
   }

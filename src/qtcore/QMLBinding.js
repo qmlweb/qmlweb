@@ -25,8 +25,8 @@ class QMLBinding {
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
   compile() {
-    this.eval = new Function('__executionObject', '__executionContext', "_executionContext = __executionContext; with(__executionContext) with(__executionObject) " + ( this.isFunction ? "" : "return " ) + this.src);
+    this.eval = new Function('__executionObject', '__executionContext', "_executionContext = __executionContext; with(QmlWeb) with(__executionContext) with(__executionObject) " + ( this.isFunction ? "" : "return " ) + this.src);
   }
 }
 
-global.QMLBinding = QMLBinding;
+QmlWeb.QMLBinding = QMLBinding;

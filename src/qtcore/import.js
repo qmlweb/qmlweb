@@ -27,14 +27,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 /**
- * Get URL contents. EXPORTED.
+ * Get URL contents.
  * @param url {String} Url to fetch.
  * @param skipExceptions {bool} when turned on, ignore exeptions and return false. This feature is used by readQmlDir.
  * @private
  * @return {mixed} String of contents or false in errors.
  */
-getUrlContents = function (url, skipExceptions) {
-    if (typeof urlContentCache[url] == 'undefined') {
+function getUrlContents(url, skipExceptions) {
+    if (typeof QmlWeb.urlContentCache[url] == 'undefined') {
       var xhr = new XMLHttpRequest();
       xhr.open("GET", url, false);
 
@@ -47,15 +47,15 @@ getUrlContents = function (url, skipExceptions) {
           console.log("Retrieving " + url + " failed: " + xhr.responseText, xhr);
           return false;
       }
-      urlContentCache[url] = xhr.responseText;
+      QmlWeb.urlContentCache[url] = xhr.responseText;
     }
-    return urlContentCache[url];
+    return QmlWeb.urlContentCache[url];
 }
-if (typeof global.urlContentCache == 'undefined')
-  global.urlContentCache = {};
+if (typeof QmlWeb.urlContentCache == 'undefined')
+  QmlWeb.urlContentCache = {};
 
 /**
- * Read qmldir spec file at directory. EXPORTED.
+ * Read qmldir spec file at directory.
  * @param url Url of the directory
  * @return {Object} Object, where .internals lists qmldir internal references
  *                          and .externals lists qmldir external references.
@@ -76,7 +76,7 @@ if (typeof global.urlContentCache == 'undefined')
    Also please look at notes and TODO's in qtcore.js::loadImports() and qtcore.js::construct() methods.
 */
  
-readQmlDir = function (url) {
+function readQmlDir(url) {
     // in case 'url' is empty, do not attach "/"
     // Q1: when this happen?
     var qmldirFileUrl = url.length > 0 ? (url + "/qmldir") : "qmldir";

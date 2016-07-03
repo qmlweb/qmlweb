@@ -62,7 +62,7 @@ function QMLComponent(meta) {
           js = qrc[src];
         else {
           loadParser();
-          js = qmlweb_jsparse(getUrlContents(src));
+          js = QmlWeb.jsparse(getUrlContents(src));
         }
         if (importDesc[3] !== "") {
           $context[importDesc[3]] = {};
