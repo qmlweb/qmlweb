@@ -83,6 +83,30 @@ function convertToEngine(tree) {
   return convertToEngine.walk(tree);
 }
 
+function stringifyDots(elem) {
+  let sub = elem;
+  const path = [];
+  while (sub[0] === "dot") {
+    path.push(sub[1]);
+    sub = sub[2];
+  }
+  path.push(sub);
+  return path.join(".");
+}
+
+function applyProp(item, name, val) {
+  let curr = item; // output structure
+  let sub = name; // input structure
+  while (sub[0] === "dot") {
+    if (!curr[sub[1]]) {
+      curr[sub[1]] = new QMLMetaPropertyGroup();
+    }
+    curr = curr[sub[1]];
+    sub = sub[2];
+  }
+  curr[sub] = val;
+}
+
 convertToEngine.walkers = {
   toplevel: (imports, statement) => {
     const item = { $class: "Component" };
@@ -91,7 +115,7 @@ convertToEngine.walkers = {
     return item;
   },
   qmlelem: (elem, onProp, statements) => {
-    const item = new QMLMetaElement(elem, onProp);
+    const item = new QMLMetaElement(stringifyDots(elem), onProp);
 
     for (const i in statements) {
       const statement = statements[i];
@@ -107,16 +131,15 @@ convertToEngine.walkers = {
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          item[name] = val;
+          applyProp(item, name, val);
           break;
         case "qmlelem":
           item.$children.push(val);
           break;
         case "qmlobjdef":
-          // Create object to item
-          item[name] = item[name] || new QMLMetaPropertyGroup();
-          item[name][statement[2]] = val;
-          break;
+          throw new Error(
+            "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
+          );
         case "qmlobj":
           // Create object to item
           item[name] = item[name] || new QMLMetaPropertyGroup();
@@ -151,7 +174,7 @@ convertToEngine.walkers = {
       const name = statement[1];
       const val = convertToEngine.walk(statement);
       if (statement[0] === "qmlprop") {
-        item[name] = val;
+        applyProp(item, name, val);
       }
     }
     return item;

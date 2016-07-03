@@ -28,7 +28,7 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-spec-reporter": "~0.0.24",
     "phantomjs-prebuilt": "^2.1.4",
-    "qmlweb-parser": "^0.2.2",
+    "qmlweb-parser": "^0.3.0",
     "remark-cli": "^2.0.0",
     "remark-lint": "^5.0.0"
   },
