@@ -69,8 +69,8 @@ gulp.task('qmlweb-covered', () =>
       // This is what karma uses
       coverageVariable: '__coverage__'
     }))
-    .pipe(babel())
     .pipe(concat('qt.covered.js'))
+    .pipe(babel())
     .pipe(replace(/["']use strict["'];/g, ''))
     .pipe(iife({
       useStrict: false,
