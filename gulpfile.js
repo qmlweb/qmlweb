@@ -136,9 +136,19 @@ gulp.task('lint-tests', () =>
 
 gulp.task('lint', ['lint-tests']);
 
-gulp.task('test', ['lint', 'build-covered'], done => {
+gulp.task('test', ['lint', 'build-dev'], done => {
   new karma.Server({
     singleRun: true,
+    configFile: path.join(__dirname, 'karma.conf.js')
+  }, code => {
+    process.exit(code);
+  }).start();
+});
+
+gulp.task('coverage', ['lint', 'build-covered'], done => {
+  new karma.Server({
+    singleRun: true,
+    coverageEnabled: true,
     configFile: path.join(__dirname, 'karma.conf.js')
   }, code => {
     process.exit(code);
