@@ -41,7 +41,10 @@ function QMLItem(meta) {
     this.dataChanged.connect(this, function(newData) {
         for (var i in newData) {
             var child = newData[i];
-            if (child.hasOwnProperty("parent")) // Seems to be an Item. TODO: Use real inheritance and ask using instanceof.
+
+            // Not checking if item inherits from Item because non-Item items
+            // may have a "parent" property (e.g. Timer).
+            if (child.hasOwnProperty("parent"))
                 child.parent = this; // This will also add it to children.
             else
                 this.resources.push(child);

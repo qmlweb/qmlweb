@@ -29,4 +29,11 @@ describe('QMLEngine.basic', function() {
     expect(qml.inner3).toBe(qml.current + 'foo/foo/lol/');
     expect(qml.full).toBe('http://example.com/bar');
   });
+
+  it('createObject', function() {
+    var qml = load('CreateObject', this.div);
+    expect(qml.children.length).toBe(1);
+    expect(qml.children[0].q).toBe(22);
+    expect(this.div.innerText).toBe("variable from context = 42");
+  });
 });
