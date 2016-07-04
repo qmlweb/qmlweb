@@ -108,6 +108,7 @@ class QMLComponent {
     return item;
   }
   static getAttachedObject() {
+    // see QMLEngine.js for explanation how it is used.
     if (!this.$Component) {
       this.$Component = new QmlWeb.QObject(this);
       this.$Component.completed = QmlWeb.Signal.signal([]);
