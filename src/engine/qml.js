@@ -482,3 +482,5 @@ QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
+QmlWeb.callSuper = callSuper;
+QmlWeb.createProperty = createProperty;
