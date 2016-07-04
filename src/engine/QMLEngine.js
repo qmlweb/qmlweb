@@ -1,17 +1,15 @@
 /*
- * - QMLEngine(element, options) -- Returns new qml engine object, for which:
+ * - QMLEngine(element) -- Returns new qml engine object, for which:
  *   - loadFile(file) -- Load file to the engine (.qml or .qml.js atm)
  *   - start() -- start the engine/application
  *   - stop() -- stop the engine/application. Restarting is experimental.
- *   element is HTMLCanvasElement and options are for debugging.
- *   For further reference, see testpad and qml viewer applications.
  */
 
 // There can only be one running QMLEngine. This variable points to the currently running engine.
 var engine = null;
 
 // QML engine. EXPORTED.
-const QMLEngine = function (element, options) {
+const QMLEngine = function (element) {
 //----------Public Members----------
     this.fps = 60;
     this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
@@ -107,9 +105,6 @@ const QMLEngine = function (element, options) {
 
     this.loadQMLTree = function(tree, parentComponent = null, file = undefined) {
         engine = this;
-        if (options.debugTree) {
-            options.debugTree(tree);
-        }
 
         // Create and initialize objects
         const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
@@ -582,17 +577,6 @@ const QMLEngine = function (element, options) {
 
 
 //----------Construct----------
-
-    options = options || {};
-
-    if (options.debugConsole) {
-        // Replace QML-side console.log
-        console = {};
-        console.log = function() {
-            var args = Array.prototype.slice.call(arguments);
-            options.debugConsole.apply(undefined, args);
-        };
-    }
 
     // TODO: Move to module initialization
     for (i in constructors) {
