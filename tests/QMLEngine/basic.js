@@ -35,4 +35,10 @@ describe("QMLEngine.basic", function() {
     expect(qml.propA).toBe(42);
     expect(qml.propB).toBe("foo");
   });
+
+  it("SignalDisconnect", function() {
+    // signal disconnect in the signal handler with many subscribers
+    var qml = load("SignalDisconnect", this.div);
+    expect(qml.log).toBe("i12i2");
+  });
 });
