@@ -19,6 +19,7 @@ const qtcoreSources = [
   "src/engine/qmlstructure.js",
   "src/engine/import.js",
   "src/engine/qml.js",
+  'src/modules/QtQml/Qt.js',
   "src/engine/*.js",
   "src/qtbase/QObject.js",
   "src/qtbase/*.js",
