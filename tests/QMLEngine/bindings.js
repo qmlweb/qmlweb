@@ -1,4 +1,4 @@
-describe('QMLEngine.imports', function() {
+describe('QMLEngine.bindings', function() {
   setupDivElement();
   var load = prefixedQmlLoader('QMLEngine/qml/Bindings');
 
