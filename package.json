@@ -41,6 +41,7 @@
     "AUTHORS",
     "LICENSE",
     "README.md",
+    "docs/**/*.md",
     "misc/**/*.svg",
     "misc/**/*.png",
     "lib/**/*.js",
