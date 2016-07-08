@@ -12,6 +12,8 @@ describe('QMLEngine.properties', function() {
     expect(qml.hexProperty).toEqual(255);
     expect(qml.octProperty).toEqual(63);
     expect(qml.bigNumber).toEqual(100000000);
+    expect(qml.sizeProperty.width).toEqual(5);
+    expect(qml.sizeProperty.height).toEqual(6);
   });
 
   it('undefined property has undefined value', function() {

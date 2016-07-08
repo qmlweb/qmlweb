@@ -9,4 +9,5 @@ Item {
   property int hexProperty: 0xFF
   property int octProperty: 077
   property double bigNumber: 1e8
+  property size sizeProperty: Qt.size(5, 6)
 }
