@@ -132,6 +132,11 @@ const Qt = {
     return engine.removeDotSegments( detectedBasePath + url )
   },
 
+  size: function size(width, height)
+  {
+    return new QSizeF(width, height);
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,

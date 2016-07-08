@@ -12,10 +12,14 @@ describe('QMLEngine.bindings', function() {
     var qml = load('Update', this.div);
     expect(qml.intB).toBe(20);
     expect(qml.textB).toBe("hello world");
+    expect(qml.sizeWidth).toBe(1);
+    expect(qml.sizeHeight).toBe(2);
     qml.intA = 5;
     expect(qml.intB).toBe(10);
     qml.textA = "goodbye";
     expect(qml.textB).toBe("goodbye world");
+    qml.size.width = 3;
+    expect(qml.sizeWidth).toBe(3);
   });
 
   /* This test case shows that QMLProperty.js::get() method should check
