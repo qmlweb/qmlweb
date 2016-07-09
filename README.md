@@ -1,4 +1,4 @@
-## JavaScript powered QML Engine
+# JavaScript powered QML Engine
 
 [![Join the chat at https://gitter.im/qmlweb/qmlweb](https://badges.gitter.im/qmlweb/qmlweb.svg)](https://gitter.im/qmlweb/qmlweb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/qmlweb/qmlweb.svg?branch=master)](https://travis-ci.org/qmlweb/qmlweb)
@@ -29,41 +29,47 @@ Rectangle {
 ```
 
 ## How to use
-#### Add the library to your web page
+
+### Add the library to your web page
+
 Using one of the methods below, install the qmlweb JavaScript library:
 
 - [npm](https://www.npmjs.com/package/qmlweb):
 
-  ```
+  ```sh
   npm install qmlweb
   ```
 
 - [Bower](http://bower.io/search/?q=qmlweb):
 
-  ```
+  ```sh
   bower install qmlweb
   ```
 
 - GitHub [releases](https://github.com/qmlweb/qmlweb/releases):
-  ```
+
+  ```sh
   tar -xzvf v0.0.4.tar.gz
   ```
 
 - Manually using gulp (recommended if you cloned from git):
-  ```
+
+  ```sh
   npm install
   npm run build
   ```
 
-Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's HTML file:
-
+Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's
+HTML file:
 
 ```HTML
 <script type="text/javascript" src="/lib/qt.js"></script>
 ```
 
-#### Auto-load
-You may then modify the `<body>` element to specify what QML file to load when the page is opened.
+### Auto-load
+
+You may then modify the `<body>` element to specify what QML file to load when
+the page is opened.
 
 ```HTML
 <!DOCTYPE html>
@@ -78,10 +84,13 @@ You may then modify the `<body>` element to specify what QML file to load when t
 ````
 
 ## How to use with Gulp
+
 See [gulp-qmlweb](https://github.com/qmlweb/gulp-qmlweb) package.
 
 ## How to extend
-When implementing new features, you may need to get away from QML and create your own QML components from scratch, using directly the engine's API.
+
+When implementing new features, you may need to get away from QML and create
+your own QML components from scratch, using directly the engine's API.
 
 ```Javascript
 registerQmlType({
@@ -105,7 +114,7 @@ registerQmlType({
     this.somethingHappened.connect(this, function() {
       console.log('You may also connect to signals in JavaScript');
     });
-  
+
     // Using the DOM
     function updateText() {
       var text = '';
@@ -123,6 +132,7 @@ registerQmlType({
 ```
 
 And here's how you would use that component in a regular QML file:
+
 ```QML
 import MyModule 1.3
 
@@ -136,8 +146,8 @@ MyTypeName {
 
 ## History
 
- 1. [git://anongit.kde.org/qmlweb](https://quickgit.kde.org/?p=qmlweb.git), see [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore),
- 2. [@JoshuaKolden/qmlweb](https://github.com/JoshuaKolden/qmlweb),
- 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb),
- 4. [@labsin/qmlweb](https://github.com/labsin/qmlweb),
- 5. [@arnopaehler/qmlweb](https://github.com/arnopaehler/qmlweb).
+1. [git://anongit.kde.org/qmlweb](https://quickgit.kde.org/?p=qmlweb.git), see [Webapps written in qml not far from reality anymore](http://akreuzkamp.de/2013/07/10/webapps-written-in-qml-not-far-from-reality-anymore),
+2. [@JoshuaKolden/qmlweb](https://github.com/JoshuaKolden/qmlweb),
+3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb),
+4. [@labsin/qmlweb](https://github.com/labsin/qmlweb),
+5. [@arnopaehler/qmlweb](https://github.com/arnopaehler/qmlweb).
