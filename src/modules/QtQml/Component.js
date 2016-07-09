@@ -62,7 +62,7 @@ class QMLComponent {
       }
     }
   }
-  createObject(parent, properties = {}) {
+  $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QmlWeb.QMLOperationState.Init;
@@ -86,6 +86,16 @@ class QMLComponent {
     engine.$basePath = bp;
 
     engine.operationState = oldState;
+    return item;
+  }
+  createObject(parent, properties = {}) {
+    const item = this.$createObject(parent, properties);
+    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
+
+    if (item instanceof QMLItem) {
+      item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInit);
+    }
+
     return item;
   }
   static getAttachedObject() {

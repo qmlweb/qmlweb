@@ -99,8 +99,6 @@ const Qt = {
     component.$file = resolvedFile;
 
     const obj = component.createObject(parent);
-    obj.parent = parent;
-    parent.childrenChanged();
 
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (engine.operationState !== QMLOperationState.Init &&

@@ -252,7 +252,7 @@ function construct(meta) {
             component = Qt.createComponent(meta.object.$class + ".qml");
 
         if (component) {
-            var item = component.createObject(meta.parent);
+            var item = component.$createObject(meta.parent);
 
             if (typeof item.dom != 'undefined')
                 item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");

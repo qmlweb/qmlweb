@@ -145,7 +145,7 @@ registerQmlType({
     const model = this.$getModel();
     let index;
     for (index = startIndex; index < endIndex; index++) {
-      const newItem = this.delegate.createObject();
+      const newItem = this.delegate.$createObject();
       createProperty("int", newItem, "index", { initialValue: index });
       newItem.parent = this.parent;
 
