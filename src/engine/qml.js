@@ -16,7 +16,7 @@ var constructors = {
   string: String,
   'bool': Boolean,
   list: QMLList,
-  color: QColor,
+  color: (...args) => new QColor(...args),
   'enum': Number,
   url: String,
   variant: QMLVariant,

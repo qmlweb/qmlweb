@@ -33,7 +33,7 @@ registerQmlType({
     this.font   = new QMLFont(this);
 
     this.colorChanged.connect(this, function(newVal) {
-        fc.style.color = QColor(newVal);
+        fc.style.color = new QColor(newVal);
     });
     this.textChanged.connect(this, function(newVal) {
         fc.innerHTML = newVal;
@@ -90,7 +90,7 @@ registerQmlType({
         };
     });
     this.styleColorChanged.connect(this, function(newVal) {
-        newVal = QColor(newVal);
+        newVal = new QColor(newVal);
         switch (this.style) {
             case 0:
                 fc.style.textShadow = "none";
