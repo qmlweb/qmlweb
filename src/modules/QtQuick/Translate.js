@@ -13,8 +13,5 @@ registerQmlType({
 
     this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yChanged.connect(this.$parent, this.$parent.$updateTransform);
-
-    this.x = 0;
-    this.y = 0;
   }
 });

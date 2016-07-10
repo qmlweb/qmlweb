@@ -29,76 +29,71 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var self = this;
-
-    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
-    const input = this.impl = document.createElement('input');
-    input.type = 'text';
+    const input = this.impl = document.createElement("input");
+    input.type = "text";
     input.disabled = true;
     input.style.pointerEvents = "auto";
     input.style.margin = "0";
     input.style.width = "100%";
     this.dom.appendChild(input);
-
     this.setupFocusOnDom(input);
-
     input.disabled = false;
 
-    this.Component.completed.connect(this, function () {
-        this.implicitWidth = input.offsetWidth;
-        this.implicitHeight = input.offsetHeight;
-    });
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.textChanged.connect(this, this.$onTextChanged);
+    this.echoModeChanged.connect(this, this.$onEchoModeChanged);
+    this.maximumLengthChanged.connect(this, this.$onMaximumLengthChanged);
+    this.readOnlyChanged.connect(this, this.$onReadOnlyChanged);
 
-    this.textChanged.connect(this, function (newVal) {
-        input.value = newVal;
-    });
+    this.Keys.pressed.connect(this, this.$submitValue);
 
-    this.echoModeChanged.connect(this, (function (newVal) {
-        switch (newVal) {
-        case TextField.Normal:
-            input.type = "text";
-            break;
-        case TextField.Password:
-            input.type = "password";
-            break;
-        }
-    }).bind(this));
-
-    this.maximumLengthChanged.connect(this, function (newVal) {
-        if (newVal < 0)
-            newVal = null;
-        input.maxLength = newVal;
-    });
-
-    this.readOnlyChanged.connect(this, function (newVal) {
-        input.disabled = newVal;
-    });
-
-    this.Keys.pressed.connect(this, (function (e) {
-        if ((e.key === Qt.Key_Return || e.key === Qt.Key_Enter) &&
-            testValidator()) {
-            self.accepted();
-            e.accepted = true;
-        }
-    }).bind(this));
-
-    function testValidator() {
-        if (typeof self.validator !== 'undefined' && self.validator !== null)
-            return self.validator.validate(self.text);
-        return true;
+    input.oninput = () => this.$updateValue();
+    input.onpropertychanged = () => this.$updateValue();
+  }
+  Component$onCompleted() {
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onTextChanged(newVal) {
+    this.impl.value = newVal;
+  }
+  $onEchoModeChanged(newVal) {
+    switch (newVal) {
+      case TextField.Normal:
+        this.impl.type = "text";
+        break;
+      case TextField.Password:
+        this.impl.type = "password";
+        break;
     }
-
-    function updateValue(e) {
-        if (self.text !== self.dom.firstChild.value) {
-            self.$canEditReadOnlyProperties = true;
-            self.text = self.dom.firstChild.value;
-            self.$canEditReadOnlyProperties = false;
-        }
+  }
+  $onMaximumLengthChanged(newVal) {
+    this.impl.maxLength = newVal < 0 ? null : newVal;
+  }
+  $onReadOnlyChanged(newVal) {
+    this.impl.disabled = newVal;
+  }
+  $testValidator() {
+    if (typeof this.validator !== "undefined" && this.validator !== null) {
+      return this.validator.validate(this.text);
     }
-
-    input.oninput = updateValue;
-    input.onpropertychanged = updateValue;
+    return true;
+  }
+  $submitValue(e) {
+    const is_submit = e.key === Qt.Key_Return || e.key === Qt.Key_Enter;
+    if (is_submit && this.$testValidator()) {
+      this.accepted();
+      e.accepted = true;
+    }
+  }
+  $updateValue() {
+    if (this.text !== this.impl.value) {
+      this.$canEditReadOnlyProperties = true;
+      this.text = this.impl.value;
+      this.$canEditReadOnlyProperties = false;
+    }
   }
 });

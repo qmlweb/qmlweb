@@ -7,21 +7,20 @@ registerQmlType({
   constructor(parent) {
     super(parent);
     createProperty("bool", this, "bold");
-    createProperty("enum", this, "capitalization", {initialValue: 0});
-    createProperty("string", this, "family", {initialValue: 'sans-serif'});
+    createProperty("enum", this, "capitalization");
+    createProperty("string", this, "family", { initialValue: "sans-serif" });
     createProperty("bool", this, "italic");
     createProperty("real", this, "letterSpacing");
-    createProperty("int", this, "pixelSize", {initialValue: 13});
-    createProperty("real", this, "pointSize", {initialValue: 10});
+    createProperty("int", this, "pixelSize", { initialValue: 13 });
+    createProperty("real", this, "pointSize", { initialValue: 10 });
     createProperty("bool", this, "strikeout");
     createProperty("bool", this, "underline");
     createProperty("enum", this, "weight");
     createProperty("real", this, "wordSpacing");
-    var sizeLock = false;
 
-        this.boldChanged.connect(newVal => {
-            this.weight = newVal ? 75 : 50; // Font.Bold : Font.Normal;
-        });
+    this.$sizeLock = false;
+
+    this.boldChanged.connect(this, this.$onBoldChanged);
         this.capitalizationChanged.connect(function(newVal) {
             parent.dom.firstChild.style.fontVariant =
                 newVal == "smallcaps" ? "small-caps" : "normal";
@@ -38,7 +37,7 @@ registerQmlType({
             parent.dom.firstChild.style.letterSpacing = newVal !== undefined ? newVal + "px" : "";
         });
         this.pixelSizeChanged.connect(newVal => {
-            if (!sizeLock) {
+            if (!this.$sizeLock) {
               this.pointSize = newVal * 0.75;
             }
             const val = newVal + 'px';
@@ -46,9 +45,9 @@ registerQmlType({
             parent.dom.firstChild.style.fontSize = val;
         });
         this.pointSizeChanged.connect(newVal => {
-            sizeLock = true;
+            this.$sizeLock = true;
             this.pixelSize = Math.round(newVal / 0.75);
-            sizeLock = false;
+            this.$sizeLock = false;
         });
         this.strikeoutChanged.connect(function(newVal) {
             parent.dom.firstChild.style.textDecoration = newVal
@@ -72,5 +71,8 @@ registerQmlType({
         this.wordSpacingChanged.connect(function(newVal) {
             parent.dom.firstChild.style.wordSpacing = newVal !== undefined ? newVal + "px" : "";
         });
+  }
+  $onBoldChanged(newVal) {
+    this.weight = newVal ? 75 : 50; // Font.Bold : Font.Normal;
   }
 });

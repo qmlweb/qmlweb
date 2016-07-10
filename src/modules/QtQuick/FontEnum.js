@@ -11,4 +11,4 @@ global.Font = {
   DemiBold: "600",
   Bold: "bold",
   Black: "bolder"
-}
+};

@@ -22,55 +22,56 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var self = this,
-        socket,
-        reconnect = false;
+    this.$socket = undefined;
+    this.$reconnect = false;
 
-    this.sendTextMessage = function(message) {
-        if (this.status == this.WebSocket.Open)
-            socket.send(message);
+    this.statusChanged.connect(this, this.$onStatusChanged);
+    this.activeChanged.connect(this, this.$reconnectSocket);
+    this.urlChanged.connect(this, this.$reconnectSocket);
+  }
+  $onStatusChanged(status) {
+    if (status !== this.WebSocket.Error) {
+      this.errorString = "";
+    }
+  }
+  $connectSocket() {
+    this.$reconnect = false;
+
+    if (!this.url || !this.active) {
+      return;
     }
 
-    function connectSocket() {
-        reconnect = false;
-
-        if (!self.url || !self.active)
-            return;
-
-        self.status = self.WebSocket.Connecting;
-        socket = new WebSocket(self.url);
-        socket.onopen = function() {
-            self.status = self.WebSocket.Open;
-        }
-        socket.onclose = function() {
-            self.status = self.WebSocket.Closed;
-            if (reconnect)
-                connectSocket();
-        }
-        socket.onerror = function(error) {
-            self.errorString = error.message;
-            self.status = self.WebSocket.Error;
-        }
-        socket.onmessage = function(message) {
-            self.textMessageReceived(message.data);
-        }
+    this.status = this.WebSocket.Connecting;
+    this.$socket = new WebSocket(this.url);
+    this.$socket.onopen = () => {
+      this.status = this.WebSocket.Open;
     };
-
-    function reconnectSocket() {
-        reconnect = true;
-        if (self.status == self.WebSocket.Open) {
-            self.status = self.WebSocket.Closing;
-            socket.close()
-        } else if (self.status != self.WebSocket.Closing) {
-            connectSocket();
-        }
+    this.$socket.onclose = () => {
+      this.status = this.WebSocket.Closed;
+      if (this.$reconnect) {
+        this.$connectSocket();
+      }
     };
-
-    this.statusChanged.connect(this, function(status) {
-        if (status != self.WebSocket.Error)
-            self.errorString = "";
-    });
-    this.activeChanged.connect(this, reconnectSocket);
-    this.urlChanged.connect(this, reconnectSocket);
+    this.$socket.onerror = error => {
+      this.errorString = error.message;
+      this.status = this.WebSocket.Error;
+    };
+    this.$socket.onmessage = message => {
+      this.textMessageReceived(message.data);
+    };
+  }
+  $reconnectSocket() {
+    this.$reconnect = true;
+    if (this.status === this.WebSocket.Open) {
+      this.status = this.WebSocket.Closing;
+      this.$socket.close();
+    } else if (this.status !== this.WebSocket.Closing) {
+      this.$connectSocket();
+    }
+  }
+  sendTextMessage(message) {
+    if (this.status === this.WebSocket.Open) {
+      this.$socket.send(message);
+    }
   }
 });

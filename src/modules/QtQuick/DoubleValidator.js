@@ -15,42 +15,33 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    var standardRegExp   = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
-    var scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
-
-    this.getRegExpForNotation = (function(notation) {
-      switch (notation) {
-        case DoubleValidator.ScientificNotation:
-          return scientificRegExp;
-          break ;
-        case DoubleValidator.StandardNotation:
-          return standardRegExp;
-          break ;
-      }
-      return null;
-    }).bind(this);
-
-    function getDecimalsForNumber(number) {
-      if (Math.round(number) != number) {
-        var str = '' + number;
-
-        return /\d*$/.exec(str)[0].length;
-      }
+    this.$standardRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
+    this.$scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
+  }
+  getRegExpForNotation(notation) {
+    switch (notation) {
+      case DoubleValidator.ScientificNotation:
+        return this.$scientificRegExp;
+      case DoubleValidator.StandardNotation:
+        return this.$standardRegExp;
+    }
+    return null;
+  }
+  $getDecimalsForNumber(number) {
+    if (Math.round(number) === number) {
       return 0;
     }
-
-    this.validate = (function(string) {
-      var regExp     = this.getRegExpForNotation(this.notation);
-      var acceptable = regExp.test(string.trim());
-
-      if (acceptable) {
-        var value    = parseFloat(string);
-
-        acceptable   = this.bottom <= value && this.top >= value;
-        acceptable   = acceptable && getDecimalsForNumber(value) <= this.decimals;
-      }
-      return acceptable;
-    }).bind(this);
+    const str = `${number}`;
+    return /\d*$/.exec(str)[0].length;
+  }
+  validate(string) {
+    const regExp = this.getRegExpForNotation(this.notation);
+    let acceptable = regExp.test(string.trim());
+    if (acceptable) {
+      const value = parseFloat(string);
+      acceptable = this.bottom <= value && this.top >= value;
+      acceptable = acceptable && this.$getDecimalsForNumber(value) <= this.decimals;
+    }
+    return acceptable;
   }
 });

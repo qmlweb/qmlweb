@@ -21,43 +21,44 @@ registerQmlType({
   }
 
   layoutChildren() {
-    var curHPos = 0,
-        curVPos = 0,
-        rowSize = 0;
-    for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
-            continue;
+    let curHPos = 0;
+    let curVPos = 0;
+    let rowSize = 0;
+    for (let i = 0; i < this.children.length; i++) {
+      const child = this.children[i];
+      if (!child.visible || !child.width || !child.height) {
+        continue;
+      }
 
-        if (this.flow == this.Flow.LeftToRight) {
-            if (curHPos + child.width > this.width) {
-                curHPos = 0;
-                curVPos += rowSize + this.spacing;
-                rowSize = 0;
-            }
-            rowSize = child.height > rowSize ? child.height : rowSize;
-
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
-            child.y = curVPos;
-            curHPos += child.width + this.spacing;
-        } else {
-            if (curVPos + child.height > this.height) {
-                curVPos = 0;
-                curHPos += rowSize + this.spacing;
-                rowSize = 0;
-            }
-            rowSize = child.width > rowSize ? child.width : rowSize;
-
-            child.x = this.layoutDirection == 1
-                    ? this.width - curHPos - child.width : curHPos;
-            child.y = curVPos;
-            curVPos += child.height + this.spacing;
+      if (this.flow === this.Flow.LeftToRight) {
+        if (curHPos + child.width > this.width) {
+          curHPos = 0;
+          curVPos += rowSize + this.spacing;
+          rowSize = 0;
         }
+        rowSize = child.height > rowSize ? child.height : rowSize;
+        child.x = this.layoutDirection === this.Flow.TopToBottom
+                ? this.width - curHPos - child.width : curHPos;
+        child.y = curVPos;
+        curHPos += child.width + this.spacing;
+      } else { // Flow.TopToBottom
+        if (curVPos + child.height > this.height) {
+          curVPos = 0;
+          curHPos += rowSize + this.spacing;
+          rowSize = 0;
+        }
+        rowSize = child.width > rowSize ? child.width : rowSize;
+        child.x = this.layoutDirection === this.Flow.TopToBottom
+                ? this.width - curHPos - child.width : curHPos;
+        child.y = curVPos;
+        curVPos += child.height + this.spacing;
+      }
     }
-    if (this.flow == 0)
-        this.implicitHeight = curVPos + rowSize;
-    else
-        this.implicitWidth = curHPos + rowSize;
+
+    if (this.flow === 0) { // Flow.LeftToRight
+      this.implicitHeight = curVPos + rowSize;
+    } else { // Flow.TopToBottom
+      this.implicitWidth = curHPos + rowSize;
+    }
   }
 });

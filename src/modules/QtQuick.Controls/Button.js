@@ -14,26 +14,30 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    const button = this.impl = document.createElement('button');
-    button.style.pointerEvents = 'auto';
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.textChanged.connect(this, this.$onTextChanged);
+    this.enabledChanged.connect(this, this.$onEnabledChanged);
+
+    const button = this.impl = document.createElement("button");
+    button.style.pointerEvents = "auto";
     this.dom.appendChild(button);
 
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = button.offsetWidth;
-        this.implicitHeight = button.offsetHeight;
-    });
-    this.textChanged.connect(this, function(newVal) {
-        button.textContent = newVal;
-        //TODO: Replace those statically sized borders
-        this.implicitWidth = button.offsetWidth;
-        this.implicitHeight = button.offsetHeight;
-    });
-    this.enabledChanged.connect(this, function(newVal) {
-        button.disabled = !newVal;
-    });
-
     button.onclick = () => {
-        this.clicked();
-    }
+      this.clicked();
+    };
   }
+  Component$onCompleted() {
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onTextChanged(newVal) {
+    this.impl.textContent = newVal;
+    //TODO: Replace those statically sized borders
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onEnabledChanged(newVal) {
+    this.impl.disabled = !newVal;
+  }
+
 });

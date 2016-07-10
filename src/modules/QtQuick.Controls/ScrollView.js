@@ -18,44 +18,19 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var self = this;
-
     this.css.pointerEvents = "auto";
     this.setupFocusOnDom(this.dom);
 
-    this.contentItemChanged.connect(this, function(newItem){
-        if (typeof newItem !== undefined) {
-            newItem.parent = self;
-        }
-    });
-    this.flickableItemChanged.connect(this, function(newItem) {
-    });
-    this.viewportChanged.connect(this, function(newViewport) {
-    });
-    this.frameVisibleChanged.connect(this, function(visible) {
-        this.css.border= visible ? "1px solid gray" : "hidden";
-    });
-    this.highlightOnFocusChanged.connect(this, function(highlight) {
-    });
-
-    this.horizontalScrollBarPolicyChanged.connect(this, function(newPolicy) {
-        this.css.overflowX = this.scrollBarPolicyToCssOverflow(newPolicy);
-    });
-    this.verticalScrollBarPolicyChanged.connect(this, function(newPolicy) {
-        this.css.overflowY = this.scrollBarPolicyToCssOverflow(newPolicy);
-    });
-
-    this.styleChanged.connect(this, function(newStyle){});
-
-    ////
-    this.childrenChanged.connect(this, function(){
-       if (typeof self.contentItem == undefined && self.children.length == 1) {
-           self.contentItem = self.children[0];
-       }
-    });
-    this.focusChanged.connect(this, function(focus){
-        this.css.outline = self.highlight && focus ? "outline: lightblue solid 2px;" : "";
-    });
+    this.contentItemChanged.connect(this, this.$onContentItemChanged);
+    this.flickableItemChanged.connect(this, this.$onFlickableItemChanged);
+    this.viewportChanged.connect(this, this.$onViewportChanged);
+    this.frameVisibleChanged.connect(this, this.$onVisibleChanged_);
+    this.highlightOnFocusChanged.connect(this, this.$onHighlightOnFocusChanged);
+    this.horizontalScrollBarPolicyChanged.connect(this, this.$onHorizontalScrollBarPolicyChanged);
+    this.verticalScrollBarPolicyChanged.connect(this, this.$onVerticalScrollBarPolicyChanged);
+    this.styleChanged.connect(this, this.$onStyleChanged);
+    this.childrenChanged.connect(this, this.$onChildrenChanged);
+    this.focusChanged.connect(this, this.$onFocusChanged_);
 
     this.width = this.implicitWidth = 240; // default QML ScrollView width
     this.height = this.implicitHeight = 150; // default QML ScrollView height
@@ -71,15 +46,47 @@ registerQmlType({
     this.horizontalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.style = undefined;
   }
-  scrollBarPolicyToCssOverflow(policy) {
-    switch (policy) {
-        case Qt.ScrollBarAsNeeded:
-            return 'auto';
-        case Qt.ScrollBarAlwaysOff:
-            return 'hidden';
-        case Qt.ScrollBarAlwaysOn:
-            return 'scroll';
+  $onContentItemChanged(newItem) {
+    if (typeof newItem !== undefined) {
+      newItem.parent = this;
     }
-    return 'auto';
+  }
+  $onFlickableItemChanged(newItem) {
+  }
+  $onHighlightOnFocusChanged(highlight) {
+  }
+  $onViewportChanged(newViewport) {
+  }
+  $onFocusChanged_(focus) {
+    this.css.outline = this.highlight && focus
+      ? "outline: lightblue solid 2px;"
+      : "";
+  }
+  $onVisibleChanged_(visible) {
+    this.css.border= visible ? "1px solid gray" : "hidden";
+  }
+  $onHorizontalScrollBarPolicyChanged(newPolicy) {
+    this.css.overflowX = this.$scrollBarPolicyToCssOverflow(newPolicy);
+  }
+  $onVerticalScrollBarPolicyChanged(newPolicy) {
+    this.css.overflowY = this.$scrollBarPolicyToCssOverflow(newPolicy);
+  }
+  $onStyleChanged(newStyle) {
+  }
+  $onChildrenChanged() {
+    if (typeof this.contentItem === "undefined" && this.children.length === 1) {
+      this.contentItem = this.children[0];
+    }
+  }
+  $scrollBarPolicyToCssOverflow(policy) {
+    switch (policy) {
+      case Qt.ScrollBarAsNeeded:
+        return "auto";
+      case Qt.ScrollBarAlwaysOff:
+        return "hidden";
+      case Qt.ScrollBarAlwaysOn:
+        return "scroll";
+    }
+    return "auto";
   }
 });

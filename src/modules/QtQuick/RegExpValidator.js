@@ -9,11 +9,9 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    this.validate = (function(string) {
-      if (typeof this.regExp == 'undefined' || this.regExp == null)
-        return true;
-      return this.regExp.test(string);
-    }).bind(this);
+  }
+  validate(string) {
+    if (!this.regExp) return true;
+    return this.regExp.test(string);
   }
 });

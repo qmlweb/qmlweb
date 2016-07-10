@@ -15,23 +15,25 @@ registerQmlType({
     callSuper(this, meta);
 
     this.$item = this.$parent;
-
-    this.$start = function(actions) {
-        for (var i = 0; i < this.animations.length; i++) {
-            var animation = this.animations[i];
-            animation.$actions = [];
-            for (var j in actions) {
-                var action = actions[j];
-                if ((animation.$targets.length === 0 || animation.$targets.indexOf(action.target) !== -1)
-                    && (animation.$props.length === 0 || animation.$props.indexOf(action.property) !== -1))
-                    animation.$actions.push(action);
-            }
-            animation.start();
+  }
+  $start(actions) {
+    for (let i = 0; i < this.animations.length; i++) {
+      const animation = this.animations[i];
+      animation.$actions = [];
+      const { $targets, $props, $actions } = animation;
+      for (const j in actions) {
+        const action = actions[j];
+        if (($targets.length === 0 || $targets.indexOf(action.target) !== -1) &&
+            ($props.length === 0 || $props.indexOf(action.property) !== -1)) {
+          $actions.push(action);
         }
+      }
+      animation.start();
     }
-    this.$stop = function() {
-        for (var i = 0; i < this.animations.length; i++)
-            this.animations[i].stop();
+  }
+  $stop() {
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].stop();
     }
   }
 });

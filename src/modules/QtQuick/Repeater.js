@@ -34,6 +34,7 @@ registerQmlType({
 
     function callOnCompleted(child) {
         child.Component.completed();
+        const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
         for (var i = 0; i < child.$tidyupList.length; i++)
             if (child.$tidyupList[i] instanceof QMLBaseObject)
                 callOnCompleted(child.$tidyupList[i]);

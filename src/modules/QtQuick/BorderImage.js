@@ -18,7 +18,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var self = this;
 
     this.border = new QObject(this);
     createProperty("int", this.border, "left");
@@ -26,41 +25,30 @@ registerQmlType({
     createProperty("int", this.border, "top");
     createProperty("int", this.border, "bottom");
 
-    this.sourceChanged.connect(this, function() {
-        this.dom.style.borderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-    });
-    this.border.leftChanged.connect(this, updateBorder);
-    this.border.rightChanged.connect(this, updateBorder);
-    this.border.topChanged.connect(this, updateBorder);
-    this.border.bottomChanged.connect(this, updateBorder);
-    this.horizontalTileModeChanged.connect(this, updateBorder);
-    this.verticalTileModeChanged.connect(this, updateBorder);
-
-    function updateBorder() {
-        this.dom.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.dom.style.OBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left + " "
-                                                + "fill";
-        this.dom.style.OBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.dom.style.OBorderImageWidth = this.border.top + "px "
-                                                + this.border.right + "px "
-                                                + this.border.bottom + "px "
-                                                + this.border.left + "px";
-
-        this.dom.style.borderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left + " "
-                                                + "fill";
-        this.dom.style.borderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.dom.style.borderImageWidth = this.border.top + "px "
-                                                + this.border.right + "px "
-                                                + this.border.bottom + "px "
-                                                + this.border.left + "px";
-    }
+    this.sourceChanged.connect(this, this.$onSourceChanged);
+    this.border.leftChanged.connect(this, this.$updateBorder);
+    this.border.rightChanged.connect(this, this.$updateBorder);
+    this.border.topChanged.connect(this, this.$updateBorder);
+    this.border.bottomChanged.connect(this, this.$updateBorder);
+    this.horizontalTileModeChanged.connect(this, this.$updateBorder);
+    this.verticalTileModeChanged.connect(this, this.$updateBorder);
+  }
+  $onSourceChanged() {
+    const style = this.dom.style;
+    style.OBorderImageSource = `url(${engine.$resolvePath(this.source)})`;
+    style.borderImageSource = `url(${engine.$resolvePath(this.source)})`;
+  }
+  $updateBorder() {
+    const style = this.dom.style;
+    const { right, left, top, bottom } = this.border;
+    const slice = `${top} ${right} ${bottom} ${left} fill`;
+    const width = `${top}px ${right}px ${bottom}px ${left}px`;
+    const repeat = `${this.horizontalTileMode} ${this.verticalTileMode}`;
+    style.OBorderImageSlice = slice;
+    style.OBorderImageRepeat = repeat;
+    style.OBorderImageWidth = width;
+    style.borderImageSlice = slice;
+    style.borderImageRepeat = repeat;
+    style.borderImageWidth = width;
   }
 });

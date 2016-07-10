@@ -12,13 +12,17 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.animationChanged.connect(this, function(newVal) {
-        newVal.target = this.$parent;
-        newVal.property = meta.object.$on;
-        this.$parent.$properties[meta.object.$on].animation = newVal;
-    });
-    this.enabledChanged.connect(this, function(newVal) {
-        this.$parent.$properties[meta.object.$on].animation = newVal ? this.animation : null;
-    });
+    this.animationChanged.connect(this, this.$onAnimationChanged);
+    this.enabledChanged.connect(this, this.$onEnabledChanged);
+  }
+  $onAnimationChanged(newVal) {
+    newVal.target = this.$parent;
+    newVal.property = meta.object.$on;
+    this.$parent.$properties[meta.object.$on].animation = newVal;
+  }
+  $onEnabledChanged(newVal) {
+    this.$parent.$properties[meta.object.$on].animation = newVal
+      ? this.animation
+      : null;
   }
 });

@@ -11,46 +11,43 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var previousSource = null;
-    var filterObject;
+    this.$previousSource = null;
+    this.$filterObject = undefined;
 
-    var updateFilterObject = (function() {
-      filterObject = {
-        transformType: 'filter',
-        operation:     'blur',
-        parameters:    this.radius + 'px'
-      };
-    }).bind(this);
-
-    function stripEffectFromSource(source) {
-      if (previousSource != null) {
-        var index = previousSource.transform.indexOf(filterObject);
-
-        previousSource.transform.splice(index, 1);
-        previousSource.$updateTransform();
-      }
+    this.radiusChanged.connect(this, this.$onRadiusChanged);
+    this.sourceChanged.connect(this, this.$onSourceChanged);
+  }
+  $onRadiusChanged(newVal) {
+    this.$updateEffect(this.source);
+  }
+  $onSourceChanged(newVal) {
+    this.$updateEffect(this.source);
+  }
+  $updateFilterObject() {
+    this.$filterObject = {
+      transformType: "filter",
+      operation: "blur",
+      parameters: `${this.radius}px`
+    };
+  }
+  $stripEffectFromSource(source) {
+    if (this.$previousSource) {
+      const index = this.$previousSource.transform.indexOf(this.$filterObject);
+      this.$previousSource.transform.splice(index, 1);
+      this.$previousSource.$updateTransform();
     }
-
-    function updateEffect(source) {
-      console.log("updating effect");
-      stripEffectFromSource(previousSource);
-      if (source != null && typeof source.transform != 'undefined') {
-        updateFilterObject();
-        console.log("updating effect:", filterObject, source);
-        source.transform.push(filterObject);
-        source.$updateTransform();
-        previousSource = source;
-      } else {
-        previousSource = null;
-      }
+  }
+  $updateEffect(source) {
+    console.log("updating effect");
+    this.stripEffectFromSource(this.$previousSource);
+    if (source && source.transform) {
+      this.$updateFilterObject();
+      console.log("updating effect:", this.$filterObject, source);
+      source.transform.push(this.$filterObject);
+      source.$updateTransform();
+      this.$previousSource = source;
+    } else {
+      this.$previousSource = null;
     }
-
-    this.radiusChanged.connect(this, (function(newVal) {
-      updateEffect(this.source);
-    }).bind(this));
-
-    this.sourceChanged.connect(this, (function(newVal) {
-      updateEffect(this.source);
-    }).bind(this));
   }
 });

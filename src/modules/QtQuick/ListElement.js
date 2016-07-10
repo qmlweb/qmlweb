@@ -7,10 +7,10 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    for (var i in meta.object) {
-        if (i[0] != "$") {
-            createProperty("variant", this, i);
-        }
+    for (const i in meta.object) {
+      if (i[0] !== "$") {
+        createProperty("variant", this, i);
+      }
     }
     applyProperties(meta.object, this, this, this.$context);
   }

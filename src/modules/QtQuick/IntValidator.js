@@ -10,17 +10,15 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
+  }
+  validate(string) {
+    const regExp = /^(-|\+)?\s*[0-9]+$/;
+    let acceptable = regExp.test(string.trim());
 
-    this.validate = (function(string) {
-      var regExp     = /^(-|\+)?\s*[0-9]+$/;
-      var acceptable = regExp.test(string.trim());
-
-      if (acceptable) {
-        var value    = parseInt(string);
-
-        acceptable   = this.bottom <= value && this.top >= value;
-      }
-      return acceptable;
-    }).bind(this);
+    if (acceptable) {
+      const value = parseInt(string, 10);
+      acceptable = this.bottom <= value && this.top >= value;
+    }
+    return acceptable;
   }
 });

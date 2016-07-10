@@ -23,58 +23,44 @@ registerQmlType({
   }
 }, class {
   constructor(meta) {
-        callSuper(this, meta);
-
-        var self = this;
-
-        this.cancelRequestAnimationFrame = function(handle) {
-            return false;
-        };
-
-        this.getContext = function(context_id) {
-            var args = arguments.slice(1, arguments.length);
-            return {};
-        };
-
-        this.isImageError = function(image) {
-            return true;
-        };
-
-        this.isImageLoaded = function(image) {
-            return false;
-        };
-
-        this.isImageLoading = function(image) {
-            return false;
-        };
-
-        this.loadImage = function(image) {
-            //loadImageAsync(image);
-            if (this.isImageLoaded(image))
-                this.imageLoaded();
-        };
-
-        this.markDirty = function(area) {
-            // if dirty
-            this.paint(area);
-        };
-
-        this.requestAnimationFrame = function(callback) {
-            return 0;
-        };
-
-        this.requestPaint = function() {
-        };
-
-        this.save = function(file_name) {
-            return false;
-        };
-
-        this.toDataURL = function(mime_type) {
-            return "";
-        };
-
-        this.unloadImage = function(image) {
-        };
+    callSuper(this, meta);
+  }
+  cancelRequestAnimationFrame(handle) {
+    return false;
+  }
+  getContext(context_id, ...args) {
+    return {};
+  }
+  isImageError(image) {
+    return true;
+  }
+  isImageLoaded(image) {
+    return false;
+  }
+  isImageLoading(image) {
+    return false;
+  }
+  loadImage(image) {
+    //loadImageAsync(image);
+    if (this.isImageLoaded(image)) {
+      this.imageLoaded();
     }
+  }
+  markDirty(area) {
+    // if dirty
+    this.paint(area);
+  }
+  requestAnimationFrame(callback) {
+    return 0;
+  }
+  requestPaint() {
+  }
+  save(file_name) {
+    return false;
+  }
+  toDataURL(mime_type) {
+    return "";
+  }
+  unloadImage(image) {
+  }
 });

@@ -15,64 +15,60 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var prevTrigger,
-        self = this;
-
-    engine.$addTicker(ticker);
-    function ticker(now, elapsed) {
-        if (self.running) {
-            if (now - prevTrigger >= self.interval) {
-                prevTrigger = now;
-                trigger();
-            }
-        }
-    }
 
     /* This ensures that if the user toggles the "running" property manually,
      * the timer will trigger. */
-    this.runningChanged.connect(this, function() {
-        if (this.running) {
-            prevTrigger = new Date().getTime();
-            if (this.triggeredOnStart) {
-                trigger();
-            }
-        }
-    })
+    this.runningChanged.connect(this, this.$onRunningChanged);
 
-    this.start = function() {
-        this.running = true;
-    }
-    this.stop = function() {
-        this.running = false;
-    }
-    this.restart = function() {
-        this.stop();
-        this.start();
-    }
-
-    function trigger() {
-        if (!self.repeat)
-            // We set the value directly in order to be able to emit the runningChanged
-            // signal after triggered, like Qt does it.
-            self.$properties.running.val = false;
-
-        // Trigger this.
-        self.triggered();
-
-        if (!self.repeat)
-            // Emit changed signal manually after setting the value manually above.
-            self.runningChanged();
-    }
-
-    engine.$registerStart(function() {
-        if (self.running) {
-            self.running = false; // toggled back by self.start();
-            self.start();
-        }
+    engine.$addTicker((now, elapsed) => {
+      if (!this.running) return;
+      if (now - this.$prevTrigger >= this.interval) {
+        this.$prevTrigger = now;
+        this.$trigger();
+      }
     });
 
-    engine.$registerStop(function() {
-        self.stop();
+    engine.$registerStart(() => {
+      if (this.running) {
+        this.restart();
+      }
     });
+
+    engine.$registerStop(() => {
+      this.stop();
+    });
+  }
+  start() {
+    this.running = true;
+  }
+  stop() {
+    this.running = false;
+  }
+  restart() {
+    this.stop();
+    this.start();
+  }
+  $onRunningChanged() {
+    if (this.running) {
+      this.$prevTrigger = Date.now();
+      if (this.triggeredOnStart) {
+        this.$trigger();
+      }
+    }
+  }
+  $trigger() {
+    if (!this.repeat) {
+      // We set the value directly in order to be able to emit the
+      // runningChanged signal after triggered, like Qt does it.
+      this.$properties.running.val = false;
+    }
+
+    // Trigger this.
+    this.triggered();
+
+    if (!this.repeat) {
+      // Emit changed signal manually after setting the value manually above.
+      this.runningChanged();
+    }
   }
 });

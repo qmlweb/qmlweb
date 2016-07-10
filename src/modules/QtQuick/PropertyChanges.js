@@ -13,12 +13,8 @@ registerQmlType({
     callSuper(this, meta);
 
     this.$actions = [];
-
-    this.$setCustomData = function(propName, value) {
-        this.$actions.push({
-            property: propName,
-            value: value
-        });
-    }
+  }
+  $setCustomData(property, value) {
+    this.$actions.push({ property, value });
   }
 });
