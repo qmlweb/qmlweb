@@ -3,9 +3,9 @@ registerQmlType({
   name:   'Font',
   versions: /.*/,
   baseClass: 'QtQml.QtObject'
-}, class {
+}, class extends QObject {
   constructor(parent) {
-    QObject.call(this);
+    super(parent);
     createProperty("bool", this, "bold");
     createProperty("enum", this, "capitalization", {initialValue: 0});
     createProperty("string", this, "family", {initialValue: 'sans-serif'});
@@ -74,4 +74,3 @@ registerQmlType({
         });
   }
 });
-
