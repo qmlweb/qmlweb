@@ -398,4 +398,6 @@ QColor.colormap = { // https://www.w3.org/TR/SVG/types.html#ColorKeywords
   yellow: [255, 255, 0],
   yellowgreen: [154, 205, 50]
 };
+QColor.nonNullableType = true;
+QColor.requireConstructor = true;
 QmlWeb.QColor = QColor;

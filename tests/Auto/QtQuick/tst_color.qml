@@ -84,4 +84,11 @@ TestCase {
     tmp.a = 0.4;
     verify(Qt.colorEqual(tmp, "#66996633"))
   }
+  function test_immut() {
+    tmp = foo;
+    tmp.r = 1;
+    tmp.a = 0.2;
+    compare(tmp.toString(), '#33ffcdef')
+    compare(foo.toString(), '#abcdef')
+  }
 }

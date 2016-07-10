@@ -52,6 +52,10 @@ class QMLProperty {
       this.val = val;
     } else if (constructors[this.type].requireParent) {
       this.val = new constructors[this.type](this.obj, val);
+    } else if (val === undefined && constructors[this.type].nonNullableType) {
+      this.val = new constructors[this.type]();
+    } else if (constructors[this.type].requireConstructor) {
+      this.val = new constructors[this.type](val);
     } else if (val instanceof Object || val === undefined || val === null) {
       this.val = val;
     } else if (constructors[this.type].plainType) {

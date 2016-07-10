@@ -88,9 +88,15 @@ const Qt = {
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   resolvedUrl: url => QmlWeb.qmlUrl(url),
 
-  size: function size(width, height) {
-    return new QmlWeb.QSizeF(width, height);
-  },
+  // Basic QML types constructors
+  point: (...args) => new QmlWeb.QPointF(...args),
+  rect: (...args) => new QmlWeb.QRectF(...args),
+  size: (...args) => new QmlWeb.QSizeF(...args),
+  vector2d: (...args) => new QmlWeb.QVector2D(...args),
+  vector3d: (...args) => new QmlWeb.QVector3D(...args),
+  vector4d: (...args) => new QmlWeb.QVector4D(...args),
+  quaternion: (...args) => new QmlWeb.QQuaternion(...args),
+  matrix4x4: (...args) => new QmlWeb.QMatrix4x4(...args),
 
   // Colors
   rgba: (...args) => QmlWeb.QColor.rgba(...args),
