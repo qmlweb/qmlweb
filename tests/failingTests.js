@@ -1,25 +1,25 @@
 window.failingTests = {
   Render: {
     Async: [
-      'NumberAnimationAutorun'
+      "NumberAnimationAutorun"
     ]
   },
   QMLEngine: {
     properties: [
-      'alias to id with same name',
-      'ChangedExpressionSignal',
-      'StringConversion'
+      "alias to id with same name",
+      "ChangedExpressionSignal",
+      "StringConversion"
     ],
     scope: [
-      'object id should override same-named property of base object'
+      "object id should override same-named property of base object"
     ]
   },
   Initialize: {
     QtQuick: [
-      'Translate',
-      'Scale',
-      'Rotation',
-      'Font'
+      "Translate",
+      "Scale",
+      "Rotation",
+      "Font"
     ]
   }
 };
