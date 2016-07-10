@@ -22,31 +22,31 @@ class QMLBaseObject extends QObject {
     }
 
     this.Keys = new QObject(this);
-    this.Keys.asteriskPresed = Signal();
-    this.Keys.backPressed = Signal();
-    this.Keys.backtabPressed = Signal();
-    this.Keys.callPressed = Signal();
-    this.Keys.cancelPressed = Signal();
-    this.Keys.deletePressed = Signal();
+    this.Keys.asteriskPresed = Signal.signal();
+    this.Keys.backPressed = Signal.signal();
+    this.Keys.backtabPressed = Signal.signal();
+    this.Keys.callPressed = Signal.signal();
+    this.Keys.cancelPressed = Signal.signal();
+    this.Keys.deletePressed = Signal.signal();
     for (var i = 0 ; i < 10 ; ++i)
-      this.Keys['digit'+i+'Pressed'] = Signal();
-    this.Keys.escapePressed = Signal();
-    this.Keys.flipPressed = Signal();
-    this.Keys.hangupPressed = Signal();
-    this.Keys.leftPressed = Signal();
-    this.Keys.menuPressed = Signal();
-    this.Keys.noPressed = Signal();
-    this.Keys.pressed = Signal();
-    this.Keys.released = Signal();
-    this.Keys.returnPressed = Signal();
-    this.Keys.rightPressed = Signal();
-    this.Keys.selectPressed = Signal();
-    this.Keys.spacePressed = Signal();
-    this.Keys.tabPressed = Signal();
-    this.Keys.upPressed = Signal();
-    this.Keys.volumeDownPressed = Signal();
-    this.Keys.volumeUpPressed = Signal();
-    this.Keys.yesPressed = Signal();
+      this.Keys['digit'+i+'Pressed'] = Signal.signal();
+    this.Keys.escapePressed = Signal.signal();
+    this.Keys.flipPressed = Signal.signal();
+    this.Keys.hangupPressed = Signal.signal();
+    this.Keys.leftPressed = Signal.signal();
+    this.Keys.menuPressed = Signal.signal();
+    this.Keys.noPressed = Signal.signal();
+    this.Keys.pressed = Signal.signal();
+    this.Keys.released = Signal.signal();
+    this.Keys.returnPressed = Signal.signal();
+    this.Keys.rightPressed = Signal.signal();
+    this.Keys.selectPressed = Signal.signal();
+    this.Keys.spacePressed = Signal.signal();
+    this.Keys.tabPressed = Signal.signal();
+    this.Keys.upPressed = Signal.signal();
+    this.Keys.volumeDownPressed = Signal.signal();
+    this.Keys.volumeUpPressed = Signal.signal();
+    this.Keys.yesPressed = Signal.signal();
 
     this.getAttributes = function() { return (attributes); }
   }

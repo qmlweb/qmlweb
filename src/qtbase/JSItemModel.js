@@ -2,24 +2,24 @@ class JSItemModel {
   constructor() {
     this.roleNames = [];
 
-    this.dataChanged = Signal([
+    this.dataChanged = Signal.signal([
       { type: 'int', name: 'startIndex' },
       { type: 'int', name: 'endIndex' }
     ]);
-    this.rowsInserted = Signal([
+    this.rowsInserted = Signal.signal([
       { type: 'int', name: 'startIndex' },
       { type: 'int', name: 'endIndex' }
     ]);
-    this.rowsMoved = Signal([
+    this.rowsMoved = Signal.signal([
       { type: 'int', name: 'sourceStartIndex' },
       { type: 'int', name: 'sourceEndIndex' },
       { type: 'int', name: 'destinationIndex' }
     ]);
-    this.rowsRemoved = Signal([
+    this.rowsRemoved = Signal.signal([
       { type: 'int', name: 'startIndex' },
       { type: 'int', name: 'endIndex' }
     ]);
-    this.modelReset = Signal();
+    this.modelReset = Signal.signal();
   }
 
   setRoleNames(names) {

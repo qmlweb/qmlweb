@@ -10,10 +10,10 @@ class QMLContext {
 QMLComponent.getAttachedObject = function() { // static
     if (!this.$Component) {
         this.$Component = new QObject(this);
-        this.$Component.completed = Signal([]);
+        this.$Component.completed = Signal.signal([]);
         engine.completedSignals.push(this.$Component.completed);
 
-        this.$Component.destruction = Signal([]);
+        this.$Component.destruction = Signal.signal([]);
     }
     return this.$Component;
 }

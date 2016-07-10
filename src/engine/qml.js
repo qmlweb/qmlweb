@@ -215,7 +215,7 @@ function callSuper(self, meta) {
   if (info.signals) {
     Object.keys(info.signals).forEach(name => {
       const params = info.signals[name];
-      self[name] = Signal(params);
+      self[name] = Signal.signal(params);
     });
   }
   if (info.defaultProperty) {
@@ -411,7 +411,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
 
         if (value instanceof Object) {
             if (value instanceof QMLSignalDefinition) {
-                item[i] = Signal(value.parameters);
+                item[i] = Signal.signal(value.parameters);
                 if (item.$isComponentRoot)
                     componentScope[i] = item[i];
                 continue;

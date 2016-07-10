@@ -2,7 +2,7 @@ class QMLProperty {
   constructor(type, obj, name) {
     this.obj = obj;
     this.name = name;
-    this.changed = Signal([], {obj:obj});
+    this.changed = Signal.signal([], { obj });
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
