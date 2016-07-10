@@ -205,16 +205,9 @@ registerQmlType({
             this.$targets.push(this.target);
     }
 
-    this.duration = 250;
-    this.easing.type = Easing.Linear;
-    this.easing.amplitude = 1;
-    this.easing.period = 0.3;
-    this.easing.overshoot = 1.70158;
     this.$props = [];
     this.$targets = [];
     this.$actions = [];
-    this.properties = "";
-    this.targets = [];
 
     this.targetChanged.connect(this, redoTargets);
     this.targetsChanged.connect(this, redoTargets);
