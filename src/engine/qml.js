@@ -76,6 +76,8 @@ function registerQmlType(options, constructor) {
       versions: options.versions,
       baseClass: options.baseClass,
       enums: options.enums,
+      signals: options.signals,
+      defaultProperty: options.defaultProperty,
       properties: options.properties,
       constructor: options
     }
