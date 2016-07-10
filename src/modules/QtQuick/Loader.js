@@ -11,14 +11,15 @@ registerQmlType({
       source: "url",
       sourceComponent: "Component",
       status: { type: "enum", initialValue: 1 }
-    }
-  }, class {
+  },
+  signals: {
+    loaded: []
+  },
+}, class {
     constructor(meta) {
         callSuper(this, meta);
 
         let sourceUrl = '';
-
-        this.loaded = Signal();
 
         const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
 

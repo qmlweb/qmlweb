@@ -12,6 +12,9 @@ registerQmlType({
     readOnly: "bool",
     validator: "var",
     echoMode: "enum" // TextInput.Normal
+  },
+  signals: {
+    accepted: []
   }
 }, class {
   constructor(meta) {
@@ -36,7 +39,6 @@ registerQmlType({
 
     this.setupFocusOnDom(input);
 
-    this.accepted = Signal();
     input.disabled = false;
 
     this.Component.completed.connect(this, function() {

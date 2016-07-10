@@ -13,6 +13,12 @@ registerQmlType({
     containsMouse: "bool",
     pressedButtons: { type: "variant", initialValue: 0 },
     cursorShape: "enum" // Qt.ArrowCursor
+  },
+  signals: {
+    clicked: [{ type: "variant", name: "mouse" }],
+    entered: [],
+    exited: [],
+    positionChanged: [{ type: "variant", name: "mouse" }]
   }
 }, class {
   constructor(meta) {
@@ -26,11 +32,6 @@ registerQmlType({
     // as that doesn't affect the mouse handling.
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
-
-    this.clicked = Signal([{type: "variant", name: "mouse"}]);
-    this.entered = Signal();
-    this.exited = Signal();
-    this.positionChanged = Signal([{type: "variant", name: "mouse"}]);
 
     function eventToMouse(e) {
         return {

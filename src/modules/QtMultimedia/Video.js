@@ -27,6 +27,11 @@ registerQmlType({
     fillMode: "enum", // VideoOutput.PreserveAspectFit
     status: "enum", // MediaPlayer.NoMedia
     error: "enum" // MediaPlayer.NoError
+  },
+  signals: {
+    paused: [],
+    playing: [],
+    stopped: []
   }
 }, class {
   constructor(meta) {
@@ -42,10 +47,6 @@ registerQmlType({
 
     this.volume = domVideo.volume;
     this.duration = domVideo.duration;
-
-    this.paused  = Signal();
-    this.playing = Signal();
-    this.stopped = Signal();
 
     this.autoPlayChanged.connect(this, (function(newVal) {
       domVideo.autoplay = newVal;

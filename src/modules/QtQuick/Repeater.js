@@ -8,6 +8,9 @@ registerQmlType({
     model: { type: "variant", initialValue: 0 },
     count: "int"
   },
+  signals: {
+    _childrenInserted: []
+  },
   defaultProperty: "delegate"
 }, class {
   constructor(meta) {
@@ -20,7 +23,6 @@ registerQmlType({
     this.container = function() { return this.parent; }
     this.$completed = false;
     this.$items = []; // List of created items
-    this._childrenInserted = Signal();
 
     this.modelChanged.connect(applyModel);
     this.delegateChanged.connect(applyModel);

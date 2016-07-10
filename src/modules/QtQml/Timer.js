@@ -8,16 +8,15 @@ registerQmlType({
     repeat: "bool",
     running: "bool",
     triggeredOnStart: "bool"
+  },
+  signals: {
+    triggered: []
   }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
     var prevTrigger,
         self = this;
-
-    // Create trigger as simple property. Reading the property triggers
-    // the function!
-    this.triggered = Signal();
 
     engine.$addTicker(ticker);
     function ticker(now, elapsed) {

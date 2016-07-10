@@ -6,6 +6,9 @@ registerQmlType({
   properties: {
     text: "string",
     enabled: { type: "bool", initialValue: true }
+  },
+  signals: {
+    clicked: []
   }
 }, class {
   constructor(meta) {
@@ -14,8 +17,6 @@ registerQmlType({
     const button = this.impl = document.createElement('button');
     button.style.pointerEvents = 'auto';
     this.dom.appendChild(button);
-
-    this.clicked = Signal();
 
     this.Component.completed.connect(this, function() {
         this.implicitWidth = button.offsetWidth;

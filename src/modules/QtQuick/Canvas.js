@@ -15,16 +15,17 @@ registerQmlType({
     renderStrategy: "enum",
     renderTarget: "enum",
     tileSize: { type: "var", initialValue: [0, 0] }
+  },
+  signals: {
+    imageLoaded: [],
+    paint: [{ type: "var", name: "region" }],
+    painted: []
   }
 }, class {
   constructor(meta) {
         callSuper(this, meta);
 
         var self = this;
-
-        this.imageLoaded = Signal();
-        this.paint = Signal([{type: "var", name: "region"}]);
-        this.painted = Signal();
 
         this.cancelRequestAnimationFrame = function(handle) {
             return false;

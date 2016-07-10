@@ -14,12 +14,13 @@ registerQmlType({
     status: { type: "enum", initialValue: 3 }, // WebSocket.Closed
     errorString: "string",
     url: "url"
+  },
+  signals: {
+    textMessageReceived: [{ type: "string", name: "message" }]
   }
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-
-    this.textMessageReceived = Signal([{type: "string", name: "message"}]);
 
     var self = this,
         socket,

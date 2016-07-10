@@ -40,6 +40,10 @@ registerQmlType({
     textMargin: "real",
     verticalAlignment: "enum",
     wrapMode: "enum"
+  },
+  signals: {
+    linkActivated: [{ type: "string", name: "link" }],
+    linkHovered: [{ type: "string", name: "link" }]
   }
 }, class {
   constructor(meta) {
@@ -80,16 +84,6 @@ registerQmlType({
     this.textChanged.connect(this, function(newVal) {
         textarea.value = newVal;
     });
-
-    // Signals
-    this.linkActivated = Signal([{
-        type: "string",
-        name: 'link'
-    }]);
-    this.linkHovered = Signal([{
-        type: "string",
-        name: 'link'
-    }]);
 
     // Methods
     this.append = function append(text) {

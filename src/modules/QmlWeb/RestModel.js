@@ -8,6 +8,10 @@ registerQmlType({
     isLoading: "bool",
     mimeType: { type: "string", initialValue: "application/json" },
     queryMimeType: { type: "string", initialValue: "application/x-www-urlencoded" }
+  },
+  signals: {
+    fetched: [],
+    saved: []
   }
 }, class {
   constructor(meta) {
@@ -15,9 +19,6 @@ registerQmlType({
     var self = this;
     var attributes = this.getAttributes();
     this.attributes    = attributes;
-
-    this.fetched = Signal();
-    this.saved   = Signal();
 
     this.runningRequests = 0;
 

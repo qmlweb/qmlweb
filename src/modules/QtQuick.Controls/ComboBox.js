@@ -10,6 +10,10 @@ registerQmlType({
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
     pressed: "bool"
+  },
+  signals: {
+    accepted: [],
+    activated: [{ type: "int", name: "index" }]
   }
 }, class {
   constructor(meta) {
@@ -41,9 +45,6 @@ registerQmlType({
         html += tail;
         return html;
     };
-
-    this.accepted = Signal();
-    this.activated = Signal([{type: "int", name: "index"}]);
 
     this.find = function(text) {
         return self.model.indexOf(text)

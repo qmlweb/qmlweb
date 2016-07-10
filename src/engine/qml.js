@@ -83,6 +83,7 @@ function registerQmlType(options, constructor) {
 
   options.constructor.$qmlTypeInfo = {
     enums: options.enums,
+    signals: options.signals,
     defaultProperty: options.defaultProperty,
     properties: options.properties
   };
@@ -207,6 +208,12 @@ function callSuper(self, meta) {
         desc = {type: desc};
       }
       createProperty(desc.type, self, name, desc);
+    });
+  }
+  if (info.signals) {
+    Object.keys(info.signals).forEach(name => {
+      const params = info.properties[name];
+      self[name] = Signal(params);
     });
   }
   if (info.defaultProperty) {
