@@ -83,7 +83,7 @@ rules:
   prefer-rest-params: 2
   prefer-template: 2
   quote-props: [0, "as-needed"]
-  quotes: [0, "single"]
+  quotes: [0, "double", {"avoidEscape": true}]
   radix: 2
   semi: 2
   semi-spacing: 2
