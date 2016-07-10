@@ -1,7 +1,7 @@
-describe('QtQuick.ListModel', function() {
+describe("QtQuick.ListModel", function() {
   setupDivElement();
 
-  var load = prefixedQmlLoader('QtQuick/qml/');
+  var load = prefixedQmlLoader("QtQuick/qml/");
   it("can append a new item", function() {
     var qml = load("ListModel", this.div);
     var oldCount = qml.count;

@@ -1,10 +1,10 @@
-describe('QtQuick.Timer', function() {
+describe("QtQuick.Timer", function() {
   setupDivElement();
   beforeEach(function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  var load = prefixedQmlLoader('QtQuick/qml/Timer');
+  var load = prefixedQmlLoader("QtQuick/qml/Timer");
   it("can roughly set short intervals", function(done) {
     var qml = load("Singleshot", this.div);
     qml.interval = 50;

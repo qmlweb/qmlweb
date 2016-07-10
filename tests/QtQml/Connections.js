@@ -1,9 +1,9 @@
-describe('QtQml.Connections', function() {
+describe("QtQml.Connections", function() {
   setupDivElement();
-  var load = prefixedQmlLoader('QtQml/qml/Connections');
+  var load = prefixedQmlLoader("QtQml/qml/Connections");
 
-  it('Connections', function() {
-    var qml = load('Connections', this.div);
+  it("Connections", function() {
+    var qml = load("Connections", this.div);
     expect(qml.connections.target).toBe(qml);
     qml.value = 1;
     expect(qml.test_value).toBe(1);

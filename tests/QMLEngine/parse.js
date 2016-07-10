@@ -1,11 +1,11 @@
-describe('QMLEngine.parse', function() {
+describe("QMLEngine.parse", function() {
   setupDivElement();
-  var load = prefixedQmlLoader('QMLEngine/qml/Parse');
+  var load = prefixedQmlLoader("QMLEngine/qml/Parse");
 
-  it('should throw error with line number and code extract', function() {
+  it("should throw error with line number and code extract", function() {
     var exception = null;
     try {
-      load('Error', this.div);
+      load("Error", this.div);
     } catch (e) {
       exception = e;
     }
@@ -17,12 +17,12 @@ describe('QMLEngine.parse', function() {
   });
 
   it("can parse a function assigned to a var property", function() {
-    var qml = load('FunctionVar', this.div);
+    var qml = load("FunctionVar", this.div);
     expect(typeof qml.aFunction).toBe("function");
   });
 
   it("can define signals from a QML component", function() {
-    var qml = load('Signal', this.div);
+    var qml = load("Signal", this.div);
     expect(qml.simpleSignal).not.toBe(undefined);
     expect(qml.signalWithParams).not.toBe(undefined);
     expect(typeof qml.simpleSignal.connect).toBe("function");

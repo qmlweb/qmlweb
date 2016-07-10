@@ -1,6 +1,6 @@
-describe('QMLEngine.states', function() {
+describe("QMLEngine.states", function() {
   setupDivElement();
-  var load = prefixedQmlLoader('QMLEngine/qml/State');
+  var load = prefixedQmlLoader("QMLEngine/qml/State");
 
   it("changes property values state is changed", function(done) {
     var qml = load("Simple", this.div);

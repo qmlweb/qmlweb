@@ -1,15 +1,15 @@
-describe('QMLEngine.bindings', function() {
+describe("QMLEngine.bindings", function() {
   setupDivElement();
-  var load = prefixedQmlLoader('QMLEngine/qml/Bindings');
+  var load = prefixedQmlLoader("QMLEngine/qml/Bindings");
 
-  it('NoSrc', function() {
-    load('NoSrc', this.div);
+  it("NoSrc", function() {
+    load("NoSrc", this.div);
     expect(this.div.offsetWidth).toBe(10);
     expect(this.div.offsetHeight).toBe(12);
   });
 
-  it('update immediately', function() {
-    var qml = load('Update', this.div);
+  it("update immediately", function() {
+    var qml = load("Update", this.div);
     expect(qml.intB).toBe(20);
     expect(qml.textB).toBe("hello world");
     expect(qml.sizeWidth).toBe(1);
@@ -27,8 +27,8 @@ describe('QMLEngine.bindings', function() {
      non-evaluated yet, it must evaluate self before returning the result.
      If property lacks that evaluation, the get will return 'undefined' value.
   */
-  it('RecursiveInit', function() {
-    var qml = load('RecursiveInit', this.div);
+  it("RecursiveInit", function() {
+    var qml = load("RecursiveInit", this.div);
     expect(qml.log).toBe("Fly to planet N5!");
   });
 
@@ -39,26 +39,26 @@ describe('QMLEngine.bindings', function() {
      to track changed's signals connections, because it is being reset
      to undefined value after each use, and we must use stack for that.
   */
-  it('RecursiveInit2', function() {
-    var qml = load('RecursiveInit2', this.div);
+  it("RecursiveInit2", function() {
+    var qml = load("RecursiveInit2", this.div);
     qml.retarget();
     expect(qml.log).toBe("Fly to planet N10!Fly to planet N15!");
   });
 
   // must have exactly 1 call of changed signal
-  it('RecursiveInit3', function() {
-    var qml = load('RecursiveInit3', this.div);
+  it("RecursiveInit3", function() {
+    var qml = load("RecursiveInit3", this.div);
     expect(qml.log).toBe("Fly to planet N6!");
   });
 
   // must have exactly 0 call of changed signal
-  it('RecursiveInit4', function() {
-    var qml = load('RecursiveInit4', this.div);
+  it("RecursiveInit4", function() {
+    var qml = load("RecursiveInit4", this.div);
     expect(qml.log).toBe("");
   });
 
-  it('can be bound inside an array', function() {
-    var qml = load('Array', this.div);
+  it("can be bound inside an array", function() {
+    var qml = load("Array", this.div);
     expect(qml.bindingArray[3][1]).toBe(2);
     qml.value++;
     expect(qml.bindingArray[3][1]).toBe(3);

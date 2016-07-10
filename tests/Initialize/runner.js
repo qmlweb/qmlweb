@@ -1,13 +1,13 @@
-describe('Initialize.loadQml', function() {
+describe("Initialize.loadQml", function() {
   setupDivElement();
 
-  it('it can load qml without a file', function() {
+  it("it can load qml without a file", function() {
     loadQml("import QtQuick 2.0\nItem {}\n", this.div);
   });
 });
 
 var modules = {
-  'QtQuick 2.5': {
+  "QtQuick 2.5": {
     AnimatedImage: { dom: true },
     Animation: {},
     Behavior: {},
@@ -45,7 +45,7 @@ var modules = {
     Transition: {},
     Translate: {}
   },
-  'QtQuick.Controls 1.4': {
+  "QtQuick.Controls 1.4": {
     Button: { dom: true },
     CheckBox: { dom: true },
     ComboBox: { dom: true },
@@ -53,24 +53,24 @@ var modules = {
     TextArea: { dom: true },
     TextField: { dom: true }
   },
-  'QtGraphicalEffects 1.0': {
+  "QtGraphicalEffects 1.0": {
     FastBlur: { dom: true }
   },
-  'QtMobility 1.2': {
+  "QtMobility 1.2": {
   },
-  'QtMultimedia 5.6': {
+  "QtMultimedia 5.6": {
     Video: { dom: true }
   },
-  'QtWebSockets 1.0': {
+  "QtWebSockets 1.0": {
     WebSocket: {}
   },
-  'Qt.labs.settings 1.0': {
+  "Qt.labs.settings 1.0": {
     Settings: {}
   },
-  'QmlWeb 1.0': {
+  "QmlWeb 1.0": {
     RestModel: {}
   },
-  'QmlWeb.Dom 1.0': {
+  "QmlWeb.Dom 1.0": {
     DomElement: { dom: true }
   }
 };
@@ -81,11 +81,11 @@ function testModule(modules, testFunc) {
     if (module._version) {
       module._name = key;
     } else {
-      var split = key.split(' ');
+      var split = key.split(" ");
       module._name = split[0];
       module._version = split[1];
     }
-    var imports = 'import ' + module._name + ' ' + module._version + '\n';
+    var imports = "import " + module._name + " " + module._version + "\n";
     for (var i in module._depends || []) {
       imports += "import " + module._depends[i] + "\n";
     }
@@ -97,7 +97,7 @@ function testModule(modules, testFunc) {
 }
 
 testModule(modules, function(module, element, imports, options) {
-  describe('Initialize.' + module, function() {
+  describe("Initialize." + module, function() {
     setupDivElement();
 
     it(element, function() {
@@ -105,7 +105,7 @@ testModule(modules, function(module, element, imports, options) {
       var qml = loadQml(src, this.div);
       if (options.dom) {
         expect(this.div.className).toBe(element);
-        expect(this.div.style.boxSizing).toBe('border-box');
+        expect(this.div.style.boxSizing).toBe("border-box");
       }
       expect(qml.Component).not.toBe(undefined);
     });
