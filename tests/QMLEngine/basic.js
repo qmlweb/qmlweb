@@ -29,4 +29,10 @@ describe("QMLEngine.basic", function() {
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
     expect(qml.full).toBe("http://example.com/bar");
   });
+
+  it("signal parameters", function() {
+    var qml = load("SignalParameters", this.div);
+    expect(qml.propA).toBe(42);
+    expect(qml.propB).toBe("foo");
+  });
 });
