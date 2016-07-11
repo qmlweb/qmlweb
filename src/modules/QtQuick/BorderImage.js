@@ -37,32 +37,6 @@ registerQmlType({
     this.verticalTileModeChanged.connect(this, updateBorder);
 
     function updateBorder() {
-        this.dom.style.MozBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.dom.style.MozBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left + " "
-                                                + "fill";
-        this.dom.style.MozBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.dom.style.MozBorderImageWidth = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-
-        this.dom.style.webkitBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
-        this.dom.style.webkitBorderImageSlice = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left + " "
-                                                + "fill";
-        this.dom.style.webkitBorderImageRepeat = this.horizontalTileMode + " "
-                                                    + this.verticalTileMode;
-        this.dom.style.webkitBorderImageWidth = this.border.top + " "
-                                                + this.border.right + " "
-                                                + this.border.bottom + " "
-                                                + this.border.left;
-
         this.dom.style.OBorderImageSource = "url(" + engine.$resolvePath(this.source) + ")";
         this.dom.style.OBorderImageSlice = this.border.top + " "
                                                 + this.border.right + " "

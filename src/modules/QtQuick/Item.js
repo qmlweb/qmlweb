@@ -303,15 +303,11 @@ registerQmlType({
               transform += " translate3d(0, 0, " + this.z + "px)";
             this.dom.style.transform = transform;
             this.dom.style.transformStyle = transformStyle;
-            this.dom.style.MozTransform = transform;    // Firefox
             this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
             this.dom.style.webkitTransformStyle = transformStyle;
-            this.dom.style.OTransform = transform;      // Opera
             this.dom.style.msTransform = transform;     // IE
             this.dom.style.filter = filter;
-            this.dom.style.msFilter = filter;     // IE
             this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
-            this.dom.style.MozFilter = filter;    // Firefox
     }
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
