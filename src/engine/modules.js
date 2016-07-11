@@ -174,8 +174,11 @@ function inherit(constructor, baseClass) {
 
 function callSuper(self, meta) {
   const info = meta.super.$qmlTypeInfo || {};
+  meta.superDepth = meta.superDepth || 0;
+  meta.superDepth++;
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
+  meta.superDepth--;
 
   if (info.enums) {
     // TODO: not exported to the whole file scope yet
@@ -204,6 +207,25 @@ function callSuper(self, meta) {
   }
   if (info.defaultProperty) {
     self.$defaultProperty = info.defaultProperty;
+  }
+  if (meta.superDepth === 0) {
+    const signalMethod = /^([A-Z][A-Za-z0-9]*\$)*\$?on([A-Z][A-Za-z0-9]*)$/;
+    for (const method in self) {
+      if (typeof self[method] !== "function") continue;
+      const match = method.match(signalMethod);
+      if (!match) continue;
+      const prefix = (match[1] || "").split("$");
+      const suffix = `${match[2][0].toLowerCase()}${match[2].substr(1)}`;
+      let item = self;
+      prefix.forEach(part => {
+        if (part) {
+          item = item && item[part];
+        }
+      });
+      if (item && item[suffix]) {
+        item[suffix].connect(self, self[method]);
+      }
+    }
   }
 }
 
