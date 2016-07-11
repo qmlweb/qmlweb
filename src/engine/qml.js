@@ -214,7 +214,7 @@ function callSuper(self, meta) {
   }
   if (info.signals) {
     Object.keys(info.signals).forEach(name => {
-      const params = info.properties[name];
+      const params = info.signals[name];
       self[name] = Signal(params);
     });
   }
