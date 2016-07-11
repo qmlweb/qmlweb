@@ -5,6 +5,7 @@ registerQmlType({
   baseClass: "QtObject",
   properties: {
     interval: { type: "int", initialValue: 1000 },
+    parent: { type: "QtObject", readOnly: true },
     repeat: "bool",
     running: "bool",
     triggeredOnStart: "bool"
@@ -15,6 +16,8 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
+
+    this.$properties.parent.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
 
     /* This ensures that if the user toggles the "running" property manually,
      * the timer will trigger. */
