@@ -247,6 +247,11 @@ function construct(meta) {
         // Currently we support only 1,2 and 4 and use order: 4,1,2
         // TODO: engine.qmldirs is global for all loaded components. That's not qml's original behaviour.
         var qdirInfo = engine.qmldirs[meta.object.$class]; // Are we have info on that component in some imported qmldir files?
+
+        /* This will also be set in applyProperties, but needs to be set here
+         * for Qt.createComponent to have the correct context. */
+        _executionContext = meta.context;
+
         if (qdirInfo) {
             // We have that component in some qmldir, load it from qmldir's url
             component = Qt.createComponent( "@" + qdirInfo.url);
@@ -255,7 +260,7 @@ function construct(meta) {
             component = Qt.createComponent(meta.object.$class + ".qml");
 
         if (component) {
-            var item = component.createObject(meta.parent, {}, meta.context);
+            var item = component.createObject(meta.parent);
 
             if (typeof item.dom != 'undefined')
                 item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
