@@ -74,7 +74,7 @@ gulp.task("qmlweb-covered", () =>
     }))
     .pipe(concat("qt.covered.js"))
     .pipe(babel())
-    .pipe(replace(/[""]use strict[""];/g, ""))
+    .pipe(replace(/["']use strict["'];/g, ""))
     .pipe(iife({
       useStrict: false,
       params: ["global"],
