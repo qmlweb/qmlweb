@@ -73,6 +73,7 @@ gulp.task("qmlweb-covered", () =>
       coverageVariable: "__coverage__"
     }))
     .pipe(concat("qt.covered.js"))
+    .pipe(changed("./tmp"))
     .pipe(babel())
     .pipe(replace(/["']use strict["'];/g, ""))
     .pipe(iife({
@@ -80,7 +81,6 @@ gulp.task("qmlweb-covered", () =>
       params: ["global"],
       args: ["typeof global != \"undefined\" ? global : window"]
     }))
-    .pipe(changed("./tmp"))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./tmp"))
 );
@@ -90,6 +90,7 @@ gulp.task("qmlweb-dev", () =>
     .pipe(order(qtcoreSources, { base: __dirname }))
     .pipe(sourcemaps.init())
     .pipe(concat("qt.js"))
+    .pipe(changed("./lib"))
     .pipe(babel())
     .pipe(replace(/"use strict";/g, ""))
     .pipe(iife({
@@ -97,7 +98,6 @@ gulp.task("qmlweb-dev", () =>
       params: ["global"],
       args: ["typeof global != \"undefined\" ? global : window"]
     }))
-    .pipe(changed("./lib"))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
 );
