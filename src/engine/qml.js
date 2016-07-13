@@ -149,7 +149,8 @@ function mergeObjects(obj1, obj2) {
   return mergedObject;
 }
 
-const perContextConstructors = {};
+var importContextIds = 0;
+const perImportContextConstructors = {};
 
 function loadImports(self, imports) {
   constructors = mergeObjects(modules.Main, null);
@@ -168,7 +169,8 @@ function loadImports(self, imports) {
     else
       constructors = mergeObjects(constructors, moduleConstructors);
   }
-  perContextConstructors[self.objectId] = constructors;
+  self.importContextId = importContextIds++;
+  perImportContextConstructors[self.importContextId] = constructors;
 }
 
 function inherit(constructor, baseClass) {
@@ -224,12 +226,23 @@ function construct(meta) {
     var item,
         component;
 
-    if (meta.object.$class in constructors) {
-        meta.super = constructors[meta.object.$class];
-        item = new constructors[meta.object.$class](meta);
-        meta.super = undefined;
+    var constructors = perImportContextConstructors[meta.context.importContextId];
+
+    var classComponents = meta.object.$class.split(".")
+    for(var ci=0; ci<classComponents.length; ++ci) {
+        var c = classComponents[ci];
+        constructors = constructors[c]
+        if (constructors === undefined) {
+            break;
+        }
     }
-    else {
+
+    if (constructors !== undefined) {
+        var constructor = constructors;
+        meta.super = constructor;
+        item = new constructor(meta);
+        meta.super = undefined;
+    } else {
         // Load component from file. Please look at import.js for main notes.
         // Actually, we have to use that order:
         // 1) try to load component from current basePath
@@ -268,6 +281,9 @@ function construct(meta) {
 
     // keep path in item for probale use it later in Qt.resolvedUrl
     item.$context["$basePath"] = QmlWeb.engine.$basePath; //gut
+
+    // We want to use the item's scope, but this Component's imports
+    item.$context.importContextId = meta.context.importContextId;
 
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, item.$context);
