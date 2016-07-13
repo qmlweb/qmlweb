@@ -434,6 +434,7 @@ class QMLEngine {
     const file = `${this.$basePath}${name}.qml`;
     this.ensureFileIsLoadedInQrc(file);
     const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
+    tree.$file = file;
     this.components[name] = tree;
     return tree;
   }

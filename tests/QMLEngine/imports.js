@@ -28,4 +28,26 @@ describe("QMLEngine.imports", function() {
     var qml = load("NoQmldir", this.div);
     expect(qml.value).toBe(67);
   });
+  it("module imports are local to file, should succeed", function() {
+    var f = function() {
+      load("LocalToFile/ModuleSucceed", this.div);
+    };
+    expect(f.bind(this)).not.toThrow();
+  });
+  it("module imports are local to file, should fail 1", function() {
+    var f = function() {
+      load("LocalToFile/ModuleFail1", this.div);
+    };
+    expect(f.bind(this)).toThrowError("No constructor found for WebSocket");
+  });
+  it("module imports are local to file, should fail 2", function() {
+    var f = function() {
+      load("LocalToFile/ModuleFail2", this.div);
+    };
+    expect(f.bind(this)).toThrowError("No constructor found for WebSocket");
+  });
+  it("qualified imports from module", function() {
+    var qml = load("QualifiedModule", this.div);
+    expect(qml.value).toBe(67);
+  });
 });

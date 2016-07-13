@@ -52,6 +52,11 @@ registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const meta = { object: tree, context: this, parent: this };
     const qmlComponent = new QMLComponent(meta);
+    qmlComponent.$basePath = QmlWeb.engine.extractBasePath(tree.$file);
+    qmlComponent.$imports = tree.$imports;
+    qmlComponent.$file = tree.$file;
+    QmlWeb.engine.loadImports(tree.$imports, qmlComponent.$basePath,
+      qmlComponent.importContextId);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
     this.$sourceUrl = newVal;
@@ -62,8 +67,7 @@ registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     let qmlComponent = newItem;
     if (newItem instanceof QMLComponent) {
-      const meta = { object: newItem.$metaObject, context: this, parent: this };
-      qmlComponent = QmlWeb.construct(meta);
+      qmlComponent = newItem.$createObject(this, {}, this);
     }
     qmlComponent.parent = this;
     this.item = qmlComponent;

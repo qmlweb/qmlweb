@@ -62,7 +62,7 @@ class QMLComponent {
       }
     }
   }
-  $createObject(parent, properties = {}) {
+  $createObject(parent, properties = {}, context = this.$context) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QmlWeb.QMLOperationState.Init;
@@ -70,10 +70,16 @@ class QMLComponent {
     const bp = engine.$basePath;
     engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
+    const newContext = context ? Object.create(context) : new QMLContext();
+
+    if (this.importContextId !== undefined) {
+      newContext.importContextId = this.importContextId;
+    }
+
     const item = QmlWeb.construct({
       object: this.$metaObject,
       parent,
-      context: this.$context ? Object.create(this.$context) : new QMLContext(),
+      context: newContext,
       isComponentRoot: true
     });
 
