@@ -9,9 +9,7 @@ function updateHGeometry(newVal, oldVal, propName) {
         rM = anchors.rightMargin || anchors.margins;
 
     // Width
-    if (this.$isUsingImplicitWidth && propName == "implicitWidth")
-        width = this.implicitWidth;
-    else if (propName == "width")
+    if (propName == "width")
         this.$isUsingImplicitWidth = false;
 
     // Position TODO: Layouts
@@ -112,9 +110,7 @@ function updateVGeometry(newVal, oldVal, propName) {
         bM = anchors.bottomMargin || anchors.margins;
 
     // Height
-    if (this.$isUsingImplicitHeight && propName == "implicitHeight")
-        height = this.implicitHeight;
-    else if (propName == "height")
+    if (propName == "height")
         this.$isUsingImplicitHeight = false;
 
     // Position TODO: Layouts

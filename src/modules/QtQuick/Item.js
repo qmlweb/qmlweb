@@ -92,8 +92,18 @@ registerQmlType({
     this.yChanged.connect(this, updateVGeometry);
     this.widthChanged.connect(this, updateHGeometry);
     this.heightChanged.connect(this, updateVGeometry);
-    this.implicitWidthChanged.connect(this, updateHGeometry);
-    this.implicitHeightChanged.connect(this, updateVGeometry);
+    this.implicitWidthChanged.connect(this, function() {
+        if (this.$isUsingImplicitWidth) {
+            this.width = this.implicitWidth;
+            this.$isUsingImplicitWidth = true;
+        }
+    });
+    this.implicitHeightChanged.connect(this, function() {
+        if (this.$isUsingImplicitHeight) {
+            this.height = this.implicitHeight;
+            this.$isUsingImplicitHeight = true;
+        }
+    });
 
     this.setupFocusOnDom = (function(element) {
       var updateFocus = (function() {
