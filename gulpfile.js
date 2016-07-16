@@ -19,7 +19,7 @@ const qtcoreSources = [
   "src/engine/qmlstructure.js",
   "src/engine/import.js",
   "src/engine/qml.js",
-  'src/modules/QtQml/Qt.js',
+  "src/modules/QtQml/Qt.js",
   "src/engine/*.js",
   "src/qtbase/QObject.js",
   "src/qtbase/*.js",
@@ -36,6 +36,11 @@ const licenseSources = [
 ];
 
 const tests = [
+  "tests/**/*.js"
+];
+
+const js = [
+  "*.js",
   "tests/**/*.js"
 ];
 
@@ -131,14 +136,14 @@ gulp.task("watch-dev", ["build-dev"], () => {
   gulp.watch(licenseSources, ["license"]);
 });
 
-gulp.task("lint-tests", () =>
-  gulp.src(tests)
+gulp.task("lint-js", () =>
+  gulp.src(js)
     .pipe(eslint())
     .pipe(eslint.formatEach("compact", process.stderr))
     .pipe(eslint.failAfterError())
 );
 
-gulp.task("lint", ["lint-tests"]);
+gulp.task("lint", ["lint-js"]);
 
 gulp.task("test", ["lint", "build-dev"], done => {
   new karma.Server({
