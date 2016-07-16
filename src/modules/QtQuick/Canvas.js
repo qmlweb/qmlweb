@@ -2,10 +2,10 @@
 // Currently only a skeleton implementation
 
 registerQmlType({
-    module: 'QtQuick',
-    name: 'Canvas',
-    versions: /.*/,
-    baseClass: "Item",
+  module: "QtQuick",
+  name: "Canvas",
+  versions: /.*/,
+  baseClass: "Item",
   properties: {
     available: { type: "bool", initialValue: true },
     canvasSize: { type: "var", initialValue: [0, 0] },

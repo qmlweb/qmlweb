@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Row',
+  module: "QtQuick",
+  name: "Row",
   versions: /.*/,
   baseClass: "Positioner",
   properties: {

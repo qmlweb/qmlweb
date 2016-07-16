@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'Rotation',
+  module: "QtQuick",
+  name: "Rotation",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

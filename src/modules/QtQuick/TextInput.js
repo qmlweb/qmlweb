@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'TextInput',
+  module: "QtQuick",
+  name: "TextInput",
   versions: /.*/,
   baseClass: "Item",
   enums: {

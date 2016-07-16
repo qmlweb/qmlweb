@@ -1,8 +1,8 @@
 registerQmlType({
-    module: 'QtQuick.Controls',
-    name: 'ComboBox',
-    versions: /.*/,
-    baseClass: "QtQuick.Item",
+  module: "QtQuick.Controls",
+  name: "ComboBox",
+  versions: /.*/,
+  baseClass: "QtQuick.Item",
   properties: {
     count: "int",
     currentIndex: "int",

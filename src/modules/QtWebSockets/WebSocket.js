@@ -2,8 +2,8 @@
 // TODO: Recheck everything.
 
 registerQmlType({
-  module:   'QtWebSockets',
-  name:     'WebSocket',
+  module: "QtWebSockets",
+  name: "WebSocket",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {

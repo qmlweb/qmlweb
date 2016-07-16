@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick.Controls',
-  name:     'CheckBox',
+  module: "QtQuick.Controls",
+  name: "CheckBox",
   versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {

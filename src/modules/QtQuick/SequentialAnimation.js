@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'SequentialAnimation',
+  module: "QtQuick",
+  name: "SequentialAnimation",
   versions: /.*/,
   baseClass: "Animation",
   properties: {

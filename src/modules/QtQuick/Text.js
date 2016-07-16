@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Text',
+  module: "QtQuick",
+  name: "Text",
   versions: /.*/,
   baseClass: "Item",
   enums: {

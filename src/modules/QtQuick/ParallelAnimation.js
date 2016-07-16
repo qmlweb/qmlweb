@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'ParallelAnimation',
+  module: "QtQuick",
+  name: "ParallelAnimation",
   versions: /.*/,
   baseClass: "Animation",
   enums: {

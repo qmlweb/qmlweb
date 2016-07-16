@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'MouseArea',
+  module: "QtQuick",
+  name: "MouseArea",
   versions: /.*/,
   baseClass: "Item",
   properties: {

@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'Rectangle',
+  module: "QtQuick",
+  name: "Rectangle",
   versions: /.*/,
   baseClass: "Item",
   properties: {

@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'FontLoader',
+  module: "QtQuick",
+  name: "FontLoader",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {

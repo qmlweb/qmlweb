@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'Behavior',
+  module: "QtQuick",
+  name: "Behavior",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

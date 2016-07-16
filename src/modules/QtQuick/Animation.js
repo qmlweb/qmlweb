@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name: 'Animation',
+  module: "QtQuick",
+  name: "Animation",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {
@@ -20,10 +20,10 @@ registerQmlType({
     }
   },
   properties: {
-    alwaysRunToEnd: 'bool',
-    loops: { type: 'int', initialValue: 1 },
-    paused: 'bool',
-    running: 'bool'
+    alwaysRunToEnd: "bool",
+    loops: { type: "int", initialValue: 1 },
+    paused: "bool",
+    running: "bool"
   }
 }, class {
   constructor(meta) {

@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'PropertyAnimation',
+  module: "QtQuick",
+  name: "PropertyAnimation",
   versions: /.*/,
   baseClass: "Animation",
   properties: {

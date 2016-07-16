@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'DoubleValidator',
+  module: "QtQuick",
+  name: "DoubleValidator",
   versions: /.*/,
   baseClass: "Item",
   enums: {

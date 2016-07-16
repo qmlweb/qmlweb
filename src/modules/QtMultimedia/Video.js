@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtMultimedia',
-  name:   'Video',
+  module: "QtMultimedia",
+  name: "Video",
   versions: /^5\./,
   baseClass: "QtQuick.Item",
   enums: {

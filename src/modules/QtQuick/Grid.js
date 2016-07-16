@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name: 'Grid',
+  module: "QtQuick",
+  name: "Grid",
   versions: /.*/,
   baseClass: "Positioner",
   enums: {

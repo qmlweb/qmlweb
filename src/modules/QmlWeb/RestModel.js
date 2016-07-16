@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QmlWeb',
-  name:     'RestModel',
+  module: "QmlWeb",
+  name: "RestModel",
   versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {

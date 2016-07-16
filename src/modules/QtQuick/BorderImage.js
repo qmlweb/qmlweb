@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'BorderImage',
+  module: "QtQuick",
+  name: "BorderImage",
   versions: /.*/,
   baseClass: "Item",
   enums: {

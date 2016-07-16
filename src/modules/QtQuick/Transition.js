@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Transition',
+  module: "QtQuick",
+  name: "Transition",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'Qt.labs.settings',
-  name:   'Settings',
+  module: "Qt.labs.settings",
+  name: "Settings",
   versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {

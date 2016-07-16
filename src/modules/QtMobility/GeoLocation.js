@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtMobility',
-  name:     'GeoLocation',
+  module: "QtMobility",
+  name: "GeoLocation",
   versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {

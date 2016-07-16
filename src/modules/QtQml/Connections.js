@@ -1,11 +1,11 @@
 registerQmlType({
-  module: 'QtQml',
-  name: 'Connections',
+  module: "QtQml",
+  name: "Connections",
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: "QtObject",
   properties: {
-    target: 'QtObject',
-    ignoreUnknownSignals: 'bool'
+    target: "QtObject",
+    ignoreUnknownSignals: "bool"
   }
 }, class {
   constructor(meta) {

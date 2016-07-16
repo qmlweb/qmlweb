@@ -1,6 +1,6 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'ListModel',
+  module: "QtQuick",
+  name: "ListModel",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

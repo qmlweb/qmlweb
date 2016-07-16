@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Scale',
+  module: "QtQuick",
+  name: "Scale",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

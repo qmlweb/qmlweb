@@ -1,20 +1,20 @@
 registerQmlType({
-    module: 'QtQuick.Window',
-    name: 'Screen',
-    versions: /.*/,
-    baseClass: "QtQuick.Item",
-    properties: {
-      name: "string",
-      orientation: "enum",
-      orientationUpdateMask: "enum",
-      primaryOrientation: "enum",
-      pixelDensity: "real",
-      devicePixelRatio: "real",
-      desktopAvailableHeight: "int",
-      desktopAvailableWidth: "int",
-      height: "int",
-      width: "int"
-    }
+  module: "QtQuick.Window",
+  name: "Screen",
+  versions: /.*/,
+  baseClass: "QtQuick.Item",
+  properties: {
+    name: "string",
+    orientation: "enum",
+    orientationUpdateMask: "enum",
+    primaryOrientation: "enum",
+    pixelDensity: "real",
+    devicePixelRatio: "real",
+    desktopAvailableHeight: "int",
+    desktopAvailableWidth: "int",
+    height: "int",
+    width: "int"
+  }
 }, class {
   constructor(meta) {
     callSuper(this, meta);

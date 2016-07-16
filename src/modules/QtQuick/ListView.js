@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'ListView',
+  module: "QtQuick",
+  name: "ListView",
   versions: /.*/,
   baseClass: "Repeater",
   properties: {

@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'RegExpValidator',
+  module: "QtQuick",
+  name: "RegExpValidator",
   versions: /.*/,
   baseClass: "Item",
   properties: {

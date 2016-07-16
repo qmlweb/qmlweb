@@ -1,8 +1,8 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'NumberAnimation',
+  module: "QtQuick",
+  name: "NumberAnimation",
   versions: /.*/,
-  baseClass: 'PropertyAnimation'
+  baseClass: "PropertyAnimation"
 }, class {
   constructor(meta) {
     callSuper(this, meta);

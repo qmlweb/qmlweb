@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQml',
-  name:     'Timer',
+  module: "QtQml",
+  name: "Timer",
   versions: /.*/,
   baseClass: "QtObject",
   properties: {

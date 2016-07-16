@@ -11,10 +11,10 @@
  */
 
 registerQmlType({
-    module: 'QtQuick.Controls',
-    name: 'TextField',
-    versions: /.*/,
-    baseClass: "QtQuick.Item",
+  module: "QtQuick.Controls",
+  name: "TextField",
+  versions: /.*/,
+  baseClass: "QtQuick.Item",
   properties: {
     text: "string",
     maximumLength: "int",

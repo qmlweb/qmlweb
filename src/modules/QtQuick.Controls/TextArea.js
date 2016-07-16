@@ -1,8 +1,8 @@
 registerQmlType({
-  module: 'QtQuick.Controls',
-  name: 'TextArea',
+  module: "QtQuick.Controls",
+  name: "TextArea",
   versions: /.*/,
-  baseClass: 'QtQuick.TextEdit'
+  baseClass: "QtQuick.TextEdit"
 }, class {
   constructor(meta) {
     callSuper(this, meta);

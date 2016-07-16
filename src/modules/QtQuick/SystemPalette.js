@@ -8,8 +8,8 @@ const platformsDetectors = [
 const systemPalettes = {};
 
 registerQmlType({
-  module: 'QtQuick',
-  name: 'SystemPalette',
+  module: "QtQuick",
+  name: "SystemPalette",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {

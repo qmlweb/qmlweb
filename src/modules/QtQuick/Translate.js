@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'Translate',
+  module: "QtQuick",
+  name: "Translate",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {

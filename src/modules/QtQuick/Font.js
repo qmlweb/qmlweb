@@ -1,8 +1,8 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'Font',
+  module: "QtQuick",
+  name: "Font",
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject"
 }, class extends QObject {
   constructor(parent) {
     super(parent);

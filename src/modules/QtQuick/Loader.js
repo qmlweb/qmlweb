@@ -1,16 +1,16 @@
 registerQmlType({
-    module: 'QtQuick',
-    name: 'Loader',
-    versions: /.*/,
-    baseClass: "Item",
-    properties: {
-      active: { type: "bool", initialValue: true },
-      asynchronous: "bool",
-      item: "var",
-      progress: "real",
-      source: "url",
-      sourceComponent: "Component",
-      status: { type: "enum", initialValue: 1 }
+  module: "QtQuick",
+  name: "Loader",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    active: { type: "bool", initialValue: true },
+    asynchronous: "bool",
+    item: "var",
+    progress: "real",
+    source: "url",
+    sourceComponent: "Component",
+    status: { type: "enum", initialValue: 1 }
   },
   signals: {
     loaded: []

@@ -1,6 +1,6 @@
 registerQmlType({
-  module:   'QtQuick',
-  name:     'IntValidator',
+  module: "QtQuick",
+  name: "IntValidator",
   versions: /.*/,
   baseClass: "Item",
   properties: {

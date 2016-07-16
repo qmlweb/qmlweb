@@ -1,8 +1,8 @@
 registerQmlType({
-  module: 'QtQuick',
-  name:   'ListElement',
+  module: "QtQuick",
+  name: "ListElement",
   versions: /.*/,
-  baseClass: 'QtQml.QtObject'
+  baseClass: "QtQml.QtObject"
 }, class {
   constructor(meta) {
     callSuper(this, meta);
