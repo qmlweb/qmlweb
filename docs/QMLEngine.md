@@ -95,27 +95,30 @@ For each of given import statements, loadImports
 `engine.qmldirs` is a hash of form: { componentName => componentFileUrl }
 This hash then used by `qml.js::construct` method for computing component urls.
 
-##### Notes
- 1. This method is not suited for loading js imports.
-    This may be done probably after answering to Q1 (below).
- 2. Please look for additional notes at readQmlDir function.
+#### Notes
 
-##### QNA
- * Q1: How and where in engine component names might be prefixed?
-       E.g. names with dot inside: SomeModule.Component1
- * A1: Seems it doesn't matter. Seems we may just save name with dot-inside
-       right to qmldirs, and it may be used by construct() seamlessly. Check it.
+1. This method is not suited for loading js imports.
+   This may be done probably after answering to Q1 (below).
+2. Please look for additional notes at readQmlDir function.
 
- * Q2: How we may access component object from here, to store qmldirs info in
-       components logical scope, and not at engine scope?
- * A2: Probably, answer is in Component.js and in QmlWeb.loadImports
+#### QNA
 
-##### TODO
-   * We have to keep output in component scope, not in engine scope.
-   * We have to add module "as"-names to component's names
-     (which is possible after keeping imports in component scope).
-   * Determine how this stuff is related to `QmlWeb.loadImports`
-   * Check A1
-   * Make a complete picture of what going in with imports, including
-     Component.js own imports loading
-   * Note importJs method in import.js
+* Q1: How and where in engine component names might be prefixed?
+      E.g. names with dot inside: SomeModule.Component1
+* A1: Seems it doesn't matter. Seems we may just save name with dot-inside
+      right to qmldirs, and it may be used by construct() seamlessly. Check it.
+
+* Q2: How we may access component object from here, to store qmldirs info in
+      components logical scope, and not at engine scope?
+* A2: Probably, answer is in Component.js and in QmlWeb.loadImports
+
+#### TODO
+
+* We have to keep output in component scope, not in engine scope.
+* We have to add module "as"-names to component's names (which is possible after
+  keeping imports in component scope).
+* Determine how this stuff is related to `QmlWeb.loadImports`
+* Check A1
+* Make a complete picture of what going in with imports, including Component.js
+  own imports loading.
+* Note importJs method in import.js
