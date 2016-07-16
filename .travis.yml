@@ -8,11 +8,11 @@ cache:
   directories:
     - $HOME/.npm/
     - node_modules
+before_install:
+  - npm install -g codecov
 matrix:
   include:
     - node_js: "6"
       script: npm run coverage
-      before_install:
-        - npm install -g codecov
       after_success:
         - codecov
