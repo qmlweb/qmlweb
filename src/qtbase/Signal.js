@@ -87,7 +87,9 @@ class Signal {
     }
     return false;
   }
+  static signal(...args) {
+    return (new Signal(...args)).signal;
+  }
 }
-Signal.signal = (...args) => (new Signal(...args)).signal;
 
 QmlWeb.Signal = Signal;
