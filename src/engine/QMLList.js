@@ -8,3 +8,4 @@ function QMLList(meta) {
 
     return list;
 }
+QMLList.plainType = true;

@@ -161,8 +161,10 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
             this.val = construct({ object: newVal, parent: this.obj, context: componentScope });
     } else if (newVal instanceof Object || !newVal) {
         this.val = newVal;
-    } else {
+    } else if (constructors[this.type].plainType) {
         this.val = constructors[this.type](newVal);
+    } else {
+      this.val = new constructors[this.type](newVal);
     }
 
     if (this.val !== oldVal) {

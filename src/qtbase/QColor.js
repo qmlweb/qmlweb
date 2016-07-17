@@ -13,3 +13,4 @@ function QColor(val) {
   }
   return val;
 };
+QColor.plainType = true;
