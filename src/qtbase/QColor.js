@@ -1,16 +1,21 @@
 // TODO complete implementation (with attributes `r`,`g` and `b`).
-function QColor(val) {
-  if (typeof val === "number") {
-    // we assume it is int value and must be converted to css hex with padding
-    // http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
-    val = "#" + (Math.round(val) + 0x1000000).toString(16).substr(-6).toUpperCase();
-  } else {
-    if(typeof val === "array" && val.length >= 3) {
-      // array like [r,g,b] where r,g,b are in 0..1 range
-      var m = 255;
-      val = "rgb(" + Math.round(m * val[0]) + "," + Math.round(m * val[1]) + "," + Math.round(m * val[2]) + ")";
+
+class QColor {
+  constructor(val) {
+    this.$value = "black";
+    if (val instanceof QColor) {
+      // Copy constructor
+      this.$value = val.$value;
+    } else if (typeof val === "string") {
+      this.$value = val.toLowerCase();
+    } else if (typeof val === "number") {
+      // we assume it is int value and must be converted to css hex with padding
+      val = (Math.round(val) + 0x1000000).toString(16).substr(-6);
+      this.$value = `#${val}`;
     }
   }
-  return val;
-};
-QColor.plainType = true;
+  toString() {
+    return this.$value;
+  }
+}
+QmlWeb.QColor = QColor;

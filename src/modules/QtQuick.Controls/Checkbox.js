@@ -40,7 +40,7 @@ registerQmlType({
         this.implicitWidth = label.offsetWidth > 0 ? label.offsetWidth + 4 : 0;
     });
     this.colorChanged.connect(this, function(newVal) {
-        span.style.color = QColor(newVal);
+        span.style.color = new QColor(newVal);
     });
 
     this.checkedChanged.connect(this, function(newVal) {

@@ -26,13 +26,13 @@ registerQmlType({
     this.dom.appendChild(bg);
 
     this.colorChanged.connect(this, function(newVal) {
-        bg.style.backgroundColor = QColor(newVal);
+        bg.style.backgroundColor = new QColor(newVal);
     });
     this.radiusChanged.connect(this, function(newVal) {
         bg.style.borderRadius = newVal + 'px';
     });
     this.border.colorChanged.connect(this, function(newVal) {
-        bg.style.borderColor = QColor(newVal);
+        bg.style.borderColor = new QColor(newVal);
         if (bg.style.borderWidth == '0px') {
             bg.style.borderWidth = this.border.width + 'px';
         }
