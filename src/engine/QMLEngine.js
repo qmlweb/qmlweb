@@ -1,17 +1,6 @@
 // There can only be one running QMLEngine. This variable points to the currently running engine.
 let engine = null;
 
-const keyboardSignals = {};
-["asterisk", "back", "backtab", "call", "cancel", "delete", "escape", "flip",
- 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "hangup", "menu", "no", "return", "select",
- "space", "tab", "volumeDown", "volumeUp", "yes", "up", "right", "down", "left"
-].forEach(key => {
-  const prefix = typeof key === "number" ? "digit" : "";
-  key = key.toString();
-  const name = `Key_${key[0].toUpperCase()}${key.slice(1)}`;
-  keyboardSignals[Qt[name]] = `${prefix}${key}Pressed`;
-});
-
 const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
@@ -376,7 +365,7 @@ class QMLEngine {
     document.onkeypress = e => {
       let focusedElement = this.focusedElement();
       const event = QmlWeb.eventToKeyboard(e || window.event);
-      const eventName = keyboardSignals[event.key];
+      const eventName = QmlWeb.keyboardSignals[event.key];
 
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;
