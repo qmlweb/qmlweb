@@ -116,6 +116,7 @@ registerQmlType({
     this.text = "";
 
     this.textChanged.connect(this, updateImplicit);
+    this.wrapModeChanged.connect(this, updateImplicit);
     this.font.boldChanged.connect(this, updateImplicit);
     this.font.weightChanged.connect(this, updateImplicit);
     this.font.pixelSizeChanged.connect(this, updateImplicit);
@@ -128,10 +129,22 @@ registerQmlType({
 
     function updateImplicit() {
         if (typeof this.text == undefined || this.text === "" || !this.dom) {
-             this.implicitHeigh = this.implicitWidth = 0;
+             this.implicitHeight = this.implicitWidth = 0;
         } else {
-            this.implicitHeight = fc.offsetHeight;
-            this.implicitWidth = fc.offsetWidth;
+            /* Need to move the child out of it's parent so that it can
+             * properly recalculate it's "natural" offsetWidth/offsetHeight
+             * */
+            if (this.$isUsingImplicitWidth) {
+                document.body.appendChild(fc);
+            }
+            var fc_offsetHeight = fc.offsetHeight;
+            var fc_offsetWidth = fc.offsetWidth;
+            if (this.$isUsingImplicitWidth) {
+                this.dom.appendChild(fc);
+            }
+
+            this.implicitHeight = fc_offsetHeight;
+            this.implicitWidth = fc_offsetWidth;
         }
     }
   }
