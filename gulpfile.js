@@ -17,10 +17,6 @@ const qtcoreSources = [
   "src/QmlWeb.js",
   "src/qtbase/QObject.js",
   "src/qtbase/*.js",
-  "src/engine/QMLBinding.js",
-  "src/engine/qmlstructure.js",
-  "src/engine/import.js",
-  "src/engine/qml.js",
   "src/modules/QtQml/Qt.js",
   "src/engine/*.js",
   "src/modules/**/*.js"
