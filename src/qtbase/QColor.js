@@ -19,13 +19,13 @@ class QColor {
   }
   $get() {
     // Returns the same instance for all equivalent colors.
-    // Note that we can't return this instance, as it could be changed later.
-    // TODO: use a WeakMap with a polyfill to reduce the potential memory hit.
-    if (!QColor.colors[this.$value]) {
-      QColor.colors[this.$value] = new QColor(this.$value);
+    // NOTE: the returned value should not be changed using method calls, if
+    // those would be added in the future, the returned value should be wrapped.
+    if (!QColor.colors.has(this.$value)) {
+      QColor.colors.set(this.$value, this);
     }
-    return QColor.colors[this.$value];
+    return QColor.colors.get(this.$value);
   }
 }
-QColor.colors = {};
+QColor.colors = new WeakMap();
 QmlWeb.QColor = QColor;

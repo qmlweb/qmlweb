@@ -15,6 +15,7 @@ const path = require("path");
 
 const qtcoreSources = [
   "src/QmlWeb.js",
+  "src/polyfills/*.js",
   "src/qtbase/QObject.js",
   "src/qtbase/*.js",
   "src/modules/QtQml/Qt.js",
