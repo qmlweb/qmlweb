@@ -97,6 +97,10 @@ QMLProperty.prototype.get = function() {
         this.changed.connect(evaluatingProperty, QMLProperty.prototype.update);
     }
 
+    if (this.val && this.val.$get) {
+      return this.val.$get();
+    }
+
     return this.val;
 }
 
