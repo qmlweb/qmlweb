@@ -21,6 +21,11 @@ registerQmlType({
   }
 
   layoutChildren() {
+    if (this.flow === undefined) {
+      // Flow has not been fully initialized yet
+      return;
+    }
+
     let curHPos = 0;
     let curVPos = 0;
     let rowSize = 0;
@@ -31,7 +36,7 @@ registerQmlType({
       }
 
       if (this.flow === this.Flow.LeftToRight) {
-        if (curHPos + child.width > this.width) {
+        if (!this.$isUsingImplicitWidth && curHPos + child.width > this.width) {
           curHPos = 0;
           curVPos += rowSize + this.spacing;
           rowSize = 0;
@@ -42,7 +47,9 @@ registerQmlType({
         child.y = curVPos;
         curHPos += child.width + this.spacing;
       } else { // Flow.TopToBottom
-        if (curVPos + child.height > this.height) {
+        if (!this.$isUsingImplicitHeight
+          && curVPos + child.height > this.height)
+        {
           curVPos = 0;
           curHPos += rowSize + this.spacing;
           rowSize = 0;
@@ -55,10 +62,12 @@ registerQmlType({
       }
     }
 
-    if (this.flow === 0) { // Flow.LeftToRight
+    if (this.flow === this.Flow.LeftToRight) {
+      this.implicitWidth = curHPos - this.spacing;
       this.implicitHeight = curVPos + rowSize;
     } else { // Flow.TopToBottom
       this.implicitWidth = curHPos + rowSize;
+      this.implicitHeight = curVPos - this.spacing;
     }
   }
 });
