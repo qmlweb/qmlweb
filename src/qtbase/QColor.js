@@ -21,13 +21,25 @@ class QColor {
     // Returns the same instance for all equivalent colors.
     // NOTE: the returned value should not be changed using method calls, if
     // those would be added in the future, the returned value should be wrapped.
-    // WARNING: might cause a potential memory hit
-    // TODO: disable if too many colors
-    if (!QColor.colors[this.$value]) {
-      QColor.colors[this.$value] = this;
+    if (!QColor.$colors[this.$value]) {
+      if (QColor.$colorsCount >= QColor.comparableColorsLimit) {
+        // Too many colors created, bail out to avoid memory hit
+        return this;
+      }
+      QColor.$colors[this.$value] = this;
+      QColor.$colorsCount++;
+      if (QColor.$colorsCount === QColor.comparableColorsLimit) {
+        console.warn(
+          "QmlWeb: the number of QColor instances reached the limit set in",
+          "QmlWeb.QColor.comparableColorsLimit. Further created colors would",
+          "not be comparable to avoid memory hit."
+        );
+      }
     }
-    return QColor.colors[this.$value];
+    return QColor.$colors[this.$value];
   }
 }
-QColor.colors = {};
+QColor.$colors = {};
+QColor.$colorsCount = 0;
+QColor.comparableColorsLimit = 10000;
 QmlWeb.QColor = QColor;
