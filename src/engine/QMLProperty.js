@@ -17,6 +17,45 @@ class QMLProperty {
     this.$tidyupList = [];
   }
 
+  // Called by update and set to actually set this.val, performing any type
+  // conversion required.
+  $setVal(val, componentScope) {
+    if (constructors[this.type] === QmlWeb.qmlList) {
+      this.val = QmlWeb.qmlList({
+        object: val,
+        parent: this.obj,
+        context: componentScope
+      });
+    } else if (val instanceof QmlWeb.QMLMetaElement) {
+      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+      if (constructors[val.$class] === QMLComponent ||
+          constructors[this.type] === QMLComponent) {
+        this.val = new QMLComponent({
+          object: val,
+          parent: this.obj,
+          context: componentScope
+        });
+        /* $basePath must be set here so that Components that are assigned to
+         * properties (e.g. Repeater delegates) can properly resolve child
+         * Components that live in the same directory in
+         * Component.createObject. */
+        this.val.$basePath = componentScope.$basePath;
+      } else {
+        this.val = QmlWeb.construct({
+          object: val,
+          parent: this.obj,
+          context: componentScope
+        });
+      }
+    } else if (val instanceof Object || !val) {
+      this.val = val;
+    } else if (constructors[this.type].plainType) {
+      this.val = constructors[this.type](val);
+    } else {
+      this.val = new constructors[this.type](val);
+    }
+  }
+
   // Updater recalculates the value of a property if one of the dependencies
   // changed
   update() {
@@ -33,7 +72,8 @@ class QMLProperty {
       if (!this.binding.eval) {
         this.binding.compile();
       }
-      this.val = this.binding.eval(this.objectScope, this.componentScope);
+      this.$setVal(this.binding.eval(this.objectScope, this.componentScope),
+        this.componentScope);
     } catch (e) {
       console.log("QMLProperty.update binding error:",
         e,
@@ -129,40 +169,7 @@ class QMLProperty {
       }
     }
 
-    if (constructors[this.type] === QmlWeb.qmlList) {
-      this.val = QmlWeb.qmlList({
-        object: val,
-        parent: this.obj,
-        context: componentScope
-      });
-    } else if (val instanceof QmlWeb.QMLMetaElement) {
-      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-      if (constructors[val.$class] === QMLComponent ||
-          constructors[this.type] === QMLComponent) {
-        this.val = new QMLComponent({
-          object: val,
-          parent: this.obj,
-          context: componentScope
-        });
-        /* $basePath must be set here so that Components that are assigned to
-         * properties (e.g. Repeater delegates) can properly resolve child
-         * Components that live in the same directory in
-         * Component.createObject. */
-        this.val.$basePath = componentScope.$basePath;
-      } else {
-        this.val = QmlWeb.construct({
-          object: val,
-          parent: this.obj,
-          context: componentScope
-        });
-      }
-    } else if (val instanceof Object || !val) {
-      this.val = val;
-    } else if (constructors[this.type].plainType) {
-      this.val = constructors[this.type](val);
-    } else {
-      this.val = new constructors[this.type](val);
-    }
+    this.$setVal(val, componentScope);
 
     if (this.val !== oldVal) {
       if (this.animation && reason === QMLProperty.ReasonUser) {
