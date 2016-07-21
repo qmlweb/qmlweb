@@ -61,4 +61,33 @@ Rectangle {
     height: 10
     width: 10
   }
+
+  /* This item is unrelated to the above items, but updateH/VGeometry recursion
+   * with implicitWidth/Height (e.g. Grid) */
+  Rectangle {
+    width: row.width + 4
+    height: row.height + 4
+    color: "blue"
+
+    Grid {
+      id: row
+      anchors.centerIn: parent
+      rows: 2
+      columns: 2
+      Repeater {
+        id: repeater
+        model: 1
+        Rectangle {
+          width: 4
+          height: 4
+          color: "red"
+        }
+      }
+    }
+
+    /* Cause "implicitHeight/WidthChanged" signals. */
+    Component.onCompleted: {
+      repeater.model += 3
+    }
+  }
 }
