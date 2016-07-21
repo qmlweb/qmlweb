@@ -47,7 +47,7 @@ class QMLProperty {
           context: componentScope
         });
       }
-    } else if (val instanceof Object || !val) {
+    } else if (val instanceof Object || val === undefined || val === null) {
       this.val = val;
     } else if (constructors[this.type].plainType) {
       this.val = constructors[this.type](val);
