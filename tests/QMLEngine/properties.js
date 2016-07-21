@@ -75,6 +75,8 @@ describe("QMLEngine.properties", function() {
     expect(typeof qml.stringB).toBe("string");
     expect(qml.stringBinding).toBe("2");
     expect(typeof qml.stringBinding).toBe("string");
+    expect(qml.stringFalseVal).toBe("0");
+    expect(typeof qml.stringFalseVal).toBe("string");
     qml.reassign();
     expect(qml.stringA).toBe("333");
     expect(typeof qml.stringA).toBe("string");
