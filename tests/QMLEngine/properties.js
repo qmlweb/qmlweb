@@ -67,14 +67,14 @@ describe("QMLEngine.properties", function() {
   /* in Qml, when assigning non-string value to string property,
      is convert's new value to string. */
   it("StringConversion", function() {
-    var qml = load("StringConversion");
+    var qml = load("StringConversion", this.div);
 
     expect(qml.stringA).toBe("10");
     expect(typeof qml.stringA).toBe("string");
-
-    //console.log("qml.stringB=", qml.stringB, typeof qml.stringB);
     expect(qml.stringB).toBe("11");
     expect(typeof qml.stringB).toBe("string");
+    expect(qml.stringBinding).toBe("2");
+    expect(typeof qml.stringBinding).toBe("string");
     qml.reassign();
     expect(qml.stringA).toBe("333");
     expect(typeof qml.stringA).toBe("string");
