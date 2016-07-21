@@ -17,6 +17,7 @@ registerQmlType({
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.widthChanged.connect(this, this.layoutChildren);
+    this.heightChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
   }
 
