@@ -49,12 +49,9 @@ class QMLComponent {
   finalizeImports($context) {
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
-      let src = importDesc[1];
+      const src = QmlWeb.engine.$resolvePath(importDesc[1]);
       let js;
 
-      if (typeof QmlWeb.engine.$basePath !== "undefined") {
-        src = QmlWeb.engine.$basePath + src;
-      }
       if (typeof QmlWeb.qrc[src] !== "undefined") {
         js = QmlWeb.qrc[src];
       } else {
