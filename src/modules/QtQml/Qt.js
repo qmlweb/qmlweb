@@ -36,7 +36,7 @@ const Qt = {
       resolvedName = name;
     }
 
-    let file = nameIsUrl ? resolvedName : engine.$basePath + resolvedName;
+    let file = nameIsUrl ? resolvedName : engine.$resolvePath(resolvedName);
     let src = QmlWeb.getUrlContents(file, true);
 
     // if failed to load, and provided name is not direct url,
