@@ -280,6 +280,12 @@ function construct(meta) {
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, item.$context);
 
+    // Not checking if item inherits from Item because non-Item items may have
+    // a "parent" property (e.g. Timer).
+    if (meta.parent && item.hasOwnProperty("parent")) {
+      item.parent = meta.parent
+    }
+
     return item;
 }
 

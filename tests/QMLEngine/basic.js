@@ -35,4 +35,11 @@ describe("QMLEngine.basic", function() {
     expect(qml.propA).toBe(42);
     expect(qml.propB).toBe("foo");
   });
+
+  it('createObject', function() {
+    var qml = load('CreateObject', this.div);
+    expect(qml.children.length).toBe(1);
+    expect(qml.children[0].q).toBe(22);
+    expect(this.div.innerText).toBe("variable from context = 42");
+  });
 });
