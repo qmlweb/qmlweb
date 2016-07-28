@@ -41,6 +41,7 @@ const js = [
   "src/modules/Qt.labs.*/*.js",
   "src/modules/QtGraphicalEffects/*.js",
   "src/modules/QtMobility/*.js",
+  "src/modules/QtMultimedia/*.js",
   "src/modules/QtQuick.Window/*.js",
   "src/modules/QtWebSockets/*.js",
   "tests/**/*.js"

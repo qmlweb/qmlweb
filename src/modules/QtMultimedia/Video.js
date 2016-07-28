@@ -37,159 +37,154 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var runningEventListener = 0;
-    var volumeBackup;
+    this.$runningEventListener = 0;
 
-    const domVideo = this.impl = document.createElement('video');
-    domVideo.style.width = domVideo.style.height = "100%";
-    domVideo.style.margin = "0";
-    this.dom.appendChild(domVideo);
+    this.impl = document.createElement("video");
+    this.impl.style.width = this.impl.style.height = "100%";
+    this.impl.style.margin = "0";
+    this.dom.appendChild(this.impl);
 
-    this.volume = domVideo.volume;
-    this.duration = domVideo.duration;
+    this.volume = this.impl.volume;
+    this.duration = this.impl.duration;
 
-    this.autoPlayChanged.connect(this, (function(newVal) {
-      domVideo.autoplay = newVal;
-    }).bind(this));
-
-    domVideo.addEventListener("play", (function() {
+    this.impl.addEventListener("play", () => {
       this.playing();
       this.playbackState = MediaPlayer.PlayingState;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("pause", (function() {
+    this.impl.addEventListener("pause", () => {
       this.paused();
       this.playbackState = MediaPlayer.PausedState;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("timeupdate", (function() {
-      runningEventListener++;
-      this.position = domVideo.currentTime * 1000;
-      runningEventListener--;
-    }).bind(this));
+    this.impl.addEventListener("timeupdate", () => {
+      this.$runningEventListener++;
+      this.position = this.impl.currentTime * 1000;
+      this.$runningEventListener--;
+    });
 
-    domVideo.addEventListener("ended", (function() {
+    this.impl.addEventListener("ended", () => {
       this.stopped();
       this.playbackState = MediaPlayer.StoppedState;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("progress", (function() {
-      if (domVideo.buffered.length > 0) {
-        this.progress = domVideo.buffered.end(0) / domVideo.duration;
-        this.status   = this.progress < 1 ? MediaPlayer.Buffering : MediaPlayer.Buffered;
+    this.impl.addEventListener("progress", () => {
+      if (this.impl.buffered.length > 0) {
+        this.progress = this.impl.buffered.end(0) / this.impl.duration;
+        this.status = this.progress < 1 ?
+          MediaPlayer.Buffering :
+          MediaPlayer.Buffered;
       }
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("stalled", (function() {
+    this.impl.addEventListener("stalled", () => {
       this.status = MediaPlayer.Stalled;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("canplaythrough", (function() {
+    this.impl.addEventListener("canplaythrough", () => {
       this.status = MediaPlayer.Buffered;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("loadstart", (function() {
+    this.impl.addEventListener("loadstart", () => {
       this.status = MediaPlayer.Loading;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("durationchanged", (function() {
-      this.duration = domVideo.duration;
-    }).bind(this));
+    this.impl.addEventListener("durationchanged", () => {
+      this.duration = this.impl.duration;
+    });
 
-    domVideo.addEventListener("volumechanged", (function() {
-      runningEventListener++;
+    this.impl.addEventListener("volumechanged", () => {
+      this.$runningEventListener++;
       this.volume = demoVideo.volume;
-      runningEventListener--;
-    }).bind(this));
+      this.$runningEventListener--;
+    });
 
-    domVideo.addEventListener("suspend", (function() {
+    this.impl.addEventListener("suspend", () => {
       this.error |= MediaPlayer.NetworkError;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("error", (function() {
+    this.impl.addEventListener("error", () => {
       this.error |= MediaPlayer.ResourceError;
-    }).bind(this));
+    });
 
-    domVideo.addEventListener("ratechange", (function() {
-      runningEventListener++;
-      this.playbackRate = domVideo.playbackRate;
-      runningEventListener--;
-    }).bind(this));
+    this.impl.addEventListener("ratechange", () => {
+      this.$runningEventListener++;
+      this.playbackRate = this.impl.playbackRate;
+      this.$runningEventListener--;
+    });
 
-    this.pause = (function() {
-      domVideo.pause();
-    }).bind(this);
-
-    this.play = (function() {
-      domVideo.play();
-    }).bind(this);
-
-    this.seek = (function(offset) {
-      domVideo.currentTime = offset * 1000;
-    }).bind(this);
-
-    this.stop = (function() {
-    }).bind(this);
-
-    this.mimetypeFromExtension = function(extension) {
-      var mimetypes = {
-        ogg: 'video/ogg',
-        ogv: 'video/ogg',
-        ogm: 'video/ogg',
-        mp4: 'video/mp4',
-        webm: 'video/webm'
-      };
-
-      if (typeof mimetypes[extension] == 'undefined')
-        return "";
-      return mimetypes[extension];
+    this.autoPlayChanged.connect(this, this.$onAutoPlayChanged);
+    this.sourceChanged.connect(this, this.$onSourceChanged);
+    this.positionChanged.connect(this, this.$onPositionChanged);
+    this.volumeChanged.connect(this, this.$onVolumeChanged);
+    this.playbackRateChanged.connect(this, this.$onPlaybackRateChanged);
+    this.mutedChanged.connect(this, this.$onMutedChanged);
+    this.fillModeChanged.connect(this, this.$onFillModeChanged);
+  }
+  $onAutoPlayChanged(newVal) {
+    this.impl.autoplay = newVal;
+  }
+  $onSourceChanged(source) {
+    const parts = source.split(".");
+    const extension = parts[parts.length - 1].toLowerCase();
+    const mime = this.mimetypeFromExtension(extension);
+    this.impl.src = source;
+    if (!this.impl.canPlayType(mime)) {
+      this.error |= MediaPlayer.FormatError;
+    }
+  }
+  $onPositionChanged(currentTime) {
+    if (this.$runningEventListener > 0) return;
+    this.impl.currentTime = currentTime / 1000;
+  }
+  $onVolumeChanged(volume) {
+    if (this.$runningEventListener > 0) return;
+    this.impl.volume = volume;
+  }
+  $onPlaybackRateChanged(playbackRate) {
+    if (this.$runningEventListener > 0) return;
+    this.impl.playbackRate = playbackRate;
+  }
+  $onMutedChanged(newValue) {
+    if (newValue) {
+      this.$volulmeBackup = this.impl.volume;
+      this.volume = 0;
+    } else {
+      this.volume = this.$volumeBackup;
+    }
+  }
+  $onFillModeChanged(newValue) {
+    switch (newValue) {
+      case VideoOutput.Stretch:
+        this.impl.style.objectFit = "fill";
+        break;
+      case VideoOutput.PreserveAspectFit:
+        this.impl.style.objectFit = "";
+        break;
+      case VideoOutput.PreserveAspectCrop:
+        this.impl.style.objectFit = "cover";
+        break;
+    }
+  }
+  pause() {
+    this.impl.pause();
+  }
+  play() {
+    this.impl.play();
+  }
+  seek(offset) {
+    this.impl.currentTime = offset * 1000;
+  }
+  stop() {
+  }
+  mimetypeFromExtension(extension) {
+    const mimetypes = {
+      ogg: "video/ogg",
+      ogv: "video/ogg",
+      ogm: "video/ogg",
+      mp4: "video/mp4",
+      webm: "video/webm"
     };
-
-    this.sourceChanged.connect(this, (function(source) {
-      var parts     = source.split('.');
-      var extension = parts[parts.length - 1];
-
-      domVideo.src = source;
-      if (domVideo.canPlayType(this.mimetypeFromExtension(extension.toLowerCase())) == "")
-        this.error |= MediaPlayer.FormatError;
-    }).bind(this));
-
-    this.positionChanged.connect(this, (function(currentTime) {
-      if (runningEventListener == 0)
-        domVideo.currentTime = currentTime / 1000;
-    }).bind(this));
-
-    this.volumeChanged.connect(this, (function(volume) {
-      if (runningEventListener == 0)
-        domVideo.volume = volume;
-    }).bind(this));
-
-    this.playbackRateChanged.connect(this, (function(playbackRate) {
-      if (runningEventListener == 0)
-        domVideo.playbackRate = playbackRate;
-    }).bind(this));
-
-    this.mutedChanged.connect(this, (function(newValue) {
-      if (newValue == true) {
-        volulmeBackup = domVideo.volume;
-        this.volume = 0;
-      } else {
-        this.volume = volumeBackup;
-      }
-    }).bind(this));
-
-    this.fillModeChanged.connect(this, (function(newValue) {
-      switch (newValue) {
-        case VideoOutput.Stretch:
-          domVideo.style.objectFit = 'fill';
-          break ;
-        case VideoOutput.PreserveAspectFit:
-          domVideo.style.objectFit = '';
-          break ;
-        case VideoOutput.PreserveAspectCrop:
-          domVideo.style.objectFit = 'cover';
-          break ;
-      }
-    }).bind(this));
+    return mimetypes[extension] || "";
   }
 });
