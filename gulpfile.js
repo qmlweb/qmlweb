@@ -39,9 +39,6 @@ const js = [
   "*.js",
   "src/**/*.js",
   "!src/engine/*.js",
-  "!src/modules/QtQml/Qt.js",
-  "!src/modules/QtQml/Component.js",
-  "!src/modules/QtQml/Connections.js",
   "!src/modules/QtQuick/*.js",
   "tests/**/*.js"
 ];

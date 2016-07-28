@@ -1,114 +1,129 @@
 const Qt = {
-  rgba: function(r,g,b,a) {
-    return "rgba("
-      + Math.round(r * 255) + ","
-      + Math.round(g * 255) + ","
-      + Math.round(b * 255) + ","
-      + a + ")";
+  rgba: (r, g, b, a) => {
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+    return `rgba(${r},${g},${b},${a})`;
   },
-  hsla: function(h,s,l,a) {
-    return "hsla("
-      + Math.round(h * 360) + ","
-      + Math.round(s * 100) + "%,"
-      + Math.round(l * 100) + "%,"
-      + a + ")";
+  hsla: (h, s, l, a) => {
+    h = Math.round(h * 360);
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+    return `hsla(${h},${s}%,${l}%,${a})`;
   },
-  openUrlExternally: function(url) {
-    page = window.open(url, '_blank');
+  openUrlExternally: url => {
+    const page = window.open(url, "_blank");
     page.focus();
   },
   // Load file, parse and construct as Component (.qml)
-  createComponent: function(name) {
-    if (name in engine.components)
-        return engine.components[name];
+  createComponent: name => {
+    if (name in engine.components) {
+      return engine.components[name];
+    }
 
-    var nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0; // e.g. // in protocol, or :/ in disk urls (D:/)
+    // e.g. // in protocol, or :/ in disk urls (D:/)
+    let nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0;
 
     // Do not perform path lookups if name starts with @ sign.
     // This is used when we load components from qmldir files
     // because in that case we do not need any lookups.
-    var origName = name;
-    if (name.length > 0 && name[0] == "@") {
+    const origName = name;
+    if (name.length > 0 && name[0] === "@") {
       nameIsUrl = true;
-      name = name.substr( 1,name.length-1 );
+      name = name.substr(1, name.length - 1);
     }
 
-    var file = nameIsUrl ? name : engine.$basePath + name;
+    let file = nameIsUrl ? name : engine.$basePath + name;
+    let src = getUrlContents(file, true);
 
-    var src = getUrlContents(file, true);
-    // if failed to load, and provided name is not direct url, try to load from dirs in importPathList()
-    if (src==false && !nameIsUrl) {
-      var moredirs = engine.importPathList();
-
-      for (var i=0; i<moredirs.length; i++) {
+    // if failed to load, and provided name is not direct url,
+    // try to load from dirs in importPathList()
+    if (!src && !nameIsUrl) {
+      const moredirs = engine.importPathList();
+      for (let i = 0; i < moredirs.length; i++) {
         file = moredirs[i] + name;
         src = getUrlContents(file, true);
         if (src !== false) break;
       }
     }
 
-    // When createComponent failed to load content from all probable sources, it should return undefined.
-    if (src === false)
+    // When createComponent failed to load content from all probable sources,
+    // it should return undefined.
+    if (src === false) {
       return undefined;
+    }
 
-    var tree = parseQML(src, file);
+    const tree = parseQML(src, file);
 
-    if (tree.$children.length !== 1)
-        console.error("A QML component must only contain one root element!");
+    if (tree.$children.length !== 1) {
+      console.error("A QML component must only contain one root element!");
+    }
 
-    const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
-    var component = new QMLComponent({ object: tree, context: _executionContext });
-    component.$basePath = engine.extractBasePath( file );
+    const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+    const component = new QMLComponent({
+      object: tree,
+      context: _executionContext
+    });
+    component.$basePath = engine.extractBasePath(file);
     component.$imports = tree.$imports;
     component.$file = file; // just for debugging
 
-    engine.loadImports( tree.$imports,component.$basePath );
+    engine.loadImports(tree.$imports, component.$basePath);
 
     engine.components[origName] = component;
     return component;
   },
 
-  createQmlObject: function(src, parent, file) {
-        var tree = parseQML(src, file);
+  createQmlObject: (src, parent, file) => {
+    const tree = parseQML(src, file);
 
-        // Create and initialize objects
+    // Create and initialize objects
 
-        const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
-        var component = new QMLComponent({ object: tree, parent: parent, context: _executionContext });
+    const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+    const component = new QMLComponent({
+      object: tree,
+      parent,
+      context: _executionContext
+    });
 
-        engine.loadImports( tree.$imports );
+    engine.loadImports(tree.$imports);
 
-        if (!file) file = Qt.resolvedUrl("createQmlObject_function");
-        component.$basePath = engine.extractBasePath(file);
-        component.$imports = tree.$imports; // for later use
-        component.$file = file; // not just for debugging, but for basepath too, see above
+    if (!file) file = Qt.resolvedUrl("createQmlObject_function");
+    component.$basePath = engine.extractBasePath(file);
+    component.$imports = tree.$imports; // for later use
+    // not just for debugging, but for basepath too, see above
+    component.$file = file;
 
-        var obj = component.createObject(parent);
-        obj.parent = parent;
-        parent.childrenChanged();
+    const obj = component.createObject(parent);
+    obj.parent = parent;
+    parent.childrenChanged();
 
-        if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
-          // We don't call those on first creation, as they will be called
-          // by the regular creation-procedures at the right time.
-          engine.$initializePropertyBindings();
+    if (engine.operationState !== QMLOperationState.Init &&
+        engine.operationState !== QMLOperationState.Idle) {
+      // We don't call those on first creation, as they will be called
+      // by the regular creation-procedures at the right time.
+      engine.$initializePropertyBindings();
 
-          engine.callCompletedSignals();
-        }
+      engine.callCompletedSignals();
+    }
 
-        return obj;
+    return obj;
   },
 
-    // Returns url resolved relative to the URL of the caller.
+  // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
-  resolvedUrl: function(url)
-  {
-    if (!url || !url.substr) // url is not a string object
+  resolvedUrl: url => {
+    if (!url || !url.substr) {
+      // url is not a string object
       return url;
+    }
 
-    // Must check for cases: D:/, file://, http://, or slash at the beginning. 
-    // This means the url is absolute => we have to skip processing (except removing dot segments).
-    if (url == "" || url.indexOf(":/") != -1 || url.indexOf("/") == 0)
-      return engine.removeDotSegments( url );
+    // Must check for cases: D:/, file://, http://, or slash at the beginning.
+    // This means the url is absolute => we have to skip processing
+    // (except removing dot segments).
+    if (url === "" || url.indexOf(":/") !== -1 || url.indexOf("/") === 0) {
+      return engine.removeDotSegments(url);
+    }
 
     // we have $basePath variable placed in context of "current" document
     // this is done in construct() function
@@ -117,23 +132,20 @@ const Qt = {
     // The 2-nd argument of the callers we hope is context object
     // e.g. see calling signature of bindings and signals
 
-    var detectedBasePath = "";
-    var currentCaller = Qt.resolvedUrl.caller;
-    var maxcount = 10;
+    let detectedBasePath = "";
+    let currentCaller = Qt.resolvedUrl.caller;
+    let maxcount = 10;
     while (maxcount-- > 0 && currentCaller) {
-      if (currentCaller.arguments[1] && currentCaller.arguments[1]["$basePath"])
-      {
-        detectedBasePath = currentCaller.arguments[1]["$basePath"];
+      if (currentCaller.arguments[1] && currentCaller.arguments[1].$basePath) {
+        detectedBasePath = currentCaller.arguments[1].$basePath;
         break;
       }
       currentCaller = currentCaller.caller;
     }
-
-    return engine.removeDotSegments( detectedBasePath + url )
+    return engine.removeDotSegments(detectedBasePath + url);
   },
 
-  size: function size(width, height)
-  {
+  size: function size(width, height) {
     return new QSizeF(width, height);
   },
 
@@ -183,7 +195,13 @@ const Qt = {
   Key_CapsLock: 20,
   Key_NumLock: 144,
   Key_ScrollLock: 145,
-  Key_F1: 112, Key_F2: 113, Key_F3: 114, Key_F4: 115, Key_F5: 116, Key_F6: 117, Key_F7: 118, Key_F8: 119, Key_F9: 120, Key_F10: 121, Key_F11: 122, Key_F12: 123, Key_F13: 124, Key_F14: 125, Key_F15: 126, Key_F16: 127, Key_F17: 128, Key_F18: 129, Key_F19: 130, Key_F20: 131, Key_F21: 132, Key_F22: 133, Key_F23: 134, Key_F24: 135, Key_F25: 0, Key_F26: 0, Key_F27: 0, Key_F28: 0, Key_F29: 0, Key_F30: 0, Key_F31: 0, Key_F32: 0, Key_F33: 0, Key_F34: 0, Key_F35: 0,
+  Key_F1: 112, Key_F2: 113, Key_F3: 114, Key_F4: 115, Key_F5: 116, Key_F6: 117,
+  Key_F7: 118, Key_F8: 119, Key_F9: 120, Key_F10: 121, Key_F11: 122,
+  Key_F12: 123, Key_F13: 124, Key_F14: 125, Key_F15: 126, Key_F16: 127,
+  Key_F17: 128, Key_F18: 129, Key_F19: 130, Key_F20: 131, Key_F21: 132,
+  Key_F22: 133, Key_F23: 134, Key_F24: 135,
+  Key_F25: 0, Key_F26: 0, Key_F27: 0, Key_F28: 0, Key_F29: 0, Key_F30: 0,
+  Key_F31: 0, Key_F32: 0, Key_F33: 0, Key_F34: 0, Key_F35: 0,
   Key_Super_L: 0,
   Key_Super_R: 0,
   Key_Menu: 0,
@@ -193,7 +211,7 @@ const Qt = {
   Key_Direction_L: 0,
   Key_Direction_R: 0,
   Key_Space: 32,
-  Key_Any:   32,
+  Key_Any: 32,
   Key_Exclam: 161,
   Key_QuoteDbl: 162,
   Key_NumberSign: 163,
@@ -209,7 +227,8 @@ const Qt = {
   Key_Minus: 173,
   Key_Period: 190,
   Key_Slash: 191,
-  Key_0: 48, Key_1: 49, Key_2: 50, Key_3: 51, Key_4: 52, Key_5: 53, Key_6: 54, Key_7: 55, Key_8: 56, Key_9: 57,
+  Key_0: 48, Key_1: 49, Key_2: 50, Key_3: 51, Key_4: 52,
+  Key_5: 53, Key_6: 54, Key_7: 55, Key_8: 56, Key_9: 57,
   Key_Colon: 58,
   Key_Semicolon: 59,
   Key_Less: 60,
@@ -217,7 +236,10 @@ const Qt = {
   Key_Greater: 62,
   Key_Question: 63,
   Key_At: 64,
-  Key_A: 65, Key_B: 66, Key_C: 67, Key_D: 68, Key_E: 69, Key_F: 70, Key_G: 71, Key_H: 72, Key_I: 73, Key_J: 74, Key_K: 75, Key_L: 76, Key_M: 77, Key_N: 78, Key_O: 79, Key_P: 80, Key_Q: 81, Key_R: 82, Key_S: 83, Key_T: 84, Key_U: 85, Key_V: 86, Key_W: 87, Key_X: 88, Key_Y: 89, Key_Z: 90,
+  Key_A: 65, Key_B: 66, Key_C: 67, Key_D: 68, Key_E: 69, Key_F: 70, Key_G: 71,
+  Key_H: 72, Key_I: 73, Key_J: 74, Key_K: 75, Key_L: 76, Key_M: 77, Key_N: 78,
+  Key_O: 79, Key_P: 80, Key_Q: 81, Key_R: 82, Key_S: 83, Key_T: 84, Key_U: 85,
+  Key_V: 86, Key_W: 87, Key_X: 88, Key_Y: 89, Key_Z: 90,
   Key_BracketLeft: 219,
   Key_Backslash: 220,
   Key_BracketRight: 221,

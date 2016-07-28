@@ -1,100 +1,105 @@
 class QMLContext {
   nameForObject(obj) {
-        for (var name in this) {
-            if (this[name] == obj)
-                return name;
-        }
+    for (const name in this) {
+      if (this[name] === obj) {
+        return name;
+      }
+    }
+    return undefined;
   }
 }
 
-QMLComponent.getAttachedObject = function() { // static
-    if (!this.$Component) {
-        this.$Component = new QObject(this);
-        this.$Component.completed = Signal.signal([]);
-        engine.completedSignals.push(this.$Component.completed);
-
-        this.$Component.destruction = Signal.signal([]);
+class QMLComponent {
+  constructor(meta) {
+    if (constructors[meta.object.$class] === QMLComponent) {
+      this.$metaObject = meta.object.$children[0];
+    } else {
+      this.$metaObject = meta.object;
     }
-    return this.$Component;
-}
+    this.$context = meta.context;
 
-QMLComponent.prototype.createObject = function(parent, properties) {
-    var oldState = engine.operationState;
+    this.$jsImports = [];
+
+    if (meta.object.$imports instanceof Array) {
+      const moduleImports = [];
+      const loadImport = importDesc => {
+        if (/\.js$/.test(importDesc[1])) {
+          this.$jsImports.push(importDesc);
+        } else {
+          moduleImports.push(importDesc);
+        }
+      };
+
+      for (let i = 0; i < meta.object.$imports.length; ++i) {
+        loadImport(meta.object.$imports[i]);
+      }
+      loadImports(this, moduleImports);
+      if (this.$context) {
+        this.finalizeImports(this.$context);
+      }
+    }
+  }
+  finalizeImports($context) {
+    for (let i = 0; i < this.$jsImports.length; ++i) {
+      const importDesc = this.$jsImports[i];
+      let src = importDesc[1];
+      let js;
+
+      if (typeof engine.$basePath !== "undefined") {
+        src = engine.$basePath + src;
+      }
+      if (typeof qrc[src] !== "undefined") {
+        js = qrc[src];
+      } else {
+        loadParser();
+        js = QmlWeb.jsparse(getUrlContents(src));
+      }
+      if (importDesc[3] !== "") {
+        $context[importDesc[3]] = {};
+        importJavascriptInContext(js, $context[importDesc[3]]);
+      } else {
+        importJavascriptInContext(js, $context);
+      }
+    }
+  }
+  createObject(parent, properties) {
+    const oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
     // change base path to current component base path
-    var bp = engine.$basePath; engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
+    const bp = engine.$basePath;
+    engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
-    var item = construct({
-        object: this.$metaObject,
-        parent: parent,
-        context: this.$context ? Object.create(this.$context) : new QMLContext(),
-        isComponentRoot: true
+    const item = construct({
+      object: this.$metaObject,
+      parent,
+      context: this.$context ? Object.create(this.$context) : new QMLContext(),
+      isComponentRoot: true
     });
 
     // change base path back
-    //TODO looks a bit hacky
+    // TODO looks a bit hacky
     engine.$basePath = bp;
 
     engine.operationState = oldState;
     return item;
-}
+  }
+  static getAttachedObject() {
+    if (!this.$Component) {
+      this.$Component = new QObject(this);
+      this.$Component.completed = Signal.signal([]);
+      engine.completedSignals.push(this.$Component.completed);
 
-function QMLComponent(meta) {
-    if (constructors[meta.object.$class] == QMLComponent)
-        this.$metaObject = meta.object.$children[0];
-    else
-        this.$metaObject = meta.object;
-    this.$context = meta.context;
-
-    var jsImports = [];
-
-    this.finalizeImports = (function($context) {
-      for (var i = 0 ; i < jsImports.length ; ++i) {
-        var importDesc = jsImports[i];
-        var src = importDesc[1];
-        var js;
-
-        if (typeof engine.$basePath != 'undefined')
-          src = engine.$basePath + src;
-        if (typeof qrc[src] != 'undefined')
-          js = qrc[src];
-        else {
-          loadParser();
-          js = QmlWeb.jsparse(getUrlContents(src));
-        }
-        if (importDesc[3] !== "") {
-          $context[importDesc[3]] = {};
-          importJavascriptInContext(js, $context[importDesc[3]]);
-        }
-        else
-          importJavascriptInContext(js, $context);
-      }
-    }).bind(this);
-
-    if (meta.object.$imports instanceof Array)
-    {
-      var moduleImports = [];
-      var loadImport    = (function(importDesc) {
-        if (/\.js$/.test(importDesc[1]))
-          jsImports.push(importDesc);
-        else
-          moduleImports.push(importDesc);
-      }).bind(this);
-
-      for (var i = 0 ; i < meta.object.$imports.length ; ++i) {
-        loadImport(meta.object.$imports[i]);
-      }
-      loadImports(this, moduleImports);
-      if (typeof this.$context != 'undefined' && this.$context != null)
-        this.finalizeImports(this.$context);
+      this.$Component.destruction = Signal.signal([]);
     }
+    return this.$Component;
+  }
 }
 
 registerQmlType({
   global: true,
-  module: 'QtQml',
-  name: 'Component',
+  module: "QtQml",
+  name: "Component",
   versions: /.*/,
-  baseClass: 'QtObject',
+  baseClass: "QtObject",
   constructor: QMLComponent
 });
