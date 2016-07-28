@@ -37,13 +37,13 @@ const tests = [
 
 const js = [
   "*.js",
-  "src/modules/QmlWeb*/*.js",
-  "src/modules/Qt.labs.*/*.js",
-  "src/modules/QtGraphicalEffects/*.js",
-  "src/modules/QtMobility/*.js",
-  "src/modules/QtMultimedia/*.js",
-  "src/modules/QtQuick.Window/*.js",
-  "src/modules/QtWebSockets/*.js",
+  "src/**/*.js",
+  "!src/qtbase/QSizeF.js",
+  "!src/engine/*.js",
+  "!src/modules/QtQml/Qt.js",
+  "!src/modules/QtQml/Component.js",
+  "!src/modules/QtQml/Connections.js",
+  "!src/modules/QtQuick/*.js",
   "tests/**/*.js"
 ];
 

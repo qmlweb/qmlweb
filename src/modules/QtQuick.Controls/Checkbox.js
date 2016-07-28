@@ -12,43 +12,45 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    const label = this.impl = document.createElement('label');
-    label.style.pointerEvents = 'auto';
+    this.impl = document.createElement("label");
+    this.impl.style.pointerEvents = "auto";
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.style.verticalAlign = 'text-bottom';
-    label.appendChild(checkbox);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.style.verticalAlign = "text-bottom";
+    checkbox.addEventListener("change", () => {
+      this.checked = checkbox.checked;
+    });
+    this.impl.appendChild(checkbox);
 
-    const span = document.createElement('span');
-    label.appendChild(span);
+    const span = document.createElement("span");
+    this.impl.appendChild(span);
 
-    this.dom.appendChild(label);
+    this.dom.appendChild(this.impl);
 
-    var self = this;
-
-    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
-    this.Component.completed.connect(this, function() {
-        this.implicitHeight = label.offsetHeight;
-        this.implicitWidth = label.offsetWidth > 0 ? label.offsetWidth + 4 : 0;
-    });
-    this.textChanged.connect(this, function(newVal) {
-        span.innerHTML = newVal;
-        this.implicitHeight = label.offsetHeight;
-        this.implicitWidth = label.offsetWidth > 0 ? label.offsetWidth + 4 : 0;
-    });
-    this.colorChanged.connect(this, function(newVal) {
-        span.style.color = new QColor(newVal);
-    });
-
-    this.checkedChanged.connect(this, function(newVal) {
-        checkbox.checked = self.checked;
-    });
-
-    checkbox.onchange = function() {
-        self.checked = this.checked;
-    };
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.textChanged.connect(this, this.$onTextChanged);
+    this.colorChanged.connect(this, this.$onColorChanged);
+    this.checkedChanged.connect(this, this.$onCheckedChanged);
+  }
+  $onTextChanged(newVal) {
+    this.impl.children[1].innerHTML = newVal;
+    this.implicitHeight = this.impl.offsetHeight;
+    this.implicitWidth = this.impl.offsetWidth > 0 ? this.impl.offsetWidth + 4 : 0;
+  }
+  $onColorChanged(newVal) {
+    this.impl.children[1].style.color = new QColor(newVal);
+  }
+  $onCheckedChanged() {
+    this.impl.children[0].checked = this.checked;
+  }
+  Component$onCompleted() {
+    this.implicitHeight = this.impl.offsetHeight;
+    this.implicitWidth = this.impl.offsetWidth > 0 ?
+                          this.impl.offsetWidth + 4 :
+                          0;
   }
 });

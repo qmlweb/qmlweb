@@ -18,57 +18,54 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var self = this;
 
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
 
-    var updateCB = function(){
-        var head = "<select>";
-        var tail = "</select>";
-        var html = head;
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.modelChanged.connect(this, this.$onModelChanged);
 
-        var model = self.model;
-        var count = model.length;
-        self.count = count;
-
-        for (var i = 0; i < count; i++) {
-            var elt = model[i];
-            //if (elt instanceof Array) { // TODO - optgroups? update model !
-            //    var count_i = elt.length;
-            //    for (var j = 0; j < count_i; j++)
-            //        html += "<option>" + elt[j] + "</option>";
-            //}
-            //else
-            html += "<option>" + elt + "</option>";
-        }
-        html += tail;
-        return html;
+    this.dom.onclick = () => {
+      const index = this.dom.firstChild.selectedIndex;
+      this.currentIndex = index;
+      this.currentText = this.model[index];
+      this.accepted();
+      this.activated(index);
     };
-
-    this.find = function(text) {
-        return self.model.indexOf(text)
-    };
-    this.selectAll = function () {};    // TODO
-    this.textAt = function(index) {
-        return this.model[index];
-    };
-
-    this.Component.completed.connect(this, function () {
-        this.dom.innerHTML = updateCB();
-        var child = this.dom.firstChild;
-        this.implicitWidth = child.offsetWidth;
-        this.implicitHeight = child.offsetHeight;
-    });
-
-    this.modelChanged.connect(updateCB);
-
-    this.dom.onclick = function (e) {
-        var index = self.dom.firstChild.selectedIndex;
-        self.currentIndex = index ;
-        self.currentText = self.model[index];
-        self.accepted();
-        self.activated(index);
-    };
+  }
+  find(text) {
+    return this.model.indexOf(text);
+  }
+  selectAll() {
+    // TODO
+  }
+  textAt(index) {
+    return this.model[index];
+  }
+  $updateImpl() {
+    this.currentIndex = 0;
+    this.count = this.model.length;
+    const entries = [];
+    for (let i = 0; i < this.count; i++) {
+      const elt = this.model[i];
+      //if (elt instanceof Array) { // TODO - optgroups? update model !
+      //    var count_i = elt.length;
+      //    for (var j = 0; j < count_i; j++)
+      //        html += "<option>" + elt[j] + "</option>";
+      //}
+      //else
+      entries.push(`<option>${elt}</option>`);
+    }
+    // TODO: remove innerHTML, port to DOM
+    this.dom.innerHTML = `<select>${entries.join("")}</select>`;
+    this.impl = this.dom.firstChild;
+  }
+  Component$onCompleted() {
+    this.$updateImpl();
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onModelChanged() {
+    this.$updateImpl();
   }
 });
