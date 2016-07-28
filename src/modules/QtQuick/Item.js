@@ -65,14 +65,14 @@ registerQmlType({
     this.parentChanged.connect(this, this.$onParentChanged);
     this.dataChanged.connect(this, this.$onDataChanged);
     this.stateChanged.connect(this, this.$onStateChanged);
-    this.visibleChanged.connect(this, this.$onVisibleChanged);
+    this.visibleChanged.connect(this, this.$onVisibleChanged_);
     this.clipChanged.connect(this, this.$onClipChanged);
     this.zChanged.connect(this, this.$onZChanged);
     this.xChanged.connect(this, this.$onXChanged);
     this.yChanged.connect(this, this.$onYChanged);
     this.widthChanged.connect(this, this.$onWidthChanged);
     this.heightChanged.connect(this, this.$onHeightChanged);
-    this.focusChanged.connect(this, this.$onFocusChanged);
+    this.focusChanged.connect(this, this.$onFocusChanged_);
 
     this.widthChanged.connect(this, this.$updateHGeometry);
     this.heightChanged.connect(this, this.$updateVGeometry);
@@ -124,7 +124,7 @@ registerQmlType({
     this.scaleChanged.connect(this, this.$updateTransform);
     this.transformChanged.connect(this, this.$updateTransform);
 
-    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.Component.completed.connect(this, this.Component$onCompleted_);
     this.opacityChanged.connect(this, this.$calculateOpacity);
     if (this.$parent) {
       this.$parent.$opacityChanged.connect(this, this.$calculateOpacity);
@@ -314,7 +314,7 @@ registerQmlType({
       transition.$start(actions);
     }
   }
-  $onVisibleChanged(newVal) {
+  $onVisibleChanged_(newVal) {
     this.css.visibility = newVal ? "inherit" : "hidden";
   }
   $onClipChanged(newVal) {
@@ -396,7 +396,7 @@ registerQmlType({
     this.dom.style.filter = filter;
     this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
   }
-  Component$onCompleted() {
+  Component$onCompleted_() {
     this.$calculateOpacity();
   }
   $calculateOpacity() {

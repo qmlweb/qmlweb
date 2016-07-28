@@ -24,13 +24,13 @@ registerQmlType({
     this.contentItemChanged.connect(this, this.$onContentItemChanged);
     this.flickableItemChanged.connect(this, this.$onFlickableItemChanged);
     this.viewportChanged.connect(this, this.$onViewportChanged);
-    this.frameVisibleChanged.connect(this, this.$onVisibleChanged_);
+    this.frameVisibleChanged.connect(this, this.$onVisibleChanged);
     this.highlightOnFocusChanged.connect(this, this.$onHighlightOnFocusChanged);
     this.horizontalScrollBarPolicyChanged.connect(this, this.$onHorizontalScrollBarPolicyChanged);
     this.verticalScrollBarPolicyChanged.connect(this, this.$onVerticalScrollBarPolicyChanged);
     this.styleChanged.connect(this, this.$onStyleChanged);
     this.childrenChanged.connect(this, this.$onChildrenChanged);
-    this.focusChanged.connect(this, this.$onFocusChanged_);
+    this.focusChanged.connect(this, this.$onFocusChanged);
 
     this.width = this.implicitWidth = 240; // default QML ScrollView width
     this.height = this.implicitHeight = 150; // default QML ScrollView height
@@ -57,12 +57,12 @@ registerQmlType({
   }
   $onViewportChanged(newViewport) {
   }
-  $onFocusChanged_(focus) {
+  $onFocusChanged(focus) {
     this.css.outline = this.highlight && focus
       ? "outline: lightblue solid 2px;"
       : "";
   }
-  $onVisibleChanged_(visible) {
+  $onVisibleChanged(visible) {
     this.css.border= visible ? "1px solid gray" : "hidden";
   }
   $onHorizontalScrollBarPolicyChanged(newPolicy) {
