@@ -38,7 +38,6 @@ const tests = [
 const js = [
   "*.js",
   "src/**/*.js",
-  "!src/qtbase/QSizeF.js",
   "!src/engine/*.js",
   "!src/modules/QtQml/Qt.js",
   "!src/modules/QtQml/Component.js",
