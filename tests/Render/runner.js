@@ -105,8 +105,7 @@
 
           if (group.indexOf("Async") !== -1) {
             window.onTestLoad = function(options) {
-              options = options || {};
-              delayedFrames(onTestLoad, options.framesDelay || 0)();
+              delayedFrames(onTestLoad, options && options.framesDelay || 0)();
             };
           } else {
             onTestLoad();

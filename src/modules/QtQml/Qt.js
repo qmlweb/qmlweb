@@ -1,15 +1,15 @@
 const Qt = {
   rgba: (r, g, b, a) => {
-    r = Math.round(r * 255);
-    g = Math.round(g * 255);
-    b = Math.round(b * 255);
-    return `rgba(${r},${g},${b},${a})`;
+    const intr = Math.round(r * 255);
+    const intg = Math.round(g * 255);
+    const intb = Math.round(b * 255);
+    return `rgba(${intr},${intg},${intb},${a})`;
   },
   hsla: (h, s, l, a) => {
-    h = Math.round(h * 360);
-    s = Math.round(s * 100);
-    l = Math.round(l * 100);
-    return `hsla(${h},${s}%,${l}%,${a})`;
+    const inth = Math.round(h * 360);
+    const ints = Math.round(s * 100);
+    const intl = Math.round(l * 100);
+    return `hsla(${inth},${ints}%,${intl}%,${a})`;
   },
   openUrlExternally: url => {
     const page = window.open(url, "_blank");
@@ -25,16 +25,18 @@ const Qt = {
     // e.g. // in protocol, or :/ in disk urls (D:/)
     let nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0;
 
-    // Do not perform path lookups if name starts with @ sign.
-    // This is used when we load components from qmldir files
-    // because in that case we do not need any lookups.
-    const origName = name;
+    let resolvedName;
     if (name.length > 0 && name[0] === "@") {
+      // Do not perform path lookups if name starts with @ sign.
+      // This is used when we load components from qmldir files because in that
+      // case we do not need any lookups.
       nameIsUrl = true;
-      name = name.substr(1, name.length - 1);
+      resolvedName = name.substr(1, name.length - 1);
+    } else {
+      resolvedName = name;
     }
 
-    let file = nameIsUrl ? name : engine.$basePath + name;
+    let file = nameIsUrl ? resolvedName : engine.$basePath + resolvedName;
     let src = getUrlContents(file, true);
 
     // if failed to load, and provided name is not direct url,
@@ -42,7 +44,7 @@ const Qt = {
     if (!src && !nameIsUrl) {
       const moredirs = engine.importPathList();
       for (let i = 0; i < moredirs.length; i++) {
-        file = moredirs[i] + name;
+        file = moredirs[i] + resolvedName;
         src = getUrlContents(file, true);
         if (src !== false) break;
       }
@@ -71,7 +73,7 @@ const Qt = {
 
     engine.loadImports(tree.$imports, component.$basePath);
 
-    engine.components[origName] = component;
+    engine.components[name] = component;
     return component;
   },
 
@@ -90,11 +92,11 @@ const Qt = {
     const engine = QmlWeb.engine;
     engine.loadImports(tree.$imports);
 
-    if (!file) file = Qt.resolvedUrl("createQmlObject_function");
-    component.$basePath = engine.extractBasePath(file);
+    const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
+    component.$basePath = engine.extractBasePath(resolvedFile);
     component.$imports = tree.$imports; // for later use
     // not just for debugging, but for basepath too, see above
-    component.$file = file;
+    component.$file = resolvedFile;
 
     const obj = component.createObject(parent);
     obj.parent = parent;

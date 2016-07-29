@@ -10,8 +10,8 @@ class QColor {
       this.$value = val.toLowerCase();
     } else if (typeof val === "number") {
       // we assume it is int value and must be converted to css hex with padding
-      val = (Math.round(val) + 0x1000000).toString(16).substr(-6);
-      this.$value = `#${val}`;
+      const rgb = (Math.round(val) + 0x1000000).toString(16).substr(-6);
+      this.$value = `#${rgb}`;
     }
   }
   toString() {
