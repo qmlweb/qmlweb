@@ -15,159 +15,203 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var self = this;
-    var QMLListModel = getConstructor('QtQuick', '2.0', 'ListModel');
 
-    this.parent = meta.parent; // TODO: some (all ?) of the components including Repeater needs to know own parent at creation time. Please consider this major change.
+    this.parent = meta.parent;
+    // TODO: some (all ?) of the components including Repeater needs to know own
+    // parent at creation time. Please consider this major change.
 
-    this.container = function() { return this.parent; }
     this.$completed = false;
     this.$items = []; // List of created items
 
-    this.modelChanged.connect(applyModel);
-    this.delegateChanged.connect(applyModel);
-    this.parentChanged.connect(applyModel);
+    this.modelChanged.connect(this, this.$onModelChanged);
+    this.delegateChanged.connect(this, this.$onDelegateChanged);
+    this.parentChanged.connect(this, this.$onParentChanged);
+  }
+  container() {
+    return this.parent;
+  }
+  itemAt(index) {
+    return this.$items[index];
+  }
+  $onModelChanged() {
+    this.$applyModel();
+  }
+  $onDelegateChanged() {
+    this.$applyModel();
+  }
+  $onParentChanged() {
+    this.$applyModel();
+  }
+  $getModel() {
+    const QMLListModel = getConstructor("QtQuick", "2.0", "ListModel");
+    return this.model instanceof QMLListModel ?
+            this.model.$model :
+            this.model;
+  }
+  $applyModel() {
+    if (!this.delegate || !this.parent) {
+      return;
+    }
+    const model = this.$getModel();
+    if (model instanceof JSItemModel) {
+      if (!model.dataChanged.isConnected(this, this.$_onModelDataChanged)) {
+        model.dataChanged.connect(this, this.$_onModelDataChanged);
+      }
+      if (!model.rowsInserted.isConnected(this, this.$insertChildren)) {
+        model.rowsInserted.connect(this, this.$insertChildren);
+      }
+      if (!model.rowsMoved.isConnected(this, this.$_onRowsMoved)) {
+        model.rowsMoved.connect(this, this.$_onRowsMoved);
+      }
+      if (!model.rowsRemoved.isConnected(this, this.$_onRowsRemoved)) {
+        model.rowsRemoved.connect(this, this.$_onRowsRemoved);
+      }
+      if (!model.modelReset.isConnected(this, this.$_onModelReset)) {
+        model.modelReset.connect(this, this.$_onModelReset);
+      }
 
-    this.itemAt = function(index) {
-        return this.$items[index];
+      this.$removeChildren(0, this.$items.length);
+      this.$insertChildren(0, model.rowCount());
+    } else if (typeof model === "number") {
+      // must be more elegant here.. do not delete already created models..
+      //this.$removeChildren(0, this.$items.length);
+      //this.$insertChildren(0, model);
+
+      if (this.$items.length > model) {
+        // have more than we need
+        this.$removeChildren(model, this.$items.length);
+      } else {
+        // need more
+        this.$insertChildren(this.$items.length, model);
+      }
+    } else if (model instanceof Array) {
+      this.$removeChildren(0, this.$items.length);
+      this.$insertChildren(0, model.length);
+    }
+  }
+  $callOnCompleted(child) {
+    child.Component.completed();
+    const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
+    for (let i = 0; i < child.$tidyupList.length; i++) {
+      if (child.$tidyupList[i] instanceof QMLBaseObject) {
+        this.$callOnCompleted(child.$tidyupList[i]);
+      }
+    }
+  }
+  $_onModelDataChanged(startIndex, endIndex, roles) {
+    const model = this.$getModel();
+    if (!roles) {
+      roles = model.roleNames;
+    }
+    for (let index = startIndex; index <= endIndex; index++) {
+      const item = this.$items[index];
+      for (const i in roles) {
+        item.$properties[roles[i]].set(
+          model.data(index, roles[i]),
+          QMLProperty.ReasonInit,
+          item,
+          this.model.$context
+        );
+      }
+    }
+  }
+  $_onRowsMoved(sourceStartIndex, sourceEndIndex, destinationIndex) {
+    const vals = this.$items.splice(
+      sourceStartIndex,
+      sourceEndIndex - sourceStartIndex
+    );
+    for (let i = 0; i < vals.length; i++) {
+      this.$items.splice(destinationIndex + i, 0, vals[i]);
+    }
+    const smallestChangedIndex = sourceStartIndex < destinationIndex ?
+                                  sourceStartIndex :
+                                  destinationIndex;
+    for (let i = smallestChangedIndex; i < this.$items.length; i++) {
+      this.$items[i].index = i;
+    }
+  }
+  $_onRowsRemoved(startIndex, endIndex) {
+    this.$removeChildren(startIndex, endIndex);
+    for (let i = startIndex; i < this.$items.length; i++) {
+      this.$items[i].index = i;
+    }
+    this.count = this.$items.length;
+  }
+  $_onModelReset() {
+    this.$removeChildren(0, this.$items.length);
+  }
+  $insertChildren(startIndex, endIndex) {
+    if (endIndex <= 0) return;
+
+    const model = this.$getModel();
+    let index;
+    for (index = startIndex; index < endIndex; index++) {
+      const newItem = this.delegate.createObject();
+      createProperty("int", newItem, "index", { initialValue: index });
+      newItem.parent = this.parent;
+
+      // To properly import JavaScript in the context of a component
+      this.delegate.finalizeImports();
+
+      if (typeof model === "number" || model instanceof Array) {
+        if (typeof newItem.$properties.modelData === "undefined") {
+          createProperty("variant", newItem, "modelData");
+        }
+        const value = model instanceof Array ?
+                      model[index] :
+                      typeof model === "number" ? index : "undefined";
+        newItem.$properties.modelData.set(value, true, newItem, model.$context);
+      } else {
+        for (let i = 0; i < model.roleNames.length; i++) {
+          const roleName = model.roleNames[i];
+          if (typeof newItem.$properties[roleName] === "undefined") {
+            createProperty("variant", newItem, roleName);
+          }
+          newItem.$properties[roleName].set(
+            model.data(index, roleName), true, newItem, this.model.$context
+          );
+        }
+      }
+
+      this.$items.splice(index, 0, newItem);
+
+      // TODO debug this. Without check to Init, Completed sometimes called
+      // twice.. But is this check correct?
+      if (engine.operationState !== QMLOperationState.Init &&
+          engine.operationState !== QMLOperationState.Idle) {
+        // We don't call those on first creation, as they will be called
+        // by the regular creation-procedures at the right time.
+        this.$callOnCompleted(newItem);
+      }
+    }
+    if (engine.operationState !== QMLOperationState.Init) {
+      // We don't call those on first creation, as they will be called
+      // by the regular creation-procedures at the right time.
+      engine.$initializePropertyBindings();
     }
 
-    function callOnCompleted(child) {
-        child.Component.completed();
-        const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
-        for (var i = 0; i < child.$tidyupList.length; i++)
-            if (child.$tidyupList[i] instanceof QMLBaseObject)
-                callOnCompleted(child.$tidyupList[i]);
-    }
-    function insertChildren(startIndex, endIndex) {
-        if (endIndex <= 0) return;
-
-        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-
-        for (var index = startIndex; index < endIndex; index++) {
-            var newItem = self.delegate.createObject();
-            createProperty('int', newItem, 'index', {initialValue: index});
-            newItem.parent = self.parent;
-            self.delegate.finalizeImports(); // To properly import JavaScript in the context of a component
-
-            if ( typeof model == "number" || model instanceof Array ) {
-                 if (typeof newItem.$properties["modelData"] == 'undefined'){
-                    createProperty("variant", newItem, "modelData");
-                 }
-                 var value = model instanceof Array ? model[index] : typeof model == "number" ? index : "undefined";
-                 newItem.$properties["modelData"].set(value, true, newItem, model.$context);
-            } else {
-                for (var i = 0; i < model.roleNames.length; i++) {
-                    var roleName = model.roleNames[i];
-                    if (typeof newItem.$properties[roleName] == 'undefined')
-                      createProperty("variant", newItem, roleName);
-                    newItem.$properties[roleName].set(model.data(index, roleName), true, newItem, self.model.$context);
-                }
-            }
-
-            self.$items.splice(index, 0, newItem);
-
-            // TODO debug this. Without check to Init, Completed sometimes called twice.. But is this check correct?
-            if (engine.operationState !== QMLOperationState.Init && engine.operationState !== QMLOperationState.Idle) {
-                // We don't call those on first creation, as they will be called
-                // by the regular creation-procedures at the right time.
-                callOnCompleted(newItem);
-            }
-        }
-        if (engine.operationState !== QMLOperationState.Init) {
-             // We don't call those on first creation, as they will be called
-             // by the regular creation-procedures at the right time.
-             engine.$initializePropertyBindings();
-        }
-
-        if (index > 0) {
-            self.container().childrenChanged();
-        }
-
-        for (var i = endIndex; i < self.$items.length; i++)
-            self.$items[i].index = i;
-
-        self.count = self.$items.length;
+    if (index > 0) {
+      this.container().childrenChanged();
     }
 
-    function onModelDataChanged(startIndex, endIndex, roles) {
-        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-
-        if (!roles)
-            roles = model.roleNames;
-        for (var index = startIndex; index <= endIndex; index++) {
-            for (var i in roles) {
-                self.$items[index].$properties[roles[i]].set(model.data(index, roles[i]), QMLProperty.ReasonInit, self.$items[index], self.model.$context);
-            }
-        }
-    }
-    function onRowsMoved(sourceStartIndex, sourceEndIndex, destinationIndex) {
-        var vals = self.$items.splice(sourceStartIndex, sourceEndIndex-sourceStartIndex);
-        for (var i = 0; i < vals.length; i++) {
-            self.$items.splice(destinationIndex + i, 0, vals[i]);
-        }
-        var smallestChangedIndex = sourceStartIndex < destinationIndex
-                                ? sourceStartIndex : destinationIndex;
-        for (var i = smallestChangedIndex; i < self.$items.length; i++) {
-            self.$items[i].index = i;
-        }
-    }
-    function onRowsRemoved(startIndex, endIndex) {
-        removeChildren(startIndex, endIndex);
-        for (var i = startIndex; i < self.$items.length; i++) {
-            self.$items[i].index = i;
-        }
-        self.count = self.$items.length;
-    }
-    function onModelReset() {
-        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-        removeChildren(0, self.$items.length);
-    }
-    function applyModel() {
-        if (!self.delegate || !self.parent)
-            return;
-        var model = self.model instanceof QMLListModel ? self.model.$model : self.model;
-        if (model instanceof JSItemModel) {
-            if ( model.dataChanged.isConnected(onModelDataChanged) == false ) model.dataChanged.connect(onModelDataChanged);
-            if ( model.rowsInserted.isConnected(insertChildren) == false ) model.rowsInserted.connect(insertChildren);
-            if ( model.rowsMoved.isConnected(onRowsMoved) == false  ) model.rowsMoved.connect(onRowsMoved);
-            if ( model.rowsRemoved.isConnected(onRowsRemoved) == false  ) model.rowsRemoved.connect(onRowsRemoved);
-            if ( model.modelReset.isConnected(onModelReset) == false  ) model.modelReset.connect(onModelReset);
-
-            removeChildren(0, self.$items.length);
-            insertChildren(0, model.rowCount());
-        } else if (typeof model == "number") {
-            // must be more elegant here.. do not delete already created models..
-            //removeChildren(0, self.$items.length);
-            //insertChildren(0, model);
-
-            if (self.$items.length > model) {
-               // have more than we need
-               removeChildren(model,self.$items.length);
-            }
-            else
-            {
-               // need more
-               insertChildren(self.$items.length,model);
-            }
-
-        } else if (model instanceof Array) {
-            removeChildren(0, self.$items.length);
-            insertChildren(0, model.length);
-        }
+    for (let i = endIndex; i < this.$items.length; i++) {
+      this.$items[i].index = i;
     }
 
-    function removeChildren(startIndex, endIndex) {
-        var removed = self.$items.splice(startIndex, endIndex - startIndex);
-        for (var index in removed) {
-            removed[index].$delete();
-            removeChildProperties(removed[index]);
-        }
+    this.count = this.$items.length;
+  }
+  $removeChildren(startIndex, endIndex) {
+    const removed = this.$items.splice(startIndex, endIndex - startIndex);
+    for (const index in removed) {
+      removed[index].$delete();
+      this.$removeChildProperties(removed[index]);
     }
-    function removeChildProperties(child) {
-        engine.completedSignals.splice(engine.completedSignals.indexOf(child.Component.completed), 1);
-        for (var i = 0; i < child.children.length; i++)
-            removeChildProperties(child.children[i])
+  }
+  $removeChildProperties(child) {
+    const signals = engine.completedSignals;
+    signals.splice(signals.indexOf(child.Component.completed), 1);
+    for (let i = 0; i < child.children.length; i++) {
+      this.$removeChildProperties(child.children[i]);
     }
   }
 });

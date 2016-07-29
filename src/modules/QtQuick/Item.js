@@ -64,7 +64,7 @@ registerQmlType({
       createProperty("var", this, "activeFocus");
     }
 
-    this.parentChanged.connect(this, this.$onParentChanged);
+    this.parentChanged.connect(this, this.$onParentChanged_);
     this.dataChanged.connect(this, this.$onDataChanged);
     this.stateChanged.connect(this, this.$onStateChanged);
     this.visibleChanged.connect(this, this.$onVisibleChanged_);
@@ -169,7 +169,7 @@ registerQmlType({
       }
     }
   }
-  $onParentChanged(newParent, oldParent, propName) {
+  $onParentChanged_(newParent, oldParent, propName) {
     if (oldParent) {
       oldParent.children.splice(oldParent.children.indexOf(this), 1);
       oldParent.childrenChanged();
