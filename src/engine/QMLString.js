@@ -1,4 +1,4 @@
 function QMLString(val) {
-  return val + "";
+  return `${val}`;
 }
 QMLString.plainType = true;

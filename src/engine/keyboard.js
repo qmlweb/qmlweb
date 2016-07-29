@@ -7,7 +7,7 @@ QmlWeb.keyCodeToQt = e => {
     return e.keyCode - (97 - Qt.Key_A);
   }
   return e.keyCode;
-},
+};
 
 QmlWeb.eventToKeyboard = e => ({
   accepted: false,
@@ -27,8 +27,8 @@ QmlWeb.keyboardSignals = {};
  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "hangup", "menu", "no", "return", "select",
  "space", "tab", "volumeDown", "volumeUp", "yes", "up", "right", "down", "left"
 ].forEach(key => {
+  const name = key.toString();
+  const qtName = `Key_${name[0].toUpperCase()}${name.slice(1)}`;
   const prefix = typeof key === "number" ? "digit" : "";
-  key = key.toString();
-  const name = `Key_${key[0].toUpperCase()}${key.slice(1)}`;
-  QmlWeb.keyboardSignals[Qt[name]] = `${prefix}${key}Pressed`;
+  QmlWeb.keyboardSignals[Qt[qtName]] = `${prefix}${name}Pressed`;
 });

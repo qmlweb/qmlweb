@@ -1,15 +1,13 @@
-window.addEventListener('load', () => {
-  var metaTags = document.getElementsByTagName('BODY');
-
-  for (var i = 0 ; i < metaTags.length ; ++i) {
-    var metaTag = metaTags[i];
-    var source  = metaTag.getAttribute('data-qml');
-
-    if (source != null) {
+window.addEventListener("load", () => {
+  const metaTags = document.getElementsByTagName("body");
+  for (let i = 0; i < metaTags.length; ++i) {
+    const metaTag = metaTags[i];
+    const source = metaTag.getAttribute("data-qml");
+    if (source) {
       QmlWeb.qmlEngine = new QMLEngine();
       QmlWeb.qmlEngine.loadFile(source);
       QmlWeb.qmlEngine.start();
-      break ;
+      break;
     }
   }
 });

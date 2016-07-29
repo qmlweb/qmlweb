@@ -34,7 +34,10 @@ const licenseSources = [
 const js = [
   "*.js",
   "src/**/*.js",
-  "!src/engine/*.js",
+  "!src/engine/import.js",
+  "!src/engine/qml.js",
+  "!src/engine/QMLProperty.js",
+  "!src/engine/qmlstructure.js",
   "!src/modules/QtQuick/*.js",
   "tests/**/*.js"
 ];

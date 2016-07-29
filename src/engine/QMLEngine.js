@@ -206,16 +206,19 @@ class QMLEngine {
   // `http://example.com/controls/qmldir`
 
   addModulePath(moduleName, dirPath) {
-    // remove trailing slash as it required for `readQmlDir`
+    let resolvedPath;
     if (dirPath[dirPath.length - 1] === "/") {
-      dirPath = dirPath.substr(0, dirPath.length - 1);
+      // remove trailing slash as it required for `readQmlDir`
+      resolvedPath = dirPath.substr(0, dirPath.length - 1);
+    } else {
+      resolvedPath = dirPath;
     }
 
     // keep the mapping. It will be used in loadImports() function .
     if (!this.userAddedModulePaths) {
       this.userAddedModulePaths = {};
     }
-    this.userAddedModulePaths[moduleName] = dirPath;
+    this.userAddedModulePaths[moduleName] = resolvedPath;
   }
 
   registerProperty(obj, propName) {
@@ -239,7 +242,7 @@ class QMLEngine {
     setupGetterSetter(obj, propName, getter, setter);
   }
 
-  loadImports(importsArray, currentFileDir) {
+  loadImports(importsArray, currentFileDir = this.$basePath) {
     if (!this.qmldirsContents) {
       this.qmldirsContents = {}; // cache
 
@@ -258,10 +261,6 @@ class QMLEngine {
 
     if (!importsArray || importsArray.length === 0) {
       return;
-    }
-    if (!currentFileDir) {
-      // use this.$basePath by default
-      currentFileDir = this.$basePath;
     }
 
     for (let i = 0; i < importsArray.length; i++) {

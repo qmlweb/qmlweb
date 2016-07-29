@@ -1,4 +1,4 @@
 function QMLVariant(val) {
-    return val;
+  return val;
 }
 QMLVariant.plainType = true;
