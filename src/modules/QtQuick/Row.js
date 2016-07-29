@@ -14,20 +14,21 @@ registerQmlType({
     this.layoutChildren();
   }
   layoutChildren() {
-    var curPos = 0,
-        maxHeight = 0,
-        // When layoutDirection is RightToLeft we need oposite order
-        i = this.layoutDirection == 1 ? this.children.length - 1 : 0,
-        endPoint = this.layoutDirection == 1 ? -1 : this.children.length,
-        step = this.layoutDirection == 1 ? -1 : 1;
+    let curPos = 0;
+    let maxHeight = 0;
+    // When layoutDirection is RightToLeft we need oposite order
+    let i = this.layoutDirection === 1 ? this.children.length - 1 : 0;
+    const endPoint = this.layoutDirection === 1 ? -1 : this.children.length;
+    const step = this.layoutDirection === 1 ? -1 : 1;
     for (; i !== endPoint; i += step) {
-        var child = this.children[i];
-        if (!(child.visible && child.width && child.height))
-            continue;
-        maxHeight = child.height > maxHeight ? child.height : maxHeight;
+      const child = this.children[i];
+      if (!(child.visible && child.width && child.height)) {
+        continue;
+      }
+      maxHeight = child.height > maxHeight ? child.height : maxHeight;
 
-        child.x = curPos;
-        curPos += child.width + this.spacing;
+      child.x = curPos;
+      curPos += child.width + this.spacing;
     }
     this.implicitHeight = maxHeight;
     this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side

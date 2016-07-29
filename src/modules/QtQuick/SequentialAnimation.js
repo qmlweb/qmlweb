@@ -10,73 +10,66 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var curIndex,
-        passedLoops,
-        i,
-        self = this;
 
-    function nextAnimation(proceed) {
-        var anim;
-        if (self.running && !proceed) {
-            curIndex++;
-            if (curIndex < self.animations.length) {
-                anim = self.animations[curIndex];
-                console.log("nextAnimation", self, curIndex, anim);
-                anim.start();
-            } else {
-                passedLoops++;
-                if (passedLoops >= self.loops) {
-                    self.complete();
-                } else {
-                    curIndex = -1;
-                    nextAnimation();
-                }
-            }
-        }
-    }
+    this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
-    this.animationsChanged.connect(this, function() {
-        for (i = 0; i < this.animations.length; i++) {
-            if (!this.animations[i].runningChanged.isConnected(nextAnimation))
-                this.animations[i].runningChanged.connect(nextAnimation);
-        }
+    engine.$registerStart(() => {
+      if (this.running) {
+        this.running = false; // toggled back by start();
+        this.start();
+      }
     });
-
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            curIndex = -1;
-            passedLoops = 0;
-            nextAnimation();
-        }
+    engine.$registerStop(() => self.stop());
+  }
+  $onAnimatonsChanged() {
+    for (let i = 0; i < this.animations.length; i++) {
+      const animation = this.animations[i];
+      if (!animation.runningChanged.isConnected(this, this.$nextAnimation)) {
+        animation.runningChanged.connect(this, this.$nextAnimation);
+      }
     }
-    this.stop = function() {
-        if (this.running) {
-            this.running = false;
-            if (curIndex < this.animations.length) {
-                this.animations[curIndex].stop();
-            }
+  }
+  $nextAnimation(proceed) {
+    if (this.running && !proceed) {
+      this.$curIndex++;
+      if (this.$curIndex < this.animations.length) {
+        const anim = this.animations[this.$curIndex];
+        console.log("nextAnimation", this, this.$curIndex, anim);
+        anim.start();
+      } else {
+        this.$passedLoops++;
+        if (this.$passedLoops >= this.loops) {
+          this.complete();
+        } else {
+          this.$curIndex = -1;
+          nextAnimation();
         }
+      }
     }
-
-    this.complete = function() {
-        if (this.running) {
-            if (curIndex < this.animations.length) {
-                // Stop current animation
-                this.animations[curIndex].stop();
-            }
-            this.running = false;
-        }
+  }
+  start() {
+    if (!this.running) {
+      this.running = true;
+      this.$curIndex = -1;
+      this.$passedLoops = 0;
+      this.$nextAnimation();
     }
-
-    engine.$registerStart(function() {
-        if (self.running) {
-            self.running = false; // toggled back by start();
-            self.start();
-        }
-    });
-    engine.$registerStop(function() {
-        self.stop();
-    });
+  }
+  stop() {
+    if (this.running) {
+      this.running = false;
+      if (this.$curIndex < this.animations.length) {
+        this.animations[this.$curIndex].stop();
+      }
+    }
+  }
+  complete() {
+    if (this.running) {
+      if (this.$curIndex < this.animations.length) {
+        // Stop current animation
+        this.animations[this.$curIndex].stop();
+      }
+      this.running = false;
+    }
   }
 });

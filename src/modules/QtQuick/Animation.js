@@ -47,6 +47,6 @@ registerQmlType({
   }
   complete() {
     // To be overridden
-    console.log('Unbound method for', this);
+    console.log("Unbound method for", this);
   }
 });
