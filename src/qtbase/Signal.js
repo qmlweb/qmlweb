@@ -16,7 +16,7 @@ class Signal {
       try {
         this.connectedSlots[i].slot.apply(this.connectedSlots[i].thisObj, args);
       } catch (err) {
-        console.error("Signal slot error:", err,
+        console.error("Signal slot error:", err.message, err,
           Function.prototype.toString.call(this.connectedSlots[i].slot)
         );
       }
