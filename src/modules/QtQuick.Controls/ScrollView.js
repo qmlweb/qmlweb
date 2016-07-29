@@ -63,7 +63,7 @@ registerQmlType({
       : "";
   }
   $onVisibleChanged(visible) {
-    this.css.border= visible ? "1px solid gray" : "hidden";
+    this.css.border = visible ? "1px solid gray" : "hidden";
   }
   $onHorizontalScrollBarPolicyChanged(newPolicy) {
     this.css.overflowX = this.$scrollBarPolicyToCssOverflow(newPolicy);
