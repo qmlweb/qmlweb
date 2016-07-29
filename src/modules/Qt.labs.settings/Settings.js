@@ -24,13 +24,17 @@ registerQmlType({
     return `${this.category}/${attrName}`;
   }
   $loadProperties() {
-    for (let i = 0; i < this.$attributes.length; ++i) {
-      const key = this.$getKey(this.$attributes[i]);
-      this[this.$attributes[i]] = localStorage.getItem(key);
-    }
+    this.$attributes.forEach(attrName => {
+      if (!this.$properties[attrName]) return;
+
+      const key = this.$getKey(attrName);
+      this[attrName] = localStorage.getItem(key);
+    });
   }
   $initializeProperties() {
     this.$attributes.forEach(attrName => {
+      if (!this.$properties[attrName]) return;
+
       let emitter = this;
       let signalName = `${attrName}Changed`;
 
