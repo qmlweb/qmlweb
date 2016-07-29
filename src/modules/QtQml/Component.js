@@ -62,7 +62,7 @@ class QMLComponent {
       }
     }
   }
-  createObject(parent, properties) {
+  createObject(parent, properties = {}) {
     const oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
     // change base path to current component base path
@@ -74,6 +74,10 @@ class QMLComponent {
       parent,
       context: this.$context ? Object.create(this.$context) : new QMLContext(),
       isComponentRoot: true
+    });
+
+    Object.keys(properties).forEach(propname => {
+      item[propname] = properties.propname;
     });
 
     // change base path back
