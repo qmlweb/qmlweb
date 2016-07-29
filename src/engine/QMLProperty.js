@@ -86,7 +86,7 @@ QMLProperty.prototype.update = function() {
 // Define getter
 QMLProperty.prototype.get = function() {
     //if (this.needsUpdate && !evaluatingPropertyPaused) {
-    if (this.needsUpdate && engine.operationState !== QMLOperationState.Init) {
+    if (this.needsUpdate && QmlWeb.engine.operationState !== QMLOperationState.Init) {
       this.update();
     }
 
@@ -127,7 +127,7 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
         this.objectScope = objectScope;
         this.componentScope = componentScope;
 
-        if (engine.operationState !== QMLOperationState.Init) {
+        if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
             if (!newVal.eval)
                 newVal.compile();
             try {
@@ -139,7 +139,7 @@ QMLProperty.prototype.set = function(newVal, reason, objectScope, componentScope
               popEvaluatingProperty();
             }
         } else {
-            engine.bindedProperties.push(this);
+            QmlWeb.engine.bindedProperties.push(this);
             return;
         }
     } else {

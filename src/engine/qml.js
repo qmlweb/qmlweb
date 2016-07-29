@@ -246,7 +246,7 @@ function construct(meta) {
         // 4) from qmldir files
         // Currently we support only 1,2 and 4 and use order: 4,1,2
         // TODO: engine.qmldirs is global for all loaded components. That's not qml's original behaviour.
-        var qdirInfo = engine.qmldirs[meta.object.$class]; // Are we have info on that component in some imported qmldir files?
+        var qdirInfo = QmlWeb.engine.qmldirs[meta.object.$class]; // Are we have info on that component in some imported qmldir files?
 
         /* This will also be set in applyProperties, but needs to be set here
          * for Qt.createComponent to have the correct context. */
@@ -275,7 +275,7 @@ function construct(meta) {
         setupGetterSetter(meta.context, meta.object.id, function() { return item; }, function() {});
 
     // keep path in item for probale use it later in Qt.resolvedUrl
-    item.$context["$basePath"] = engine.$basePath; //gut
+    item.$context["$basePath"] = QmlWeb.engine.$basePath; //gut
 
     // Apply properties (Bindings won't get evaluated, yet)
     applyProperties(meta.object, item, item, item.$context);
@@ -471,7 +471,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
                       }
                     }
                   }
-                  engine.pendingOperations.push( [con,item.$properties[i]] );
+                  QmlWeb.engine.pendingOperations.push( [con,item.$properties[i]] );
                 }
 
                 continue;

@@ -1,5 +1,5 @@
 // There can only be one running QMLEngine. This variable points to the currently running engine.
-let engine = null;
+QmlWeb.engine = null;
 
 const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
@@ -64,7 +64,7 @@ class QMLEngine {
 
   // Start the engine
   start() {
-    engine = this;
+    QmlWeb.engine = this;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
       this._tickerId = setInterval(this._tick.bind(this), this.$interval);
@@ -156,7 +156,7 @@ class QMLEngine {
   }
 
   loadQMLTree(tree, parentComponent = null, file = undefined) {
-    engine = this;
+    QmlWeb.engine = this;
 
     // Create and initialize objects
     const QMLComponent = getConstructor("QtQml", "2.0", "Component");

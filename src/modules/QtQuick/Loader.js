@@ -52,7 +52,7 @@ registerQmlType({
             }
             var fileName = newVal.substring(0, newVal.length - 4);
 
-            var tree = engine.loadComponent(fileName);
+            var tree = QmlWeb.engine.loadComponent(fileName);
             var meta = { object: tree, context: this, parent: this };
             var qmlComponent = new QMLComponent(meta);
             var loadedComponent = createComponentObject(qmlComponent, this);
@@ -90,10 +90,10 @@ registerQmlType({
             newComponent.parent = parent;
             qmlComponent.finalizeImports();
 
-             if (engine.operationState !== QMLOperationState.Init) {
+             if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
-                engine.$initializePropertyBindings();
+                QmlWeb.engine.$initializePropertyBindings();
                 callOnCompleted(newComponent);
              }
 

@@ -35,8 +35,9 @@ registerQmlType({
   }
   $onSourceChanged() {
     const style = this.dom.style;
-    style.OBorderImageSource = `url(${engine.$resolvePath(this.source)})`;
-    style.borderImageSource = `url(${engine.$resolvePath(this.source)})`;
+    const path = QmlWeb.engine.$resolvePath(this.source);
+    style.OBorderImageSource = `url(${path})`;
+    style.borderImageSource = `url(${path})`;
   }
   $updateBorder() {
     const style = this.dom.style;

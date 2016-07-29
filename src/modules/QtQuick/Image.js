@@ -95,8 +95,9 @@ registerQmlType({
   $onSourceChanged(val) {
     this.progress = 0;
     this.status = this.Image.Loading;
-    this.impl.style.backgroundImage = `url('${engine.$resolvePath(val)}')`;
-    this.$img.src = engine.$resolvePath(val);
+    const path = QmlWeb.engine.$resolvePath(val);
+    this.impl.style.backgroundImage = `url('${path}')`;
+    this.$img.src = path;
     if (this.$img.complete) {
       this.status = this.Image.Ready;
     }

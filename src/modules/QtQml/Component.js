@@ -45,8 +45,8 @@ class QMLComponent {
       let src = importDesc[1];
       let js;
 
-      if (typeof engine.$basePath !== "undefined") {
-        src = engine.$basePath + src;
+      if (typeof QmlWeb.engine.$basePath !== "undefined") {
+        src = QmlWeb.engine.$basePath + src;
       }
       if (typeof qrc[src] !== "undefined") {
         js = qrc[src];
@@ -63,6 +63,7 @@ class QMLComponent {
     }
   }
   createObject(parent, properties = {}) {
+    const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QMLOperationState.Init;
     // change base path to current component base path
@@ -91,7 +92,7 @@ class QMLComponent {
     if (!this.$Component) {
       this.$Component = new QObject(this);
       this.$Component.completed = Signal.signal([]);
-      engine.completedSignals.push(this.$Component.completed);
+      QmlWeb.engine.completedSignals.push(this.$Component.completed);
 
       this.$Component.destruction = Signal.signal([]);
     }

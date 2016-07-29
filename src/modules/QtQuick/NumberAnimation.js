@@ -10,7 +10,7 @@ registerQmlType({
         loop = 0,
         self = this;
 
-    engine.$addTicker(ticker);
+    QmlWeb.engine.$addTicker(ticker);
 
     function ticker(now, elapsed) {
         if ((self.running || loop === -1) && !self.paused) { // loop === -1 is a marker to just finish this run

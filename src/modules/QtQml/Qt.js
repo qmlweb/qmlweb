@@ -17,6 +17,7 @@ const Qt = {
   },
   // Load file, parse and construct as Component (.qml)
   createComponent: name => {
+    const engine = QmlWeb.engine;
     if (name in engine.components) {
       return engine.components[name];
     }
@@ -86,6 +87,7 @@ const Qt = {
       context: _executionContext
     });
 
+    const engine = QmlWeb.engine;
     engine.loadImports(tree.$imports);
 
     if (!file) file = Qt.resolvedUrl("createQmlObject_function");
@@ -117,6 +119,8 @@ const Qt = {
       // url is not a string object
       return url;
     }
+
+    const engine = QmlWeb.engine;
 
     // Must check for cases: D:/, file://, http://, or slash at the beginning.
     // This means the url is absolute => we have to skip processing

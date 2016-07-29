@@ -39,7 +39,7 @@ registerQmlType({
     callSuper(this, meta);
 
     if (this.$parent === null) { // This is the root element. Initialize it.
-      this.dom = engine.rootElement || document.body;
+      this.dom = QmlWeb.engine.rootElement || document.body;
       this.dom.innerHTML = "";
       // Needed to make absolute positioning work
       this.dom.style.position = "relative";
@@ -139,7 +139,7 @@ registerQmlType({
 
     // Init size of root element
     if (this.$parent === null) {
-      if (!engine.rootElement) {
+      if (!QmlWeb.engine.rootElement) {
         // Case 1: Qml scene is placed in body tag
 
         // event handling by addEventListener is probably better than setting
@@ -361,7 +361,7 @@ registerQmlType({
       this.$context.activeFocus = this;
     } else if (document.qmlFocus === this) {
       document.getElementsByTagName("BODY")[0].focus();
-      document.qmlFocus = engine.rootContext().base;
+      document.qmlFocus = QmlWeb.engine.rootContext().base;
       this.$context.activeFocus = null;
     }
   }

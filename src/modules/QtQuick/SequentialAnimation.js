@@ -13,13 +13,13 @@ registerQmlType({
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
-    engine.$registerStart(() => {
+    QmlWeb.engine.$registerStart(() => {
       if (this.running) {
         this.running = false; // toggled back by start();
         this.start();
       }
     });
-    engine.$registerStop(() => self.stop());
+    QmlWeb.engine.$registerStop(() => self.stop());
   }
   $onAnimatonsChanged() {
     for (let i = 0; i < this.animations.length; i++) {

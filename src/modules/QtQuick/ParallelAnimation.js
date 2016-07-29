@@ -48,13 +48,13 @@ registerQmlType({
     }
     this.complete = this.stop;
 
-    engine.$registerStart(function() {
+    QmlWeb.engine.$registerStart(function() {
         if (self.running) {
             self.running = false; // toggled back by start();
             self.start();
         }
     });
-    engine.$registerStop(function() {
+    QmlWeb.engine.$registerStop(function() {
         self.stop();
     });
   }
