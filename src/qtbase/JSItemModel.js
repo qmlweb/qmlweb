@@ -2,6 +2,7 @@ class JSItemModel {
   constructor() {
     this.roleNames = [];
 
+    const Signal = QmlWeb.Signal;
     this.dataChanged = Signal.signal([
       { type: "int", name: "startIndex" },
       { type: "int", name: "endIndex" }

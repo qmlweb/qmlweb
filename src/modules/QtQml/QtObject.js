@@ -23,6 +23,8 @@ registerQmlType({
       }
     }
 
+    const Signal = QmlWeb.Signal;
+
     this.Keys = new QObject(this);
     this.Keys.asteriskPresed = Signal.signal();
     this.Keys.backPressed = Signal.signal();

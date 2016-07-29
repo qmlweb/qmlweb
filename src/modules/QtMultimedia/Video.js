@@ -49,12 +49,12 @@ registerQmlType({
 
     this.impl.addEventListener("play", () => {
       this.playing();
-      this.playbackState = MediaPlayer.PlayingState;
+      this.playbackState = this.MediaPlayer.PlayingState;
     });
 
     this.impl.addEventListener("pause", () => {
       this.paused();
-      this.playbackState = MediaPlayer.PausedState;
+      this.playbackState = this.MediaPlayer.PausedState;
     });
 
     this.impl.addEventListener("timeupdate", () => {
@@ -65,28 +65,28 @@ registerQmlType({
 
     this.impl.addEventListener("ended", () => {
       this.stopped();
-      this.playbackState = MediaPlayer.StoppedState;
+      this.playbackState = this.MediaPlayer.StoppedState;
     });
 
     this.impl.addEventListener("progress", () => {
       if (this.impl.buffered.length > 0) {
         this.progress = this.impl.buffered.end(0) / this.impl.duration;
         this.status = this.progress < 1 ?
-          MediaPlayer.Buffering :
-          MediaPlayer.Buffered;
+          this.MediaPlayer.Buffering :
+          this.MediaPlayer.Buffered;
       }
     });
 
     this.impl.addEventListener("stalled", () => {
-      this.status = MediaPlayer.Stalled;
+      this.status = this.MediaPlayer.Stalled;
     });
 
     this.impl.addEventListener("canplaythrough", () => {
-      this.status = MediaPlayer.Buffered;
+      this.status = this.MediaPlayer.Buffered;
     });
 
     this.impl.addEventListener("loadstart", () => {
-      this.status = MediaPlayer.Loading;
+      this.status = this.MediaPlayer.Loading;
     });
 
     this.impl.addEventListener("durationchanged", () => {
@@ -100,11 +100,11 @@ registerQmlType({
     });
 
     this.impl.addEventListener("suspend", () => {
-      this.error |= MediaPlayer.NetworkError;
+      this.error |= this.MediaPlayer.NetworkError;
     });
 
     this.impl.addEventListener("error", () => {
-      this.error |= MediaPlayer.ResourceError;
+      this.error |= this.MediaPlayer.ResourceError;
     });
 
     this.impl.addEventListener("ratechange", () => {
@@ -130,7 +130,7 @@ registerQmlType({
     const mime = this.mimetypeFromExtension(extension);
     this.impl.src = source;
     if (!this.impl.canPlayType(mime)) {
-      this.error |= MediaPlayer.FormatError;
+      this.error |= this.MediaPlayer.FormatError;
     }
   }
   $onPositionChanged(currentTime) {

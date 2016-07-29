@@ -1,4 +1,4 @@
-class QSizeF extends QObject {
+class QSizeF extends QmlWeb.QObject {
   constructor(width, height) {
     super();
     createProperty("real", this, "width", { initialValue: width });

@@ -1,6 +1,12 @@
 parser: babel-eslint
 plugins: ["babel"]
 extends: eslint:recommended
+env:
+  browser: true
+  node: true
+globals:
+  QmlWeb: true
+  global: false
 rules:
   array-bracket-spacing: 2
   array-callback-return: 2

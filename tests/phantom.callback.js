@@ -1,3 +1,5 @@
+/* global page */
+
 module.exports = function(command, options) {
   if (options.offset) {
     page.clipRect = options.offset;

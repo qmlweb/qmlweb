@@ -1,3 +1,11 @@
+env:
+  jasmine: true
+globals:
+  loadQmlFile: true
+  prefixedQmlLoader: true
+  loadQml: true
+  setupDivElement: true
+  customMatchers: true
 rules:
   no-var: 0
   prefer-arrow-callback: 0
