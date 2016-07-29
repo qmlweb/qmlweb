@@ -89,7 +89,7 @@ rules:
   prefer-rest-params: 2
   prefer-spread: 2
   prefer-template: 2
-  quote-props: [0, "as-needed"]
+  quote-props: [2, "as-needed"]
   quotes: [1, "double", {"avoidEscape": true}]
   radix: 2
   semi: 2

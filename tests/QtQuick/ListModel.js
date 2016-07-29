@@ -5,7 +5,7 @@ describe("QtQuick.ListModel", function() {
   it("can append a new item", function() {
     var qml = load("ListModel", this.div);
     var oldCount = qml.count;
-    qml.append({ "cost": 5.95, "name": "Pizza" });
+    qml.append({ cost: 5.95, name: "Pizza" });
     expect(qml.count).toBe(oldCount + 1);
   });
 
@@ -13,15 +13,15 @@ describe("QtQuick.ListModel", function() {
     var qml = load("ListModel", this.div);
     var oldCount = qml.count;
     qml.append([
-      { "cost": 5.95, "name": "Pizza" },
-      { "cost": 9.95, "name": "Chicken" }
+      { cost: 5.95, name: "Pizza" },
+      { cost: 9.95, name: "Chicken" }
     ]);
     expect(qml.count).toBe(oldCount + 2);
   });
 
   it("can insert an item at a given position", function() {
     var qml = load("ListModel", this.div);
-    qml.insert(2, { "cost": 5.95, "name": "Pizza" });
+    qml.insert(2, { cost: 5.95, name: "Pizza" });
     expect(qml.get(2).cost).toBe(5.95);
   });
 
@@ -53,7 +53,7 @@ describe("QtQuick.ListModel", function() {
 
   it("can set properties with the method set", function() {
     var qml = load("ListModel", this.div);
-    qml.set(1, { "cost": 5.95, "name": "Pizza" });
+    qml.set(1, { cost: 5.95, name: "Pizza" });
     expect(qml.get(1).cost).toBe(5.95);
     expect(qml.get(1).name).toBe("Pizza");
   });
