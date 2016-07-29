@@ -75,28 +75,7 @@ var modules = {
   }
 };
 
-function testModule(modules, testFunc) {
-  Object.keys(modules).forEach(function(key) {
-    var module = modules[key];
-    if (module._version) {
-      module._name = key;
-    } else {
-      var split = key.split(" ");
-      module._name = split[0];
-      module._version = split[1];
-    }
-    var imports = "import " + module._name + " " + module._version + "\n";
-    for (var i in module._depends || []) {
-      imports += "import " + module._depends[i] + "\n";
-    }
-    Object.keys(module).forEach(function(element) {
-      if (element[0] === "_") return;
-      testFunc(module._name, element, imports, module[element]);
-    });
-  });
-}
-
-testModule(modules, function(module, element, imports, options) {
+function testModule(module, element, imports, options) {
   describe("Initialize." + module, function() {
     setupDivElement();
 
@@ -109,5 +88,24 @@ testModule(modules, function(module, element, imports, options) {
       }
       expect(qml.Component).not.toBe(undefined);
     });
+  });
+}
+
+Object.keys(modules).forEach(function(key) {
+  var module = modules[key];
+  if (module._version) {
+    module._name = key;
+  } else {
+    var split = key.split(" ");
+    module._name = split[0];
+    module._version = split[1];
+  }
+  var imports = "import " + module._name + " " + module._version + "\n";
+  for (var i in module._depends || []) {
+    imports += "import " + module._depends[i] + "\n";
+  }
+  Object.keys(module).forEach(function(element) {
+    if (element[0] === "_") return;
+    testModule(module._name, element, imports, module[element]);
   });
 });
