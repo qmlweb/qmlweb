@@ -68,7 +68,7 @@ rules:
   no-underscore-dangle: 0
   no-unneeded-ternary: 2
   no-unused-expressions: 2
-  no-unused-vars: 0
+  no-unused-vars: 2
   no-use-before-define: 0
   no-useless-constructor: 2
   no-useless-escape: 2

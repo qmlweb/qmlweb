@@ -53,3 +53,5 @@ class QObject {
     this.$delete();
   }
 }
+
+QmlWeb.QObject = QObject;

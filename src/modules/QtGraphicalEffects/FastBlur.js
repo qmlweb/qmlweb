@@ -17,10 +17,10 @@ registerQmlType({
     this.radiusChanged.connect(this, this.$onRadiusChanged);
     this.sourceChanged.connect(this, this.$onSourceChanged);
   }
-  $onRadiusChanged(newVal) {
+  $onRadiusChanged() {
     this.$updateEffect(this.source);
   }
-  $onSourceChanged(newVal) {
+  $onSourceChanged() {
     this.$updateEffect(this.source);
   }
   $updateFilterObject() {
@@ -30,16 +30,13 @@ registerQmlType({
       parameters: `${this.radius}px`
     };
   }
-  $stripEffectFromSource(source) {
+  $updateEffect(source) {
+    console.log("updating effect");
     if (this.$previousSource) {
       const index = this.$previousSource.transform.indexOf(this.$filterObject);
       this.$previousSource.transform.splice(index, 1);
       this.$previousSource.$updateTransform();
     }
-  }
-  $updateEffect(source) {
-    console.log("updating effect");
-    this.stripEffectFromSource(this.$previousSource);
     if (source && source.transform) {
       this.$updateFilterObject();
       console.log("updating effect:", this.$filterObject, source);

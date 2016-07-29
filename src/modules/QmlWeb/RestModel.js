@@ -33,7 +33,7 @@ registerQmlType({
   remove() {
     this.$ajax({
       method: "DELETE",
-      success: xhr => {
+      success: () => {
         this.destroy();
       }
     });

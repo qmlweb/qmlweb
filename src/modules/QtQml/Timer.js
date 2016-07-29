@@ -20,7 +20,7 @@ registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    engine.$addTicker((now, elapsed) => {
+    engine.$addTicker(now => {
       if (!this.running) return;
       if (now - this.$prevTrigger >= this.interval) {
         this.$prevTrigger = now;

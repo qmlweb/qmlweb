@@ -51,11 +51,11 @@ registerQmlType({
       newItem.parent = this;
     }
   }
-  $onFlickableItemChanged(newItem) {
+  $onFlickableItemChanged() {
   }
-  $onHighlightOnFocusChanged(highlight) {
+  $onHighlightOnFocusChanged() {
   }
-  $onViewportChanged(newViewport) {
+  $onViewportChanged() {
   }
   $onFocusChanged(focus) {
     this.css.outline = this.highlight && focus
@@ -71,7 +71,7 @@ registerQmlType({
   $onVerticalScrollBarPolicyChanged(newPolicy) {
     this.css.overflowY = this.$scrollBarPolicyToCssOverflow(newPolicy);
   }
-  $onStyleChanged(newStyle) {
+  $onStyleChanged() {
   }
   $onChildrenChanged() {
     if (typeof this.contentItem === "undefined" && this.children.length === 1) {

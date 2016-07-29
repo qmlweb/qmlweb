@@ -31,10 +31,6 @@ const licenseSources = [
   "node_modules/qmlweb-parser/LICENSE"
 ];
 
-const tests = [
-  "tests/**/*.js"
-];
-
 const js = [
   "*.js",
   "src/**/*.js",
@@ -144,7 +140,7 @@ gulp.task("lint-js", () =>
 
 gulp.task("lint", ["lint-js"]);
 
-gulp.task("test", ["lint", "build-dev"], done => {
+gulp.task("test", ["lint", "build-dev"], () => {
   new karma.Server({
     singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js")
@@ -153,7 +149,7 @@ gulp.task("test", ["lint", "build-dev"], done => {
   }).start();
 });
 
-gulp.task("coverage", ["lint", "build-covered"], done => {
+gulp.task("coverage", ["lint", "build-covered"], () => {
   new karma.Server({
     singleRun: true,
     coverageEnabled: true,

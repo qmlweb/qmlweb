@@ -5,3 +5,5 @@ class QSizeF extends QObject {
     createProperty("real", this, "height", { initialValue: height });
   }
 }
+
+QmlWeb.QSizeF = QSizeF;
