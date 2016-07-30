@@ -71,7 +71,7 @@ registerQmlType({
 
             if (newItem instanceof QMLComponent) {
                   var meta = { object: newItem.$metaObject, context: this, parent: this };
-                  qmlComponent = construct(meta);
+                  qmlComponent = QmlWeb.construct(meta);
             }
 
             qmlComponent.parent = this;

@@ -142,7 +142,7 @@ class QMLProperty {
           context: componentScope
         });
       } else {
-        this.val = construct({
+        this.val = QmlWeb.construct({
           object: val,
           parent: this.obj,
           context: componentScope

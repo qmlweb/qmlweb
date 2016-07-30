@@ -488,11 +488,13 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     }
 }
 
+QmlWeb.modules = modules;
 QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
 QmlWeb.callSuper = callSuper;
+QmlWeb.construct = construct;
 QmlWeb.createProperty = createProperty;
 QmlWeb.setupGetter = setupGetter;
 QmlWeb.setupSetter = setupSetter;

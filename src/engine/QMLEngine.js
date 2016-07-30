@@ -259,7 +259,7 @@ class QMLEngine {
       // putting initial keys in qmldirsContents - is a hack. We should find a
       // way to explain to qmlweb, is this built-in module or qmldir-style
       // module.
-      for (const module in modules) {
+      for (const module in QmlWeb.modules) {
         if (module !== "Main") {
           this.qmldirsContents[module] = {};
         }

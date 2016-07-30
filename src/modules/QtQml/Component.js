@@ -70,7 +70,7 @@ class QMLComponent {
     const bp = engine.$basePath;
     engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
-    const item = construct({
+    const item = QmlWeb.construct({
       object: this.$metaObject,
       parent,
       context: this.$context ? Object.create(this.$context) : new QMLContext(),
