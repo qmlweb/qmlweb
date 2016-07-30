@@ -106,6 +106,5 @@ registerQmlType({
     }
 
     input.oninput = updateValue;
-    input.onpropertychanged = updateValue;
   }
 });

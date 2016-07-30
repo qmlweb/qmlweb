@@ -210,7 +210,6 @@ registerQmlType({
     }
 
     textarea.oninput = updateValue;
-    textarea.onpropertychanged = updateValue;
 
     this.colorChanged.connect(this, function(newVal) {
         textarea.style.color = newVal;

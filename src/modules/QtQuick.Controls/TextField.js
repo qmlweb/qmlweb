@@ -51,7 +51,6 @@ registerQmlType({
     this.Keys.pressed.connect(this, this.$submitValue);
 
     input.oninput = () => this.$updateValue();
-    input.onpropertychanged = () => this.$updateValue();
   }
   Component$onCompleted() {
     this.implicitWidth = this.impl.offsetWidth;
