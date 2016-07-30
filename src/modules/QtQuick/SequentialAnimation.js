@@ -41,7 +41,7 @@ registerQmlType({
           this.complete();
         } else {
           this.$curIndex = -1;
-          nextAnimation();
+          this.$nextAnimation();
         }
       }
     }

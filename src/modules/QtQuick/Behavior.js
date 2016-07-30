@@ -11,17 +11,18 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
+    this.$on = meta.object.$on;
 
     this.animationChanged.connect(this, this.$onAnimationChanged);
     this.enabledChanged.connect(this, this.$onEnabledChanged);
   }
   $onAnimationChanged(newVal) {
     newVal.target = this.$parent;
-    newVal.property = meta.object.$on;
-    this.$parent.$properties[meta.object.$on].animation = newVal;
+    newVal.property = this.$on;
+    this.$parent.$properties[this.$on].animation = newVal;
   }
   $onEnabledChanged(newVal) {
-    this.$parent.$properties[meta.object.$on].animation = newVal
+    this.$parent.$properties[this.$on].animation = newVal
       ? this.animation
       : null;
   }

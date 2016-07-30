@@ -66,7 +66,7 @@ registerQmlType({
     } else if (!this.running) {
       this.$actions = [];
     } else {
-      thos.$startLoop(this);
+      this.$startLoop(this);
     }
   }
 });

@@ -95,7 +95,7 @@ registerQmlType({
 
     this.impl.addEventListener("volumechanged", () => {
       this.$runningEventListener++;
-      this.volume = demoVideo.volume;
+      this.volume = this.impl.volume;
       this.$runningEventListener--;
     });
 

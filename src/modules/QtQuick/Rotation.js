@@ -24,7 +24,7 @@ registerQmlType({
     this.axis.yChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.origin.xChanged.connect(this, this.$updateOrigin);
-    this.origin.yChanged.connect(this, updatethis.$Origin);
+    this.origin.yChanged.connect(this, this.$updateOrigin);
     this.$parent.$updateTransform();
   }
   $updateOrigin() {

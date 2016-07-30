@@ -39,10 +39,10 @@ registerQmlType({
     });
   }
   create() {
-    $this.sendToServer("POST");
+    this.$sendToServer("POST");
   }
   save() {
-    $this.sendToServer("PUT");
+    this.$sendToServer("PUT");
   }
   $sendToServer(method) {
     this.$ajax({
