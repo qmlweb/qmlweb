@@ -257,10 +257,8 @@ function loadParser() {
         throw new Error("Could not load QmlWeb parser!");
       }
       new Function(xhr.responseText)();
-      // TODO: remove in 0.2, qmlweb.parser should set
-      //  QmlWeb.parse and QmlWeb.jsparse if QmlWeb is defined
-      QmlWeb.parse = QmlWeb.parse || qmlweb_parse;
-      QmlWeb.jsparse = QmlWeb.jsparse || qmlweb_jsparse;
+      QmlWeb.parse = QmlWeb.parse;
+      QmlWeb.jsparse = QmlWeb.jsparse;
       return;
     }
   }
