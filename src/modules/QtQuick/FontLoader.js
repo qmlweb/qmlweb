@@ -43,6 +43,7 @@ registerQmlType({
     this.nameChanged.connect(this, this.$onNameChanged);
   }
   $loadFont(fontName) {
+    /* global FontLoader */
     if (this.$lastName === fontName || this.$inTouchName) {
       return;
     }
@@ -53,7 +54,7 @@ registerQmlType({
       return;
     }
     this.status = this.FontLoader.Loading;
-    if (typeof FontLoader !== "undefined") {
+    if (typeof FontLoader === "function") {
       const fontLoader = new FontLoader([fontName], {
         fontsLoaded: error => {
           if (error !== null) {
