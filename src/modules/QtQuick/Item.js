@@ -198,13 +198,13 @@ registerQmlType({
     }
   }
   $onStateChanged(newVal, oldVal) {
-    let oldState;
+    // let oldState; // TODO: do we need oldState?
     let newState;
     for (let i = 0; i < this.states.length; i++) {
       if (this.states[i].name === newVal) {
         newState = this.states[i];
       } else if (this.states[i].name === oldVal) {
-        oldState = this.states[i];
+        // oldState = this.states[i];
       }
     }
 
@@ -463,6 +463,7 @@ registerQmlType({
     let left;
     let right;
     let hC;
+    let u;
     if ((t = anchors.fill) !== undefined) {
       const props = t.$properties;
       if (!props.left.changed.isConnected(this, this.$updateHGeometry)) {
@@ -586,6 +587,7 @@ registerQmlType({
     let top;
     let bottom;
     let vC;
+    let u;
     if ((t = anchors.fill) !== undefined) {
       const props = t.$properties;
       if (!props.top.changed.isConnected(this, this.$updateVGeometry)) {
