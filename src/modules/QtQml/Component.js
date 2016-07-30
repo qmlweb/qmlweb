@@ -48,8 +48,8 @@ class QMLComponent {
       if (typeof QmlWeb.engine.$basePath !== "undefined") {
         src = QmlWeb.engine.$basePath + src;
       }
-      if (typeof qrc[src] !== "undefined") {
-        js = qrc[src];
+      if (typeof QmlWeb.qrc[src] !== "undefined") {
+        js = QmlWeb.qrc[src];
       } else {
         loadParser();
         js = QmlWeb.jsparse(getUrlContents(src));

@@ -94,12 +94,12 @@ function readQmlDir(url) {
   // Q1: when this happen?
   const qmldirFileUrl = url.length > 0 ? `${url}/qmldir` : "qmldir";
 
-  if (!qrc.hasOwnProperty(qmldirFileUrl)) {
+  if (!QmlWeb.qrc.hasOwnProperty(qmldirFileUrl)) {
     // loading url contents with skipping errors
-    qrc[qmldirFileUrl] = getUrlContents(qmldirFileUrl, true);
+    QmlWeb.qrc[qmldirFileUrl] = getUrlContents(qmldirFileUrl, true);
   }
 
-  const qmldir = qrc[qmldirFileUrl];
+  const qmldir = QmlWeb.qrc[qmldirFileUrl];
   const internals = {};
   const externals = {};
 

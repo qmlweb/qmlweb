@@ -85,7 +85,7 @@ class QMLEngine {
   }
 
   ensureFileIsLoadedInQrc(file) {
-    if (qrc.hasOwnProperty(file)) {
+    if (QmlWeb.qrc.hasOwnProperty(file)) {
       return;
     }
 
@@ -97,7 +97,7 @@ class QMLEngine {
 
     loadParser();
     console.log("Loading file [", file, "]");
-    qrc[file] = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
+    QmlWeb.qrc[file] = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
   }
 
   /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
@@ -148,7 +148,7 @@ class QMLEngine {
   loadFile(file, parentComponent = null) {
     this.$basePath = this.extractBasePath(file);
     this.ensureFileIsLoadedInQrc(file);
-    const tree = convertToEngine(qrc[file]);
+    const tree = convertToEngine(QmlWeb.qrc[file]);
     return this.loadQMLTree(tree, parentComponent, file);
   }
 
@@ -429,7 +429,7 @@ class QMLEngine {
 
     const file = `${this.$basePath}${name}.qml`;
     this.ensureFileIsLoadedInQrc(file);
-    const tree = convertToEngine(qrc[file]);
+    const tree = convertToEngine(QmlWeb.qrc[file]);
     this.components[name] = tree;
     return tree;
   }
