@@ -10,34 +10,32 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var self = this;
-
-    this.container = function() { return self; }
-    this.modelChanged.connect(styleChanged);
-    this.delegateChanged.connect(styleChanged);
-    this.orientationChanged.connect(styleChanged);
-    this.spacingChanged.connect(styleChanged);
-
-    this._childrenInserted.connect(applyStyleOnItem)
-
-    function applyStyleOnItem($item) {
-      $item.dom.style.position = 'initial';
-      if (self.orientation == Qt.Horizontal) {
-        $item.dom.style.display = 'inline-block';
-        if ($item != self.$items[0])
-          $item.dom.style["margin-left"] = self.spacing + "px";
+    this.modelChanged.connect(this, this.$styleChanged);
+    this.delegateChanged.connect(this, this.$styleChanged);
+    this.orientationChanged.connect(this, this.$styleChanged);
+    this.spacingChanged.connect(this, this.$styleChanged);
+    this._childrenInserted.connect(this, this.$applyStyleOnItem);
+  }
+  container() {
+    return this;
+  }
+  $applyStyleOnItem($item) {
+    $item.dom.style.position = "initial";
+    if (this.orientation === Qt.Horizontal) {
+      $item.dom.style.display = "inline-block";
+      if ($item !== this.$items[0]) {
+        $item.dom.style["margin-left"] = `${this.spacing}px`;
       }
-      else {
-        $item.dom.style.display = 'block';
-        if ($item != self.$items[0])
-          $item.dom.style["margin-top"] = self.spacing + "px";
+    } else {
+      $item.dom.style.display = "block";
+      if ($item !== this.$items[0]) {
+        $item.dom.style["margin-top"] = `${this.spacing}px`;
       }
     }
-
-    function styleChanged() {
-      for (var i = 0 ; i < self.$items.length ; ++i) {
-        applyStyleOnItem(self.$items[i]);
-      }
+  }
+  $styleChanged() {
+    for (let i = 0; i < this.$items.length; ++i) {
+      this.$applyStyleOnItem(this.$items[i]);
     }
   }
 });
