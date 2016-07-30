@@ -1,11 +1,3 @@
-// Property that is currently beeing evaluated. Used to get the information
-// which property called the getter of a certain other property for
-// evaluation and is thus dependant on it.
-var evaluatingProperty;
-var evaluatingPropertyStack = [];
-var evaluatingPropertyPaused = false;
-var evaluatingPropertyStackOfStacks = [];
-
 var _executionContext = null;
 
 // All object constructors

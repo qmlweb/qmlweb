@@ -232,8 +232,9 @@ class QMLEngine {
     let value = obj[propName];
 
     const getter = () => {
-      if (evaluatingProperty && dependantProperties.indexOf(evaluatingProperty) === -1) {
-        dependantProperties.push(evaluatingProperty);
+      if (QMLProperty.evaluatingProperty &&
+          dependantProperties.indexOf(QMLProperty.evaluatingProperty) === -1) {
+        dependantProperties.push(QMLProperty.evaluatingProperty);
       }
       return value;
     };

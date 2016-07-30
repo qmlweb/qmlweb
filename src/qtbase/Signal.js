@@ -11,7 +11,7 @@ class Signal {
     this.signal.isConnected = this.isConnected.bind(this);
   }
   execute(...args) {
-    pushEvalStack();
+    QmlWeb.QMLProperty.pushEvalStack();
     for (const i in this.connectedSlots) {
       try {
         this.connectedSlots[i].slot.apply(this.connectedSlots[i].thisObj, args);
@@ -21,7 +21,7 @@ class Signal {
         );
       }
     }
-    popEvalStack();
+    QmlWeb.QMLProperty.popEvalStack();
   }
   connect(...args) {
     if (args.length === 1) {
