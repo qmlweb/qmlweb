@@ -56,7 +56,7 @@ const Qt = {
       return undefined;
     }
 
-    const tree = parseQML(src, file);
+    const tree = QmlWeb.parseQML(src, file);
 
     if (tree.$children.length !== 1) {
       console.error("A QML component must only contain one root element!");
@@ -78,7 +78,7 @@ const Qt = {
   },
 
   createQmlObject: (src, parent, file) => {
-    const tree = parseQML(src, file);
+    const tree = QmlWeb.parseQML(src, file);
 
     // Create and initialize objects
 

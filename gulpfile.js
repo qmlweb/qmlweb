@@ -37,7 +37,6 @@ const js = [
   "src/**/*.js",
   "!src/engine/import.js",
   "!src/engine/qml.js",
-  "!src/engine/qmlstructure.js",
   "!src/modules/QtQuick/Font.js",
   "!src/modules/QtQuick/Item.js",
   "!src/modules/QtQuick/ListView.js",

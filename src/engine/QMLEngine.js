@@ -155,7 +155,7 @@ class QMLEngine {
   // parse and construct qml
   // file is not required; only for debug purposes
   loadQML(src, parentComponent = null, file = undefined) {
-    return this.loadQMLTree(parseQML(src, file), parentComponent, file);
+    return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
   }
 
   loadQMLTree(tree, parentComponent = null, file = undefined) {
