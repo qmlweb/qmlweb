@@ -307,12 +307,12 @@ class QMLEngine {
       ) {
         // 1. we have qualified module and user had configured path for that
         // module with this.addModulePath
-        content = readQmlDir(this.userAddedModulePaths[name]);
+        content = QmlWeb.readQmlDir(this.userAddedModulePaths[name]);
       } else if (nameIsUrl || nameIsDir) {
         // 2. direct load
         // nameIsUrl => url do not need dirs
         // nameIsDir => already computed full path above
-        content = readQmlDir(name);
+        content = QmlWeb.readQmlDir(name);
       } else {
         // 3. qt-style lookup for qualified module
         const probableDirs = [currentFileDir].concat(this.importPathList());
@@ -320,7 +320,7 @@ class QMLEngine {
 
         for (let k = 0; k < probableDirs.length; k++) {
           const file = probableDirs[k] + diredName;
-          content = readQmlDir(file);
+          content = QmlWeb.readQmlDir(file);
           if (content) {
             break;
           }
