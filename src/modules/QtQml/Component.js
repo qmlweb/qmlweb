@@ -65,7 +65,7 @@ class QMLComponent {
   createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
-    engine.operationState = QMLOperationState.Init;
+    engine.operationState = QmlWeb.QMLOperationState.Init;
     // change base path to current component base path
     const bp = engine.$basePath;
     engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
@@ -91,10 +91,10 @@ class QMLComponent {
   static getAttachedObject() {
     if (!this.$Component) {
       this.$Component = new QObject(this);
-      this.$Component.completed = Signal.signal([]);
+      this.$Component.completed = QmlWeb.Signal.signal([]);
       QmlWeb.engine.completedSignals.push(this.$Component.completed);
 
-      this.$Component.destruction = Signal.signal([]);
+      this.$Component.destruction = QmlWeb.Signal.signal([]);
     }
     return this.$Component;
   }

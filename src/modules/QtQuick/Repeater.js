@@ -53,7 +53,7 @@ registerQmlType({
       return;
     }
     const model = this.$getModel();
-    if (model instanceof JSItemModel) {
+    if (model instanceof QmlWeb.JSItemModel) {
       if (!model.dataChanged.isConnected(this, this.$_onModelDataChanged)) {
         model.dataChanged.connect(this, this.$_onModelDataChanged);
       }
@@ -106,7 +106,7 @@ registerQmlType({
       for (const i in roleNames) {
         item.$properties[roleNames[i]].set(
           model.data(index, roleNames[i]),
-          QMLProperty.ReasonInit,
+          QmlWeb.QMLProperty.ReasonInit,
           item,
           this.model.$context
         );
@@ -141,6 +141,7 @@ registerQmlType({
   $insertChildren(startIndex, endIndex) {
     if (endIndex <= 0) return;
 
+    const QMLOperationState = QmlWeb.QMLOperationState;
     const model = this.$getModel();
     let index;
     for (index = startIndex; index < endIndex; index++) {

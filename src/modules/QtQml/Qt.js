@@ -102,6 +102,7 @@ const Qt = {
     obj.parent = parent;
     parent.childrenChanged();
 
+    const QMLOperationState = QmlWeb.QMLOperationState;
     if (engine.operationState !== QMLOperationState.Init &&
         engine.operationState !== QMLOperationState.Idle) {
       // We don't call those on first creation, as they will be called
@@ -152,7 +153,7 @@ const Qt = {
   },
 
   size: function size(width, height) {
-    return new QSizeF(width, height);
+    return new QmlWeb.QSizeF(width, height);
   },
 
   // Buttons masks

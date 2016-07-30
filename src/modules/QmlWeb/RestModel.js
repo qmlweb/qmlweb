@@ -126,6 +126,7 @@ registerQmlType({
     this.$updatePropertiesFromResponseObject(responseObject);
   }
   $updatePropertiesFromResponseObject(responseObject) {
+    const QMLProperty = QmlWeb.QMLProperty;
     for (const key in responseObject) {
       if (responseObject.hasOwnProperty(key) && this.$hasProperty(key)) {
         this.$properties[key].set(responseObject[key], QMLProperty.ReasonUser);

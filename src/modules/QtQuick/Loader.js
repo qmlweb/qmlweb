@@ -90,7 +90,7 @@ registerQmlType({
             newComponent.parent = parent;
             qmlComponent.finalizeImports();
 
-             if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
+             if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
                 // We don't call those on first creation, as they will be called
                 // by the regular creation-procedures at the right time.
                 QmlWeb.engine.$initializePropertyBindings();

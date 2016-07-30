@@ -8,7 +8,7 @@ function QMLList(meta) {
         context: meta.context
       }));
     }
-  } else if (meta.object instanceof QMLMetaElement) {
+  } else if (meta.object instanceof QmlWeb.QMLMetaElement) {
     list.push(construct({
       object: meta.object,
       parent: meta.parent,

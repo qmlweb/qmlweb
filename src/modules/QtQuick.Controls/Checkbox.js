@@ -42,7 +42,7 @@ registerQmlType({
     this.implicitWidth = this.impl.offsetWidth > 0 ? this.impl.offsetWidth + 4 : 0;
   }
   $onColorChanged(newVal) {
-    this.impl.children[1].style.color = new QColor(newVal);
+    this.impl.children[1].style.color = new QmlWeb.QColor(newVal);
   }
   $onCheckedChanged() {
     this.impl.children[0].checked = this.checked;

@@ -2,7 +2,7 @@ class QMLProperty {
   constructor(type, obj, name) {
     this.obj = obj;
     this.name = name;
-    this.changed = Signal.signal([], { obj });
+    this.changed = QmlWeb.Signal.signal([], { obj });
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
@@ -62,7 +62,7 @@ class QMLProperty {
   get() {
     //if (this.needsUpdate && !QMLProperty.evaluatingPropertyPaused) {
     if (this.needsUpdate &&
-        QmlWeb.engine.operationState !== QMLOperationState.Init) {
+        QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
       this.update();
     }
 
@@ -88,7 +88,7 @@ class QMLProperty {
     const oldVal = this.val;
 
     let val = newVal;
-    if (val instanceof QMLBinding) {
+    if (val instanceof QmlWeb.QMLBinding) {
       if (!objectScope || !componentScope) {
         throw new Error("Internal error: binding assigned without scope");
       }
@@ -96,7 +96,7 @@ class QMLProperty {
       this.objectScope = objectScope;
       this.componentScope = componentScope;
 
-      if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         if (!val.eval) {
           val.compile();
         }
@@ -126,13 +126,13 @@ class QMLProperty {
       }
     }
 
-    if (constructors[this.type] === QMLList) {
+    if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList({
         object: val,
         parent: this.obj,
         context: componentScope
       });
-    } else if (val instanceof QMLMetaElement) {
+    } else if (val instanceof QmlWeb.QMLMetaElement) {
       const QMLComponent = getConstructor("QtQml", "2.0", "Component");
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {

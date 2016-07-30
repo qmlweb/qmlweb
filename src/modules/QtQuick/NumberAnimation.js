@@ -40,7 +40,7 @@ registerQmlType({
       const value = action.from + (action.to - action.from) *
                     this.easing.$valueForProgress(this.$at);
       const property = action.target.$properties[action.property];
-      property.set(value, QMLProperty.ReasonAnimation);
+      property.set(value, QmlWeb.QMLProperty.ReasonAnimation);
     }
   }
   $onRunningChanged(newVal) {
@@ -58,7 +58,7 @@ registerQmlType({
     for (const i in this.$actions) {
       const action = this.$actions[i];
       const property = action.target.$properties[action.property];
-      property.set(action.to, QMLProperty.ReasonAnimation);
+      property.set(action.to, QmlWeb.QMLProperty.ReasonAnimation);
     }
     this.$loop++;
     if (this.$loop === this.loops) {

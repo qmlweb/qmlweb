@@ -68,6 +68,7 @@ class QMLEngine {
   // Start the engine
   start() {
     QmlWeb.engine = this;
+    const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
       this._tickerId = setInterval(this._tick.bind(this), this.$interval);
@@ -77,6 +78,7 @@ class QMLEngine {
 
   // Stop the engine
   stop() {
+    const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState === QMLOperationState.Running) {
       clearInterval(this._tickerId);
       this.operationState = QMLOperationState.Idle;
@@ -232,6 +234,7 @@ class QMLEngine {
     let value = obj[propName];
 
     const getter = () => {
+      const QMLProperty = QmlWeb.QMLProperty;
       if (QMLProperty.evaluatingProperty &&
           dependantProperties.indexOf(QMLProperty.evaluatingProperty) === -1) {
         dependantProperties.push(QMLProperty.evaluatingProperty);

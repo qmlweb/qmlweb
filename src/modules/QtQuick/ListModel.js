@@ -14,7 +14,7 @@ registerQmlType({
 
     this.$firstItem = true;
     this.$itemsChanged.connect(this, this.$on$itemsChanged);
-    this.$model = new JSItemModel();
+    this.$model = new QmlWeb.JSItemModel();
     this.$model.data = (index, role) => this.$items[index][role];
     this.$model.rowCount = () => this.$items.length;
   }

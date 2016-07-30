@@ -64,7 +64,7 @@ registerQmlType({
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
   $onColorChanged(newVal) {
-    this.impl.style.color = new QColor(newVal);
+    this.impl.style.color = new QmlWeb.QColor(newVal);
   }
   $onTextChanged(newVal) {
     this.impl.innerHTML = newVal;
@@ -78,7 +78,7 @@ registerQmlType({
     this.$updateShadow(newVal, this.styleColor);
   }
   $onStyleColorChanged(newVal) {
-    this.$updateShadow(this.style, new QColor(newVal));
+    this.$updateShadow(this.style, new QmlWeb.QColor(newVal));
   }
   $onWrapModeChanged(newVal) {
     const style = this.impl.style;

@@ -4,7 +4,7 @@ window.addEventListener("load", () => {
     const metaTag = metaTags[i];
     const source = metaTag.getAttribute("data-qml");
     if (source) {
-      QmlWeb.qmlEngine = new QMLEngine();
+      QmlWeb.qmlEngine = new QmlWeb.QMLEngine();
       QmlWeb.qmlEngine.loadFile(source);
       QmlWeb.qmlEngine.start();
       break;

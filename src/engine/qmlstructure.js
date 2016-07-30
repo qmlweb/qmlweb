@@ -24,7 +24,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-class QMLMethod extends QMLBinding {
+class QMLMethod extends QmlWeb.QMLBinding {
 }
 
 /**
@@ -175,7 +175,7 @@ convertToEngine.walkers = {
       // TODO: is this needed? kept for compat with ==
       return src;
     }
-    return new QMLBinding(src, ["name", src]);
+    return new QmlWeb.QMLBinding(src, ["name", src]);
   },
   num: src => +src,
   string: src => String(src),
@@ -189,7 +189,7 @@ convertToEngine.walkers = {
 
       if (val instanceof QMLMetaElement) {
         isList = true;
-      } else if (val instanceof QMLBinding) {
+      } else if (val instanceof QmlWeb.QMLBinding) {
         hasBinding = true;
       }
     }
@@ -200,7 +200,7 @@ convertToEngine.walkers = {
           "An array may either contain bindings or Element definitions."
         );
       }
-      return new QMLBinding(src, tree);
+      return new QmlWeb.QMLBinding(src, tree);
     }
 
     return a;
@@ -229,7 +229,7 @@ convertToEngine.bindout = function(statement, binding) {
   if (walker) {
     return walker.apply(type, tree.slice(1));
   } else {
-    return new QMLBinding(binding, tree);
+    return new QmlWeb.QMLBinding(binding, tree);
   }
 };
 
@@ -272,4 +272,5 @@ function parseQML(src, file) {
   return convertToEngine(parsetree);
 }
 
+QmlWeb.QMLMetaElement = QMLMetaElement;
 QmlWeb.parseQML = parseQML;
