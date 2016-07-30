@@ -38,7 +38,17 @@ const js = [
   "!src/engine/qml.js",
   "!src/engine/QMLProperty.js",
   "!src/engine/qmlstructure.js",
-  "!src/modules/QtQuick/*.js",
+  "!src/modules/QtQuick/Font.js",
+  "!src/modules/QtQuick/Item.js",
+  "!src/modules/QtQuick/ListView.js",
+  "!src/modules/QtQuick/Loader.js",
+  "!src/modules/QtQuick/MouseArea.js",
+  "!src/modules/QtQuick/NumberAnimation.js",
+  "!src/modules/QtQuick/ParallelAnimation.js",
+  "!src/modules/QtQuick/PropertyAnimation.js",
+  "!src/modules/QtQuick/Rectangle.js",
+  "!src/modules/QtQuick/TextEdit.js",
+  "!src/modules/QtQuick/TextInput.js",
   "tests/**/*.js"
 ];
 

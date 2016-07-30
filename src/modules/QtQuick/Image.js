@@ -53,10 +53,7 @@ registerQmlType({
     this.mirrorChanged.connect(this, this.$onMirrorChanged);
     this.fillModeChanged.connect(this, this.$onFillModeChanged);
   }
-  $updateFillMode(val) {
-    if (typeof val === "undefined") {
-      val = this.fillMode;
-    }
+  $updateFillMode(val = this.fillMode) {
     const style = this.impl.style;
     switch (val) {
       default:

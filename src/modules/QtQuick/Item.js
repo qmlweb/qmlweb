@@ -282,7 +282,7 @@ registerQmlType({
       const action = actions[i];
       action.target.$properties[action.property].set(
         action.value, QMLProperty.ReasonUser, action.target,
-        newState ? newState.$context: action.target.$context
+        newState ? newState.$context : action.target.$context
       );
     }
     for (const i in actions) {
@@ -335,7 +335,7 @@ registerQmlType({
   $onClipChanged(newVal) {
     this.css.overflow = newVal ? "hidden" : "visible";
   }
-  $onZChanged(newVal) {
+  $onZChanged() {
     this.$updateTransform();
   }
   $onXChanged(newVal) {

@@ -89,38 +89,37 @@ registerQmlType({
         }
     }
 
-    function cursorShapeToCSS(){
-        switch (self.cursorShape) {
-          case Qt.ArrowCursor: return 'default';
-          case Qt.UpArrowCursor: return 'n-resize';
-          case Qt.CrossCursor: return 'crosshair';
-          case Qt.WaitCursor: return 'wait';
-          case Qt.IBeamCursor: return 'text';
-          case Qt.SizeVerCursor: return 'ew-resize';
-          case Qt.SizeHorCursor: return 'ns-resize';
-          case Qt.SizeBDiagCursor: return 'nesw-resize';
-          case Qt.SizeFDiagCursor: return 'nwse-resize';
-          case Qt.SizeAllCursor: return 'all-scroll';
-          case Qt.BlankCursor: return 'none';
-          case Qt.SplitVCursor: return 'row-resize';
-          case Qt.SplitHCursor: return 'col-resize';
-          case Qt.PointingHandCursor: return 'pointer';
-          case Qt.ForbiddenCursor: return 'not-allowed';
-          case Qt.WhatsThisCursor: return 'help';
-          case Qt.BusyCursor: return 'progress';
-          case Qt.OpenHandCursor: return 'grab';
-          case Qt.ClosedHandCursor: return 'grabbing';
-          case Qt.DragCopyCursor: return 'copy';
-          case Qt.DragMoveCursor: return 'move';
-          case Qt.DragLinkCursor: return 'alias';
-          //case Qt.BitmapCursor: return 'auto';
-          //case Qt.CustomCursor: return 'auto';
-        }
-        return 'auto';
-    }
-
     this.cursorShapeChanged.connect(function() {
-      self.dom.style.cursor = cursorShapeToCSS();
+      self.dom.style.cursor = this.$cursorShapeToCSS();
     });
+  }
+  $cursorShapeToCSS() {
+    switch (this.cursorShape) {
+      case Qt.ArrowCursor: return "default";
+      case Qt.UpArrowCursor: return "n-resize";
+      case Qt.CrossCursor: return "crosshair";
+      case Qt.WaitCursor: return "wait";
+      case Qt.IBeamCursor: return "text";
+      case Qt.SizeVerCursor: return "ew-resize";
+      case Qt.SizeHorCursor: return "ns-resize";
+      case Qt.SizeBDiagCursor: return "nesw-resize";
+      case Qt.SizeFDiagCursor: return "nwse-resize";
+      case Qt.SizeAllCursor: return "all-scroll";
+      case Qt.BlankCursor: return "none";
+      case Qt.SplitVCursor: return "row-resize";
+      case Qt.SplitHCursor: return "col-resize";
+      case Qt.PointingHandCursor: return "pointer";
+      case Qt.ForbiddenCursor: return "not-allowed";
+      case Qt.WhatsThisCursor: return "help";
+      case Qt.BusyCursor: return "progress";
+      case Qt.OpenHandCursor: return "grab";
+      case Qt.ClosedHandCursor: return "grabbing";
+      case Qt.DragCopyCursor: return "copy";
+      case Qt.DragMoveCursor: return "move";
+      case Qt.DragLinkCursor: return "alias";
+      //case Qt.BitmapCursor: return "auto";
+      //case Qt.CustomCursor: return "auto";
+    }
+    return "auto";
   }
 });

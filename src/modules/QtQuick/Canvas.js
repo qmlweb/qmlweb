@@ -25,19 +25,19 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
   }
-  cancelRequestAnimationFrame(handle) {
+  cancelRequestAnimationFrame(/*handle*/) {
     return false;
   }
-  getContext(context_id, ...args) {
+  getContext(/*context_id, ...args*/) {
     return {};
   }
-  isImageError(image) {
+  isImageError(/*image*/) {
     return true;
   }
-  isImageLoaded(image) {
+  isImageLoaded(/*image*/) {
     return false;
   }
-  isImageLoading(image) {
+  isImageLoading(/*image*/) {
     return false;
   }
   loadImage(image) {
@@ -50,17 +50,17 @@ registerQmlType({
     // if dirty
     this.paint(area);
   }
-  requestAnimationFrame(callback) {
+  requestAnimationFrame(/*callback*/) {
     return 0;
   }
   requestPaint() {
   }
-  save(file_name) {
+  save(/*file_name*/) {
     return false;
   }
-  toDataURL(mime_type) {
+  toDataURL(/*mime_type*/) {
     return "";
   }
-  unloadImage(image) {
+  unloadImage(/*image*/) {
   }
 });

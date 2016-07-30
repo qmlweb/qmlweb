@@ -100,14 +100,12 @@ registerQmlType({
   }
   $_onModelDataChanged(startIndex, endIndex, roles) {
     const model = this.$getModel();
-    if (!roles) {
-      roles = model.roleNames;
-    }
+    const roleNames = roles || model.roleNames;
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
-      for (const i in roles) {
-        item.$properties[roles[i]].set(
-          model.data(index, roles[i]),
+      for (const i in roleNames) {
+        item.$properties[roleNames[i]].set(
+          model.data(index, roleNames[i]),
           QMLProperty.ReasonInit,
           item,
           this.model.$context
