@@ -15,12 +15,15 @@ registerQmlType({
   name: "TextField",
   versions: /.*/,
   baseClass: "QtQuick.Item",
+  enums: {
+    TextInput: { Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3 }
+  },
   properties: {
     text: "string",
-    maximumLength: "int",
-    readOnly: { type: "bool", initialValue: -1 },
+    maximumLength: { type: "int", initialValue: -1 },
+    readOnly: "bool",
     validator: "var",
-    echoMode: "enum"
+    echoMode: "enum" // TextInput.Normal
   },
   signals: {
     accepted: []
@@ -47,8 +50,7 @@ registerQmlType({
     this.echoModeChanged.connect(this, this.$onEchoModeChanged);
     this.maximumLengthChanged.connect(this, this.$onMaximumLengthChanged);
     this.readOnlyChanged.connect(this, this.$onReadOnlyChanged);
-
-    this.Keys.pressed.connect(this, this.$submitValue);
+    this.Keys.pressed.connect(this, this.Keys$onPressed);
 
     input.oninput = () => this.$updateValue();
   }
@@ -57,15 +59,28 @@ registerQmlType({
     this.implicitHeight = this.impl.offsetHeight;
   }
   $onTextChanged(newVal) {
-    this.impl.value = newVal;
+    // See TextInput for comments
+    if (this.impl.value !== newVal) {
+      this.impl.value = newVal;
+    }
   }
   $onEchoModeChanged(newVal) {
+    const TextInput = this.TextInput;
+    const input = this.impl;
     switch (newVal) {
-      case this.TextField.Normal:
-        this.impl.type = "text";
+      case TextInput.Normal:
+        input.type = "text";
         break;
-      case this.TextField.Password:
-        this.impl.type = "password";
+      case TextInput.Password:
+        input.type = "password";
+        break;
+      case TextInput.NoEcho:
+        // Not supported, use password, that's nearest
+        input.type = "password";
+        break;
+      case TextInput.PasswordEchoOnEdit:
+        // Not supported, use password, that's nearest
+        input.type = "password";
         break;
     }
   }
@@ -75,19 +90,19 @@ registerQmlType({
   $onReadOnlyChanged(newVal) {
     this.impl.disabled = newVal;
   }
-  $testValidator() {
-    if (typeof this.validator !== "undefined" && this.validator !== null) {
-      return this.validator.validate(this.text);
-    }
-    return true;
-  }
-  $submitValue(e) {
+  Keys$onPressed(e) {
     const Qt = QmlWeb.Qt;
-    const is_submit = e.key === Qt.Key_Return || e.key === Qt.Key_Enter;
-    if (is_submit && this.$testValidator()) {
+    const submit = e.key === Qt.Key_Return || e.key === Qt.Key_Enter;
+    if (submit && this.$testValidator()) {
       this.accepted();
       e.accepted = true;
     }
+  }
+  $testValidator() {
+    if (this.validator) {
+      return this.validator.validate(this.text);
+    }
+    return true;
   }
   $updateValue() {
     if (this.text !== this.impl.value) {
