@@ -13,49 +13,47 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var curIndex,
-        passedLoops,
-        i;
 
     this.$runningAnimations = 0;
 
-    this.animationsChanged.connect(this, function() {
-        for (i = 0; i < this.animations.length; i++) {
-            if (!this.animations[i].runningChanged.isConnected(this, animationFinished))
-                this.animations[i].runningChanged.connect(this, animationFinished);
-        }
-    });
+    this.animationsChanged.connect(this, this.$onAnimationsChanged);
 
-    function animationFinished(newVal) {
-        this.$runningAnimations += newVal ? 1 : -1;
-        if (this.$runningAnimations === 0)
-            this.running = false;
-    }
-
-    this.start = function() {
-        if (!this.running) {
-            this.running = true;
-            for (i = 0; i < this.animations.length; i++)
-                this.animations[i].start();
-        }
-    }
-    this.stop = function() {
-        if (this.running) {
-            for (i = 0; i < this.animations.length; i++)
-                this.animations[i].stop();
-            this.running = false;
-        }
-    }
-    this.complete = this.stop;
-
-    QmlWeb.engine.$registerStart(function() {
-        if (self.running) {
-            self.running = false; // toggled back by start();
-            self.start();
-        }
+    QmlWeb.engine.$registerStart(() => {
+      if (!this.running) return;
+      self.running = false; // toggled back by start();
+      self.start();
     });
-    QmlWeb.engine.$registerStop(function() {
-        self.stop();
-    });
+    QmlWeb.engine.$registerStop(() => this.stop());
+  }
+  $onAnimationsChanged() {
+    for (let i = 0; i < this.animations.length; i++) {
+      const animation = this.animations[i];
+      if (!animation.runningChanged.isConnected(this, this.$animationFinished)) {
+        animation.runningChanged.connect(this, this.$animationFinished);
+      }
+    }
+  }
+  $animationFinished(newVal) {
+    this.$runningAnimations += newVal ? 1 : -1;
+    if (this.$runningAnimations === 0) {
+      this.running = false;
+    }
+  }
+  start() {
+    if (this.running) return;
+    this.running = true;
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].start();
+    }
+  }
+  stop() {
+    if (!this.running) return;
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].stop();
+    }
+    this.running = false;
+  }
+  complete() {
+    this.stop();
   }
 });

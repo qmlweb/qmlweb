@@ -14,10 +14,9 @@ registerQmlType({
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
     QmlWeb.engine.$registerStart(() => {
-      if (this.running) {
-        this.running = false; // toggled back by start();
-        this.start();
-      }
+      if (!this.running) return;
+      this.running = false; // toggled back by start();
+      this.start();
     });
     QmlWeb.engine.$registerStop(() => self.stop());
   }
@@ -48,28 +47,25 @@ registerQmlType({
     }
   }
   start() {
-    if (!this.running) {
-      this.running = true;
-      this.$curIndex = -1;
-      this.$passedLoops = 0;
-      this.$nextAnimation();
-    }
+    if (this.running) return;
+    this.running = true;
+    this.$curIndex = -1;
+    this.$passedLoops = 0;
+    this.$nextAnimation();
   }
   stop() {
-    if (this.running) {
-      this.running = false;
-      if (this.$curIndex < this.animations.length) {
-        this.animations[this.$curIndex].stop();
-      }
+    if (!this.running) return;
+    this.running = false;
+    if (this.$curIndex < this.animations.length) {
+      this.animations[this.$curIndex].stop();
     }
   }
   complete() {
-    if (this.running) {
-      if (this.$curIndex < this.animations.length) {
-        // Stop current animation
-        this.animations[this.$curIndex].stop();
-      }
-      this.running = false;
+    if (!this.running) return;
+    if (this.$curIndex < this.animations.length) {
+      // Stop current animation
+      this.animations[this.$curIndex].stop();
     }
+    this.running = false;
   }
 });

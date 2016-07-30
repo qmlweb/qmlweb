@@ -6,60 +6,67 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var at = 0,
-        loop = 0,
-        self = this;
 
-    QmlWeb.engine.$addTicker(ticker);
+    this.$at = 0;
+    this.$loop = 0;
 
-    function ticker(now, elapsed) {
-        if ((self.running || loop === -1) && !self.paused) { // loop === -1 is a marker to just finish this run
-            if (at == 0 && loop == 0 && !self.$actions.length)
-                self.$redoActions();
-            at += elapsed / self.duration;
-            if (at >= 1)
-                self.complete();
-            else
-                for (var i in self.$actions) {
-                    var action = self.$actions[i],
-                        value = self.easing.$valueForProgress(at) * (action.to - action.from) + action.from;
-                    action.target.$properties[action.property].set(value, QMLProperty.ReasonAnimation);
-                }
-        }
+    QmlWeb.engine.$addTicker((...args) => this.$ticker(...args));
+    this.runningChanged.connect(this, this.$onRunningChanged);
+  }
+  $startLoop() {
+    for (const i in this.$actions) {
+      const action = this.$actions[i];
+      action.from = action.from !== undefined ?
+                      action.from :
+                      action.target[action.property];
     }
-
-    function startLoop() {
-        for (var i in this.$actions) {
-            var action = this.$actions[i];
-            action.from = action.from !== undefined ? action.from : action.target[action.property];
-        }
-        at = 0;
+    this.$at = 0;
+  }
+  $ticker(now, elapsed) {
+    if (!this.running && this.$loop !== -1 || this.paused) {
+      // $loop === -1 is a marker to just finish this run
+      return;
     }
-
-    this.runningChanged.connect(this, function(newVal) {
-        if (newVal) {
-            startLoop.call(this);
-            this.paused = false;
-        } else if (this.alwaysRunToEnd && at < 1) {
-            loop = -1; // -1 is used as a marker to stop
-        } else {
-            loop = 0;
-            this.$actions = [];
-        }
-    });
-
-    this.complete = function() {
-        for (var i in this.$actions) {
-            var action = this.$actions[i];
-            action.target.$properties[action.property].set(action.to, QMLProperty.ReasonAnimation);
-        }
-
-        if (++loop == this.loops)
-            this.running = false;
-        else if (!this.running)
-            this.$actions = [];
-        else
-            startLoop.call(this);
+    if (this.$at === 0 && this.$loop === 0 && !this.$actions.length) {
+      this.$redoActions();
+    }
+    this.$at += elapsed / this.duration;
+    if (this.$at >= 1) {
+      this.complete();
+      return;
+    }
+    for (const i in this.$actions) {
+      const action = this.$actions[i];
+      const value = action.from + (action.to - action.from) *
+                    this.easing.$valueForProgress(this.$at);
+      const property = action.target.$properties[action.property];
+      property.set(value, QMLProperty.ReasonAnimation);
+    }
+  }
+  $onRunningChanged(newVal) {
+    if (newVal) {
+      this.$startLoop();
+      this.paused = false;
+    } else if (this.alwaysRunToEnd && this.$at < 1) {
+      this.$loop = -1; // -1 is used as a marker to stop
+    } else {
+      this.$loop = 0;
+      this.$actions = [];
+    }
+  }
+  complete() {
+    for (const i in this.$actions) {
+      const action = this.$actions[i];
+      const property = action.target.$properties[action.property];
+      property.set(action.to, QMLProperty.ReasonAnimation);
+    }
+    this.$loop++;
+    if (this.$loop === this.loops) {
+      this.running = false;
+    } else if (!this.running) {
+      this.$actions = [];
+    } else {
+      thos.$startLoop(this);
     }
   }
 });
