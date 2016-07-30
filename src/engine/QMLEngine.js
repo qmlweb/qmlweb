@@ -1,4 +1,5 @@
-// There can only be one running QMLEngine. This variable points to the currently running engine.
+// There can only be one running QMLEngine.
+// This variable points to the currently running engine.
 QmlWeb.engine = null;
 
 const geometryProperties = [
@@ -11,7 +12,8 @@ class QMLEngine {
     //----------Public Members----------
 
     this.fps = 60;
-    this.$interval = Math.floor(1000 / this.fps); // Math.floor, causes bugs to timing?
+    // Math.floor, causes bugs to timing?
+    this.$interval = Math.floor(1000 / this.fps);
     this.running = false;
     this.rootElement = element;
 
@@ -55,7 +57,8 @@ class QMLEngine {
     const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
     for (const i in constructors) {
       if (constructors[i].getAttachedObject) {
-        setupGetter(QMLBaseObject.prototype, i, constructors[i].getAttachedObject);
+        setupGetter(QMLBaseObject.prototype, i,
+                    constructors[i].getAttachedObject);
       }
     }
   }
@@ -160,7 +163,10 @@ class QMLEngine {
 
     // Create and initialize objects
     const QMLComponent = getConstructor("QtQml", "2.0", "Component");
-    const component = new QMLComponent({ object: tree, parent: parentComponent });
+    const component = new QMLComponent({
+      object: tree,
+      parent: parentComponent
+    });
 
     this.loadImports(tree.$imports);
     component.$basePath = this.$basePath;
@@ -247,7 +253,8 @@ class QMLEngine {
       this.qmldirsContents = {}; // cache
 
       // putting initial keys in qmldirsContents - is a hack. We should find a
-      // way to explain to qmlweb, is this built-in module or qmldir-style module.
+      // way to explain to qmlweb, is this built-in module or qmldir-style
+      // module.
       for (const module in modules) {
         if (module !== "Main") {
           this.qmldirsContents[module] = {};
@@ -285,7 +292,8 @@ class QMLEngine {
           name = name.substr(0, name.length - 1);
         }
       }
-      // TODO if nameIsDir, we have also to add `name` to importPathList() for current component...
+      // TODO if nameIsDir, we have also to add `name` to importPathList() for
+      // current component...
 
       // check if we have already loaded that qmldir file
       if (this.qmldirsContents[name]) {
@@ -319,14 +327,18 @@ class QMLEngine {
       }
 
       if (!content) {
-        console.log("qmlengine::loadImports: cannot load qmldir file for import name=", name);
+        console.log(
+          "qmlengine::loadImports: cannot load qmldir file for import name=",
+          name
+        );
         // save blank info, meaning that we failed to load import
         // this prevents repeated lookups
         this.qmldirsContents[ name ] = {};
 
         // NEW
         // add that dir to import path list
-        // that means, lookup qml files in that failed dir by trying to load them directly
+        // that means, lookup qml files in that failed dir by trying to load
+        // them directly
         // this is not the same behavior as in Qt for "url" schemes,
         // but it is same as for ordirnal disk files.
         // So, we do it for experimental purposes.
@@ -460,10 +472,12 @@ class QMLEngine {
         // $updateVGeometry could be blocked during their eval.
         // So we call them explicitly, just in case.
         const { obj, changed } = property;
-        if (obj.$updateHGeometry && changed.isConnected(obj, obj.$updateHGeometry)) {
+        if (obj.$updateHGeometry &&
+            changed.isConnected(obj, obj.$updateHGeometry)) {
           obj.$updateHGeometry(property.val, property.val, property.name);
         }
-        if (obj.$updateVGeometry && changed.isConnected(obj, obj.$updateVGeometry)) {
+        if (obj.$updateVGeometry &&
+            changed.isConnected(obj, obj.$updateVGeometry)) {
           obj.$updateVGeometry(property.val, property.val, property.name);
         }
       }
