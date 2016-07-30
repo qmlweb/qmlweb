@@ -20,9 +20,9 @@ registerQmlType({
   }
   getRegExpForNotation(notation) {
     switch (notation) {
-      case DoubleValidator.ScientificNotation:
+      case this.DoubleValidator.ScientificNotation:
         return this.$scientificRegExp;
-      case DoubleValidator.StandardNotation:
+      case this.DoubleValidator.StandardNotation:
         return this.$standardRegExp;
     }
     return null;

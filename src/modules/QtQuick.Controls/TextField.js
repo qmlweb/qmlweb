@@ -62,10 +62,10 @@ registerQmlType({
   }
   $onEchoModeChanged(newVal) {
     switch (newVal) {
-      case TextField.Normal:
+      case this.TextField.Normal:
         this.impl.type = "text";
         break;
-      case TextField.Password:
+      case this.TextField.Password:
         this.impl.type = "password";
         break;
     }

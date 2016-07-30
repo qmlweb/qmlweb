@@ -155,13 +155,13 @@ registerQmlType({
   }
   $onFillModeChanged(newValue) {
     switch (newValue) {
-      case VideoOutput.Stretch:
+      case this.VideoOutput.Stretch:
         this.impl.style.objectFit = "fill";
         break;
-      case VideoOutput.PreserveAspectFit:
+      case this.VideoOutput.PreserveAspectFit:
         this.impl.style.objectFit = "";
         break;
-      case VideoOutput.PreserveAspectCrop:
+      case this.VideoOutput.PreserveAspectCrop:
         this.impl.style.objectFit = "cover";
         break;
     }
