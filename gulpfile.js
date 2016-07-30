@@ -41,7 +41,6 @@ const js = [
   "!src/modules/QtQuick/MouseArea.js",
   "!src/modules/QtQuick/Rectangle.js",
   "!src/modules/QtQuick/TextEdit.js",
-  "!src/modules/QtQuick/TextInput.js",
   "tests/**/*.js"
 ];
 

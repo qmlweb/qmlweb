@@ -20,13 +20,11 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var self = this;
-
-    const QMLFont = QmlWeb.getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
-    const input = this.impl = document.createElement('input');
-    input.type = 'text';
+    const input = this.impl = document.createElement("input");
+    input.type = "text";
     input.disabled = true;
     input.style.pointerEvents = "auto";
     // In some browsers text-inputs have a margin by default, which distorts
@@ -36,75 +34,77 @@ registerQmlType({
     input.style.width = "100%";
     input.style.height = "100%";
     this.dom.appendChild(input);
-
     this.setupFocusOnDom(input);
-
     input.disabled = false;
 
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = input.offsetWidth;
-        this.implicitHeight = input.offsetHeight;
-    });
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.textChanged.connect(this, this.$onTextChanged);
+    this.echoModeChanged.connect(this, this.$onEchoModeChanged);
+    this.maximumLengthChanged.connect(this, this.$onMaximumLengthChanged);
+    this.readOnlyChanged.connect(this, this.$onReadOnlyChanged);
+    this.Keys.pressed.connect(this, this.Keys$onPressed);
 
-    this.textChanged.connect(this, function(newVal) {
-        // We have to check if value actually changes.
-        // If we do not have this check, then after user updates text input following occurs:
-        // user update gui text -> updateValue called -> textChanged called -> gui value updates again -> caret position moves to the right!
-        if (input.value != newVal)
-            input.value = newVal;
-    });
-
-    this.echoModeChanged.connect(this, (function(newVal) {
-        switch (newVal) {
-          case TextInput.Normal:
-            input.type = "text";
-            break ;
-          case TextInput.Password:
-            input.type = "password";
-            break ;
-          case TextInput.NoEcho:
-            // Not supported, use password, that's nearest
-            input.type = "password";
-            break;
-          case TextInput.PasswordEchoOnEdit:
-            // Not supported, use password, that's nearest
-            input.type = "password";
-            break;
-        }
-    }).bind(this));
-
-    this.maximumLengthChanged.connect(this, function(newVal) {
-        if (newVal < 0)
-          newVal = null;
-        input.maxLength = newVal;
-    });
-
-    this.readOnlyChanged.connect(this, function(newVal) {
-        input.disabled = newVal;
-    });
-
-    this.Keys.pressed.connect(this, (function(e) {
-      if ((e.key == Qt.Key_Return || e.key == Qt.Key_Enter) &&
-          testValidator()) {
-        self.accepted();
-        e.accepted = true;
-      }
-    }).bind(this));
-
-    function testValidator() {
-      if (typeof self.validator != 'undefined' && self.validator != null)
-        return self.validator.validate(self.text);
-      return true;
+    input.oninput = () => this.$updateValue();
+  }
+  Component$onCompleted() {
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onTextChanged(newVal) {
+    // We have to check if value actually changes.
+    // If we do not have this check, then after user updates text input
+    // following occurs: user updates gui text -> updateValue gets called ->
+    // textChanged gets called -> gui value updates again -> caret position
+    // moves to the right!
+    if (this.impl.value !== newVal) {
+      this.impl.value = newVal;
     }
-
-    function updateValue(e) {
-        if (self.text != self.dom.firstChild.value) {
-          self.$canEditReadOnlyProperties = true;
-          self.text = self.dom.firstChild.value;
-          self.$canEditReadOnlyProperties = false;
-        }
+  }
+  $onEchoModeChanged(newVal) {
+    const TextInput = this.TextInput;
+    const input = this.impl;
+    switch (newVal) {
+      case TextInput.Normal:
+        input.type = "text";
+        break;
+      case TextInput.Password:
+        input.type = "password";
+        break;
+      case TextInput.NoEcho:
+        // Not supported, use password, that's nearest
+        input.type = "password";
+        break;
+      case TextInput.PasswordEchoOnEdit:
+        // Not supported, use password, that's nearest
+        input.type = "password";
+        break;
     }
-
-    input.oninput = updateValue;
+  }
+  $onMaximumLengthChanged(newVal) {
+    this.impl.maxLength = newVal < 0 ? null : newVal;
+  }
+  $onReadOnlyChanged(newVal) {
+    this.impl.disabled = newVal;
+  }
+  Keys$onPressed(e) {
+    const Qt = QmlWeb.Qt;
+    const submit = e.key === Qt.Key_Return || e.key === Qt.Key_Enter;
+    if (submit && this.$testValidator()) {
+      this.accepted();
+      e.accepted = true;
+    }
+  }
+  $testValidator() {
+    if (this.validator) {
+      return this.validator.validate(this.text);
+    }
+    return true;
+  }
+  $updateValue() {
+    if (this.text !== this.impl.value) {
+      this.$canEditReadOnlyProperties = true;
+      this.text = this.impl.value;
+      this.$canEditReadOnlyProperties = false;
+    }
   }
 });
