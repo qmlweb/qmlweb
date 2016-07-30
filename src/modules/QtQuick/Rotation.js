@@ -10,12 +10,12 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.axis = new QObject(this);
+    this.axis = new QmlWeb.QObject(this);
     createProperty("real", this.axis, "x");
     createProperty("real", this.axis, "y");
     createProperty("real", this.axis, "z", { initialValue: 1 });
 
-    this.origin = new QObject(this);
+    this.origin = new QmlWeb.QObject(this);
     createProperty("real", this.origin, "x");
     createProperty("real", this.origin, "y");
 

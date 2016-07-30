@@ -20,6 +20,7 @@ registerQmlType({
     return this;
   }
   $applyStyleOnItem($item) {
+    const Qt = QmlWeb.Qt;
     $item.dom.style.position = "initial";
     if (this.orientation === Qt.Horizontal) {
       $item.dom.style.display = "inline-block";

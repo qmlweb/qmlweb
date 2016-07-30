@@ -31,7 +31,7 @@ registerQmlType({
           typeof old_target[i].disconnect === "function") {
         old_target[i].disconnect(c._currentConnection);
       }
-      c._currentConnection = connectSignal(this.target, i, c.value,
+      c._currentConnection = QmlWeb.connectSignal(this.target, i, c.value,
                                            c.objectScope, c.componentScope);
     }
     this.$old_target = this.target;

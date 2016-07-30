@@ -19,7 +19,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.border = new QObject(this);
+    this.border = new QmlWeb.QObject(this);
     createProperty("int", this.border, "left");
     createProperty("int", this.border, "right");
     createProperty("int", this.border, "top");

@@ -43,7 +43,7 @@ registerQmlType({
     this.$applyModel();
   }
   $getModel() {
-    const QMLListModel = getConstructor("QtQuick", "2.0", "ListModel");
+    const QMLListModel = QmlWeb.getConstructor("QtQuick", "2.0", "ListModel");
     return this.model instanceof QMLListModel ?
             this.model.$model :
             this.model;
@@ -91,7 +91,7 @@ registerQmlType({
   }
   $callOnCompleted(child) {
     child.Component.completed();
-    const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
+    const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
     for (let i = 0; i < child.$tidyupList.length; i++) {
       if (child.$tidyupList[i] instanceof QMLBaseObject) {
         this.$callOnCompleted(child.$tidyupList[i]);

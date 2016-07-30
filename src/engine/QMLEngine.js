@@ -54,10 +54,10 @@ class QMLEngine {
     //----------Construct----------
 
     // TODO: Move to module initialization
-    const QMLBaseObject = getConstructor("QtQml", "2.0", "QtObject");
+    const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
     for (const i in constructors) {
       if (constructors[i].getAttachedObject) {
-        setupGetter(QMLBaseObject.prototype, i,
+        QmlWeb.setupGetter(QMLBaseObject.prototype, i,
                     constructors[i].getAttachedObject);
       }
     }
@@ -91,13 +91,13 @@ class QMLEngine {
       return;
     }
 
-    const src = getUrlContents(file);
+    const src = QmlWeb.getUrlContents(file);
     if (!src) {
       console.log("Can not load file [", file, "]");
       return;
     }
 
-    loadParser();
+    QmlWeb.loadParser();
     console.log("Loading file [", file, "]");
     QmlWeb.qrc[file] = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
   }
@@ -150,7 +150,7 @@ class QMLEngine {
   loadFile(file, parentComponent = null) {
     this.$basePath = this.extractBasePath(file);
     this.ensureFileIsLoadedInQrc(file);
-    const tree = convertToEngine(QmlWeb.qrc[file]);
+    const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
     return this.loadQMLTree(tree, parentComponent, file);
   }
 
@@ -164,7 +164,7 @@ class QMLEngine {
     QmlWeb.engine = this;
 
     // Create and initialize objects
-    const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
       parent: parentComponent
@@ -249,7 +249,7 @@ class QMLEngine {
       }
     };
 
-    setupGetterSetter(obj, propName, getter, setter);
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   }
 
   loadImports(importsArray, currentFileDir = this.$basePath) {
@@ -432,7 +432,7 @@ class QMLEngine {
 
     const file = `${this.$basePath}${name}.qml`;
     this.ensureFileIsLoadedInQrc(file);
-    const tree = convertToEngine(QmlWeb.qrc[file]);
+    const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
     this.components[name] = tree;
     return tree;
   }

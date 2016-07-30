@@ -133,7 +133,7 @@ class QMLProperty {
         context: componentScope
       });
     } else if (val instanceof QmlWeb.QMLMetaElement) {
-      const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {
         this.val = new QMLComponent({

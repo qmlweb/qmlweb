@@ -23,6 +23,7 @@ registerQmlType({
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
   Component$onCompleted() {
+    const Qt = QmlWeb.Qt;
     this.desktopAvailableHeight = window.outerHeight;
     this.desktopAvailableWidth = window.outerWidth;
     this.devicePixelRatio = window.devicePixelRatio;

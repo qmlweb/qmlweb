@@ -4,7 +4,7 @@ registerQmlType({
   module: "QtQml",
   name: "QtObject",
   versions: /.*/,
-}, class extends QObject {
+}, class extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent);
 
@@ -25,7 +25,7 @@ registerQmlType({
 
     const Signal = QmlWeb.Signal;
 
-    this.Keys = new QObject(this);
+    this.Keys = new QmlWeb.QObject(this);
     this.Keys.asteriskPresed = Signal.signal();
     this.Keys.backPressed = Signal.signal();
     this.Keys.backtabPressed = Signal.signal();

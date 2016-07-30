@@ -29,7 +29,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    const QMLFont = getConstructor("QtQuick", "2.0", "Font");
+    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
     const input = this.impl = document.createElement("input");
@@ -83,6 +83,7 @@ registerQmlType({
     return true;
   }
   $submitValue(e) {
+    const Qt = QmlWeb.Qt;
     const is_submit = e.key === Qt.Key_Return || e.key === Qt.Key_Enter;
     if (is_submit && this.$testValidator()) {
       this.accepted();

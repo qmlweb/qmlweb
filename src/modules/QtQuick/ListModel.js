@@ -21,7 +21,9 @@ registerQmlType({
   $on$itemsChanged(newVal) {
     this.count = this.$items.length;
     if (this.$firstItem && newVal.length > 0) {
-      const QMLListElement = getConstructor("QtQuick", "2.0", "ListElement");
+      const QMLListElement = QmlWeb.getConstructor(
+        "QtQuick", "2.0", "ListElement"
+      );
       this.$firstItem = false;
       const roleNames = [];
       let dict = newVal[0];

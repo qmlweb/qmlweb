@@ -25,7 +25,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.sourceSize = new QObject(this);
+    this.sourceSize = new QmlWeb.QObject(this);
     createProperty("int", this.sourceSize, "width");
     createProperty("int", this.sourceSize, "height");
 

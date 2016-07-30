@@ -37,7 +37,7 @@ const Qt = {
     }
 
     let file = nameIsUrl ? resolvedName : engine.$basePath + resolvedName;
-    let src = getUrlContents(file, true);
+    let src = QmlWeb.getUrlContents(file, true);
 
     // if failed to load, and provided name is not direct url,
     // try to load from dirs in importPathList()
@@ -45,7 +45,7 @@ const Qt = {
       const moredirs = engine.importPathList();
       for (let i = 0; i < moredirs.length; i++) {
         file = moredirs[i] + resolvedName;
-        src = getUrlContents(file, true);
+        src = QmlWeb.getUrlContents(file, true);
         if (src !== false) break;
       }
     }
@@ -62,7 +62,7 @@ const Qt = {
       console.error("A QML component must only contain one root element!");
     }
 
-    const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
       context: QmlWeb.executionContext
@@ -82,7 +82,7 @@ const Qt = {
 
     // Create and initialize objects
 
-    const QMLComponent = getConstructor("QtQml", "2.0", "Component");
+    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
       parent,

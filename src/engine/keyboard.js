@@ -1,4 +1,5 @@
 QmlWeb.keyCodeToQt = e => {
+  const Qt = QmlWeb.Qt;
   e.keypad = e.keyCode >= 96 && e.keyCode <= 111;
   if (e.keyCode === Qt.Key_Tab && e.shiftKey) {
     return Qt.Key_Backtab;
@@ -14,11 +15,11 @@ QmlWeb.eventToKeyboard = e => ({
   count: 1,
   isAutoRepeat: false,
   key: QmlWeb.keyCodeToQt(e),
-  modifiers: e.ctrlKey * Qt.CtrlModifier
-           | e.altKey * Qt.AltModifier
-           | e.shiftKey * Qt.ShiftModifier
-           | e.metaKey * Qt.MetaModifier
-           | e.keypad * Qt.KeypadModifier,
+  modifiers: e.ctrlKey * QmlWeb.Qt.CtrlModifier
+           | e.altKey * QmlWeb.Qt.AltModifier
+           | e.shiftKey * QmlWeb.Qt.ShiftModifier
+           | e.metaKey * QmlWeb.Qt.MetaModifier
+           | e.keypad * QmlWeb.Qt.KeypadModifier,
   text: String.fromCharCode(e.charCode)
 });
 
@@ -30,5 +31,5 @@ QmlWeb.keyboardSignals = {};
   const name = key.toString();
   const qtName = `Key_${name[0].toUpperCase()}${name.slice(1)}`;
   const prefix = typeof key === "number" ? "digit" : "";
-  QmlWeb.keyboardSignals[Qt[qtName]] = `${prefix}${name}Pressed`;
+  QmlWeb.keyboardSignals[QmlWeb.Qt[qtName]] = `${prefix}${name}Pressed`;
 });

@@ -16,7 +16,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.easing = new QObject(this);
+    this.easing = new QmlWeb.QObject(this);
     createProperty("enum", this.easing, "type", { initialValue: this.Easing.Linear });
     createProperty("real", this.easing, "amplitude", { initialValue: 1 });
     createProperty("real", this.easing, "overshoot", { initialValue: 0.3 });

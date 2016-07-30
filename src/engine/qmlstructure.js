@@ -273,4 +273,6 @@ function parseQML(src, file) {
 }
 
 QmlWeb.QMLMetaElement = QMLMetaElement;
+QmlWeb.convertToEngine = convertToEngine;
+QmlWeb.loadParser = loadParser;
 QmlWeb.parseQML = parseQML;

@@ -12,6 +12,6 @@ registerQmlType({
         createProperty("variant", this, i);
       }
     }
-    applyProperties(meta.object, this, this, this.$context);
+    QmlWeb.applyProperties(meta.object, this, this, this.$context);
   }
 });

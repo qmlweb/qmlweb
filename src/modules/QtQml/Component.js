@@ -33,7 +33,7 @@ class QMLComponent {
       for (let i = 0; i < meta.object.$imports.length; ++i) {
         loadImport(meta.object.$imports[i]);
       }
-      loadImports(this, moduleImports);
+      QmlWeb.loadImports(this, moduleImports);
       if (this.$context) {
         this.finalizeImports(this.$context);
       }
@@ -51,14 +51,14 @@ class QMLComponent {
       if (typeof QmlWeb.qrc[src] !== "undefined") {
         js = QmlWeb.qrc[src];
       } else {
-        loadParser();
-        js = QmlWeb.jsparse(getUrlContents(src));
+        QmlWeb.loadParser();
+        js = QmlWeb.jsparse(QmlWeb.getUrlContents(src));
       }
       if (importDesc[3] !== "") {
         $context[importDesc[3]] = {};
-        importJavascriptInContext(js, $context[importDesc[3]]);
+        QmlWeb.importJavascriptInContext(js, $context[importDesc[3]]);
       } else {
-        importJavascriptInContext(js, $context);
+        QmlWeb.importJavascriptInContext(js, $context);
       }
     }
   }
@@ -90,7 +90,7 @@ class QMLComponent {
   }
   static getAttachedObject() {
     if (!this.$Component) {
-      this.$Component = new QObject(this);
+      this.$Component = new QmlWeb.QObject(this);
       this.$Component.completed = QmlWeb.Signal.signal([]);
       QmlWeb.engine.completedSignals.push(this.$Component.completed);
 

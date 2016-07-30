@@ -51,7 +51,7 @@ registerQmlType({
 
     var self = this;
 
-    const QMLFont = getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = QmlWeb.getConstructor('QtQuick', '2.0', 'Font');
     this.font = new QMLFont(this);
 
     // Undo / Redo stacks;

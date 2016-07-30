@@ -37,6 +37,7 @@ registerQmlType({
     this.width = this.implicitWidth;
     this.height = this.implicitHeight;
 
+    const Qt = QmlWeb.Qt;
     this.contentItem = undefined;
     this.flickableItem = undefined;
     this.viewport = undefined;
@@ -79,6 +80,7 @@ registerQmlType({
     }
   }
   $scrollBarPolicyToCssOverflow(policy) {
+    const Qt = QmlWeb.Qt;
     switch (policy) {
       case Qt.ScrollBarAsNeeded:
         return "auto";

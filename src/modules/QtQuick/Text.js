@@ -33,7 +33,7 @@ registerQmlType({
     fc.style.height = "100%";
     this.dom.appendChild(fc);
 
-    const QMLFont = getConstructor("QtQuick", "2.0", "Font");
+    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
     this.colorChanged.connect(this, this.$onColorChanged);

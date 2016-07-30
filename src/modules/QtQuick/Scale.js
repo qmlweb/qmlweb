@@ -11,7 +11,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    this.origin = new QObject(this);
+    this.origin = new QmlWeb.QObject(this);
     createProperty("real", this.origin, "x");
     createProperty("real", this.origin, "y");
 

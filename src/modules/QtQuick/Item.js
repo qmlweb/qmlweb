@@ -84,7 +84,7 @@ registerQmlType({
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
-    this.anchors = new QObject(this);
+    this.anchors = new QmlWeb.QObject(this);
     createProperty("var", this.anchors, "left");
     createProperty("var", this.anchors, "right");
     createProperty("var", this.anchors, "top");
@@ -116,7 +116,7 @@ registerQmlType({
     this.anchors.marginsChanged.connect(this, this.$updateVGeometry);
 
     // childrenRect property
-    this.childrenRect = new QObject(this);
+    this.childrenRect = new QmlWeb.QObject(this);
     createProperty("real", this.childrenRect, "x"); // TODO ro
     createProperty("real", this.childrenRect, "y"); // TODO ro
     createProperty("real", this.childrenRect, "width"); // TODO ro
@@ -281,7 +281,7 @@ registerQmlType({
     for (const i in actions) {
       const action = actions[i];
       action.target.$properties[action.property].set(
-        action.value, QMLProperty.ReasonUser, action.target,
+        action.value, QmlWeb.QMLProperty.ReasonUser, action.target,
         newState ? newState.$context : action.target.$context
       );
     }
@@ -377,9 +377,9 @@ registerQmlType({
     element.addEventListener("blur", updateFocus);
   }
   $updateTransform() {
-    const QMLTranslate = getConstructor("QtQuick", "2.0", "Translate");
-    const QMLRotation = getConstructor("QtQuick", "2.0", "Rotation");
-    const QMLScale = getConstructor("QtQuick", "2.0", "Scale");
+    const QMLTranslate = QmlWeb.getConstructor("QtQuick", "2.0", "Translate");
+    const QMLRotation = QmlWeb.getConstructor("QtQuick", "2.0", "Rotation");
+    const QMLScale = QmlWeb.getConstructor("QtQuick", "2.0", "Scale");
     let transform = `rotate(${this.rotation}deg) scale(${this.scale})`;
     let filter = "";
     const transformStyle = "preserve-3d";

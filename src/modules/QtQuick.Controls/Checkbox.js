@@ -28,7 +28,7 @@ registerQmlType({
 
     this.dom.appendChild(this.impl);
 
-    const QMLFont = getConstructor("QtQuick", "2.0", "Font");
+    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
     this.Component.completed.connect(this, this.Component$onCompleted);

@@ -21,7 +21,7 @@ registerQmlType({
 
         let sourceUrl = '';
 
-        const QMLComponent = getConstructor('QtQml', '2.0', 'Component');
+        const QMLComponent = QmlWeb.getConstructor('QtQml', '2.0', 'Component');
 
         this.activeChanged.connect(() => {
             if (!this.active) {

@@ -143,4 +143,5 @@ function readQmlDir(url) {
   return { internals, externals };
 }
 
+QmlWeb.getUrlContents = getUrlContents;
 QmlWeb.readQmlDir = readQmlDir;
