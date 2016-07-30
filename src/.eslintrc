@@ -1,2 +1,8 @@
 env:
   node: false
+globals:
+  registerQmlType: true
+  createProperty: true
+  callSuper: true
+  constructors: true
+  Easing: true

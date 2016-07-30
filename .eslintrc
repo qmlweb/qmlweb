@@ -69,7 +69,7 @@ rules:
   no-shadow-restricted-names: 2
   no-spaced-func: 2
   no-trailing-spaces: 2
-  no-undef: 0
+  no-undef: 2
   no-undef-init: 2
   no-underscore-dangle: 0
   no-unneeded-ternary: 2
