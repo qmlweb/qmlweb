@@ -19,3 +19,4 @@ function QMLList(meta) {
   return list;
 }
 QMLList.plainType = true;
+QmlWeb.qmlList = QMLList;

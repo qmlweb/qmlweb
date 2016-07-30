@@ -10,17 +10,17 @@ var _executionContext = null;
 
 // All object constructors
 var constructors = {
-  int: QMLInteger,
-  real: QMLNumber,
-  double: QMLNumber,
-  string: QMLString,
-  bool: QMLBoolean,
-  list: QMLList,
-  color: QColor,
-  enum: QMLNumber,
-  url: QMLString,
-  variant: QMLVariant,
-  var: QMLVariant
+  int: QmlWeb.qmlInteger,
+  real: QmlWeb.qmlNumber,
+  double: QmlWeb.qmlNumber,
+  string: QmlWeb.qmlString,
+  bool: QmlWeb.qmlBoolean,
+  list: QmlWeb.qmlList,
+  color: QmlWeb.QColor,
+  enum: QmlWeb.qmlNumber,
+  url: QmlWeb.qmlString,
+  variant: QmlWeb.qmlVariant,
+  var: QmlWeb.qmlVariant
 };
 
 const modules = {
