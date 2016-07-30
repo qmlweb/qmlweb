@@ -1,4 +1,4 @@
-var _executionContext = null;
+QmlWeb.executionContext = null;
 
 // All object constructors
 var constructors = {
@@ -242,7 +242,7 @@ function construct(meta) {
 
         /* This will also be set in applyProperties, but needs to be set here
          * for Qt.createComponent to have the correct context. */
-        _executionContext = meta.context;
+        QmlWeb.executionContext = meta.context;
 
         if (qdirInfo) {
             // We have that component in some qmldir, load it from qmldir's url
@@ -347,7 +347,7 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
             params += j==0 ? "" : ", ";
             params += item[signalName].parameters[j].name;
         }
-        value.src = "(function(" + params + ") { _executionContext = __executionContext;" + value.src + "})";
+        value.src = "(function(" + params + ") { QmlWeb.executionContext = __executionContext;" + value.src + "})";
         value.isFunction = false;
         value.compile();
     }
@@ -366,7 +366,7 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
 function applyProperties(metaObject, item, objectScope, componentScope) {
     var i;
     objectScope = objectScope || item;
-    _executionContext = componentScope;
+    QmlWeb.executionContext = componentScope;
 
     if (metaObject.$children && metaObject.$children.length !== 0) {
         if (item.$defaultProperty)

@@ -65,7 +65,7 @@ const Qt = {
     const QMLComponent = getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
-      context: _executionContext
+      context: QmlWeb.executionContext
     });
     component.$basePath = engine.extractBasePath(file);
     component.$imports = tree.$imports;
@@ -86,7 +86,7 @@ const Qt = {
     const component = new QMLComponent({
       object: tree,
       parent,
-      context: _executionContext
+      context: QmlWeb.executionContext
     });
 
     const engine = QmlWeb.engine;

@@ -29,7 +29,7 @@ class QMLBinding {
  */
   compile() {
     this.eval = new Function("__executionObject", "__executionContext", `
-      _executionContext = __executionContext;
+      QmlWeb.executionContext = __executionContext;
       with(QmlWeb) with(__executionContext) with(__executionObject) {
         ${this.isFunction ? "" : "return"} ${this.src}
         }
