@@ -52,6 +52,7 @@ registerQmlType({
     this.text = "";
 
     this.textChanged.connect(this, this.$onTextChanged);
+    this.widthChanged.connect(this, this.$onWidthChanged);
     this.wrapModeChanged.connect(this, this.$onWrapModeChanged);
 
     this.font.boldChanged.connect(this, this.$onFontChanged);
@@ -69,6 +70,9 @@ registerQmlType({
   }
   $onTextChanged(newVal) {
     this.impl.innerHTML = newVal;
+    this.$updateImplicit();
+  }
+  $onWidthChanged() {
     this.$updateImplicit();
   }
   $onLineHeightChanged(newVal) {
