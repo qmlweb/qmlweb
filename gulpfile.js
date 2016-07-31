@@ -38,7 +38,6 @@ const js = [
   "!src/engine/qml.js",
   "!src/modules/QtQuick/Font.js",
   "!src/modules/QtQuick/Loader.js",
-  "!src/modules/QtQuick/MouseArea.js",
   "!src/modules/QtQuick/Rectangle.js",
   "tests/**/*.js"
 ];

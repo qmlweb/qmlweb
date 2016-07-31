@@ -23,7 +23,6 @@ registerQmlType({
 }, class {
   constructor(meta) {
     callSuper(this, meta);
-    var self = this;
 
     this.dom.style.pointerEvents = "all";
 
@@ -33,67 +32,68 @@ registerQmlType({
     this.dom.style.backgroundColor = "white";
     this.dom.style.opacity = 0;
 
-    function eventToMouse(e) {
-        return {
-            accepted: true,
-            button: e.button == 0 ? Qt.LeftButton :
-                    e.button == 1 ? Qt.MiddleButton :
-                    e.button == 2 ? Qt.RightButton :
-                    0,
-            modifiers: (e.ctrlKey * Qt.CtrlModifier)
-                    | (e.altKey * Qt.AltModifier)
-                    | (e.shiftKey * Qt.ShiftModifier)
-                    | (e.metaKey * Qt.MetaModifier),
-            x: (e.offsetX || e.layerX),
-            y: (e.offsetY || e.layerY)
-        };
-    }
-    function handleClick(e) {
-        var mouse = eventToMouse(e);
+    this.cursorShapeChanged.connect(this, this.$onCursorShapeChanged);
 
-        if (self.enabled && self.acceptedButtons & mouse.button) {
-            self.clicked(mouse);
-        }
-        // This decides whether to show the browser's context menu on right click or not
-        return !(self.acceptedButtons & Qt.RightButton);
-    }
-    this.dom.onclick = handleClick;
-    this.dom.oncontextmenu = handleClick;
-    this.dom.onmousedown = function(e) {
-        if (self.enabled) {
-            var mouse = eventToMouse(e);
-            self.mouseX = mouse.x;
-            self.mouseY = mouse.y;
-            self.pressed = true;
-        }
-        self.pressedButtons = mouse.button;
-    }
-    this.dom.onmouseup = function(e) {
-        self.pressed = false;
-        self.pressedButtons = 0;
-    }
-    this.dom.onmouseover = function(e) {
-        self.containsMouse = true;
-        self.entered();
-    }
-    this.dom.onmouseout = function(e) {
-        self.containsMouse = false;
-        self.exited();
-    }
-    this.dom.onmousemove = function(e) {
-        if (self.enabled && (self.hoverEnabled || self.pressed)) {
-            var mouse = eventToMouse(e);
-            self.positionChanged(mouse);
-            self.mouseX = mouse.x;
-            self.mouseY = mouse.y;
-        }
-    }
-
-    this.cursorShapeChanged.connect(function() {
-      self.dom.style.cursor = this.$cursorShapeToCSS();
+    this.dom.addEventListener("click", e => this.$handleClick(e));
+    this.dom.addEventListener("contextmenu", e => this.$handleClick(e));
+    this.dom.addEventListener("mousedown", e => {
+      if (!this.enabled) return;
+      const mouse = this.$eventToMouse(e);
+      this.mouseX = mouse.x;
+      this.mouseY = mouse.y;
+      this.pressed = true;
+      this.pressedButtons = mouse.button;
+    });
+    this.dom.addEventListener("mouseup", () => {
+      this.pressed = false;
+      this.pressedButtons = 0;
+    });
+    this.dom.addEventListener("mouseover", () => {
+      this.containsMouse = true;
+      this.entered();
+    });
+    this.dom.addEventListener("mouseout", () => {
+      this.containsMouse = false;
+      this.exited();
+    });
+    this.dom.addEventListener("mousemove", e => {
+      if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
+      const mouse = this.eventToMouse(e);
+      this.positionChanged(mouse);
+      this.mouseX = mouse.x;
+      this.mouseY = mouse.y;
     });
   }
+  $onCursorShapeChanged() {
+    this.dom.style.cursor = this.$cursorShapeToCSS();
+  }
+  $handleClick(e) {
+    if (this.enabled && this.acceptedButtons & this.button) {
+      const mouse = this.$eventToMouse(e);
+      this.clicked(mouse);
+    }
+    // This decides whether to show the browser's context menu on right click or
+    // not
+    return !(this.acceptedButtons & QmlWeb.Qt.RightButton);
+  }
+  $eventToMouse(e) {
+    const Qt = QmlWeb.Qt;
+    return {
+      accepted: true,
+      button: e.button === 0 ? Qt.LeftButton :
+              e.button === 1 ? Qt.MiddleButton :
+              e.button === 2 ? Qt.RightButton :
+              0,
+      modifiers: e.ctrlKey * Qt.CtrlModifier
+               | e.altKey * Qt.AltModifier
+               | e.shiftKey * Qt.ShiftModifier
+               | e.metaKey * Qt.MetaModifier,
+      x: e.offsetX || e.layerX,
+      y: e.offsetY || e.layerY
+    };
+  }
   $cursorShapeToCSS() {
+    const Qt = QmlWeb.Qt;
     switch (this.cursorShape) {
       case Qt.ArrowCursor: return "default";
       case Qt.UpArrowCursor: return "n-resize";
