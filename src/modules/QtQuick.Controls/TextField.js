@@ -52,7 +52,7 @@ registerQmlType({
     this.readOnlyChanged.connect(this, this.$onReadOnlyChanged);
     this.Keys.pressed.connect(this, this.Keys$onPressed);
 
-    input.oninput = () => this.$updateValue();
+    this.impl.addEventListener("input", () => this.$updateValue());
   }
   Component$onCompleted() {
     this.implicitWidth = this.impl.offsetWidth;

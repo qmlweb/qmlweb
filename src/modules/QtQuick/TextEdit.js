@@ -49,9 +49,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
-    var self = this;
-
-    const QMLFont = QmlWeb.getConstructor('QtQuick', '2.0', 'Font');
+    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);
 
     // Undo / Redo stacks;
@@ -60,159 +58,134 @@ registerQmlType({
     this.redoStack = [];
     this.redoStackPosition = -1;
 
-    const textarea = this.impl = document.createElement('textarea');
+    const textarea = this.impl = document.createElement("textarea");
     textarea.style.pointerEvents = "auto";
     textarea.style.width = "100%";
     textarea.style.height = "100%";
-    textarea.style.boxSizing = 'border-box';
-    textarea.style.borderWidth = '0';
-    textarea.style.background = 'none';
-    textarea.style.outline = 'none';
-    textarea.style.resize = 'none';
-    textarea.style.padding = '0'; // TODO: padding/*Padding props from Qt 5.6
+    textarea.style.boxSizing = "border-box";
+    textarea.style.borderWidth = "0";
+    textarea.style.background = "none";
+    textarea.style.outline = "none";
+    textarea.style.resize = "none";
+    textarea.style.padding = "0"; // TODO: padding/*Padding props from Qt 5.6
     // In some browsers text-areas have a margin by default, which distorts
     // the positioning, so we need to manually set it to 0.
     textarea.style.margin = "0";
     textarea.disabled = false;
     this.dom.appendChild(textarea);
 
-    this.Component.completed.connect(this, function() {
-        this.implicitWidth = textarea.offsetWidth;
-        this.implicitHeight = textarea.offsetHeight;
-    });
+    this.Component.completed.connect(this, this.Component$onCompleted);
+    this.textChanged.connect(this, this.$onTextChanged);
+    this.colorChanged.connect(this, this.$onColorChanged);
 
-    this.textChanged.connect(this, function(newVal) {
-        textarea.value = newVal;
-    });
-
-    // Methods
-    this.append = function append(text) {
-        this.text += text;
-    };
-
-    this.copy = function copy() {
-        // TODO
-    };
-
-    this.cut = function cut() {
-        this.text =
-            this.text(0, this.selectionStart) + this.text(this.selectionEnd, this.text.length);
-        // TODO
-    };
-
-    this.deselect = function deselect() {
-        //this.selectionStart = -1;
-        //this.selectionEnd = -1;
-        //this.selectedText = null;
-    };
-
-    this.getFormattedText = function getFormattedText(start, end) {
-        this.text = this.text.slice(start, end);
-        // TODO
-        // process text
-        return text;
-    };
-
-    this.getText = function getText(start, end) {
-        return this.text.slice(start, end);
-    };
-
-    this.insert = function getText(position, text) {
-        // TODO
-    };
-
-    this.isRightToLeft = function isRightToLeft(start, end) {
-        // TODO
-    };
-
-    this.linkAt = function linkAt(x, y) {
-        // TODO
-    };
-
-    this.moveCursorSelection = function moveCursorSelection(x, y) {
-        // TODO
-    };
-
-    this.paste = function paste() {
-        // TODO
-    };
-
-    this.positionAt = function positionAt(x, y) {
-        // TODO
-    };
-
-    this.positionToRectangle = function positionToRectangle(position) {
-        // TODO
-    };
-
-    this.redo = function redo() {
-        // TODO
-    };
-
-    this.remove = function remove(start, end) {
-        // TODO
-    };
-
-    this.select = function select(start, end) {
-        // TODO
-    };
-
-    this.selectAll = function selectAll() {
-        // TODO
-    };
-
-    this.selectWord = function selectWord() {
-        // TODO
-    };
-
-    this.undo = function undo() {
-        // TODO
-    };
-
-    var getLineCount = function(self) {
-        return self.text.split(/\n/).length;
+    this.impl.addEventListener("input", () => this.$updateValue());
+  }
+  append(text) {
+    this.text += text;
+  }
+  copy() {
+    // TODO
+  }
+  cut() {
+    this.text = this.text(0, this.selectionStart) +
+                this.text(this.selectionEnd, this.text.length);
+    // TODO
+  }
+  deselect() {
+    //this.selectionStart = -1;
+    //this.selectionEnd = -1;
+    //this.selectedText = null;
+    // TODO
+  }
+  getFormattedText(start, end) {
+    const text = this.text.slice(start, end);
+    // TODO
+    // process text
+    return text;
+  }
+  getText(start, end) {
+    return this.text.slice(start, end);
+  }
+  insert(/*position, text*/) {
+    // TODO
+  }
+  isRightToLeft(/*start, end*/) {
+    // TODO
+  }
+  linkAt(/*x, y*/) {
+    // TODO
+  }
+  moveCursorSelection(/*x, y*/) {
+    // TODO
+  }
+  paste() {
+    // TODO
+  }
+  positionAt(/*x, y*/) {
+    // TODO
+  }
+  positionToRectangle(/*position*/) {
+    // TODO
+  }
+  redo() {
+    // TODO
+  }
+  remove(/*start, end*/) {
+    // TODO
+  }
+  select(/*start, end*/) {
+    // TODO
+  }
+  selectAll() {
+    // TODO
+  }
+  selectWord() {
+    // TODO
+  }
+  undo() {
+    // TODO
+  }
+  Component$onCompleted() {
+    this.selectByKeyboard = !this.readOnly;
+    this.$updateValue();
+    this.implicitWidth = this.offsetWidth;
+    this.implicitHeight = this.offsetHeight;
+  }
+  $onTextChanged(newVal) {
+    this.impl.value = newVal;
+  }
+  $onColorChanged(newVal) {
+    this.impl.style.color = newVal;
+  }
+  $updateValue() {
+    if (this.text !== this.impl.value) {
+      this.text = this.impl.value;
     }
-
-    this.Component.completed.connect(this, function() {
-        this.selectByKeyboard = !this.readOnly;
-        updateValue();
-    });
-
-    // Transfer dom style to firstChild,
-    // then clear corresponding dom style
-    function updateCss(self) {
-        var supported = [
-            'border',
-            'borderRadius',
-            'borderWidth',
-            'borderColor',
-            'backgroundColor',
-        ];
-
-        var child_style = self.dom.firstChild.style;
-        for (n = 0; n < supported.length; n++) {
-            var o = supported[n];
-            var v = self.css[o];
-            if (v) {
-                child_style[o] = v;
-                self.css[o] = null;
-            }
-        }
+    this.length = this.text.length;
+    this.lineCount = this.$getLineCount();
+    this.$updateCss();
+  }
+  // Transfer dom style to firstChild,
+  // then clear corresponding dom style
+  $updateCss() {
+    const supported = [
+      "border",
+      "borderRadius",
+      "borderWidth",
+      "borderColor",
+      "backgroundColor",
+    ];
+    const style = this.impl.style;
+    for (let n = 0; n < supported.length; n++) {
+      const o = supported[n];
+      const v = this.css[o];
+      if (v) {
+        style[o] = v;
+        this.css[o] = null;
+      }
     }
-
-    function updateValue(e) {
-        if (self.text != self.dom.firstChild.value) {
-            self.text = self.dom.firstChild.value;
-        }
-        self.length = self.text.length;
-        self.lineCount = getLineCount(self);
-        updateCss(self);
-    }
-
-    textarea.oninput = updateValue;
-
-    this.colorChanged.connect(this, function(newVal) {
-        textarea.style.color = newVal;
-    });
+  }
+  $getLineCount() {
+    return this.text.split(/\n/).length;
   }
 });
