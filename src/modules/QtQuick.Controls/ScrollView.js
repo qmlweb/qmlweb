@@ -26,8 +26,10 @@ registerQmlType({
     this.viewportChanged.connect(this, this.$onViewportChanged);
     this.frameVisibleChanged.connect(this, this.$onVisibleChanged);
     this.highlightOnFocusChanged.connect(this, this.$onHighlightOnFocusChanged);
-    this.horizontalScrollBarPolicyChanged.connect(this, this.$onHorizontalScrollBarPolicyChanged);
-    this.verticalScrollBarPolicyChanged.connect(this, this.$onVerticalScrollBarPolicyChanged);
+    this.horizontalScrollBarPolicyChanged.connect(this,
+                                      this.$onHorizontalScrollBarPolicyChanged);
+    this.verticalScrollBarPolicyChanged.connect(this,
+                                        this.$onVerticalScrollBarPolicyChanged);
     this.styleChanged.connect(this, this.$onStyleChanged);
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.focusChanged.connect(this, this.$onFocusChanged);

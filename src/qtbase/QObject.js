@@ -38,7 +38,8 @@ class QObject {
     }
 
     if (this.$parent && this.$parent.$tidyupList) {
-      this.$parent.$tidyupList.splice(this.$parent.$tidyupList.indexOf(this), 1);
+      const index = this.$parent.$tidyupList.indexOf(this);
+      this.$parent.$tidyupList.splice(index, 1);
     }
 
     // must do this:

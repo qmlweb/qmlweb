@@ -102,6 +102,7 @@ class QMLEngine {
     QmlWeb.qrc[file] = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
   }
 
+  // eslint-disable-next-line max-len
   /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
    *
    * Removes dot segments in given path component, as described in

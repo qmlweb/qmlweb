@@ -7,7 +7,8 @@ registerQmlType({
     url: "string",
     isLoading: "bool",
     mimeType: { type: "string", initialValue: "application/json" },
-    queryMimeType: { type: "string", initialValue: "application/x-www-urlencoded" }
+    queryMimeType: { type: "string",
+                     initialValue: "application/x-www-urlencoded" }
   },
   signals: {
     fetched: [],
@@ -81,7 +82,9 @@ registerQmlType({
         if (typeof value === "object") {
           parts.push(this.$objectToUrlEncoded(value, key));
         } else {
-          parts.push(`${this.$myEncodeURIComponent(key)}=${this.$myEncodeURIComponent(value)}`);
+          const ekey = this.$myEncodeURIComponent(key);
+          const evalue = this.$myEncodeURIComponent(value);
+          parts.push(`${ekey}=${evalue}`);
         }
       }
     }

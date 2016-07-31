@@ -10,7 +10,8 @@ registerQmlType({
     bottom: { type: "real", initialValue: -Infinity },
     top: { type: "real", initialValue: Infinity },
     decimals: { type: "int", initialValue: 1000 },
-    notation: { type: "enum", initialValue: 2 } // DoubleValidator.ScientificNotation
+    // DoubleValidator.ScientificNotation
+    notation: { type: "enum", initialValue: 2 }
   }
 }, class {
   constructor(meta) {
@@ -36,12 +37,11 @@ registerQmlType({
   }
   validate(string) {
     const regExp = this.getRegExpForNotation(this.notation);
-    let acceptable = regExp.test(string.trim());
-    if (acceptable) {
-      const value = parseFloat(string);
-      acceptable = this.bottom <= value && this.top >= value;
-      acceptable = acceptable && this.$getDecimalsForNumber(value) <= this.decimals;
+    if (!regExp.test(string.trim())) {
+      return false;
     }
-    return acceptable;
+    const value = parseFloat(string);
+    return this.bottom <= value && this.top >= value &&
+           this.$getDecimalsForNumber(value) <= this.decimals;
   }
 });

@@ -46,25 +46,28 @@ class Signal {
     }
   }
   disconnect(...args) {
-    // callType meaning:
+    // type meaning:
     //  1 = function, 2 = string
     //  3 = object with string method,  4 = object with function
     const callType = args.length === 1
       ? args[0] instanceof Function ? 1 : 2
       : typeof args[1] === "string" || args[1] instanceof String ? 3 : 4;
     for (let i = 0; i < this.connectedSlots.length; i++) {
-      const item = this.connectedSlots[i];
+      const { slot, thisObj } = this.connectedSlots[i];
       if (
-        callType === 1 && item.slot === args[0] ||
-        callType === 2 && item.thisObj === args[0] ||
-        callType === 3 && item.thisObj === args[0] && item.slot === args[0][args[1]] ||
-        item.thisObj === args[0] && item.slot === args[1]
+        callType === 1 && slot === args[0] ||
+        callType === 2 && thisObj === args[0] ||
+        callType === 3 && thisObj === args[0] && slot === args[0][args[1]] ||
+        thisObj === args[0] && slot === args[1]
       ) {
-        if (item.thisObj) {
-          item.thisObj.$tidyupList.splice(item.thisObj.$tidyupList.indexOf(this.signal), 1);
+        if (thisObj) {
+          const index = thisObj.$tidyupList.indexOf(this.signal);
+          thisObj.$tidyupList.splice(index, 1);
         }
         this.connectedSlots.splice(i, 1);
-        i--; // We have removed an item from the list so the indexes shifted one backwards
+        // We have removed an item from the list so the indexes shifted one
+        // backwards
+        i--;
       }
     }
 
@@ -77,10 +80,10 @@ class Signal {
     const callType = args.length === 1 ? 1
       : typeof args[1] === "string" || args[1] instanceof String ? 2 : 3;
     for (const i in this.connectedSlots) {
-      const item = this.connectedSlots[i];
-      if (callType === 1 && item.slot === args[0] ||
-          callType === 2 && item.thisObj === args[0] && item.slot === args[0][args[1]] ||
-          item.thisObj === args[0] && item.slot === args[1]
+      const { slot, thisObj } = this.connectedSlots[i];
+      if (callType === 1 && slot === args[0] ||
+          callType === 2 && thisObj === args[0] && slot === args[0][args[1]] ||
+          thisObj === args[0] && slot === args[1]
       ) {
         return true;
       }

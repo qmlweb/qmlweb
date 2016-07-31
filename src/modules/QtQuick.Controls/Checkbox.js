@@ -39,7 +39,9 @@ registerQmlType({
   $onTextChanged(newVal) {
     this.impl.children[1].innerHTML = newVal;
     this.implicitHeight = this.impl.offsetHeight;
-    this.implicitWidth = this.impl.offsetWidth > 0 ? this.impl.offsetWidth + 4 : 0;
+    this.implicitWidth = this.impl.offsetWidth > 0 ?
+                          this.impl.offsetWidth + 4 :
+                          0;
   }
   $onColorChanged(newVal) {
     this.impl.children[1].style.color = new QmlWeb.QColor(newVal);

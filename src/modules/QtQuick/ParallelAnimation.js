@@ -28,7 +28,8 @@ registerQmlType({
   $onAnimationsChanged() {
     for (let i = 0; i < this.animations.length; i++) {
       const animation = this.animations[i];
-      if (!animation.runningChanged.isConnected(this, this.$animationFinished)) {
+      if (!animation.runningChanged.isConnected(this,
+          this.$animationFinished)) {
         animation.runningChanged.connect(this, this.$animationFinished);
       }
     }

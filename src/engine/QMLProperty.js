@@ -73,8 +73,11 @@ class QMLProperty {
           QMLProperty.evaluatingProperty,
           QMLProperty.prototype.update
         )) {
-      // console.log( this,QMLProperty.evaluatingPropertyStack.slice(0),this.val );
-      this.changed.connect(QMLProperty.evaluatingProperty, QMLProperty.prototype.update);
+      //console.log(this,QMLProperty.evaluatingPropertyStack.slice(0),this.val);
+      this.changed.connect(
+        QMLProperty.evaluatingProperty,
+        QMLProperty.prototype.update
+      );
     }
 
     if (this.val && this.val.$get) {

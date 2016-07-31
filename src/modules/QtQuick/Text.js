@@ -40,7 +40,8 @@ registerQmlType({
     this.textChanged.connect(this, this.$onTextChanged);
     this.lineHeightChanged.connect(this, this.$onLineHeightChanged);
     this.wrapModeChanged.connect(this, this.$onWrapModeChanged);
-    this.horizontalAlignmentChanged.connect(this, this.$onHorizontalAlignmentChanged);
+    this.horizontalAlignmentChanged.connect(this,
+                                            this.$onHorizontalAlignmentChanged);
     this.styleChanged.connect(this, this.$onStyleChanged);
     this.styleColorChanged.connect(this, this.$onStyleColorChanged);
 

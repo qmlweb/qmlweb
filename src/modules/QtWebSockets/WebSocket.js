@@ -1,4 +1,5 @@
-// WARNING: Can have wrong behavior if url is changed while the socket is in Connecting state.
+// WARNING: Can have wrong behavior if url is changed while the socket is in
+// Connecting state.
 // TODO: Recheck everything.
 
 registerQmlType({

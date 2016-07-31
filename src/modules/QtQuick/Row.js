@@ -31,6 +31,7 @@ registerQmlType({
       curPos += child.width + this.spacing;
     }
     this.implicitHeight = maxHeight;
-    this.implicitWidth = curPos - this.spacing; // We want no spacing at the right side
+    // We want no spacing at the right side
+    this.implicitWidth = curPos - this.spacing;
   }
 });

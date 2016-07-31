@@ -11,8 +11,10 @@ registerQmlType({
   },
   properties: {
     source: "url",
-    horizontalTileMode: { type: "enum", initialValue: "stretch" }, // BorderImage.Stretch
-    verticalTileMode: { type: "enum", initialValue: "stretch" }, // BorderImage.Stretch
+    // BorderImage.Stretch
+    horizontalTileMode: { type: "enum", initialValue: "stretch" },
+    // BorderImage.Stretch
+    verticalTileMode: { type: "enum", initialValue: "stretch" },
     status: { type: "enum", initialValue: 1 } // BorderImage.Null
   }
 }, class {

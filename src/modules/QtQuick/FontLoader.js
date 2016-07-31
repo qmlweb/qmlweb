@@ -60,7 +60,8 @@ registerQmlType({
           if (error !== null) {
             if (this.$lastName === fontName &&
                 error.notLoadedFontFamilies[0] === fontName) {
-              this.name = fontName; // Set the name for the case of font loading after the timeout.
+              // Set the name for the case of font loading after the timeout.
+              this.name = fontName;
               this.status = this.FontLoader.Error;
             }
           }
@@ -72,7 +73,8 @@ registerQmlType({
           }
         }
       }, this.$timeouts[this.$timeouts.length - 1]);
-      FontLoader.testDiv = null; // Else I get problems loading multiple fonts (FontLoader.js bug?)
+      // Else I get problems loading multiple fonts (FontLoader.js bug?)
+      FontLoader.testDiv = null;
       fontLoader.loadFonts();
     } else {
       console.warn(`FontLoader.js library is not loaded.

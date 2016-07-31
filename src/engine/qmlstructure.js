@@ -67,8 +67,8 @@ class QMLMetaPropertyGroup {
 
 /**
  * Create an object representing a QML element.
- * @param {String} type The type of the element
- * @param {String} onProp The name of the property specified with the "on" keyword
+ * @param {String} type Type of the element
+ * @param {String} onProp Name of the property specified with the "on" keyword
  */
 class QMLMetaElement {
   constructor(type, onProp) {
@@ -253,7 +253,8 @@ function loadParser() {
       const xhr = new XMLHttpRequest();
       xhr.open("GET", src, false);
       xhr.send(null);
-      if (xhr.status !== 200 && xhr.status !== 0) { // 0 if accessing with file://
+      if (xhr.status !== 200 && xhr.status !== 0) {
+        // xhr.status === 0 if accessing with file://
         throw new Error("Could not load QmlWeb parser!");
       }
       new Function(xhr.responseText)();

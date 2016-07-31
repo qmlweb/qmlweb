@@ -1,14 +1,18 @@
 const fs = require("fs");
 const path = require("path");
 
-require("jsdom").env("", (err, window) => {
-  /* eslint no-eval: 0 */
-
+function include(file, window) {
   const document = window.document;
   const exports = global;
-  eval(fs.readFileSync(path.join(__dirname, "../lib/qt.js"), "utf-8"));
-  eval(fs.readFileSync(path.join(__dirname, "../lib/qmlweb.parser.js"), "utf-8"));
+  // eslint-disable-next-line no-eval
+  eval(fs.readFileSync(path.join(__dirname, file), "utf-8"));
+}
 
+require("jsdom").env("", (err, window) => {
+  include("../lib/qt.js", window);
+  include("../lib/qmlweb.parser.js", window);
+
+  const document = window.document;
   const file = process.argv[process.argv.length - 1];
   const div = document.createElement("div");
   document.body.appendChild(div);
