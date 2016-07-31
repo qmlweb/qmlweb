@@ -72,8 +72,8 @@ registerQmlType({
     this.zChanged.connect(this, this.$onZChanged);
     this.xChanged.connect(this, this.$onXChanged);
     this.yChanged.connect(this, this.$onYChanged);
-    this.widthChanged.connect(this, this.$onWidthChanged);
-    this.heightChanged.connect(this, this.$onHeightChanged);
+    this.widthChanged.connect(this, this.$onWidthChanged_);
+    this.heightChanged.connect(this, this.$onHeightChanged_);
     this.focusChanged.connect(this, this.$onFocusChanged_);
 
     this.widthChanged.connect(this, this.$updateHGeometry);
@@ -346,10 +346,10 @@ registerQmlType({
     this.css.top = `${newVal}px`;
     this.$updateVGeometry();
   }
-  $onWidthChanged(newVal) {
+  $onWidthChanged_(newVal) {
     this.css.width = newVal ? `${newVal}px` : "auto";
   }
-  $onHeightChanged(newVal) {
+  $onHeightChanged_(newVal) {
     this.css.height = newVal ? `${newVal}px` : "auto";
   }
   $onFocusChanged(newVal) {
