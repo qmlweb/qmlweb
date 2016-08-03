@@ -23,7 +23,7 @@ const Qt = {
     }
 
     // e.g. // in protocol, or :/ in disk urls (D:/)
-    let nameIsUrl = name.indexOf("//") >= 0 || name.indexOf(":/") >= 0;
+    let nameIsUrl = name.indexOf("//") === 0 || name.indexOf(":/") >= 0;
 
     let resolvedName;
     if (name.length > 0 && name[0] === "@") {
@@ -42,7 +42,8 @@ const Qt = {
     // if failed to load, and provided name is not direct url,
     // try to load from dirs in importPathList()
     if (!src && !nameIsUrl) {
-      const moredirs = engine.importPathList();
+      const moredirs = engine.importSearchPaths(
+        QmlWeb.executionContext.importContextId);
       for (let i = 0; i < moredirs.length; i++) {
         file = moredirs[i] + resolvedName;
         src = QmlWeb.getUrlContents(file, true);
@@ -71,7 +72,8 @@ const Qt = {
     component.$imports = tree.$imports;
     component.$file = file; // just for debugging
 
-    engine.loadImports(tree.$imports, component.$basePath);
+    engine.loadImports(tree.$imports, component.$basePath,
+      component.importContextId);
 
     engine.components[name] = component;
     return component;
@@ -90,7 +92,7 @@ const Qt = {
     });
 
     const engine = QmlWeb.engine;
-    engine.loadImports(tree.$imports);
+    engine.loadImports(tree.$imports, undefined, component.importContextId);
 
     const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
     component.$basePath = engine.extractBasePath(resolvedFile);

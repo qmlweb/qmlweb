@@ -144,6 +144,11 @@ class QMLProperty {
           parent: this.obj,
           context: componentScope
         });
+        /* $basePath must be set here so that Components that are assigned to
+         * properties (e.g. Repeater delegates) can properly resolve child
+         * Components that live in the same directory in
+         * Component.createObject. */
+        this.val.$basePath = componentScope.$basePath;
       } else {
         this.val = QmlWeb.construct({
           object: val,

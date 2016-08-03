@@ -171,7 +171,7 @@ class QMLEngine {
       parent: parentComponent
     });
 
-    this.loadImports(tree.$imports);
+    this.loadImports(tree.$imports, undefined, component.importContextId);
     component.$basePath = this.$basePath;
     component.$imports = tree.$imports; // for later use
     component.$file = file; // just for debugging
@@ -199,6 +199,68 @@ class QMLEngine {
       this.userAddedImportPaths = [];
     }
     this.userAddedImportPaths.push(dirpath);
+  }
+
+  /* Add this dirpath to be checked for components. This is the result of
+   * something like:
+   *
+   * import "SomeDir/AnotherDirectory"
+   *
+   * The importContextId ensures it is only accessible from the file in which
+   * it was imported. */
+  addComponentImportPath(importContextId, dirpath, qualifier) {
+    if (!this.componentImportPaths) {
+      this.componentImportPaths = {};
+    }
+    if (!this.componentImportPaths[importContextId]) {
+      this.componentImportPaths[importContextId] = {};
+    }
+
+    const contextComponentImportPaths
+      = this.componentImportPaths[importContextId];
+
+    if (qualifier) {
+      if (!contextComponentImportPaths.qualified) {
+        contextComponentImportPaths.qualified = {};
+      }
+
+      contextComponentImportPaths.qualified[qualifier] = dirpath;
+    } else {
+      if (!contextComponentImportPaths.unqualified) {
+        contextComponentImportPaths.unqualified = [];
+      }
+
+      contextComponentImportPaths.unqualified.push(dirpath);
+    }
+  }
+
+  importSearchPaths(importContextId) {
+    if (!this.componentImportPaths) {
+      return [];
+    }
+    const contextComponentImportPaths
+      = this.componentImportPaths[importContextId];
+    if (!contextComponentImportPaths) {
+      return [];
+    }
+    return contextComponentImportPaths.unqualified || [];
+  }
+
+  qualifiedImportPath(importContextId, qualifier) {
+    if (!this.componentImportPaths) {
+      return "";
+    }
+    const contextComponentImportPaths
+      = this.componentImportPaths[importContextId];
+    if (!contextComponentImportPaths) {
+      return "";
+    }
+    const qualifiedContextComponentImportPaths
+      = contextComponentImportPaths.qualified;
+    if (!qualifiedContextComponentImportPaths) {
+      return "";
+    }
+    return qualifiedContextComponentImportPaths[qualifier] || "";
   }
 
   setImportPathList(arrayOfDirs) {
@@ -253,7 +315,9 @@ class QMLEngine {
     QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   }
 
-  loadImports(importsArray, currentFileDir = this.$basePath) {
+  loadImports(importsArray, currentFileDir = this.$basePath,
+    importContextId = -1)
+  {
     if (!this.qmldirsContents) {
       this.qmldirsContents = {}; // cache
 
@@ -332,14 +396,6 @@ class QMLEngine {
       }
 
       if (!content) {
-        console.log(
-          "qmlengine::loadImports: cannot load qmldir file for import name=",
-          name
-        );
-        // save blank info, meaning that we failed to load import
-        // this prevents repeated lookups
-        this.qmldirsContents[ name ] = {};
-
         // NEW
         // add that dir to import path list
         // that means, lookup qml files in that failed dir by trying to load
@@ -348,7 +404,15 @@ class QMLEngine {
         // but it is same as for ordirnal disk files.
         // So, we do it for experimental purposes.
         if (nameIsDir) {
-          this.addImportPath(`${name}/`);
+          if (entry[3]) {
+            /* Use entry[1] directly, as we don't want to include the
+             * basePath, otherwise it gets prepended twice in
+             * createComponent. */
+            this.addComponentImportPath(importContextId,
+              `${entry[1]}/`, entry[3]);
+          } else {
+            this.addComponentImportPath(importContextId, `${name}/`);
+          }
         }
 
         continue;
