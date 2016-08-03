@@ -37,4 +37,9 @@ describe("QtQuick.Timer", function() {
     };
     qml.start();
   });
+
+  it("Timer parent property", function() {
+    var qml = load("ParentProperty", this.div);
+    expect(qml.timer.value).toBe(42);
+  });
 });
