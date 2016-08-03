@@ -261,14 +261,23 @@ function construct(meta) {
             // We have that component in some qmldir, load it from qmldir's url
             component = Qt.createComponent( "@" + qdirInfo.url);
         }
-        else
-            component = Qt.createComponent(meta.object.$class + ".qml");
+        else {
+            var filePath;
+            if (classComponents.length === 2) {
+                filePath = QmlWeb.engine.qualifiedImportPath(
+                    meta.context.importContextId, classComponents[0]) +
+                        classComponents[1];
+            } else {
+                filePath = classComponents[0];
+            }
+            component = Qt.createComponent(filePath + ".qml");
+        }
 
         if (component) {
             var item = component.$createObject(meta.parent);
 
             if (typeof item.dom != 'undefined')
-                item.dom.className += " " + meta.object.$class + (meta.object.id ? " " + meta.object.id : "");
+                item.dom.className += " " + classComponents[classComponents.length-1] + (meta.object.id ? " " + meta.object.id : "");
             var dProp; // Handle default properties
         } else {
             throw new Error("No constructor found for " + meta.object.$class);

@@ -38,6 +38,13 @@ class QMLComponent {
         this.finalizeImports(this.$context);
       }
     }
+
+    /* If this Component does not have any imports, it is likely one that was
+     * created within another Component file. It should inherit the
+     * importContextId of the Component file it was created within. */
+    if (this.importContextId === undefined) {
+      this.importContextId = meta.context.importContextId;
+    }
   }
   finalizeImports($context) {
     for (let i = 0; i < this.$jsImports.length; ++i) {
