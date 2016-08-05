@@ -7,10 +7,8 @@ registerQmlType({
     Text: {
       NoWrap: 0, WordWrap: 1, WrapAnywhere: 2, Wrap: 3,
       WrapAtWordBoundaryOrAnywhere: 3,
-
-      AlignLeft: "left", AlignRight: "right", AlignHCenter: "center",
-      AlignJustify: "justify",
-
+      AlignLeft: 1, AlignRight: 2, AlignHCenter: 4, AlignJustify: 8,
+      AlignTop: 32, AlignBottom: 64, AlignVCenter: 128,
       Normal: 0, Outline: 1, Raised: 2, Sunken: 3
     }
   },
@@ -103,20 +101,26 @@ registerQmlType({
         style.whiteSpace = "pre-wrap";
         style.wordWrap = "break-word";
     }
-    // AlignJustify doesn't work with pre/pre-wrap, so we decide the lesser of
-    // the two evils to be ignoring "\n"s inside the text.
-    if (this.horizontalAlignment === "justify") {
-      style.whiteSpace = "normal";
-    }
-    this.$updateImplicit();
+    this.$updateJustifyWhiteSpace();
   }
   $onHorizontalAlignmentChanged(newVal) {
-    this.dom.style.textAlign = newVal;
-    // AlignJustify doesn't work with pre/pre-wrap, so we decide the lesser of
-    // the two evils to be ignoring "\n"s inside the text.
-    if (newVal === "justify") {
-      this.impl.style.whiteSpace = "normal";
+    let textAlign = null;
+    switch (newVal) {
+      case this.Text.AlignLeft:
+        textAlign = "left";
+        break;
+      case this.Text.AlignRight:
+        textAlign = "right";
+        break;
+      case this.Text.AlignHCenter:
+        textAlign = "center";
+        break;
+      case this.Text.AlignJustify:
+        textAlign = "justify";
+        break;
     }
+    this.dom.style.textAlign = textAlign;
+    this.$updateJustifyWhiteSpace();
   }
   $onFontChanged() {
     this.$updateImplicit();
@@ -165,5 +169,14 @@ registerQmlType({
         style.textShadow = `-1px -1px 0 ${styleColor}`;
         break;
     }
+  }
+  $updateJustifyWhiteSpace() {
+    const style = this.impl.style;
+    // AlignJustify doesn't work with pre/pre-wrap, so we decide the lesser of
+    // the two evils to be ignoring "\n"s inside the text.
+    if (this.horizontalAlignment === this.Text.AlignJustify) {
+      style.whiteSpace = "normal";
+    }
+    this.$updateImplicit();
   }
 });
