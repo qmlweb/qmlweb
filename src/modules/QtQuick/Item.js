@@ -186,11 +186,10 @@ registerQmlType({
     this.$updateVGeometry(newParent, oldParent, propName);
   }
   $onDataChanged(newData) {
+    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
     for (const i in newData) {
       const child = newData[i];
-      if (child.hasOwnProperty("parent")) {
-        // Seems to be an Item.
-        // TODO: Use real inheritance and ask using instanceof.
+      if (child instanceof QMLItem) {
         child.parent = this; // This will also add it to children.
       } else {
         this.resources.push(child);
