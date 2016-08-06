@@ -58,7 +58,7 @@ registerQmlType({
     });
     this.dom.addEventListener("mousemove", e => {
       if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
-      const mouse = this.eventToMouse(e);
+      const mouse = this.$eventToMouse(e);
       this.positionChanged(mouse);
       this.mouseX = mouse.x;
       this.mouseY = mouse.y;
@@ -68,8 +68,8 @@ registerQmlType({
     this.dom.style.cursor = this.$cursorShapeToCSS();
   }
   $handleClick(e) {
-    if (this.enabled && this.acceptedButtons & this.button) {
-      const mouse = this.$eventToMouse(e);
+    const mouse = this.$eventToMouse(e);
+    if (this.enabled && this.acceptedButtons & mouse.button) {
       this.clicked(mouse);
     }
     // This decides whether to show the browser's context menu on right click or
