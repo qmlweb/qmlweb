@@ -83,9 +83,14 @@ registerQmlType({
     this.item.parent = undefined;
     this.item = undefined;
   }
-  static callOnCompleted(child) {
+  $callOnCompleted(child) {
     child.Component.completed();
-    child.children.forEach(this.callOnCompleted);
+    const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+    for (let i = 0; i < child.$tidyupList.length; i++) {
+      if (child.$tidyupList[i] instanceof QMLBaseObject) {
+        this.$callOnCompleted(child.$tidyupList[i]);
+      }
+    }
   }
   $createComponentObject(qmlComponent, parent) {
     const newComponent = qmlComponent.createObject(parent);
@@ -95,7 +100,7 @@ registerQmlType({
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
       QmlWeb.engine.$initializePropertyBindings();
-      this.constructor.callOnCompleted(newComponent); // call static
+      this.$callOnCompleted(newComponent);
     }
     return newComponent;
   }
