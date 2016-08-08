@@ -36,6 +36,11 @@ registerQmlType({
 
     this.dom.addEventListener("click", e => this.$handleClick(e));
     this.dom.addEventListener("contextmenu", e => this.$handleClick(e));
+    const handleMouseUp = () => {
+      this.pressed = false;
+      this.pressedButtons = 0;
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
     this.dom.addEventListener("mousedown", e => {
       if (!this.enabled) return;
       const mouse = this.$eventToMouse(e);
@@ -43,10 +48,7 @@ registerQmlType({
       this.mouseY = mouse.y;
       this.pressed = true;
       this.pressedButtons = mouse.button;
-    });
-    this.dom.addEventListener("mouseup", () => {
-      this.pressed = false;
-      this.pressedButtons = 0;
+      document.addEventListener("mouseup", handleMouseUp);
     });
     this.dom.addEventListener("mouseover", () => {
       this.containsMouse = true;
