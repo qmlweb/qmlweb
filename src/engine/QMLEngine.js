@@ -216,21 +216,18 @@ class QMLEngine {
       this.componentImportPaths[importContextId] = {};
     }
 
-    const contextComponentImportPaths
-      = this.componentImportPaths[importContextId];
+    const paths = this.componentImportPaths[importContextId];
 
     if (qualifier) {
-      if (!contextComponentImportPaths.qualified) {
-        contextComponentImportPaths.qualified = {};
+      if (!paths.qualified) {
+        paths.qualified = {};
       }
-
-      contextComponentImportPaths.qualified[qualifier] = dirpath;
+      paths.qualified[qualifier] = dirpath;
     } else {
-      if (!contextComponentImportPaths.unqualified) {
-        contextComponentImportPaths.unqualified = [];
+      if (!paths.unqualified) {
+        paths.unqualified = [];
       }
-
-      contextComponentImportPaths.unqualified.push(dirpath);
+      paths.unqualified.push(dirpath);
     }
   }
 
@@ -238,29 +235,22 @@ class QMLEngine {
     if (!this.componentImportPaths) {
       return [];
     }
-    const contextComponentImportPaths
-      = this.componentImportPaths[importContextId];
-    if (!contextComponentImportPaths) {
+    const paths = this.componentImportPaths[importContextId];
+    if (!paths) {
       return [];
     }
-    return contextComponentImportPaths.unqualified || [];
+    return paths.unqualified || [];
   }
 
   qualifiedImportPath(importContextId, qualifier) {
     if (!this.componentImportPaths) {
       return "";
     }
-    const contextComponentImportPaths
-      = this.componentImportPaths[importContextId];
-    if (!contextComponentImportPaths) {
+    const paths = this.componentImportPaths[importContextId];
+    if (!paths || !paths.qualified) {
       return "";
     }
-    const qualifiedContextComponentImportPaths
-      = contextComponentImportPaths.qualified;
-    if (!qualifiedContextComponentImportPaths) {
-      return "";
-    }
-    return qualifiedContextComponentImportPaths[qualifier] || "";
+    return paths.qualified[qualifier] || "";
   }
 
   setImportPathList(arrayOfDirs) {
