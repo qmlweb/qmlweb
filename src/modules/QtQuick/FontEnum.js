@@ -1,14 +1,18 @@
 global.Font = {
   // Capitalization
-  MixedCase: "none",
-  AllUppercase: "uppercase",
-  AllLowercase: "lowercase",
-  SmallCaps: "smallcaps",
-  Capitalize: "capitalize",
+  MixedCase: 0,
+  AllUppercase: 1,
+  AllLowercase: 2,
+  SmallCaps: 3,
+  Capitalize: 4,
   // Weight
-  Light: "lighter",
-  Normal: "normal",
-  DemiBold: "600",
-  Bold: "bold",
-  Black: "bolder"
+  Thin: 0,
+  ExtraLight: 12,
+  Light: 25,
+  Normal: 50,
+  Medium: 57,
+  DemiBold: 63,
+  Bold: 75,
+  ExtraBold: 81,
+  Black: 87
 };
