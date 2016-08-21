@@ -36,7 +36,6 @@ const js = [
   "*.js",
   "src/**/*.js",
   "!src/engine/qml.js",
-  "!src/modules/QtQuick/Font.js",
   "tests/**/*.js"
 ];
 
