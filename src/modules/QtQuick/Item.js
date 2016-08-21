@@ -63,6 +63,8 @@ registerQmlType({
 
     this.css.boxSizing = "border-box";
 
+    const createProperty = QmlWeb.createProperty;
+
     if (this.$isComponentRoot) {
       createProperty("var", this, "activeFocus");
     }

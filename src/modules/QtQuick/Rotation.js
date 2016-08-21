@@ -10,6 +10,8 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
+    const createProperty = QmlWeb.createProperty;
+
     this.axis = new QmlWeb.QObject(this);
     createProperty("real", this.axis, "x");
     createProperty("real", this.axis, "y");

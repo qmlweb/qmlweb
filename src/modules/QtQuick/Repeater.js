@@ -133,6 +133,7 @@ registerQmlType({
     if (endIndex <= 0) return;
 
     const QMLOperationState = QmlWeb.QMLOperationState;
+    const createProperty = QmlWeb.createProperty;
     const model = this.$getModel();
     let index;
     for (index = startIndex; index < endIndex; index++) {

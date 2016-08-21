@@ -11,6 +11,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
+    const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this);
     createProperty("color", this.border, "color", { initialValue: "black" });
     createProperty("int", this.border, "width", { initialValue: 1 });

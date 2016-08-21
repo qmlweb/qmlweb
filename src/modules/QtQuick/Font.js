@@ -9,6 +9,7 @@ registerQmlType({
     this.Font = global.Font; // TODO: make a sane enum
 
     const Font = this.Font;
+    const createProperty = QmlWeb.createProperty;
 
     createProperty("bool", this, "bold");
     createProperty("enum", this, "capitalization", { initialValue:

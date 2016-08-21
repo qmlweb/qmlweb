@@ -7,6 +7,7 @@ registerQmlType({
   constructor(meta) {
     callSuper(this, meta);
 
+    const createProperty = QmlWeb.createProperty;
     for (const i in meta.object) {
       if (i[0] !== "$") {
         createProperty("variant", this, i);
