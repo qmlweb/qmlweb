@@ -205,9 +205,12 @@ registerQmlType({
     for (let i = 0; i < this.states.length; i++) {
       if (this.states[i].name === newVal) {
         newState = this.states[i];
-      } else if (this.states[i].name === oldVal) {
-        // oldState = this.states[i];
       }
+      /*
+      else if (this.states[i].name === oldVal) {
+        oldState = this.states[i];
+      }
+      */
     }
 
     const actions = this.$revertActions.slice();
@@ -222,58 +225,7 @@ registerQmlType({
 
       // Get all actions we need to do and create actions to revert them
       for (let i = 0; i < changes.length; i++) {
-        const change = changes[i];
-
-        for (let j = 0; j < change.$actions.length; j++) {
-          const item = change.$actions[j];
-
-          const action = {
-            target: change.target,
-            property: item.property,
-            origValue: change.target.$properties[item.property].binding ||
-                       change.target.$properties[item.property].val,
-            value: item.value,
-            from: change.target[item.property],
-            to: undefined,
-            explicit: change.explicit
-          };
-          let found = false;
-          for (const k in actions) {
-            if (actions[k].target === action.target &&
-                actions[k].property === action.property) {
-              found = true;
-              actions[k] = action;
-              break;
-            }
-          }
-          if (!found) {
-            actions.push(action);
-          }
-
-          // Look for existing revert action, else create it
-          found = false;
-          for (let k = 0; k < this.$revertActions.length; k++) {
-            if (this.$revertActions[k].target === change.target &&
-                this.$revertActions[k].property === item.property) {
-              if (!change.restoreEntryValues) {
-                // We don't want to revert, so remove it
-                this.$revertActions.splice(k, 1);
-              }
-              found = true;
-              break;
-            }
-          }
-          if (!found && change.restoreEntryValues) {
-            this.$revertActions.push({
-              target: change.target,
-              property: item.property,
-              value: change.target.$properties[item.property].binding ||
-                     change.target.$properties[item.property].val,
-              from: undefined,
-              to: change.target[item.property]
-            });
-          }
-        }
+        this.$applyChange(actions, changes[i]);
       }
     }
 
@@ -329,6 +281,52 @@ registerQmlType({
     }
     if (transition) {
       transition.$start(actions);
+    }
+  }
+  $applyChange(actions, change) {
+    const arrayFindIndex = QmlWeb.helpers.arrayFindIndex;
+    for (let j = 0; j < change.$actions.length; j++) {
+      const item = change.$actions[j];
+
+      const action = {
+        target: change.target,
+        property: item.property,
+        origValue: change.target.$properties[item.property].binding ||
+                    change.target.$properties[item.property].val,
+        value: item.value,
+        from: change.target[item.property],
+        to: undefined,
+        explicit: change.explicit
+      };
+
+      const actionIndex = arrayFindIndex(actions, element =>
+        element.target === action.target &&
+        element.property === action.property
+      );
+      if (actionIndex !== -1) {
+        actions[actionIndex] = action;
+      } else {
+        actions.push(action);
+      }
+
+      // Look for existing revert action, else create it
+      const revertIndex = arrayFindIndex(this.$revertActions, element =>
+        element.target === change.target &&
+        element.property === item.property
+      );
+      if (revertIndex !== -1 && !change.restoreEntryValues) {
+        // We don't want to revert, so remove it
+        this.$revertActions.splice(revertIndex, 1);
+      } else if (revertIndex === -1 && change.restoreEntryValues) {
+        this.$revertActions.push({
+          target: change.target,
+          property: item.property,
+          value: change.target.$properties[item.property].binding ||
+                  change.target.$properties[item.property].val,
+          from: undefined,
+          to: change.target[item.property]
+        });
+      }
     }
   }
   $onVisibleChanged_(newVal) {
