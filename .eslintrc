@@ -8,20 +8,27 @@ globals:
   QmlWeb: true
   global: false
 rules:
+  accessor-pairs: 2
   array-bracket-spacing: 2
   array-callback-return: 2
   arrow-body-style: 2
   babel/arrow-parens: [2, "as-needed"]
+  babel/func-params-comma-dangle: 2
   brace-style: 0
   camelcase: 0
   comma-dangle: [2, "only-multiline"]
   comma-spacing: 2
   comma-style: [2, "last"]
+  complexity: ["error", 40]
   consistent-return: 2
   curly: [2, "multi-line"]
+  default-case: 0
+  dot-location: [2, "property"]
   dot-notation: 2
   eol-last: 2
   eqeqeq: 2
+  func-call-spacing: 2
+  guard-for-in: 0
   indent: [2, 2, { "SwitchCase": 1 }]
   key-spacing: 2
   keyword-spacing: 2
@@ -37,18 +44,30 @@ rules:
   no-confusing-arrow: [2, {"allowParens": true}]
   no-console: 0
   no-constant-condition: 2
+  no-div-regex: 2
   no-dupe-class-members: 2
   no-duplicate-imports: 2
+  no-else-return: 2
+  no-empty-function: 0
+  no-empty-pattern: 2
+  no-eq-null: 2
   no-eval: 2
   no-extend-native: 2
   no-extra-bind: 2
   no-extra-parens: 2
+  no-fallthrough: 2
+  no-floating-decimal: 2
+  no-global-assign: 2
+  no-implicit-coercion: 0
+  no-implicit-globals: 2
   no-implied-eval: 2
+  no-invalid-this: 2
   no-iterator: 2
   no-labels: 2
   no-lone-blocks: 2
   no-lonely-if: 2
   no-loop-func: 2
+  no-magic-numbers: 0
   no-mixed-spaces-and-tabs: 2
   no-multiple-empty-lines: 2
   no-multi-spaces: 2
@@ -60,25 +79,38 @@ rules:
   no-new-object: 2
   no-new-wrappers: 2
   no-octal-escape: 2
+  no-octal: 2
   no-param-reassign: 2
   no-proto: 0
+  no-prototype-builtins: 0
   no-return-assign: 2
   no-script-url: 2
+  no-self-assign: 2
+  no-self-compare: 2
   no-sequences: 2
   no-shadow: 2
   no-shadow-restricted-names: 2
   no-spaced-func: 2
+  no-tabs: 2
+  no-template-curly-in-string: 2
+  no-throw-literal: 2
   no-trailing-spaces: 2
   no-undef: 2
   no-undef-init: 2
   no-underscore-dangle: 0
+  no-unmodified-loop-condition: 2
   no-unneeded-ternary: 2
+  no-unsafe-negation: 2
   no-unused-expressions: 2
   no-unused-vars: 2
   no-use-before-define: 2
+  no-useless-call: 2
+  no-useless-concat: 2
   no-useless-constructor: 2
   no-useless-escape: 2
   no-var: 2
+  no-void: 2
+  no-warning-comments: 0
   no-with: 2
   object-curly-spacing: [2, "always"]
   object-shorthand: 2
@@ -94,6 +126,7 @@ rules:
   radix: 2
   semi: 2
   semi-spacing: 2
+  sort-keys: 0
   space-before-blocks: 2
   space-before-function-paren: [2, "never"]
   space-infix-ops: 2

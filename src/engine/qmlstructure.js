@@ -213,9 +213,8 @@ convertToEngine.walk = function(tree) {
   if (!walker) {
     console.log(`No walker for ${type}`);
     return undefined;
-  } else {
-    return walker.apply(type, tree.slice(1));
   }
+  return walker.apply(type, tree.slice(1));
 };
 
 // Try to bind out tree and return static variable instead of binding
@@ -228,9 +227,8 @@ convertToEngine.bindout = function(statement, binding) {
   const walker = convertToEngine.walkers[type];
   if (walker) {
     return walker.apply(type, tree.slice(1));
-  } else {
-    return new QmlWeb.QMLBinding(binding, tree);
   }
+  return new QmlWeb.QMLBinding(binding, tree);
 };
 
 // Help logger

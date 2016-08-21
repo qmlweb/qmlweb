@@ -82,6 +82,7 @@ registerQmlType({
   }
 });
 
+// eslint-disable-next-line complexity
 QmlWeb.$ease = (type, period, amplitude, overshoot, t) => {
   switch (type) {
     // Linear
