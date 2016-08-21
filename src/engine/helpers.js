@@ -11,6 +11,19 @@ class QmlWebHelpers {
     }
     return Array.prototype.findIndex.call(array, callback);
   }
+  static mergeObjects(...args) {
+    const merged = {};
+    for (const i in args) {
+      const arg = args[i];
+      if (!arg) {
+        continue;
+      }
+      for (const key in arg) {
+        merged[key] = arg[key];
+      }
+    }
+    return merged;
+  }
 }
 
 QmlWeb.helpers = QmlWebHelpers;

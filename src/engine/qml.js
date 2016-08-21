@@ -137,23 +137,12 @@ function collectConstructorsForModule(moduleName, version) {
   return constructors;
 };
 
-function mergeObjects(obj1, obj2) {
-  var mergedObject = {};
-
-  if (typeof obj1 != 'undefined' && obj1 != null) {
-    for (var key in obj1) { mergedObject[key] = obj1[key]; }
-  }
-  if (typeof obj2 != 'undefined' && obj2 != null) {
-    for (var key in obj2) { mergedObject[key] = obj2[key]; }
-  }
-  return mergedObject;
-}
-
 var importContextIds = 0;
 const perImportContextConstructors = {};
 
 function loadImports(self, imports) {
-  constructors = mergeObjects(modules.Main, null);
+  const mergeObjects = QmlWeb.helpers.mergeObjects;
+  constructors = mergeObjects(modules.Main);
   if (imports.filter(row => row[1] === 'QtQml').length === 0 &&
       imports.filter(row => row[1] === 'QtQuick').length === 1) {
     imports.push(['qmlimport', 'QtQml', 2, '', true]);
@@ -286,7 +275,7 @@ function construct(meta) {
 
     // id
     if (meta.object.id)
-        setupGetterSetter(meta.context, meta.object.id, function() { return item; }, function() {});
+      QmlWeb.setupGetterSetter(meta.context, meta.object.id, function() { return item; }, function() {});
 
     // keep path in item for probale use it later in Qt.resolvedUrl
     item.$context["$basePath"] = QmlWeb.engine.$basePath; //gut
@@ -323,38 +312,9 @@ function createProperty(type, obj, propName, options = {}) {
         obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
       }
     }
-    setupGetterSetter(obj, propName, getter, setter);
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
     if (obj.$isComponentRoot)
-        setupGetterSetter(obj.$context, propName, getter, setter);
-}
-
-/**
- * Set up simple getter function for property
- */
-
-function setupGetter(obj, propName, func) {
-  Object.defineProperty(obj, propName, {
-    get: func,
-    configurable: true,
-    enumerable: true
-  });
-}
-
-function setupSetter(obj, propName, func) {
-  Object.defineProperty(obj, propName, {
-    set: func,
-    configurable: true,
-    enumerable: false
-  });
-}
-
-function setupGetterSetter(obj, propName, getter, setter) {
-  Object.defineProperty(obj, propName, {
-    get: getter,
-    set: setter,
-    configurable: true,
-    enumerable: false
-  });
+      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
 }
 
 function connectSignal(item, signalName, value, objectScope, componentScope) {
@@ -521,8 +481,5 @@ QmlWeb.loadImports = loadImports;
 QmlWeb.callSuper = callSuper;
 QmlWeb.construct = construct;
 QmlWeb.createProperty = createProperty;
-QmlWeb.setupGetter = setupGetter;
-QmlWeb.setupSetter = setupSetter;
-QmlWeb.setupGetterSetter = setupGetterSetter;
 QmlWeb.connectSignal = connectSignal;
 QmlWeb.applyProperties = applyProperties;
