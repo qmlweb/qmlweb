@@ -13,12 +13,11 @@ class Signal {
   execute(...args) {
     QmlWeb.QMLProperty.pushEvalStack();
     for (const i in this.connectedSlots) {
-      try {
-        this.connectedSlots[i].slot.apply(this.connectedSlots[i].thisObj, args);
-      } catch (err) {
-        console.error("Signal slot error:", err.message, err,
-          Function.prototype.toString.call(this.connectedSlots[i].slot)
-        );
+      const desc = this.connectedSlots[i];
+      if (desc.type & Signal.QueuedConnection) {
+        Signal.$addQueued(desc, args);
+      } else {
+        Signal.$execute(desc, args);
       }
     }
     QmlWeb.QMLProperty.popEvalStack();
@@ -34,19 +33,20 @@ class Signal {
       }
     }
     if (args.length === 1) {
-      this.connectedSlots.push({ thisObj: global, slot: args[0] });
+      this.connectedSlots.push({ thisObj: global, slot: args[0], type });
     } else if (typeof args[1] === "string" || args[1] instanceof String) {
       if (args[0].$tidyupList && args[0] !== this.obj) {
         args[0].$tidyupList.push(this.signal);
       }
-      this.connectedSlots.push({ thisObj: args[0], slot: args[0][args[1]] });
+      const slot = args[0][args[1]];
+      this.connectedSlots.push({ thisObj: args[0], slot, type });
     } else {
       if (args[0].$tidyupList &&
         (!this.obj || args[0] !== this.obj && args[0] !== this.obj.$parent)
       ) {
         args[0].$tidyupList.push(this.signal);
       }
-      this.connectedSlots.push({ thisObj: args[0], slot: args[1] });
+      this.connectedSlots.push({ thisObj: args[0], slot: args[1], type });
     }
 
     // Notify object of connect
@@ -102,8 +102,45 @@ class Signal {
   static signal(...args) {
     return (new Signal(...args)).signal;
   }
+
+  static $execute(desc, args) {
+    try {
+      desc.slot.apply(desc.thisObj, args);
+    } catch (err) {
+      console.error("Signal slot error:", err.message, err,
+        Function.prototype.toString.call(desc.slot)
+      );
+    }
+  }
+
+  static $addQueued(desc, args) {
+    if (Signal.$queued.length === 0) {
+      if (global.setImmediate) {
+        global.setImmediate(Signal.$executeQueued);
+      } else {
+        global.setTimeout(Signal.$executeQueued, 0);
+      }
+    }
+    Signal.$queued.push([desc, args]);
+  }
+  static $executeQueued() {
+    // New queued signals should be executed on next tick of the event loop
+    const queued = Signal.$queued;
+    Signal.$queued = [];
+
+    QmlWeb.QMLProperty.pushEvalStack();
+    for (const i in queued) {
+      Signal.$execute(...queued[i]);
+    }
+    QmlWeb.QMLProperty.popEvalStack();
+  }
 }
+
+Signal.$queued = [];
+
 Signal.AutoConnection = 0;
+Signal.DirectConnection = 1;
+Signal.QueuedConnection = 2;
 Signal.UniqueConnection = 128;
 
 QmlWeb.Signal = Signal;
