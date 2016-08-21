@@ -142,7 +142,7 @@ const perImportContextConstructors = {};
 
 function loadImports(self, imports) {
   const mergeObjects = QmlWeb.helpers.mergeObjects;
-  constructors = mergeObjects(modules.Main);
+  let constructors = mergeObjects(modules.Main);
   if (imports.filter(row => row[1] === 'QtQml').length === 0 &&
       imports.filter(row => row[1] === 'QtQuick').length === 1) {
     imports.push(['qmlimport', 'QtQml', 2, '', true]);
