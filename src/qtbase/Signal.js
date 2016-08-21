@@ -24,6 +24,15 @@ class Signal {
     QmlWeb.QMLProperty.popEvalStack();
   }
   connect(...args) {
+    let type = Signal.AutoConnection;
+    if (typeof args[args.length - 1] === "number") {
+      type = args.pop();
+    }
+    if (type & Signal.UniqueConnection) {
+      if (this.isConnected(...args)) {
+        return;
+      }
+    }
     if (args.length === 1) {
       this.connectedSlots.push({ thisObj: global, slot: args[0] });
     } else if (typeof args[1] === "string" || args[1] instanceof String) {
@@ -94,5 +103,7 @@ class Signal {
     return (new Signal(...args)).signal;
   }
 }
+Signal.AutoConnection = 0;
+Signal.UniqueConnection = 128;
 
 QmlWeb.Signal = Signal;
