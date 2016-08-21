@@ -100,7 +100,7 @@ Refs: https://github.com/smnh/FontLoader.`);
       this.$inTouchName = false;
     }
     if (i < this.$timeouts.length) {
-      setTimeout(function() {
+      setTimeout(() => {
         this.$cycleTouchName(fontName, i + 1);
       }, this.$timeouts[i] - (i > 0 ? this.$timeouts[i - 1] : 0));
     }

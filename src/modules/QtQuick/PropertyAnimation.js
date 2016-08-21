@@ -292,7 +292,7 @@ QmlWeb.$ease = (type, period, amplitude, overshoot, t) => {
 
     // Default
     default:
-      console.error("Unsupported animation type: ", this.type);
+      console.error("Unsupported animation type: ", type);
       return t;
   }
 };
