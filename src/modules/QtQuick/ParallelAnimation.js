@@ -26,12 +26,10 @@ registerQmlType({
     QmlWeb.engine.$registerStop(() => this.stop());
   }
   $onAnimationsChanged() {
+    const flags = QmlWeb.Signal.UniqueConnection;
     for (let i = 0; i < this.animations.length; i++) {
       const animation = this.animations[i];
-      if (!animation.runningChanged.isConnected(this,
-          this.$animationFinished)) {
-        animation.runningChanged.connect(this, this.$animationFinished);
-      }
+      animation.runningChanged.connect(this, this.$animationFinished, flags);
     }
   }
   $animationFinished(newVal) {

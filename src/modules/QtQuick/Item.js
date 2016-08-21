@@ -449,6 +449,7 @@ registerQmlType({
     }
     this.$updatingHGeometry = true;
 
+    const flags = QmlWeb.Signal.UniqueConnection;
     const lM = anchors.leftMargin || anchors.margins;
     const rM = anchors.rightMargin || anchors.margins;
 
@@ -468,15 +469,9 @@ registerQmlType({
     let u;
     if ((t = anchors.fill) !== undefined) {
       const props = t.$properties;
-      if (!props.left.changed.isConnected(this, this.$updateHGeometry)) {
-        props.left.changed.connect(this, this.$updateHGeometry);
-      }
-      if (!props.right.changed.isConnected(this, this.$updateHGeometry)) {
-        props.right.changed.connect(this, this.$updateHGeometry);
-      }
-      if (!props.width.changed.isConnected(this, this.$updateHGeometry)) {
-        props.width.changed.connect(this, this.$updateHGeometry);
-      }
+      props.left.changed.connect(this, this.$updateHGeometry, flags);
+      props.right.changed.connect(this, this.$updateHGeometry, flags);
+      props.width.changed.connect(this, this.$updateHGeometry, flags);
 
       this.$isUsingImplicitWidth = false;
       width = t.width - lM - rM;
@@ -486,9 +481,7 @@ registerQmlType({
       hC = (left + right) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
       const horizontalCenter = t.$properties.horizontalCenter;
-      if (!horizontalCenter.changed.isConnected(this, this.$updateHGeometry)) {
-        horizontalCenter.changed.connect(this, this.$updateHGeometry);
-      }
+      horizontalCenter.changed.connect(this, this.$updateHGeometry, flags);
 
       w = width || this.width;
       hC = t.horizontalCenter;
@@ -535,9 +528,7 @@ registerQmlType({
     } else {
       if (this.parent) {
         const leftProp = this.parent.$properties.left;
-        if (!leftProp.changed.isConnected(this, this.$updateHGeometry)) {
-          leftProp.changed.connect(this, this.$updateHGeometry);
-        }
+        leftProp.changed.connect(this, this.$updateHGeometry, flags);
       }
 
       w = width || this.width;
@@ -573,6 +564,7 @@ registerQmlType({
     }
     this.$updatingVGeometry = true;
 
+    const flags = QmlWeb.Signal.UniqueConnection;
     const tM = anchors.topMargin || anchors.margins;
     const bM = anchors.bottomMargin || anchors.margins;
 
@@ -592,15 +584,9 @@ registerQmlType({
     let u;
     if ((t = anchors.fill) !== undefined) {
       const props = t.$properties;
-      if (!props.top.changed.isConnected(this, this.$updateVGeometry)) {
-        props.top.changed.connect(this, this.$updateVGeometry);
-      }
-      if (!props.bottom.changed.isConnected(this, this.$updateVGeometry)) {
-        props.bottom.changed.connect(this, this.$updateVGeometry);
-      }
-      if (!props.height.changed.isConnected(this, this.$updateVGeometry)) {
-        props.height.changed.connect(this, this.$updateVGeometry);
-      }
+      props.top.changed.connect(this, this.$updateVGeometry, flags);
+      props.bottom.changed.connect(this, this.$updateVGeometry, flags);
+      props.height.changed.connect(this, this.$updateVGeometry, flags);
 
       this.$isUsingImplicitHeight = false;
       height = t.height - tM - bM;
@@ -610,9 +596,7 @@ registerQmlType({
       vC = (top + bottom) / 2;
     } else if ((t = anchors.centerIn) !== undefined) {
       const verticalCenter = t.$properties.verticalCenter;
-      if (!verticalCenter.changed.isConnected(this, this.$updateVGeometry)) {
-        verticalCenter.changed.connect(this, this.$updateVGeometry);
-      }
+      verticalCenter.changed.connect(this, this.$updateVGeometry, flags);
 
       w = height || this.height;
       vC = t.verticalCenter;
@@ -659,9 +643,7 @@ registerQmlType({
     } else {
       if (this.parent) {
         const topProp = this.parent.$properties.top;
-        if (!topProp.changed.isConnected(this, this.$updateVGeometry)) {
-          topProp.changed.connect(this, this.$updateVGeometry);
-        }
+        topProp.changed.connect(this, this.$updateVGeometry, flags);
       }
 
       w = height || this.height;

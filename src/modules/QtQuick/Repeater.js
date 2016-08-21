@@ -54,21 +54,12 @@ registerQmlType({
     }
     const model = this.$getModel();
     if (model instanceof QmlWeb.JSItemModel) {
-      if (!model.dataChanged.isConnected(this, this.$_onModelDataChanged)) {
-        model.dataChanged.connect(this, this.$_onModelDataChanged);
-      }
-      if (!model.rowsInserted.isConnected(this, this.$insertChildren)) {
-        model.rowsInserted.connect(this, this.$insertChildren);
-      }
-      if (!model.rowsMoved.isConnected(this, this.$_onRowsMoved)) {
-        model.rowsMoved.connect(this, this.$_onRowsMoved);
-      }
-      if (!model.rowsRemoved.isConnected(this, this.$_onRowsRemoved)) {
-        model.rowsRemoved.connect(this, this.$_onRowsRemoved);
-      }
-      if (!model.modelReset.isConnected(this, this.$_onModelReset)) {
-        model.modelReset.connect(this, this.$_onModelReset);
-      }
+      const flags = QmlWeb.Signal.UniqueConnection;
+      model.dataChanged.connect(this, this.$_onModelDataChanged, flags);
+      model.rowsInserted.connect(this, this.$insertChildren, flags);
+      model.rowsMoved.connect(this, this.$_onRowsMoved, flags);
+      model.rowsRemoved.connect(this, this.$_onRowsRemoved, flags);
+      model.modelReset.connect(this, this.$_onModelReset, flags);
 
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.rowCount());
