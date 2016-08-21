@@ -83,37 +83,36 @@ registerQmlType({
     if (this.width <= 0 || typeof this.width === "undefined" ||
         this.height <= 0 || typeof this.height === "undefined") {
       style.borderWidth = "0px";
-    } else {
-      // check if border is not greater than Rectangle size
-      // react by change of width or height of div (in css)
-      if (this.height < 2 * this.border.width) {
-        topBottom = `${this.height / 2}px`;
-        style.height = "0px";
-      } else if (this.height < 3 * this.border.width) { // TODO: what??
-        if (this.height > 2) {
-          const height = this.height % 2
-                            ? -1
-                            : -2 + 2 * this.height - 2 * this.border.width;
-          style.height = `${height}px`;
-        }
-      }
-
-      if (this.width < 2 * this.border.width) {
-        leftRight = `${this.width / 2}px`;
-        style.width = "0px";
-      } else if (this.width < 3 * this.border.width) { // TODO: what??
-        if (this.width > 2) {
-          const width = this.width % 2
-                          ? -1
-                          : -2 + 2 * this.width - 2 * this.border.width;
-          style.width = `${width}px`;
-        }
-      }
-
-      style.borderTopWidth = topBottom;
-      style.borderBottomWidth = topBottom;
-      style.borderLeftWidth = leftRight;
-      style.borderRightWidth = leftRight;
+      return;
     }
+
+    // check if border is not greater than Rectangle size
+    // react by change of width or height of div (in css)
+    if (this.height < 2 * this.border.width) {
+      topBottom = `${this.height / 2}px`;
+      style.height = "0px";
+    } else if (this.height > 2 && this.height < 3 * this.border.width) {
+      // TODO: what??
+      const height = this.height % 2
+                        ? -1
+                        : -2 + 2 * this.height - 2 * this.border.width;
+      style.height = `${height}px`;
+    }
+
+    if (this.width < 2 * this.border.width) {
+      leftRight = `${this.width / 2}px`;
+      style.width = "0px";
+    } else if (this.width > 2 && this.width < 3 * this.border.width) {
+      // TODO: what??
+      const width = this.width % 2
+                      ? -1
+                      : -2 + 2 * this.width - 2 * this.border.width;
+      style.width = `${width}px`;
+    }
+
+    style.borderTopWidth = topBottom;
+    style.borderBottomWidth = topBottom;
+    style.borderLeftWidth = leftRight;
+    style.borderRightWidth = leftRight;
   }
 });
