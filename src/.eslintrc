@@ -6,5 +6,3 @@ globals:
   callSuper: true
   constructors: true
   Easing: true
-rules:
-  complexity: ["error", 23]

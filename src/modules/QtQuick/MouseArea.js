@@ -94,6 +94,8 @@ registerQmlType({
       y: e.offsetY || e.layerY
     };
   }
+
+  // eslint-disable-next-line complexity
   $cursorShapeToCSS() {
     const Qt = QmlWeb.Qt;
     switch (this.cursorShape) {
