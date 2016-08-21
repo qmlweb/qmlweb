@@ -330,92 +330,94 @@ class QMLEngine {
     }
 
     for (let i = 0; i < importsArray.length; i++) {
-      const entry = importsArray[i];
-      let name = entry[1];
-
-      // is it url to remote resource
-      const nameIsUrl = name.indexOf("//") === 0 || name.indexOf("://") >= 0;
-      // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
-      const nameIsQualifiedModuleName = entry[4];
-      // local [relative] dir
-      const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl;
-
-      if (nameIsDir) {
-        // resolve name from relative to full dir path
-        // we hope all dirs are relative
-        if (currentFileDir && currentFileDir.length > 0) {
-          name = this.removeDotSegments(currentFileDir + name);
-        }
-        if (name[name.length - 1] === "/") {
-          // remove trailing slash as it required for `readQmlDir`
-          name = name.substr(0, name.length - 1);
-        }
-      }
-      // TODO if nameIsDir, we have also to add `name` to importPathList() for
-      // current component...
-
-      let content = this.qmldirsContents[name];
-      // check if we have already loaded that qmldir file
-      if (!content) {
-        if (nameIsQualifiedModuleName && this.userAddedModulePaths &&
-            this.userAddedModulePaths[name]
-        ) {
-          // 1. we have qualified module and user had configured path for that
-          // module with this.addModulePath
-          content = QmlWeb.readQmlDir(this.userAddedModulePaths[name]);
-        } else if (nameIsUrl || nameIsDir) {
-          // 2. direct load
-          // nameIsUrl => url do not need dirs
-          // nameIsDir => already computed full path above
-          content = QmlWeb.readQmlDir(name);
-        } else {
-          // 3. qt-style lookup for qualified module
-          const probableDirs = [currentFileDir].concat(this.importPathList());
-          const diredName = name.replace(/\./g, "/");
-
-          for (let k = 0; k < probableDirs.length; k++) {
-            const file = probableDirs[k] + diredName;
-            content = QmlWeb.readQmlDir(file);
-            if (content) {
-              break;
-            }
-          }
-        }
-        this.qmldirsContents[name] = content;
-      }
-
-      /* If there is no qmldir, add these directories to the list of places to
-       * search for components (within this import scope). "noqmldir" is
-       * inserted into the qmldir cache to avoid future attempts at fetching
-       * the qmldir file, but we always need to the call to
-       * "addComponentImportPath" for these sorts of directories. */
-      if (!content || content === "noqmldir") {
-        if (nameIsDir) {
-          if (entry[3]) {
-            /* Use entry[1] directly, as we don't want to include the
-             * basePath, otherwise it gets prepended twice in
-             * createComponent. */
-            this.addComponentImportPath(importContextId,
-              `${entry[1]}/`, entry[3]);
-          } else {
-            this.addComponentImportPath(importContextId, `${name}/`);
-          }
-        }
-
-        this.qmldirsContents[name] = "noqmldir";
-
-        continue;
-      }
-
-      // copy founded externals to global var
-      // TODO actually we have to copy it to current component
-      for (const attrname in content.externals) {
-        this.qmldirs[attrname] = content.externals[attrname];
-      }
-
-      // keep already loaded qmldir files
-      this.qmldirsContents[ name ] = content;
+      this.loadImport(importsArray[i], currentFileDir, importContextId);
     }
+  }
+
+  loadImport(entry, currentFileDir, importContextId) {
+    let name = entry[1];
+
+    // is it url to remote resource
+    const nameIsUrl = name.indexOf("//") === 0 || name.indexOf("://") >= 0;
+    // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
+    const nameIsQualifiedModuleName = entry[4];
+    // local [relative] dir
+    const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl;
+
+    if (nameIsDir) {
+      // resolve name from relative to full dir path
+      // we hope all dirs are relative
+      if (currentFileDir && currentFileDir.length > 0) {
+        name = this.removeDotSegments(currentFileDir + name);
+      }
+      if (name[name.length - 1] === "/") {
+        // remove trailing slash as it required for `readQmlDir`
+        name = name.substr(0, name.length - 1);
+      }
+    }
+    // TODO if nameIsDir, we have also to add `name` to importPathList() for
+    // current component...
+
+    let content = this.qmldirsContents[name];
+    // check if we have already loaded that qmldir file
+    if (!content) {
+      if (nameIsQualifiedModuleName && this.userAddedModulePaths &&
+          this.userAddedModulePaths[name]
+      ) {
+        // 1. we have qualified module and user had configured path for that
+        // module with this.addModulePath
+        content = QmlWeb.readQmlDir(this.userAddedModulePaths[name]);
+      } else if (nameIsUrl || nameIsDir) {
+        // 2. direct load
+        // nameIsUrl => url do not need dirs
+        // nameIsDir => already computed full path above
+        content = QmlWeb.readQmlDir(name);
+      } else {
+        // 3. qt-style lookup for qualified module
+        const probableDirs = [currentFileDir].concat(this.importPathList());
+        const diredName = name.replace(/\./g, "/");
+
+        for (let k = 0; k < probableDirs.length; k++) {
+          const file = probableDirs[k] + diredName;
+          content = QmlWeb.readQmlDir(file);
+          if (content) {
+            break;
+          }
+        }
+      }
+      this.qmldirsContents[name] = content;
+    }
+
+    /* If there is no qmldir, add these directories to the list of places to
+      * search for components (within this import scope). "noqmldir" is
+      * inserted into the qmldir cache to avoid future attempts at fetching
+      * the qmldir file, but we always need to the call to
+      * "addComponentImportPath" for these sorts of directories. */
+    if (!content || content === "noqmldir") {
+      if (nameIsDir) {
+        if (entry[3]) {
+          /* Use entry[1] directly, as we don't want to include the
+            * basePath, otherwise it gets prepended twice in
+            * createComponent. */
+          this.addComponentImportPath(importContextId,
+            `${entry[1]}/`, entry[3]);
+        } else {
+          this.addComponentImportPath(importContextId, `${name}/`);
+        }
+      }
+
+      this.qmldirsContents[name] = "noqmldir";
+      return;
+    }
+
+    // copy founded externals to global var
+    // TODO actually we have to copy it to current component
+    for (const attrname in content.externals) {
+      this.qmldirs[attrname] = content.externals[attrname];
+    }
+
+    // keep already loaded qmldir files
+    this.qmldirsContents[name] = content;
   }
 
   size() {
