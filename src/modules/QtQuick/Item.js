@@ -637,10 +637,10 @@ registerQmlType({
     if (this.parent) this.$updateChildrenRect(this.parent);
   }
   $updateChildrenRect(component) {
-    const children = component !== undefined ? component.children : undefined;
-    if (!children || children.length === 0) {
+    if (!component || !component.children || component.children.length === 0) {
       return;
     }
+    const children = component.children;
 
     let maxWidth = 0;
     let maxHeight = 0;
