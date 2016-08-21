@@ -1,23 +1,23 @@
 QmlWeb.executionContext = null;
 
-// All object constructors
-var constructors = {
-  int: QmlWeb.qmlInteger,
-  real: QmlWeb.qmlNumber,
-  double: QmlWeb.qmlNumber,
-  string: QmlWeb.qmlString,
-  bool: QmlWeb.qmlBoolean,
-  list: QmlWeb.qmlList,
-  color: QmlWeb.QColor,
-  enum: QmlWeb.qmlNumber,
-  url: QmlWeb.qmlString,
-  variant: QmlWeb.qmlVariant,
-  var: QmlWeb.qmlVariant
+const modules = {
+  Main: {
+    int: QmlWeb.qmlInteger,
+    real: QmlWeb.qmlNumber,
+    double: QmlWeb.qmlNumber,
+    string: QmlWeb.qmlString,
+    bool: QmlWeb.qmlBoolean,
+    list: QmlWeb.qmlList,
+    color: QmlWeb.QColor,
+    enum: QmlWeb.qmlNumber,
+    url: QmlWeb.qmlString,
+    variant: QmlWeb.qmlVariant,
+    var: QmlWeb.qmlVariant
+  }
 };
 
-const modules = {
-  Main: constructors
-};
+// All object constructors
+let constructors = modules.Main;
 
 const dependants = {};
 
