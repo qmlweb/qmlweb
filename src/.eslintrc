@@ -7,4 +7,4 @@ globals:
   constructors: true
   Easing: true
 rules:
-  complexity: ["error", 32]
+  complexity: ["error", 30]

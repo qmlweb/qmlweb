@@ -23,81 +23,22 @@ registerQmlType({
     this.layoutChildren();
   }
   layoutChildren() {
-    const visibleItems = [];
-    let r = 0;
-    let c = 0;
-    const colWidth = [];
-    const rowHeight = [];
-    let gridWidth = -this.spacing;
-    let gridHeight = -this.spacing;
-    let curHPos = 0;
-    let curVPos = 0;
-
     // How many items are actually visible?
-    for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i];
-      if (child.visible && child.width && child.height) {
-        visibleItems.push(this.children[i]);
-      }
-    }
+    const visibleItems = this.$getVisibleItems();
 
     // How many rows and columns do we need?
-    if (!this.columns && !this.rows) {
-      c = 4;
-      r = Math.ceil(visibleItems.length / 4);
-    } else if (!this.columns) {
-      r = this.rows;
-      c = Math.ceil(visibleItems.length / r);
-    } else {
-      c = this.columns;
-      r = Math.ceil(visibleItems.length / c);
-    }
+    const [c, r] = this.$calculateSize(visibleItems.length);
 
     // How big are the colums/rows?
-    if (this.flow === 0) {
-      for (let i = 0; i < r; i++) {
-        for (let j = 0; j < c; j++) {
-          const item = visibleItems[i * c + j];
-          if (!item) {
-            break;
-          }
-          if (!colWidth[j] || item.width > colWidth[j]) {
-            colWidth[j] = item.width;
-          }
-          if (!rowHeight[i] || item.height > rowHeight[i]) {
-            rowHeight[i] = item.height;
-          }
-        }
-      }
-    } else {
-      for (let i = 0; i < c; i++) {
-        for (let j = 0; j < r; j++) {
-          const item = visibleItems[i * r + j];
-          if (!item) {
-            break;
-          }
-          if (!rowHeight[j] || item.height > rowHeight[j]) {
-            rowHeight[j] = item.height;
-          }
-          if (!colWidth[i] || item.width > colWidth[i]) {
-            colWidth[i] = item.width;
-          }
-        }
-      }
-    }
-
-    for (const i in colWidth) {
-      gridWidth += colWidth[i] + this.spacing;
-    }
-    for (const i in rowHeight) {
-      gridHeight += rowHeight[i] + this.spacing;
-    }
+    const [colWidth, rowHeight] = this.$calculateGrid(visibleItems, c, r);
 
     // Do actual positioning
     // When layoutDirection is RightToLeft we need oposite order of coumns
     const step = this.layoutDirection === 1 ? -1 : 1;
     const startingPoint = this.layoutDirection === 1 ? c - 1 : 0;
     const endPoint = this.layoutDirection === 1 ? -1 : c;
+    let curHPos = 0;
+    let curVPos = 0;
     if (this.flow === 0) {
       for (let i = 0; i < r; i++) {
         for (let j = startingPoint; j !== endPoint; j += step) {
@@ -130,7 +71,74 @@ registerQmlType({
       }
     }
 
+    // Set implicit size
+    let gridWidth = -this.spacing;
+    let gridHeight = -this.spacing;
+    for (const i in colWidth) {
+      gridWidth += colWidth[i] + this.spacing;
+    }
+    for (const i in rowHeight) {
+      gridHeight += rowHeight[i] + this.spacing;
+    }
     this.implicitWidth = gridWidth;
     this.implicitHeight = gridHeight;
+  }
+  $getVisibleItems() {
+    return this.children.filter(child =>
+      child.visible && child.width && child.height
+    );
+  }
+  $calculateSize(length) {
+    let cols;
+    let rows;
+    if (!this.columns && !this.rows) {
+      cols = 4;
+      rows = Math.ceil(length / cols);
+    } else if (!this.columns) {
+      rows = this.rows;
+      cols = Math.ceil(length / rows);
+    } else {
+      cols = this.columns;
+      rows = Math.ceil(length / cols);
+    }
+    return [cols, rows];
+  }
+  $calculateGrid(visibleItems, cols, rows) {
+    const colWidth = [];
+    const rowHeight = [];
+
+    if (this.flow === 0) {
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const item = visibleItems[i * cols + j];
+          if (!item) {
+            break;
+          }
+          if (!colWidth[j] || item.width > colWidth[j]) {
+            colWidth[j] = item.width;
+          }
+          if (!rowHeight[i] || item.height > rowHeight[i]) {
+            rowHeight[i] = item.height;
+          }
+        }
+      }
+    } else {
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const item = visibleItems[i * rows + j];
+          if (!item) {
+            break;
+          }
+          if (!rowHeight[j] || item.height > rowHeight[j]) {
+            rowHeight[j] = item.height;
+          }
+          if (!colWidth[i] || item.width > colWidth[i]) {
+            colWidth[i] = item.width;
+          }
+        }
+      }
+    }
+
+    return [colWidth, rowHeight];
   }
 });
