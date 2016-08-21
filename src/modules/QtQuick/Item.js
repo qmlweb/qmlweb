@@ -451,6 +451,7 @@ registerQmlType({
     const lM = anchors.leftMargin || anchors.margins;
     const rM = anchors.rightMargin || anchors.margins;
     const w = this.width;
+    const left = this.parent ? this.parent.left : 0;
 
     // Width
     if (propName === "width") {
@@ -470,7 +471,7 @@ registerQmlType({
 
       this.$isUsingImplicitWidth = false;
       u.width = fill.width - lM - rM;
-      u.x = fill.left - (this.parent ? this.parent.left : 0) + lM;
+      u.x = fill.left - left + lM;
       u.left = fill.left + lM;
       u.right = fill.right - rM;
       u.horizontalCenter = (u.left + u.right) / 2;
@@ -479,7 +480,7 @@ registerQmlType({
       horizontalCenter.changed.connect(this, this.$updateHGeometry, flags);
 
       u.horizontalCenter = anchors.centerIn.horizontalCenter;
-      u.x = u.horizontalCenter - w / 2 - (this.parent ? this.parent.left : 0);
+      u.x = u.horizontalCenter - w / 2 - left;
       u.left = u.horizontalCenter - w / 2;
       u.right = u.horizontalCenter + w / 2;
     } else if (anchors.left !== undefined) {
@@ -488,16 +489,16 @@ registerQmlType({
         u.right = anchors.right - rM;
         this.$isUsingImplicitWidth = false;
         u.width = u.right - u.left;
-        u.x = u.left - (this.parent ? this.parent.left : 0);
+        u.x = u.left - left;
         u.horizontalCenter = (u.right + u.left) / 2;
       } else if (anchors.horizontalCenter !== undefined) {
         u.horizontalCenter = anchors.horizontalCenter;
         this.$isUsingImplicitWidth = false;
         u.width = (u.horizontalCenter - u.left) * 2;
-        u.x = u.left - (this.parent ? this.parent.left : 0);
+        u.x = u.left - left;
         u.right = 2 * u.horizontalCenter - u.left;
       } else {
-        u.x = u.left - (this.parent ? this.parent.left : 0);
+        u.x = u.left - left;
         u.right = u.left + w;
         u.horizontalCenter = u.left + w / 2;
       }
@@ -507,17 +508,16 @@ registerQmlType({
         u.horizontalCenter = anchors.horizontalCenter;
         this.$isUsingImplicitWidth = false;
         u.width = (u.right - u.horizontalCenter) * 2;
-        u.x = 2 * u.horizontalCenter - u.right
-              - (this.parent ? this.parent.left : 0);
+        u.x = 2 * u.horizontalCenter - u.right - left;
         u.left = 2 * u.horizontalCenter - u.right;
       } else {
-        u.x = u.right - w - (this.parent ? this.parent.left : 0);
+        u.x = u.right - w - left;
         u.left = u.right - w;
         u.horizontalCenter = u.right - w / 2;
       }
     } else if (anchors.horizontalCenter !== undefined) {
       u.horizontalCenter = anchors.horizontalCenter;
-      u.x = u.horizontalCenter - w / 2 - (this.parent ? this.parent.left : 0);
+      u.x = u.horizontalCenter - w / 2 - left;
       u.left = u.horizontalCenter - w / 2;
       u.right = u.horizontalCenter + w / 2;
     } else {
@@ -526,7 +526,7 @@ registerQmlType({
         leftProp.changed.connect(this, this.$updateHGeometry, flags);
       }
 
-      u.left = this.x + (this.parent ? this.parent.left : 0);
+      u.left = this.x + left;
       u.right = u.left + w;
       u.horizontalCenter = u.left + w / 2;
     }
@@ -550,6 +550,7 @@ registerQmlType({
     const tM = anchors.topMargin || anchors.margins;
     const bM = anchors.bottomMargin || anchors.margins;
     const h = this.height;
+    const top = this.parent ? this.parent.top : 0;
 
     // HeighttopProp
     if (propName === "height") {
@@ -569,7 +570,7 @@ registerQmlType({
 
       this.$isUsingImplicitHeight = false;
       u.height = fill.height - tM - bM;
-      u.y = fill.top - (this.parent ? this.parent.top : 0) + tM;
+      u.y = fill.top - top + tM;
       u.top = fill.top + tM;
       u.bottom = fill.bottom - bM;
       u.verticalCenter = (u.top + u.bottom) / 2;
@@ -578,7 +579,7 @@ registerQmlType({
       verticalCenter.changed.connect(this, this.$updateVGeometry, flags);
 
       u.verticalCenter = anchors.centerIn.verticalCenter;
-      u.y = u.verticalCenter - h / 2 - (this.parent ? this.parent.top : 0);
+      u.y = u.verticalCenter - h / 2 - top;
       u.top = u.verticalCenter - h / 2;
       u.bottom = u.verticalCenter + h / 2;
     } else if (anchors.top !== undefined) {
@@ -587,15 +588,15 @@ registerQmlType({
         u.bottom = anchors.bottom - bM;
         this.$isUsingImplicitHeight = false;
         u.height = u.bottom - u.top;
-        u.y = u.top - (this.parent ? this.parent.top : 0);
+        u.y = u.top - top;
         u.verticalCenter = (u.bottom + u.top) / 2;
       } else if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
         this.$isUsingImplicitHeight = false;
         u.height = (u.verticalCenter - u.top) * 2;
-        u.y = u.top - (this.parent ? this.parent.top : 0);
+        u.y = u.top - top;
         u.bottom = 2 * u.verticalCenter - u.top;
       } else {
-        u.y = u.top - (this.parent ? this.parent.top : 0);
+        u.y = u.top - top;
         u.bottom = u.top + h;
         u.verticalCenter = u.top + h / 2;
       }
@@ -604,17 +605,16 @@ registerQmlType({
       if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
         this.$isUsingImplicitHeight = false;
         u.height = (u.bottom - u.verticalCenter) * 2;
-        u.y = 2 * u.verticalCenter - u.bottom
-              - (this.parent ? this.parent.top : 0);
+        u.y = 2 * u.verticalCenter - u.bottom - top;
         u.top = 2 * u.verticalCenter - u.bottom;
       } else {
-        u.y = u.bottom - h - (this.parent ? this.parent.top : 0);
+        u.y = u.bottom - h - top;
         u.top = u.bottom - h;
         u.verticalCenter = u.bottom - h / 2;
       }
     } else if (anchors.verticalCenter !== undefined) {
       u.verticalCenter = anchors.verticalCenter;
-      u.y = u.verticalCenter - h / 2 - (this.parent ? this.parent.top : 0);
+      u.y = u.verticalCenter - h / 2 - top;
       u.top = u.verticalCenter - h / 2;
       u.bottom = u.verticalCenter + h / 2;
     } else {
@@ -623,7 +623,7 @@ registerQmlType({
         topProp.changed.connect(this, this.$updateVGeometry, flags);
       }
 
-      u.top = this.y + (this.parent ? this.parent.top : 0);
+      u.top = this.y + top;
       u.bottom = u.top + h;
       u.verticalCenter = u.top + h / 2;
     }
