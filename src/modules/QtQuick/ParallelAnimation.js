@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ParallelAnimation",
   versions: /.*/,

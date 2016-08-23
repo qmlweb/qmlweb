@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QmlWeb",
   name: "RestModel",
   versions: /.*/,

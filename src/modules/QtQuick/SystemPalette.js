@@ -7,7 +7,7 @@ const platformsDetectors = [
 
 const systemPalettes = {};
 
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "SystemPalette",
   versions: /.*/,

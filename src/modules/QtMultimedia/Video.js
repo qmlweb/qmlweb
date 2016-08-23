@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtMultimedia",
   name: "Video",
   versions: /^5\./,

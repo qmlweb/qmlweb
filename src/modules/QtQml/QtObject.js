@@ -1,6 +1,6 @@
 // Base object for all qml elements
 
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQml",
   name: "QtObject",
   versions: /.*/,

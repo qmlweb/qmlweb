@@ -123,7 +123,7 @@ class QMLComponent {
   }
 }
 
-registerQmlType({
+QmlWeb.registerQmlType({
   global: true,
   module: "QtQml",
   name: "Component",

@@ -1,5 +1,4 @@
 env:
   node: false
 globals:
-  registerQmlType: true
   callSuper: true

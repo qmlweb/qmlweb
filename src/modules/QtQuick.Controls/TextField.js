@@ -10,7 +10,7 @@
  *
  */
 
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQuick.Controls",
   name: "TextField",
   versions: /.*/,

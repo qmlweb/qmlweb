@@ -2,7 +2,7 @@
 // Connecting state.
 // TODO: Recheck everything.
 
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtWebSockets",
   name: "WebSocket",
   versions: /.*/,

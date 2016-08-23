@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Timer",
   versions: /.*/,

@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtMobility",
   name: "GeoLocation",
   versions: /.*/,

@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQuick.Window",
   name: "Screen",
   versions: /.*/,

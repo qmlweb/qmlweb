@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtGraphicalEffects",
   name: "FastBlur",
   versions: /.*/,

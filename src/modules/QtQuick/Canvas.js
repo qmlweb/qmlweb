@@ -1,7 +1,7 @@
 // TODO
 // Currently only a skeleton implementation
 
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Canvas",
   versions: /.*/,

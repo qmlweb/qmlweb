@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "Qt.labs.settings",
   name: "Settings",
   versions: /.*/,

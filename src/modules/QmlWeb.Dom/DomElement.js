@@ -1,4 +1,4 @@
-registerQmlType({
+QmlWeb.registerQmlType({
   module: "QmlWeb.Dom",
   name: "DomElement",
   versions: /.*/,
