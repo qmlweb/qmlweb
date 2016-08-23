@@ -11,7 +11,7 @@ class QMLContext {
 
 class QMLComponent {
   constructor(meta) {
-    if (constructors[meta.object.$class] === QMLComponent) {
+    if (QmlWeb.constructors[meta.object.$class] === QMLComponent) {
       this.$metaObject = meta.object.$children[0];
     } else {
       this.$metaObject = meta.object;

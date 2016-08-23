@@ -17,14 +17,14 @@ const modules = {
 };
 
 // All object constructors
-let constructors = modules.Main;
+QmlWeb.constructors = modules.Main;
 
 const dependants = {};
 
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
   QmlWeb[type.name]  = type;
-  constructors[name] = type;
+  QmlWeb.constructors[name] = type;
   modules.Main[name] = type;
 };
 
@@ -142,7 +142,7 @@ const perImportContextConstructors = {};
 
 function loadImports(self, imports) {
   const mergeObjects = QmlWeb.helpers.mergeObjects;
-  constructors = mergeObjects(modules.Main);
+  let constructors = mergeObjects(modules.Main);
   if (imports.filter(row => row[1] === 'QtQml').length === 0 &&
       imports.filter(row => row[1] === 'QtQuick').length === 1) {
     imports.push(['qmlimport', 'QtQml', 2, '', true]);
@@ -160,6 +160,7 @@ function loadImports(self, imports) {
   }
   self.importContextId = importContextIds++;
   perImportContextConstructors[self.importContextId] = constructors;
+  QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
 
 function inherit(constructor, baseClass) {

@@ -55,6 +55,7 @@ class QMLEngine {
 
     // TODO: Move to module initialization
     const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+    const constructors = QmlWeb.constructors;
     for (const i in constructors) {
       if (constructors[i].getAttachedObject) {
         QmlWeb.setupGetter(QMLBaseObject.prototype, i,

@@ -3,4 +3,3 @@ env:
 globals:
   registerQmlType: true
   callSuper: true
-  constructors: true
