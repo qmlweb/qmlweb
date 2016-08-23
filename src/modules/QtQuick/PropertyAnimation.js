@@ -21,8 +21,8 @@ QmlWeb.registerQmlType({
     createProperty("enum", this.easing, "type",
       { initialValue: this.Easing.Linear });
     createProperty("real", this.easing, "amplitude", { initialValue: 1 });
-    createProperty("real", this.easing, "overshoot", { initialValue: 0.3 });
-    createProperty("real", this.easing, "period", { initialValue: 1.70158 });
+    createProperty("real", this.easing, "overshoot", { initialValue: 1.70158 });
+    createProperty("real", this.easing, "period", { initialValue: 0.3 });
 
     this.easing.$valueForProgress = function(t) {
       return QmlWeb.$ease(
