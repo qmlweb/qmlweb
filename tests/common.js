@@ -29,6 +29,21 @@ function setupDivElement() {
   });
 }
 
+function sendEvent(element, type, x, y, button) {
+  var event = document.createEvent("MouseEvents");
+  event.initMouseEvent(type, true, true, window, 0, 0, 0, x, y,
+                        false, false, false, false, button || 0, null);
+  /*
+  var event = new MouseEvent(type, {
+    bubbles: true, cancelable: true,
+    clientX: x, clientY: y,
+    button: button
+  });
+  */
+  var node = element || document.body;
+  node.dispatchEvent(event);
+}
+
 var customMatchers = {
   toBeRoughly: function(util, customEqualityTesters) {
     return {

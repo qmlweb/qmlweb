@@ -6,6 +6,7 @@ globals:
   loadQml: true
   setupDivElement: true
   customMatchers: true
+  sendEvent: true
 rules:
   block-scoped-var: 2
   no-var: 0
