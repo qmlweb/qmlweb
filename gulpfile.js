@@ -7,7 +7,6 @@ const uglify = require("gulp-uglify");
 const sourcemaps = require("gulp-sourcemaps");
 const iife = require("gulp-iife");
 const babel = require("gulp-babel");
-const eslint = require("gulp-eslint");
 const replace = require("gulp-replace");
 const karma = require("karma");
 const istanbul = require("gulp-istanbul");
@@ -30,12 +29,6 @@ const parserSources = [
 const licenseSources = [
   "LICENSE",
   "node_modules/qmlweb-parser/LICENSE"
-];
-
-const js = [
-  "*.js",
-  "src/**/*.js",
-  "tests/**/*.js"
 ];
 
 // This is required because other values confuse PhantomJS, and are sometimes
@@ -130,16 +123,7 @@ gulp.task("watch-dev", ["build-dev"], () => {
   gulp.watch(licenseSources, ["license"]);
 });
 
-gulp.task("lint-js", () =>
-  gulp.src(js)
-    .pipe(eslint())
-    .pipe(eslint.formatEach("stylish", process.stderr))
-    .pipe(eslint.failAfterError())
-);
-
-gulp.task("lint", ["lint-js"]);
-
-gulp.task("test", ["lint", "build-dev"], () => {
+gulp.task("test", ["build-dev"], () => {
   new karma.Server({
     singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js")
@@ -148,7 +132,7 @@ gulp.task("test", ["lint", "build-dev"], () => {
   }).start();
 });
 
-gulp.task("coverage", ["lint", "build-covered"], () => {
+gulp.task("coverage", ["build-covered"], () => {
   new karma.Server({
     singleRun: true,
     coverageEnabled: true,
