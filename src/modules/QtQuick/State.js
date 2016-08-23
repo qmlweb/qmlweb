@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "changes"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.$item = this.$parent;
 

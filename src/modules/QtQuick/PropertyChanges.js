@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.$actions = [];
   }

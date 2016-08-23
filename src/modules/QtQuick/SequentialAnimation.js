@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "animations"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 

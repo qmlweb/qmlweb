@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
     this.$standardRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
     this.$scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
   }

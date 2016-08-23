@@ -5,6 +5,6 @@ QmlWeb.registerQmlType({
   baseClass: "Image"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
   }
 });

@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "contentItem"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.css.pointerEvents = "auto";
     this.setupFocusOnDom(this.dom);

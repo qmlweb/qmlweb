@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "Positioner"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
   }
   layoutChildren() {
     let curPos = 0;

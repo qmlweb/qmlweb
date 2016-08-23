@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "PropertyAnimation"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.$at = 0;
     this.$loop = 0;

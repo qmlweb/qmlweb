@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.$properties.parent.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
 

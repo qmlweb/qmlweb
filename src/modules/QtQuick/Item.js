@@ -36,7 +36,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "data"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     if (this.$parent === null) { // This is the root element. Initialize it.
       this.dom = QmlWeb.engine.rootElement || document.body;

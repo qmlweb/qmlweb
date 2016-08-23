@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     for (const i in meta.object) {

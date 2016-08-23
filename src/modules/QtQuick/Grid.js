@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);

@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);

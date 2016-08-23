@@ -1,4 +1,2 @@
 env:
   node: false
-globals:
-  callSuper: true

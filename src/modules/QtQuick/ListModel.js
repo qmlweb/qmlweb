@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "$items"
 }, class {
   constructor(meta) {
-    callSuper(this, meta);
+    QmlWeb.callSuper(this, meta);
 
     this.$firstItem = true;
     this.$itemsChanged.connect(this, this.$on$itemsChanged);
