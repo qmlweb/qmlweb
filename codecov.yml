@@ -1,4 +1,7 @@
 coverage:
+  round: down
+  range: 50...100
+
   status:
     project:
       default:
