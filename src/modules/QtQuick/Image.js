@@ -99,6 +99,7 @@ QmlWeb.registerQmlType({
     this.impl.style.backgroundImage = `url('${path}')`;
     this.$img.src = path;
     if (this.$img.complete) {
+      this.progress = 1;
       this.status = this.Image.Ready;
     }
     this.$updateFillMode();
