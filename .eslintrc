@@ -122,7 +122,7 @@ rules:
   prefer-spread: 2
   prefer-template: 2
   quote-props: [2, "as-needed"]
-  quotes: [1, "double", {"avoidEscape": true}]
+  quotes: [2, "double", {"avoidEscape": true}]
   radix: 2
   semi: 2
   semi-spacing: 2
