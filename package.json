@@ -28,11 +28,14 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-spec-reporter": "~0.0.24",
     "phantomjs-prebuilt": "^2.1.4",
-    "qmlweb-parser": "^0.2.2"
+    "qmlweb-parser": "^0.2.2",
+    "remark-cli": "^2.0.0",
+    "remark-lint": "^5.0.0"
   },
   "scripts": {
     "eslint": "eslint --cache *.js src tests",
-    "lint": "npm run eslint",
+    "mdlint": "remark -q docs",
+    "lint": "npm run eslint && npm run mdlint",
     "test": "npm run lint && gulp test",
     "coverage": "gulp coverage",
     "build": "gulp build",
