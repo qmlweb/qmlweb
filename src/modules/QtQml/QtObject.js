@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
         continue;
       }
       const name = meta.object[key].__proto__.constructor.name;
-      if (name !== "QMLPropertyDefinition" && name !== "QMLAliasDefinition") {
+      if (name === "QMLPropertyDefinition" || name === "QMLAliasDefinition") {
         this.$attributes.push(key);
       }
     }
