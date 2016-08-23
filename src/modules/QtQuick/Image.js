@@ -54,6 +54,7 @@ QmlWeb.registerQmlType({
     this.sourceChanged.connect(this, this.$onSourceChanged);
     this.mirrorChanged.connect(this, this.$onMirrorChanged);
     this.fillModeChanged.connect(this, this.$onFillModeChanged);
+    this.smoothChanged.connect(this, this.$onSmoothChanged);
   }
   $updateFillMode(val = this.fillMode) {
     const style = this.impl.style;
@@ -116,5 +117,14 @@ QmlWeb.registerQmlType({
   }
   $onFillModeChanged(val) {
     this.$updateFillMode(val);
+  }
+  $onSmoothChanged(val) {
+    const style = this.impl.style;
+    if (val) {
+      style.imageRendering = "auto";
+    } else {
+      style.imageRendering = "-webkit-optimize-contrast";
+      style.imageRendering = "pixelated";
+    }
   }
 });
