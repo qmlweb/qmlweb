@@ -34,7 +34,7 @@
   },
   "scripts": {
     "eslint": "eslint --cache *.js src tests",
-    "mdlint": "remark -q *.md docs",
+    "mdlint": "remark -qf *.md docs",
     "lint": "npm run eslint && npm run mdlint",
     "test": "npm run lint && gulp test",
     "coverage": "gulp coverage",
