@@ -31,7 +31,7 @@ function setupDivElement() {
 
 function sendEvent(element, type, x, y, button) {
   var event = document.createEvent("MouseEvents");
-  event.initMouseEvent(type, true, true, window, 0, 0, 0, x, y,
+  event.initMouseEvent(type, true, true, window, 0, 0, 0, x || 0, y || 0,
                         false, false, false, false, button || 0, null);
   /*
   var event = new MouseEvent(type, {

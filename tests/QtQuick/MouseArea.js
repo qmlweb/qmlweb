@@ -2,6 +2,24 @@ describe("QtQuick.MouseArea", function() {
   setupDivElement();
   var load = prefixedQmlLoader("QtQuick/qml/MouseArea");
 
+  it("onClicked", function() {
+    var qml = load("Generic", this.div);
+    expect(qml.clicks).toBe(0);
+    sendEvent(qml.area.dom, "click");
+    expect(qml.clicks).toBe(1);
+    sendEvent(qml.area.dom, "click");
+    sendEvent(qml.area.dom, "click");
+    expect(qml.clicks).toBe(3);
+    qml.area.enabled = false;
+    sendEvent(qml.area.dom, "click");
+    sendEvent(qml.area.dom, "click");
+    expect(qml.clicks).toBe(3);
+    qml.area.enabled = true;
+    expect(qml.clicks).toBe(3);
+    sendEvent(qml.area.dom, "click");
+    expect(qml.clicks).toBe(4);
+  });
+
   it("CotainsMouse", function() {
     var qml = load("Generic", this.div);
     expect(qml.area.containsMouse).toBe(false);
