@@ -67,7 +67,7 @@ QmlWeb.registerQmlType({
       case this.Image.Tile:
         style.backgroundRepeat = "auto";
         style.backgroundSize = "auto";
-        style.backgroundPosition = "auto";
+        style.backgroundPosition = "center";
         break;
       case this.Image.PreserveAspectFit:
         style.backgroundRepeat = "no-repeat";
