@@ -11,6 +11,7 @@ QmlWeb.registerQmlType({
   },
   properties: {
     source: "url",
+    smooth: { type: "bool", initialValue: true },
     // BorderImage.Stretch
     horizontalTileMode: { type: "enum", initialValue: "stretch" },
     // BorderImage.Stretch
@@ -35,6 +36,7 @@ QmlWeb.registerQmlType({
     this.border.bottomChanged.connect(this, this.$updateBorder);
     this.horizontalTileModeChanged.connect(this, this.$updateBorder);
     this.verticalTileModeChanged.connect(this, this.$updateBorder);
+    this.smoothChanged.connect(this, this.$onSmoothChanged);
   }
   $onSourceChanged() {
     const style = this.dom.style;
@@ -54,5 +56,14 @@ QmlWeb.registerQmlType({
     style.borderImageSlice = slice;
     style.borderImageRepeat = repeat;
     style.borderImageWidth = width;
+  }
+  $onSmoothChanged(val) {
+    const style = this.dom.style;
+    if (val) {
+      style.imageRendering = "auto";
+    } else {
+      style.imageRendering = "-webkit-optimize-contrast";
+      style.imageRendering = "pixelated";
+    }
   }
 });
