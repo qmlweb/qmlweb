@@ -16,6 +16,7 @@ QmlWeb.registerQmlType({
     horizontalTileMode: { type: "enum", initialValue: "stretch" },
     // BorderImage.Stretch
     verticalTileMode: { type: "enum", initialValue: "stretch" },
+    progress: "real",
     status: { type: "enum", initialValue: 1 } // BorderImage.Null
   }
 }, class {
@@ -29,6 +30,15 @@ QmlWeb.registerQmlType({
     createProperty("int", this.border, "top");
     createProperty("int", this.border, "bottom");
 
+    this.$img = new Image();
+    this.$img.addEventListener("load", () => {
+      this.progress = 1;
+      this.status = this.BorderImage.Ready;
+    });
+    this.$img.addEventListener("error", () => {
+      this.status = this.BorderImage.Error;
+    });
+
     this.sourceChanged.connect(this, this.$onSourceChanged);
     this.border.leftChanged.connect(this, this.$updateBorder);
     this.border.rightChanged.connect(this, this.$updateBorder);
@@ -39,10 +49,17 @@ QmlWeb.registerQmlType({
     this.smoothChanged.connect(this, this.$onSmoothChanged);
   }
   $onSourceChanged() {
+    this.progress = 0;
+    this.status = this.BorderImage.Loading;
     const style = this.dom.style;
     const path = QmlWeb.engine.$resolvePath(this.source);
     style.OBorderImageSource = `url(${path})`;
     style.borderImageSource = `url(${path})`;
+    this.$img.src = path;
+    if (this.$img.complete) {
+      this.progress = 1;
+      this.status = this.BorderImage.Ready;
+    }
   }
   $updateBorder() {
     const style = this.dom.style;
