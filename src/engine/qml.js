@@ -192,7 +192,7 @@ function callSuper(self, meta) {
       if (typeof desc === 'string') {
         desc = {type: desc};
       }
-      createProperty(desc.type, self, name, desc);
+      QmlWeb.createProperty(desc.type, self, name, desc);
     });
   }
   if (info.signals) {
@@ -284,193 +284,9 @@ function construct(meta) {
     item.$context.importContextId = meta.context.importContextId;
 
     // Apply properties (Bindings won't get evaluated, yet)
-    applyProperties(meta.object, item, item, item.$context);
+    QmlWeb.applyProperties(meta.object, item, item, item.$context);
 
     return item;
-}
-
-/**
- * Create property getters and setters for object.
- * @param {Object} obj Object for which gsetters will be set
- * @param {String} propName Property name
- * @param {Object} [options] Options that allow finetuning of the property
- */
-function createProperty(type, obj, propName, options = {}) {
-    var prop = new QMLProperty(type, obj, propName);
-    var getter, setter;
-
-    obj[propName + "Changed"] = prop.changed;
-    obj.$properties[propName] = prop;
-    obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
-    getter = function()       { return obj.$properties[propName].get(); };
-    if (!options.readOnly)
-      setter = function(newVal) { obj.$properties[propName].set(newVal, QMLProperty.ReasonUser); };
-    else {
-      setter = function(newVal) {
-        if (obj.$canEditReadOnlyProperties != true)
-          throw "property '" + propName + "' has read only access";
-        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-      }
-    }
-    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
-    if (obj.$isComponentRoot)
-      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
-}
-
-function connectSignal(item, signalName, value, objectScope, componentScope) {
-    if (!item[signalName]) {
-        console.warn("No signal called " + signalName + " found!");
-        return;
-    }
-    else if (typeof item[signalName].connect != 'function') {
-        console.warn(signalName + " is not a signal!");
-        return;
-    }
-    if (!value.eval) {
-        var params = "";
-        for (var j in item[signalName].parameters) {
-            params += j==0 ? "" : ", ";
-            params += item[signalName].parameters[j].name;
-        }
-        value.src = "(function(" + params + ") { QmlWeb.executionContext = __executionContext;" + value.src + "})";
-        value.isFunction = false;
-        value.compile();
-    }
-    var slot = value.eval(objectScope, componentScope);
-    item[signalName].connect(item, slot);
-    return slot;
-}
-
-/**
- * Apply properties from metaObject to item.
- * @param {Object} metaObject Source of properties
- * @param {Object} item Target of property apply
- * @param {Object} objectScope Scope in which properties should be evaluated
- * @param {Object} componentScope Component scope in which properties should be evaluated
- */
-function applyProperties(metaObject, item, objectScope, componentScope) {
-    var i;
-    objectScope = objectScope || item;
-    QmlWeb.executionContext = componentScope;
-
-    if (metaObject.$children && metaObject.$children.length !== 0) {
-        if (item.$defaultProperty)
-            item.$properties[item.$defaultProperty].set(metaObject.$children, QMLProperty.ReasonInit, objectScope, componentScope);
-        else
-            throw "Cannot assign to unexistant default property";
-    }
-    // We purposefully set the default property AFTER using it, in order to only have it applied for
-    // instanciations of this component, but not for its internal children
-    if (metaObject.$defaultProperty)
-        item.$defaultProperty = metaObject.$defaultProperty;
-
-    for (i in metaObject) {
-        var value = metaObject[i];
-        if (i == "id" || i == "$class") { // keep them
-          item[i] = value;
-          continue;
-        }
-
-        // skip global id's and internal values
-        if (i == "id" || i[0] == "$") {
-            continue;
-        }
-        // slots
-        if (i.indexOf("on") == 0 && i[2].toUpperCase() == i[2]) {
-            var signalName =  i[2].toLowerCase() + i.slice(3);
-            if (!connectSignal(item, signalName, value, objectScope, componentScope)) {
-                if (item.$setCustomSlot) {
-                    item.$setCustomSlot(signalName, value, objectScope, componentScope);
-                }
-            }
-            continue;
-        }
-
-        if (value instanceof Object) {
-            if (value instanceof QMLSignalDefinition) {
-                item[i] = Signal.signal(value.parameters);
-                if (item.$isComponentRoot)
-                    componentScope[i] = item[i];
-                continue;
-            } else if (value instanceof QMLMethod) {
-                value.compile();
-                item[i] = value.eval(objectScope, componentScope);
-                if (item.$isComponentRoot)
-                    componentScope[i] = item[i];
-                continue;
-            } else if (value instanceof QMLAliasDefinition) {
-                // TODO: 1. Alias must be able to point to prop or id of local object,eg: property alias q: t
-                //       2. Alias may have same name as id it points to: property alias someid: someid
-                //       3. Alias proxy (or property proxy) to proxy prop access to selected incapsulated object. (think twice).
-                createProperty("alias", item, i);
-                item.$properties[i].componentScope = componentScope;
-                item.$properties[i].val = value;
-                item.$properties[i].get = function() {
-                    var obj = this.componentScope[this.val.objectName];
-                    return this.val.propertyName ? obj.$properties[this.val.propertyName].get() : obj;
-                }
-                item.$properties[i].set = function(newVal, reason, objectScope, componentScope) {
-                    if (!this.val.propertyName)
-                        throw "Cannot set alias property pointing to an QML object.";
-                    this.componentScope[this.val.objectName].$properties[this.val.propertyName].set(newVal, reason, objectScope, componentScope);
-                }
-
-                if (value.propertyName) {
-                  var con = function(prop) {
-                    var obj = prop.componentScope[prop.val.objectName];
-                    if (!obj) {
-                      console.error("qtcore: target object ",prop.val.objectName," not found for alias ",prop );
-                    } else {
-                      var targetProp = obj.$properties[prop.val.propertyName];
-                      if (!targetProp) {
-                        console.error("qtcore: target property [",prop.val.objectName,"].",prop.val.propertyName," not found for alias ",prop.name );
-                      } else {
-                        // targetProp.changed.connect( prop.changed );
-                        // it is not sufficient to connect to `changed` of source property
-                        // we have to propagate own changed to it too
-                        // seems the best way to do this is to make them identical?..
-                        // prop.changed = targetProp.changed;
-                        // obj[i + "Changed"] = prop.changed;
-                        // no. because those object might be destroyed later.
-                        ( function() {
-                          var loopWatchdog = false;
-                          targetProp.changed.connect( item, function() {
-                              if (loopWatchdog) return; loopWatchdog = true;
-                              prop.changed.apply( item,arguments );
-                              loopWatchdog = false;
-                          } );
-                          prop.changed.connect( obj, function() {
-                              if (loopWatchdog) return; loopWatchdog = true;
-                              targetProp.changed.apply( obj, arguments );
-                              loopWatchdog = false;
-                          } );
-                        } ) ();
-                      }
-                    }
-                  }
-                  QmlWeb.engine.pendingOperations.push( [con,item.$properties[i]] );
-                }
-
-                continue;
-            } else if (value instanceof QMLPropertyDefinition) {
-                createProperty(value.type, item, i);
-                item.$properties[i].set(value.value, QMLProperty.ReasonInit, objectScope, componentScope);
-                continue;
-            } else if (item[i] && value instanceof QMLMetaPropertyGroup) {
-                // Apply properties one by one, otherwise apply at once
-                applyProperties(value, item[i], objectScope, componentScope);
-                continue;
-            }
-        }
-        if (item.$properties && i in item.$properties)
-            item.$properties[i].set(value, QMLProperty.ReasonInit, objectScope, componentScope);
-        else if (i in item)
-            item[i] = value;
-        else if (item.$setCustomData)
-            item.$setCustomData(i, value);
-        else
-            console.warn("Cannot assign to non-existent property \"" + i + "\". Ignoring assignment.");
-    }
 }
 
 QmlWeb.modules = modules;
@@ -480,6 +296,3 @@ QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
 QmlWeb.callSuper = callSuper;
 QmlWeb.construct = construct;
-QmlWeb.createProperty = createProperty;
-QmlWeb.connectSignal = connectSignal;
-QmlWeb.applyProperties = applyProperties;

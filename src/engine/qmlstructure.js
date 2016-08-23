@@ -271,6 +271,11 @@ function parseQML(src, file) {
   return convertToEngine(parsetree);
 }
 
+QmlWeb.QMLMethod = QMLMethod;
+QmlWeb.QMLPropertyDefinition = QMLPropertyDefinition;
+QmlWeb.QMLAliasDefinition = QMLAliasDefinition;
+QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
+QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
 QmlWeb.convertToEngine = convertToEngine;
 QmlWeb.loadParser = loadParser;
