@@ -31,6 +31,7 @@
     "qmlweb-parser": "^0.2.2"
   },
   "scripts": {
+    "eslint": "eslint --cache *.js src tests",
     "lint": "gulp lint",
     "test": "gulp test",
     "coverage": "gulp coverage",
