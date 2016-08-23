@@ -133,7 +133,7 @@ gulp.task("watch-dev", ["build-dev"], () => {
 gulp.task("lint-js", () =>
   gulp.src(js)
     .pipe(eslint())
-    .pipe(eslint.formatEach("compact", process.stderr))
+    .pipe(eslint.formatEach("stylish", process.stderr))
     .pipe(eslint.failAfterError())
 );
 
