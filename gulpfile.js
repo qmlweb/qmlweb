@@ -35,7 +35,6 @@ const licenseSources = [
 const js = [
   "*.js",
   "src/**/*.js",
-  "!src/engine/qml.js",
   "tests/**/*.js"
 ];
 
