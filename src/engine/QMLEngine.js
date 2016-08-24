@@ -41,6 +41,9 @@ class QMLEngine {
     // Module import paths overrides
     this.userAddedModulePaths = {};
 
+    // Stores data for setImportPathList(), importPathList(), and addImportPath
+    this.userAddedImportPaths = [];
+
     //----------Private Members---------
 
     // Ticker resource id and ticker callbacks
@@ -199,9 +202,6 @@ class QMLEngine {
   // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
   addImportPath(dirpath) {
-    if (!this.userAddedImportPaths) {
-      this.userAddedImportPaths = [];
-    }
     this.userAddedImportPaths.push(dirpath);
   }
 
@@ -262,7 +262,7 @@ class QMLEngine {
   }
 
   importPathList() {
-    return this.userAddedImportPaths || [];
+    return this.userAddedImportPaths;
   }
 
   // `addModulePath` defines conrete path for module lookup
