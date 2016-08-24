@@ -38,6 +38,9 @@ class QMLEngine {
     // Base path of qml engine (used for resource loading)
     this.$basePath = "";
 
+    // Module import paths overrides
+    this.userAddedModulePaths = {};
+
     //----------Private Members---------
 
     // Ticker resource id and ticker callbacks
@@ -268,19 +271,9 @@ class QMLEngine {
   // `http://example.com/controls/qmldir`
 
   addModulePath(moduleName, dirPath) {
-    let resolvedPath;
-    if (dirPath[dirPath.length - 1] === "/") {
-      // remove trailing slash as it required for `readQmlDir`
-      resolvedPath = dirPath.substr(0, dirPath.length - 1);
-    } else {
-      resolvedPath = dirPath;
-    }
-
-    // keep the mapping. It will be used in loadImports() function .
-    if (!this.userAddedModulePaths) {
-      this.userAddedModulePaths = {};
-    }
-    this.userAddedModulePaths[moduleName] = resolvedPath;
+    // Keep the mapping. It will be used in loadImports() function.
+    // Remove trailing slash as it required for `readQmlDir`.
+    this.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
   }
 
   registerProperty(obj, propName) {
@@ -362,9 +355,7 @@ class QMLEngine {
     let content = this.qmldirsContents[name];
     // check if we have already loaded that qmldir file
     if (!content) {
-      if (nameIsQualifiedModuleName && this.userAddedModulePaths &&
-          this.userAddedModulePaths[name]
-      ) {
+      if (nameIsQualifiedModuleName && this.userAddedModulePaths[name]) {
         // 1. we have qualified module and user had configured path for that
         // module with this.addModulePath
         content = QmlWeb.readQmlDir(this.userAddedModulePaths[name]);
