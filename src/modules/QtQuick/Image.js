@@ -125,6 +125,8 @@ QmlWeb.registerQmlType({
       style.imageRendering = "auto";
     } else {
       style.imageRendering = "-webkit-optimize-contrast";
+      style.imageRendering = "-moz-crisp-edges";
+      style.imageRendering = "crisp-edges";
       style.imageRendering = "pixelated";
     }
   }
