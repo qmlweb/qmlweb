@@ -54,13 +54,14 @@ QmlWeb.registerQmlType({
     this.verticalTileModeChanged.connect(this, this.$updateBorder);
     this.smoothChanged.connect(this, this.$onSmoothChanged);
   }
-  $onSourceChanged(path) {
+  $onSourceChanged(source) {
     this.progress = 0;
     this.status = this.BorderImage.Loading;
     const style = this.impl.style;
-    style.OBorderImageSource = `url(${path})`;
-    style.borderImageSource = `url(${path})`;
-    this.$img.src = path;
+    const imageURL = QmlWeb.engine.$resolveImageURL(source);
+    style.OBorderImageSource = `url("${imageURL}")`;
+    style.borderImageSource = `url("${imageURL}")`;
+    this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;
       this.status = this.BorderImage.Ready;

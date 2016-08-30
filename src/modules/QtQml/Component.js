@@ -47,17 +47,17 @@ class QMLComponent {
     }
   }
   finalizeImports($context) {
+    const engine = QmlWeb.engine;
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
-      const src = QmlWeb.engine.$resolvePath(importDesc[1]);
-      let js;
+      const js = engine.loadJS(engine.$resolvePath(importDesc[1]));
 
-      if (typeof QmlWeb.qrc[src] !== "undefined") {
-        js = QmlWeb.qrc[src];
-      } else {
-        QmlWeb.loadParser();
-        js = QmlWeb.jsparse(QmlWeb.getUrlContents(src));
+      if (!js) {
+        console.log("Component.finalizeImports: failed to import JavaScript",
+          importDesc[1]);
+        continue;
       }
+
       if (importDesc[3] !== "") {
         $context[importDesc[3]] = {};
         QmlWeb.importJavascriptInContext(js, $context[importDesc[3]]);
