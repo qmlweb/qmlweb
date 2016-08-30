@@ -117,40 +117,7 @@ const Qt = {
 
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
-  resolvedUrl: url => {
-    if (!url || !url.substr) {
-      // url is not a string object
-      return url;
-    }
-
-    const engine = QmlWeb.engine;
-
-    // Must check for cases: D:/, file://, http://, or slash at the beginning.
-    // This means the url is absolute => we have to skip processing
-    // (except removing dot segments).
-    if (url === "" || url.indexOf(":/") !== -1 || url.indexOf("/") === 0) {
-      return engine.removeDotSegments(url);
-    }
-
-    // we have $basePath variable placed in context of "current" document
-    // this is done in construct() function
-
-    // let's go to the callers and inspect their arguments
-    // The 2-nd argument of the callers we hope is context object
-    // e.g. see calling signature of bindings and signals
-
-    let detectedBasePath = "";
-    let currentCaller = Qt.resolvedUrl.caller;
-    let maxcount = 10;
-    while (maxcount-- > 0 && currentCaller) {
-      if (currentCaller.arguments[1] && currentCaller.arguments[1].$basePath) {
-        detectedBasePath = currentCaller.arguments[1].$basePath;
-        break;
-      }
-      currentCaller = currentCaller.caller;
-    }
-    return engine.removeDotSegments(detectedBasePath + url);
-  },
+  resolvedUrl: url => QmlWeb.qmlUrl(url),
 
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);

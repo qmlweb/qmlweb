@@ -38,15 +38,11 @@ QmlWeb.registerQmlType({
       this.$onSourceComponentChanged(this.sourceComponent);
     }
   }
-  $onSourceChanged(newVal) {
-    // if (newVal == this.$sourceUrl && this.item !== undefined) return; // TODO
+  $onSourceChanged(fileName) {
+    // TODO
+    // if (fileName == this.$sourceUrl && this.item !== undefined) return;
     if (!this.active) return;
     this.$unload();
-
-    // TODO: we require ".qml" for now, that should be fixed
-    if (newVal.length <= 4) return;
-    if (newVal.substr(newVal.length - 4, 4) !== ".qml") return;
-    const fileName = newVal.substring(0, newVal.length - 4);
 
     const tree = QmlWeb.engine.loadComponent(fileName);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
@@ -59,7 +55,7 @@ QmlWeb.registerQmlType({
       qmlComponent.importContextId);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
-    this.$sourceUrl = newVal;
+    this.$sourceUrl = fileName;
   }
   $onSourceComponentChanged(newItem) {
     if (!this.active) return;

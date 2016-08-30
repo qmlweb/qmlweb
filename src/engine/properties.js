@@ -119,7 +119,8 @@ function applyProperty(item, i, value, objectScope, componentScope) {
 
   if (value instanceof QmlWeb.QMLMethod) {
     value.compile();
-    item[i] = value.eval(objectScope, componentScope);
+    item[i] = value.eval(objectScope, componentScope,
+      componentScope.$basePath);
     if (item.$isComponentRoot) {
       componentScope[i] = item[i];
     }
@@ -136,6 +137,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     //    incapsulated object. (think twice).
     createProperty("alias", item, i);
     item.$properties[i].componentScope = componentScope;
+    item.$properties[i].componentScopeBasePath = componentScope.$basePath;
     item.$properties[i].val = value;
     item.$properties[i].get = function() {
       const obj = this.componentScope[this.val.objectName];
@@ -227,12 +229,15 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     value.src = `(
       function(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
+        QmlWeb.engine.$basePath = "${componentScope.$basePath}";
         ${value.src}
       }
     )`;
     value.isFunction = false;
     value.compile();
   }
+  // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
+  // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(objectScope, componentScope);
   item[signalName].connect(item, slot);
   return slot;

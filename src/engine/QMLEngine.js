@@ -156,7 +156,12 @@ class QMLEngine {
 
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parentComponent = null) {
-    this.$basePath = this.extractBasePath(file);
+    // Create an anchor element to get the absolute path from the DOM
+    if (!this.$basePathA) {
+      this.$basePathA = document.createElement("a");
+    }
+    this.$basePathA.href = this.extractBasePath(file);
+    this.$basePath = this.$basePathA.href;
     this.ensureFileIsLoadedInQrc(file);
     const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
     return this.loadQMLTree(tree, parentComponent, file);
@@ -472,13 +477,12 @@ class QMLEngine {
     this._tickers.forEach(ticker => ticker(now, elapsed));
   }
 
-  // Load file, parse and construct as Component (.qml)
-  loadComponent(name) {
-    if (name in this.components) {
-      return this.components[name];
+  // Load already-resolved file, parse and construct as Component (.qml)
+  loadComponent(file) {
+    if (file in this.components) {
+      return this.components[file];
     }
 
-    const file = QmlWeb.engine.$resolvePath(`${name}.qml`);
     this.ensureFileIsLoadedInQrc(file);
     const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
     tree.$file = file;
@@ -542,11 +546,31 @@ class QMLEngine {
   // Return a path to load the file
   $resolvePath(file) {
     // probably, replace :// with :/ ?
-    if (file === "" || file.indexOf("://") !== -1 || file.indexOf("/") === 0 ||
-        file.indexOf("data:") === 0 || file.indexOf("blob:") === 0) {
+    if (file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
+      file.indexOf("blob:") === 0) {
       return file;
     }
-    return this.$basePath + file;
+
+    let schemeAuthority;
+    let path;
+    const match = this.$basePath.match(/^([^\/]*?:\/\/.*?)(\/.*)$/);
+    if (match) {
+      schemeAuthority = match[1];
+      path = match[2];
+    } else {
+      return file;
+    }
+
+    if (file.indexOf("/") === 0) {
+      path = file;
+    } else {
+      path = `${path}/${file}`;
+    }
+
+    // Remove duplicate slashes and dot segments in the path
+    path = this.removeDotSegments(path.replace(/([^:]\/)\/+/g, "$1"));
+
+    return `${schemeAuthority}${path}`;
   }
 
   $initializeAliasSignals() {

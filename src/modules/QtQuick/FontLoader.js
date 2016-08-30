@@ -110,7 +110,7 @@ Refs: https://github.com/smnh/FontLoader.`);
     const fontName = `font_${Date.now().toString(36)}_${rand.toString(36)}`;
     this.$domStyle.innerHTML = `@font-face {
       font-family: ${fontName};
-      src: url('${QmlWeb.engine.$resolvePath(font_src)}');
+      src: url('${font_src}');
     }`;
     document.getElementsByTagName("head")[0].appendChild(this.$domStyle);
     this.$loadFont(fontName);
