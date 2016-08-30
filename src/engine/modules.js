@@ -10,7 +10,7 @@ const modules = {
     list: QmlWeb.qmlList,
     color: QmlWeb.QColor,
     enum: QmlWeb.qmlNumber,
-    url: QmlWeb.qmlString,
+    url: QmlWeb.qmlUrl,
     variant: QmlWeb.qmlVariant,
     var: QmlWeb.qmlVariant
   }

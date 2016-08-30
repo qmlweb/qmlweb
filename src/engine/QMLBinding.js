@@ -28,8 +28,12 @@ class QMLBinding {
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
   compile() {
-    this.eval = new Function("__executionObject", "__executionContext", `
+    this.eval = new Function("__executionObject", "__executionContext",
+      "__basePath", `
       QmlWeb.executionContext = __executionContext;
+      if (__basePath) {
+        QmlWeb.engine.$basePath = __basePath;
+      }
       with(QmlWeb) with(__executionContext) with(__executionObject) {
         ${this.isFunction ? "" : "return"} ${this.src}
         }

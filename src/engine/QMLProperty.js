@@ -73,8 +73,8 @@ class QMLProperty {
       if (!this.binding.eval) {
         this.binding.compile();
       }
-      this.$setVal(this.binding.eval(this.objectScope, this.componentScope),
-        this.componentScope);
+      this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
+        this.componentScopeBasePath), this.componentScope);
     } catch (e) {
       console.log("QMLProperty.update binding error:",
         e,
@@ -136,6 +136,7 @@ class QMLProperty {
       this.binding = val;
       this.objectScope = objectScope;
       this.componentScope = componentScope;
+      this.componentScopeBasePath = componentScope.$basePath;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         if (!val.eval) {
@@ -144,7 +145,8 @@ class QMLProperty {
         try {
           QMLProperty.pushEvaluatingProperty(this);
           this.needsUpdate = false;
-          val = this.binding.eval(objectScope, componentScope);
+          val = this.binding.eval(objectScope, componentScope,
+            this.componentScopeBasePath);
         } finally {
           QMLProperty.popEvaluatingProperty();
         }
