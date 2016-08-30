@@ -17,8 +17,11 @@ class QMLEngine {
     this.running = false;
     this.rootElement = element;
 
-    // List of available Components
+    // Cached component trees (post-QmlWeb.convertToEngine)
     this.components = {};
+
+    // Cached parsed JS files (post-QmlWeb.jsparse)
+    this.js = {};
 
     // List of Component.completed signals
     this.completedSignals = [];
@@ -93,22 +96,6 @@ class QMLEngine {
     }
   }
 
-  ensureFileIsLoadedInQrc(file) {
-    if (QmlWeb.qrc.hasOwnProperty(file)) {
-      return;
-    }
-
-    const src = QmlWeb.getUrlContents(file);
-    if (!src) {
-      console.log("Can not load file [", file, "]");
-      return;
-    }
-
-    QmlWeb.loadParser();
-    console.log("Loading file [", file, "]");
-    QmlWeb.qrc[file] = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
-  }
-
   // eslint-disable-next-line max-len
   /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
    *
@@ -162,13 +149,13 @@ class QMLEngine {
     }
     this.$basePathA.href = this.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
-    this.ensureFileIsLoadedInQrc(file);
-    const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
+    const tree = this.loadComponent(this.$resolvePath(file));
     return this.loadQMLTree(tree, parentComponent, file);
   }
 
   // parse and construct qml
   // file is not required; only for debug purposes
+  // This function is only used by the QmlWeb tests
   loadQML(src, parentComponent = null, file = undefined) {
     return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
   }
@@ -344,11 +331,7 @@ class QMLEngine {
     const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl;
 
     if (nameIsDir) {
-      // resolve name from relative to full dir path
-      // we hope all dirs are relative
-      if (currentFileDir && currentFileDir.length > 0) {
-        name = this.removeDotSegments(currentFileDir + name);
-      }
+      name = this.$resolvePath(name, currentFileDir);
       if (name[name.length - 1] === "/") {
         // remove trailing slash as it required for `readQmlDir`
         name = name.substr(0, name.length - 1);
@@ -477,17 +460,55 @@ class QMLEngine {
     this._tickers.forEach(ticker => ticker(now, elapsed));
   }
 
-  // Load already-resolved file, parse and construct as Component (.qml)
+  // Load resolved file, parse and construct as Component (.qml)
   loadComponent(file) {
     if (file in this.components) {
       return this.components[file];
     }
 
-    this.ensureFileIsLoadedInQrc(file);
-    const tree = QmlWeb.convertToEngine(QmlWeb.qrc[file]);
+    const uri = this.$parseURI(file);
+    if (!uri) {
+      return undefined;
+    }
+
+    let tree;
+    if (uri.scheme === "qrc://") {
+      tree = QmlWeb.qrc[uri.path];
+    } else {
+      const src = QmlWeb.getUrlContents(file);
+      if (!src) {
+        console.log("Can not load file [", file, "]");
+        return undefined;
+      }
+
+      QmlWeb.loadParser();
+      console.log("Loading file [", file, "]");
+      tree = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
+    }
+
+    tree = QmlWeb.convertToEngine(tree);
     tree.$file = file;
-    this.components[name] = tree;
+    this.components[file] = tree;
     return tree;
+  }
+
+  // Load resolved file and parse as JavaScript
+  loadJS(file) {
+    if (file in this.js) {
+      return this.js[file];
+    }
+
+    const uri = this.$parseURI(file);
+    if (!uri) {
+      return undefined;
+    }
+
+    if (uri.scheme === "qrc://") {
+      return QmlWeb.qrc[uri.path];
+    }
+
+    QmlWeb.loadParser();
+    return QmlWeb.jsparse(QmlWeb.getUrlContents(file));
   }
 
   $registerStart(f) {
@@ -543,34 +564,58 @@ class QMLEngine {
     this.$initializeAliasSignals();
   }
 
+  // This parses the full URL into scheme, authority and path
+  $parseURI(uri) {
+    const match = uri.match(/^([^\/]*?:\/\/)(.*?)(\/.*)$/);
+    if (match) {
+      return {
+        scheme: match[1],
+        authority: match[2],
+        path: match[3]
+      };
+    }
+    return undefined;
+  }
+
   // Return a path to load the file
-  $resolvePath(file) {
+  $resolvePath(file, basePath = this.$basePath) {
     // probably, replace :// with :/ ?
     if (file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
       file.indexOf("blob:") === 0) {
       return file;
     }
 
-    let schemeAuthority;
-    let path;
-    const match = this.$basePath.match(/^([^\/]*?:\/\/.*?)(\/.*)$/);
-    if (match) {
-      schemeAuthority = match[1];
-      path = match[2];
-    } else {
+    const basePathURI = this.$parseURI(basePath);
+    if (!basePathURI) {
       return file;
     }
 
+    let path = basePathURI.path;
     if (file.indexOf("/") === 0) {
       path = file;
     } else {
-      path = `${path}/${file}`;
+      path = `${path}${file}`;
     }
 
     // Remove duplicate slashes and dot segments in the path
     path = this.removeDotSegments(path.replace(/([^:]\/)\/+/g, "$1"));
 
-    return `${schemeAuthority}${path}`;
+    return `${basePathURI.scheme}${basePathURI.authority}${path}`;
+  }
+
+  // Return a DOM-valid path to load the image (fileURL is an already-resolved
+  // URL)
+  $resolveImageURL(fileURL) {
+    const uri = this.$parseURI(fileURL);
+    // If we are within the resource system, look up a "real" path that can be
+    // used by the DOM. If not found, return the path itself without the
+    // "qrc://" scheme.
+    if (uri && uri.scheme === "qrc://") {
+      return QmlWeb.qrc[uri.path] || uri.path;
+    }
+
+    // Something we can't parse, just pass it through
+    return fileURL;
   }
 
   $initializeAliasSignals() {
