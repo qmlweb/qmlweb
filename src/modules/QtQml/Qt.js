@@ -18,49 +18,31 @@ const Qt = {
   // Load file, parse and construct as Component (.qml)
   createComponent: name => {
     const engine = QmlWeb.engine;
-    if (name in engine.components) {
-      return engine.components[name];
-    }
 
-    // e.g. // in protocol, or :/ in disk urls (D:/)
-    let nameIsUrl = name.indexOf("//") === 0 || name.indexOf(":/") >= 0;
+    let file = engine.$resolvePath(name);
 
-    let resolvedName;
-    if (name.length > 0 && name[0] === "@") {
-      // Do not perform path lookups if name starts with @ sign.
-      // This is used when we load components from qmldir files because in that
-      // case we do not need any lookups.
-      nameIsUrl = true;
-      resolvedName = name.substr(1, name.length - 1);
-    } else {
-      resolvedName = name;
-    }
+    // If "name" was a full URL, "file" will be equivalent to name and this
+    // will try and load the Component from the full URL, otherwise, this
+    // doubles as checking for the file in the current directory.
+    let tree = engine.loadComponent(file);
 
-    let file = nameIsUrl ? resolvedName : engine.$resolvePath(resolvedName);
-    let src = QmlWeb.getUrlContents(file, true);
-
-    // if failed to load, and provided name is not direct url,
-    // try to load from dirs in importPathList()
-    if (!src && !nameIsUrl) {
-      const moredirs = engine.importSearchPaths(
-        QmlWeb.executionContext.importContextId);
-      for (let i = 0; i < moredirs.length; i++) {
-        file = moredirs[i] + resolvedName;
-        src = QmlWeb.getUrlContents(file, true);
-        if (src !== false) break;
+    // If the Component is not found, and it is not a URL, look for "name" in
+    // this context's importSearchPaths
+    if (!tree) {
+      const nameIsUrl = engine.$parseURI(name) !== undefined;
+      if (!nameIsUrl) {
+        const moreDirs = engine.importSearchPaths(
+          QmlWeb.executionContext.importContextId);
+        for (let i = 0; i < moreDirs.length; i++) {
+          file = `${moreDirs[i]}${name}`;
+          tree = engine.loadComponent(file);
+          if (tree) break;
+        }
       }
     }
 
-    // When createComponent failed to load content from all probable sources,
-    // it should return undefined.
-    if (src === false) {
+    if (!tree) {
       return undefined;
-    }
-
-    const tree = QmlWeb.parseQML(src, file);
-
-    if (tree.$children.length !== 1) {
-      console.error("A QML component must only contain one root element!");
     }
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");

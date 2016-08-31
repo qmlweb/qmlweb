@@ -215,7 +215,6 @@ function callSuper(self, meta) {
  */
 function construct(meta) {
   let item;
-  let component;
 
   let constructors = perImportContextConstructors[meta.context.importContextId];
 
@@ -250,22 +249,20 @@ function construct(meta) {
      * for Qt.createComponent to have the correct context. */
     QmlWeb.executionContext = meta.context;
 
-    const Qt = QmlWeb.Qt;
+    let filePath;
     if (qdirInfo) {
-      // We have that component in some qmldir, load it from qmldir's url
-      component = Qt.createComponent(`@${qdirInfo.url}`);
+      filePath = qdirInfo.url;
+    } else
+    if (classComponents.length === 2) {
+      const qualified = QmlWeb.engine.qualifiedImportPath(
+        meta.context.importContextId, classComponents[0]
+      );
+      filePath = `${qualified}${classComponents[1]}.qml`;
     } else {
-      let filePath;
-      if (classComponents.length === 2) {
-        const qualified = QmlWeb.engine.qualifiedImportPath(
-          meta.context.importContextId, classComponents[0]
-        );
-        filePath = qualified + classComponents[1];
-      } else {
-        filePath = classComponents[0];
-      }
-      component = Qt.createComponent(`${filePath}.qml`);
+      filePath = `${classComponents[0]}.qml`;
     }
+
+    const component = QmlWeb.Qt.createComponent(filePath);
 
     if (!component) {
       throw new Error(`No constructor found for ${meta.object.$class}`);
