@@ -474,19 +474,33 @@ class QMLEngine {
     let tree;
     if (uri.scheme === "qrc://") {
       tree = QmlWeb.qrc[uri.path];
+      if (!tree) {
+        return undefined;
+      }
+      // QmlWeb.qrc contains pre-parsed Component objects, but they still need
+      // convertToEngine called on them.
+      tree = QmlWeb.convertToEngine(tree);
     } else {
-      const src = QmlWeb.getUrlContents(file);
+      const src = QmlWeb.getUrlContents(file, true);
       if (!src) {
-        console.log("Can not load file [", file, "]");
+        console.error("QMLEngine.loadComponent: Failed to load:", file);
         return undefined;
       }
 
-      QmlWeb.loadParser();
-      console.log("Loading file [", file, "]");
-      tree = QmlWeb.parse(src, QmlWeb.parse.QMLDocument);
+      console.log("QMLEngine.loadComponent: Loading file:", file);
+      tree = QmlWeb.parseQML(src, file);
     }
 
-    tree = QmlWeb.convertToEngine(tree);
+    if (!tree) {
+      return undefined;
+    }
+
+    if (tree.$children.length !== 1) {
+      console.error("QMLEngine.loadComponent: Failed to load:", file,
+        ": A QML component must only contain one root element!");
+      return undefined;
+    }
+
     tree.$file = file;
     this.components[file] = tree;
     return tree;
