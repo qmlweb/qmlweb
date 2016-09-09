@@ -34,30 +34,12 @@ Rectangle {
 
 Using one of the methods below, install the qmlweb JavaScript library:
 
-* [npm](https://www.npmjs.com/package/qmlweb):
-
-  ```sh
-  npm install qmlweb
-  ```
-
-* [Bower](http://bower.io/search/?q=qmlweb):
-
-  ```sh
-  bower install qmlweb
-  ```
-
-* GitHub [releases](https://github.com/qmlweb/qmlweb/releases):
-
-  ```sh
-  tar -xzvf v0.0.4.tar.gz
-  ```
-
-* Manually using gulp (recommended if you cloned from git):
-
-  ```sh
-  npm install
-  npm run build
-  ```
+* [npm](https://www.npmjs.com/package/qmlweb) — `npm install qmlweb`
+* [Bower](http://bower.io/search/?q=qmlweb) — `bower install qmlweb`
+* GitHub [releases](https://github.com/qmlweb/qmlweb/releases) —
+  `tar -xaf v0.2.0.tar.gz`
+* Manually using gulp (recommended if you cloned from git) —
+  `npm install && npm run build`
 
 Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's
 HTML file:
