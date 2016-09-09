@@ -89,60 +89,7 @@ See [gulp-qmlweb](https://github.com/qmlweb/gulp-qmlweb) package.
 
 ## How to extend
 
-When implementing new features, you may need to get away from QML and create
-your own QML components from scratch, using directly the engine's API.
-
-```Javascript
-registerQmlType({
-  module:   'MyModule',
-  name:     'MyTypeName',
-  baseClass: 'QtQuick.Item',
-  versions: /^1(\.[0-3])?$/, // that regexp must match the version number for the import to work
-  constructor: function(meta) {
-    callSuper(this, meta);
-
-    var self = this;
-
-    // Managing properties
-    createProperty("var", this, "data"); // creates a property 'data' of undefined type
-    // creates a property 'name' of type string, with a default value
-    createProperty("string", this, "name", { initialValue: 'default name' });
-
-    // Signals
-    this.somethingHappened = Signal(); // creates a signal somethingHappened
-
-    this.somethingHappened.connect(this, function() {
-      console.log('You may also connect to signals in JavaScript');
-    });
-
-    // Using the DOM
-    function updateText() {
-      var text = '';
-      for (var i = 0 ; i < self.data.length ; ++i)
-        text += '[' + data[i] + '] ';
-      self.dom.textContent = text; // Updating the dom
-      self.somethingHappened(); // triggers the 'somethingHappened' signal.
-    }
-
-    // Run updateText once, ensure it'll be executed whenever the 'data' property changes.
-    updateText();
-    this.onDataChanged.connect(this, updateText);
-  }
-});
-```
-
-And here's how you would use that component in a regular QML file:
-
-```QML
-import MyModule 1.3
-
-MyTypeName {
-  name: 'el nombre'
-  data: [ 1, 2, 3 ]
-
-  onSomethingHappened: console.log(data)
-}
-```
+See [Extending](docs/Extending.md).
 
 ## History
 
