@@ -337,8 +337,6 @@ class QMLEngine {
         name = name.substr(0, name.length - 1);
       }
     }
-    // TODO if nameIsDir, we have also to add `name` to importPathList() for
-    // current component...
 
     let content = this.qmldirsContents[name];
     // check if we have already loaded that qmldir file
