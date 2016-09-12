@@ -15,6 +15,7 @@ QmlWeb.registerQmlType({
     this.border = new QmlWeb.QObject(this);
     createProperty("color", this.border, "color", { initialValue: "black" });
     createProperty("int", this.border, "width", { initialValue: 1 });
+    this.$borderActive = false;
 
     const bg = this.impl = document.createElement("div");
     bg.style.pointerEvents = "none";
@@ -37,83 +38,26 @@ QmlWeb.registerQmlType({
     this.impl.style.backgroundColor = new QmlWeb.QColor(newVal);
   }
   border$onColorChanged(newVal) {
-    const style = this.impl.style;
-    style.borderColor = new QmlWeb.QColor(newVal);
-    if (style.borderWidth === "0px") {
-      style.borderWidth = `${this.border.width}px`;
-    }
+    this.$borderActive = true;
+    this.impl.style.borderColor = new QmlWeb.QColor(newVal);
     this.$updateBorder();
   }
-  border$onWidthChanged(newVal) {
-    // ignore negative border width
-    if (newVal < 0) {
-      this.impl.style.borderWidth = "0px";
-      return;
-    }
+  border$onWidthChanged() {
+    this.$borderActive = true;
     this.$updateBorder();
   }
   $onRadiusChanged(newVal) {
     this.impl.style.borderRadius = `${newVal}px`;
   }
   $updateBorder() {
-    const size = this.border.width;
+    const border = this.$borderActive ? Math.max(0, this.border.width) : 0;
     const style = this.impl.style;
-
-    // ignore negative border width
-    if (size < 0) {
-      return;
-    }
-
-    // no Rectangle border width was set yet
-    if ((size === 1 || typeof size === "undefined") &&
-        style.borderWidth === "0px") {
-      return;
-    }
-
-    let topBottom = typeof size === "undefined" ?
-                      style.borderWidth :
-                      `${size}px`;
-    let leftRight = topBottom;
-
-    style.borderTopWidth = topBottom;
-    style.borderBottomWidth = topBottom;
-    style.borderLeftWidth = leftRight;
-    style.borderRightWidth = leftRight;
-
-    // hide border if any of dimensions is less then one
-    if (this.width <= 0 || typeof this.width === "undefined" ||
-        this.height <= 0 || typeof this.height === "undefined") {
+    if (border * 2 > this.width || border * 2 > this.height) {
+      // Border is covering the whole background
       style.borderWidth = "0px";
-      return;
+      style.borderTopWidth = `${this.height}px`;
+    } else {
+      style.borderWidth = `${border}px`;
     }
-
-    // check if border is not greater than Rectangle size
-    // react by change of width or height of div (in css)
-    if (this.height < 2 * this.border.width) {
-      topBottom = `${this.height / 2}px`;
-      style.height = "0px";
-    } else if (this.height > 2 && this.height < 3 * this.border.width) {
-      // TODO: what??
-      const height = this.height % 2
-                        ? -1
-                        : -2 + 2 * this.height - 2 * this.border.width;
-      style.height = `${height}px`;
-    }
-
-    if (this.width < 2 * this.border.width) {
-      leftRight = `${this.width / 2}px`;
-      style.width = "0px";
-    } else if (this.width > 2 && this.width < 3 * this.border.width) {
-      // TODO: what??
-      const width = this.width % 2
-                      ? -1
-                      : -2 + 2 * this.width - 2 * this.border.width;
-      style.width = `${width}px`;
-    }
-
-    style.borderTopWidth = topBottom;
-    style.borderBottomWidth = topBottom;
-    style.borderLeftWidth = leftRight;
-    style.borderRightWidth = leftRight;
   }
 });
