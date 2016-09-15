@@ -26,8 +26,37 @@ class QMLBinding {
   }
 
   eval(object, context, basePath) {
-    // .call is needed for `this` support
-    return this.impl.call(object, object, context, basePath);
+    if (this.impl) {
+      // .call is needed for `this` support
+      return this.impl.call(object, object, context, basePath);
+    }
+    if (this.src === "this") {
+      return object;
+    }
+
+    const path = this.path;
+    const varname = path[0];
+
+    QmlWeb.executionContext = context;
+    if (basePath) {
+      QmlWeb.engine.$basePath = basePath;
+    }
+
+    let base;
+    if (varname in object) {
+      base = object[varname];
+    } else if (varname in context) {
+      base = context[varname];
+    } else if (varname in QmlWeb) {
+      base = QmlWeb[varname];
+    } else {
+      throw new ReferenceError(`${varname} is not defined`);
+    }
+
+    for (let i = 1; i < path.length; i++) {
+      base = base[path[i]];
+    }
+    return base;
   }
 
 /**
@@ -35,7 +64,16 @@ class QMLBinding {
  */
   compile() {
     this.src = this.src.trim();
-    this.impl = QMLBinding.bindSrc(this.src, this.isFunction);
+    if (!this.isFunction && /^[a-zA-Z$_][a-zA-Z0-9$_.]*$/.test(this.src)) {
+      // A simple variable reference
+      this.path = this.src.split(".");
+      if (this.path[0] === "this") {
+        this.path.shift();
+      }
+    } else {
+      // A complex expression
+      this.impl = QMLBinding.bindSrc(this.src, this.isFunction);
+    }
     this.compiled = true;
   }
 
