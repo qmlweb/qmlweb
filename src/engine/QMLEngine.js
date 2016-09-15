@@ -142,7 +142,7 @@ class QMLEngine {
   }
 
   extractFileName(file) {
-    return file.split('\\').pop().split('/').pop();
+    return file.split(/[\/\\]/).pop();
   }
 
   // Load file, parse and construct (.qml or .qml.js)
