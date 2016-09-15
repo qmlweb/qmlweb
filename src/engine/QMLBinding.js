@@ -14,6 +14,7 @@ class QMLBinding {
     this.isFunction = tree && tree[0] === "block" &&
                       tree[1][0] && tree[1][0][0] !== "label";
     this.src = val;
+    this.compiled = false;
   }
 
   toJSON() {
@@ -24,19 +25,30 @@ class QMLBinding {
     };
   }
 
+  eval(object, context, basePath) {
+    // .call is needed for `this` support
+    return this.impl.call(object, object, context, basePath);
+  }
+
 /**
  * Compile binding. Afterwards you may call binding.eval to evaluate.
  */
   compile() {
-    this.eval = new Function("__executionObject", "__executionContext",
+    this.src = this.src.trim();
+    this.impl = QMLBinding.bindSrc(this.src, this.isFunction);
+    this.compiled = true;
+  }
+
+  static bindSrc(src, isFunction) {
+    return new Function("__executionObject", "__executionContext",
       "__basePath", `
       QmlWeb.executionContext = __executionContext;
       if (__basePath) {
         QmlWeb.engine.$basePath = __basePath;
       }
       with(QmlWeb) with(__executionContext) with(__executionObject) {
-        ${this.isFunction ? "" : "return"} ${this.src}
-        }
+        ${isFunction ? "" : "return"} ${src}
+      }
     `);
   }
 }

@@ -70,7 +70,7 @@ class QMLProperty {
 
     try {
       QMLProperty.pushEvaluatingProperty(this);
-      if (!this.binding.eval) {
+      if (!this.binding.compiled) {
         this.binding.compile();
       }
       this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
@@ -139,7 +139,7 @@ class QMLProperty {
       this.componentScopeBasePath = componentScope.$basePath;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        if (!val.eval) {
+        if (!val.compiled) {
           val.compile();
         }
         try {

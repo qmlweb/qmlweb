@@ -63,4 +63,11 @@ describe("QMLEngine.bindings", function() {
     qml.value++;
     expect(qml.bindingArray[3][1]).toBe(3);
   });
+
+  it("this", function() {
+    var qml = load("This", this.div);
+    expect(qml.intA).toBe(10);
+    expect(qml.intB).toBe(20);
+    expect(qml.foo()).toBe(30);
+  });
 });

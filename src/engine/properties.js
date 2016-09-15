@@ -221,7 +221,7 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     return undefined;
   }
 
-  if (!value.eval) {
+  if (!value.compiled) {
     const params = [];
     for (const j in item[signalName].parameters) {
       params.push(item[signalName].parameters[j].name);
