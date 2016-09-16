@@ -141,6 +141,10 @@ class QMLEngine {
     return basePath.join("/");
   }
 
+  extractFileName(file) {
+    return file.split(/[\/\\]/).pop();
+  }
+
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parentComponent = null) {
     // Create an anchor element to get the absolute path from the DOM
@@ -149,7 +153,8 @@ class QMLEngine {
     }
     this.$basePathA.href = this.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
-    const tree = this.loadComponent(this.$resolvePath(file));
+    const fileName = this.extractFileName(file);
+    const tree = this.loadComponent(this.$resolvePath(fileName));
     return this.loadQMLTree(tree, parentComponent, file);
   }
 
