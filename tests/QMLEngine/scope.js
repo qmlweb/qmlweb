@@ -72,4 +72,14 @@ describe("QMLEngine.scope", function() {
       expect(qml.bar).toBe(42);
     }
   );
+
+  it("delegates in Repeaters have roles in scope",
+    function(done) {
+      var qml = load("Repeater", this.div);
+      qml.yield = function(width) {
+        expect(width).toBe(200);
+        done();
+      };
+    }
+  );
 });
