@@ -139,7 +139,6 @@ QmlWeb.registerQmlType({
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject();
       createProperty("int", newItem, "index", { initialValue: index });
-      newItem.parent = this.parent;
 
       // To properly import JavaScript in the context of a component
       this.delegate.finalizeImports();
@@ -165,6 +164,11 @@ QmlWeb.registerQmlType({
       }
 
       this.$items.splice(index, 0, newItem);
+
+      // parent must be set after the roles have been added to newItem scope in
+      // case we are outside of QMLOperationState.Init and parentChanged has
+      // any side effects that result in those roleNames being referenced.
+      newItem.parent = this.parent;
 
       // TODO debug this. Without check to Init, Completed sometimes called
       // twice.. But is this check correct?
