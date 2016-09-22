@@ -127,10 +127,13 @@ QmlWeb.registerQmlType({
     this.count = this.$items.length;
   }
   $_onModelReset() {
-    this.$removeChildren(0, this.$items.length);
+    this.$applyModel();
   }
   $insertChildren(startIndex, endIndex) {
-    if (endIndex <= 0) return;
+    if (endIndex <= 0) {
+      this.count = 0;
+      return;
+    }
 
     const QMLOperationState = QmlWeb.QMLOperationState;
     const createProperty = QmlWeb.createProperty;
