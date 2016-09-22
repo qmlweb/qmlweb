@@ -86,5 +86,6 @@ QmlWeb.registerQmlType({
   }
   setProperty(index, property, value) {
     this.$items[index][property] = value;
+    this.$model.dataChanged(index, index);
   }
 });
