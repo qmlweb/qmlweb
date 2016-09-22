@@ -150,7 +150,8 @@ QmlWeb.registerQmlType({
         const value = model instanceof Array ?
                       model[index] :
                       typeof model === "number" ? index : "undefined";
-        newItem.$properties.modelData.set(value, true, newItem, model.$context);
+        newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInit,
+          newItem, model.$context);
       } else {
         for (let i = 0; i < model.roleNames.length; i++) {
           const roleName = model.roleNames[i];
@@ -158,7 +159,8 @@ QmlWeb.registerQmlType({
             createProperty("variant", newItem, roleName);
           }
           newItem.$properties[roleName].set(
-            model.data(index, roleName), true, newItem, this.model.$context
+            model.data(index, roleName), QmlWeb.QMLProperty.ReasonInit,
+            newItem, this.model.$context
           );
         }
       }
