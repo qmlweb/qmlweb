@@ -10,4 +10,17 @@ Item {
   Component.onCompleted: {
     localSet = "localSet.png"
   }
+  /* These are required as they force some slots to run in this context when
+   * things are done in PropertiesUrl. This tests that running slots in this
+   * context doesn't have any unintended consequences. The "return" statements
+   * are to ensure that slot handling continues after a return. */
+  onRemoteSetChanged: {
+      return
+  }
+  onRemoteBindingSimpleChanged: {
+      return
+  }
+  onRemoteBindingChanged: {
+      return
+  }
 }
