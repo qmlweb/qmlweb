@@ -56,9 +56,9 @@ QmlWeb.registerQmlType({
     this.$model.rowsInserted(index, index + c);
   }
   clear() {
-    this.$model.modelReset();
     this.$items.length = 0;
     this.count = 0;
+    this.$model.modelReset();
   }
   get(index) {
     return this.$items[index];
