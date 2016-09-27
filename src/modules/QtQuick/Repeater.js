@@ -154,9 +154,6 @@ QmlWeb.registerQmlType({
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
 
-      // To properly import JavaScript in the context of a component
-      this.delegate.finalizeImports();
-
       if (typeof model === "number" || model instanceof Array) {
         if (typeof newItem.$properties.modelData === "undefined") {
           createProperty("variant", newItem, "modelData");
