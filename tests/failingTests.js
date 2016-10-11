@@ -16,6 +16,11 @@ window.failingTests = {
       "object id should override same-named property of base object"
     ]
   },
+  QtQuick: {
+    Timer: [
+      "can roughly set short intervals" // flaky
+    ]
+  },
   Initialize: {
     QtQuick: [
       "Translate",
