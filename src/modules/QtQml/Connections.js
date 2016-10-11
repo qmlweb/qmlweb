@@ -31,8 +31,10 @@ QmlWeb.registerQmlType({
           typeof old_target[i].disconnect === "function") {
         old_target[i].disconnect(c._currentConnection);
       }
-      c._currentConnection = QmlWeb.connectSignal(this.target, i, c.value,
-                                           c.objectScope, c.componentScope);
+      if (this.target) {
+        c._currentConnection = QmlWeb.connectSignal(this.target, i, c.value,
+          c.objectScope, c.componentScope);
+      }
     }
     this.$old_target = this.target;
   }
