@@ -226,11 +226,16 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     for (const j in item[signalName].parameters) {
       params.push(item[signalName].parameters[j].name);
     }
+    // Wrap value.src in IIFE in case it includes a "return"
     value.src = `(
       function(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
+        QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
         QmlWeb.engine.$basePath = "${componentScope.$basePath}";
-        ${value.src}
+        (function() {
+          ${value.src}
+        })();
+        QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
       }
     )`;
     value.isFunction = false;
