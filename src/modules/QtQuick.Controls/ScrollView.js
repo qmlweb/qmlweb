@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
     this.contentItemChanged.connect(this, this.$onContentItemChanged);
     this.flickableItemChanged.connect(this, this.$onFlickableItemChanged);
     this.viewportChanged.connect(this, this.$onViewportChanged);
-    this.frameVisibleChanged.connect(this, this.$onVisibleChanged);
+    this.frameVisibleChanged.connect(this, this.$onFrameVisibleChanged);
     this.highlightOnFocusChanged.connect(this, this.$onHighlightOnFocusChanged);
     this.horizontalScrollBarPolicyChanged.connect(this,
                                       this.$onHorizontalScrollBarPolicyChanged);
@@ -65,7 +65,7 @@ QmlWeb.registerQmlType({
       ? "outline: lightblue solid 2px;"
       : "";
   }
-  $onVisibleChanged(visible) {
+  $onFrameVisibleChanged(visible) {
     this.css.border = visible ? "1px solid gray" : "hidden";
   }
   $onHorizontalScrollBarPolicyChanged(newPolicy) {
