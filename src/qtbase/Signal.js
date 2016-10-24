@@ -58,12 +58,14 @@ class Signal {
     // type meaning:
     //  1 = function, 2 = string
     //  3 = object with string method,  4 = object with function
+    // No args means disconnect everything connected to this signal
     const callType = args.length === 1
       ? args[0] instanceof Function ? 1 : 2
       : typeof args[1] === "string" || args[1] instanceof String ? 3 : 4;
     for (let i = 0; i < this.connectedSlots.length; i++) {
       const { slot, thisObj } = this.connectedSlots[i];
       if (
+        args.length === 0 ||
         callType === 1 && slot === args[0] ||
         callType === 2 && thisObj === args[0] ||
         callType === 3 && thisObj === args[0] && slot === args[0][args[1]] ||
@@ -71,7 +73,9 @@ class Signal {
       ) {
         if (thisObj) {
           const index = thisObj.$tidyupList.indexOf(this.signal);
-          thisObj.$tidyupList.splice(index, 1);
+          if (index >= 0) {
+            thisObj.$tidyupList.splice(index, 1);
+          }
         }
         this.connectedSlots.splice(i, 1);
         // We have removed an item from the list so the indexes shifted one
