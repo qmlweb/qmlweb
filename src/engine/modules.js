@@ -76,7 +76,7 @@ function registerQmlType(options, constructor) {
 
   const descriptor = typeof options === "function" ? {
     module: options.module,
-    name: options.element,
+    name: options.element || options.name,
     versions: options.versions,
     baseClass: options.baseClass,
     enums: options.enums,
