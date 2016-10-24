@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject"
 }, class extends QmlWeb.QObject {
   constructor(parent) {
-    super(parent); // TODO: sallSuper support?
+    super(parent); // TODO: callSuper support?
     this.Font = global.Font; // TODO: make a sane enum
 
     const Font = this.Font;
