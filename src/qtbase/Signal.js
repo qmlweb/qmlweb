@@ -9,6 +9,11 @@ class Signal {
     this.signal.connect = this.connect.bind(this);
     this.signal.disconnect = this.disconnect.bind(this);
     this.signal.isConnected = this.isConnected.bind(this);
+
+    // XXX Fix Keys that don't have an obj for the signal
+    if (this.obj && this.obj.$signals !== undefined) {
+      this.obj.$signals.push(this.signal);
+    }
   }
   execute(...args) {
     QmlWeb.QMLProperty.pushEvalStack();

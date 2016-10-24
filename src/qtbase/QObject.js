@@ -10,6 +10,7 @@ class QObject {
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
     this.$properties = {};
+    this.$signals = [];
 
     this.objectId = objectIds++;
   }
@@ -46,6 +47,12 @@ class QObject {
     // 1) parent will be notified and erase object from it's children.
     // 2) DOM node will be removed.
     this.parent = undefined;
+
+    // Disconnect any slots connected to any of our signals. Do this after
+    // clearing the parent, as that relies on parentChanged being handled.
+    for (const i in this.$signals) {
+      this.$signals[i].disconnect();
+    }
   }
 
   // must have a `destroy` method
