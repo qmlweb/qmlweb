@@ -143,7 +143,7 @@ QmlWeb.registerQmlType({
     const model = this.$getModel();
     let index;
     for (index = startIndex; index < endIndex; index++) {
-      const newItem = this.delegate.$createObject();
+      const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
 
       // To properly import JavaScript in the context of a component
