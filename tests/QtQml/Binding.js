@@ -1,7 +1,7 @@
 describe("QtQuick.Binding", function() {
   setupDivElement();
 
-  var load = prefixedQmlLoader("QtQuick/qml/Binding");
+  var load = prefixedQmlLoader("QtQml/qml/Binding");
   it("one way binding", function() {
     var qml = load("OneWay", this.div);
     qml.sourceValue = 50;
