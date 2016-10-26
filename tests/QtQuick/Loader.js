@@ -26,4 +26,8 @@ describe("QtQuick.Loader", function() {
     };
     qml.start();
   });
+  it("set source to an empty string", function() {
+    const qml = load("EmptySource", this.div);
+    expect(qml.sourceComponent).toBe(null);
+  });
 });
