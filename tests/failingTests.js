@@ -24,6 +24,9 @@ window.failingTests = {
   QtQuick: {
     Timer: [
       "can roughly set short intervals" // flaky
+    ],
+    Repeater: [
+      "handle delegate property and role name conflict"
     ]
   },
   Initialize: {

@@ -87,4 +87,13 @@ describe("QtQuick.Repeater", function() {
     expect(r.itemAt(1).firstRoleInner).toBe("bar");
     expect(r.itemAt(1).secondRoleInner).toBe(43);
   });
+
+  it("handle delegate property and role name conflict", function() {
+    var qml = load("PropertyRoleNameConflict", this.div);
+    var r = qml.repeater;
+
+    expect(r.itemAt(0).roleName).toBe("bar");
+    expect(r.itemAt(0).implicitRoleNameReference).toBe("bar");
+    expect(r.itemAt(0).explicitRoleNameReference).toBe("foo");
+  });
 });
