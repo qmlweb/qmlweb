@@ -66,4 +66,10 @@ describe("QtQuick.Repeater", function() {
     r.model = 0;
     expect(r.count).toBe(0);
   });
+
+  it("delegate onCompleted and onDestruction called", function() {
+    var qml = load("CompletedDestruction", this.div);
+    expect(qml.internal_created).toBe(3);
+    expect(qml.internal_destroyed).toBe(3);
+  });
 });
