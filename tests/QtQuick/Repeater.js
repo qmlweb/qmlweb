@@ -72,4 +72,19 @@ describe("QtQuick.Repeater", function() {
     expect(qml.internal_created).toBe(3);
     expect(qml.internal_destroyed).toBe(3);
   });
+
+  it("model role", function() {
+    var qml = load("ModelRole", this.div);
+    var r = qml.repeater;
+
+    expect(r.itemAt(0).firstRole).toBe("foo");
+    expect(r.itemAt(0).secondRole).toBe(42);
+    expect(r.itemAt(0).firstRoleInner).toBe("foo");
+    expect(r.itemAt(0).secondRoleInner).toBe(42);
+
+    expect(r.itemAt(1).firstRole).toBe("bar");
+    expect(r.itemAt(1).secondRole).toBe(43);
+    expect(r.itemAt(1).firstRoleInner).toBe("bar");
+    expect(r.itemAt(1).secondRoleInner).toBe(43);
+  });
 });

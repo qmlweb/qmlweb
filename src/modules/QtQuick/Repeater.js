@@ -91,14 +91,24 @@ QmlWeb.registerQmlType({
     const roleNames = roles || model.roleNames;
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
+      const modelData = item.$properties.model;
       for (const i in roleNames) {
-        item.$properties[roleNames[i]].set(
-          model.data(index, roleNames[i]),
+        const roleName = roleNames[i];
+        const roleData = model.data(index, roleName);
+        item.$properties[roleName].set(
+          roleData,
           QmlWeb.QMLProperty.ReasonInit,
           item,
           this.model.$context
         );
+        modelData[roleName] = roleData;
       }
+      item.$properties.model.set(
+        modelData,
+        QmlWeb.QMLProperty.ReasonInit,
+        item,
+        this.model.$context
+      );
     }
   }
   $_onRowsInserted(startIndex, endIndex) {
@@ -157,16 +167,28 @@ QmlWeb.registerQmlType({
         newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInit,
           newItem, model.$context);
       } else {
+        // QML exposes a "model" property in the scope that contains all role
+        // data.
+        const modelData = {};
         for (let i = 0; i < model.roleNames.length; i++) {
           const roleName = model.roleNames[i];
           if (typeof newItem.$properties[roleName] === "undefined") {
             createProperty("variant", newItem, roleName);
           }
+          const roleData = model.data(index, roleName);
+          modelData[roleName] = roleData;
           newItem.$properties[roleName].set(
-            model.data(index, roleName), QmlWeb.QMLProperty.ReasonInit,
+            roleData, QmlWeb.QMLProperty.ReasonInit,
             newItem, this.model.$context
           );
         }
+        if (typeof newItem.$properties.model === "undefined") {
+          createProperty("variant", newItem, "model");
+        }
+        newItem.$properties.model.set(
+          modelData, QmlWeb.QMLProperty.ReasonInit,
+          newItem, this.model.$context
+        );
       }
 
       this.$items.splice(index, 0, newItem);
