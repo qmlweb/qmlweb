@@ -111,4 +111,19 @@ describe("QMLEngine.properties", function() {
     a.href = "/";
     expect(qml.absolute).toBe(a.href + "absolute-url");
   });
+
+  it("Url exception safe", function() {
+    var qml = load("UrlExceptionSafe", this.div);
+    expect(qml.localBindingSimple).toBe(
+      QmlWeb.engine.$basePath + "PropertiesUrlDir/localBindingSimple.png");
+    expect(qml.localBinding).toBe(
+      QmlWeb.engine.$basePath + "PropertiesUrlDir/localBinding.png");
+    expect(qml.localSet).toBe(
+      QmlWeb.engine.$basePath + "PropertiesUrlDir/localSet.png");
+    expect(qml.remoteBindingSimple).toBe(
+      QmlWeb.engine.$basePath + "remoteBindingSimple.png");
+    expect(qml.remoteBinding).toBe(
+      QmlWeb.engine.$basePath + "remoteBinding.png");
+    expect(qml.remoteSet).toBe(QmlWeb.engine.$basePath + "remoteSet.png");
+  });
 });
