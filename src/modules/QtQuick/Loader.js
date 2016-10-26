@@ -44,6 +44,12 @@ QmlWeb.registerQmlType({
     if (!this.active) return;
     this.$unload();
 
+    if (!fileName) {
+      this.sourceComponent = null;
+      this.$sourceUrl = fileName;
+      return;
+    }
+
     const tree = QmlWeb.engine.loadComponent(fileName);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const meta = { object: tree, context: this, parent: this };
@@ -60,6 +66,12 @@ QmlWeb.registerQmlType({
   $onSourceComponentChanged(newItem) {
     if (!this.active) return;
     this.$unload();
+
+    if (!newItem) {
+      this.item = null;
+      return;
+    }
+
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     let qmlComponent = newItem;
     if (newItem instanceof QMLComponent) {
