@@ -52,4 +52,18 @@ describe("QtQuick.Repeater", function() {
 
     expect(r.count).toBe(0);
   });
+
+  it("reflect number model changes", function() {
+    var qml = load("NumberModel", this.div);
+    var r = qml.repeater;
+    expect(r.count).toBe(0);
+    r.model = 2;
+    expect(r.count).toBe(2);
+    r.model = 1;
+    expect(r.count).toBe(1);
+    r.model = 2;
+    expect(r.count).toBe(2);
+    r.model = 0;
+    expect(r.count).toBe(0);
+  });
 });
