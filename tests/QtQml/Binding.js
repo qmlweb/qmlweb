@@ -1,4 +1,4 @@
-describe("QtQuick.Binding", function() {
+describe("QtQml.Binding", function() {
   setupDivElement();
 
   var load = prefixedQmlLoader("QtQml/qml/Binding");
@@ -43,5 +43,11 @@ describe("QtQuick.Binding", function() {
     expect(qml.targetValue).toBe(0);
     qml.when = true;
     expect(qml.targetValue).toBe(0); // should not override anything
+  });
+
+  it("binding undefined var", function() {
+    var qml = load("Undefined", this.div);
+    qml.sourceValue = undefined;
+    expect(qml.targetValue).toBe(undefined);
   });
 });
