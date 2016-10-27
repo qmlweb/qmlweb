@@ -1,12 +1,12 @@
 QmlWeb.registerQmlType({
-  module: "QtQuick",
+  module: "QtQml",
   name: "Binding",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     target: { type: "QtObject", initialValue: null },
     property: { type: "string", initialValue: "" },
-    value: { type: "var", initialValue: null },
+    value: { type: "var", initialValue: undefined },
     when: { type: "bool", initialValue: true }
   }
 }, class {
@@ -14,7 +14,6 @@ QmlWeb.registerQmlType({
     QmlWeb.callSuper(this, meta);
 
     this.$property = undefined;
-    this.$valueAssigned = false;
 
     this.valueChanged.connect(this, this.$onValueChanged);
     this.targetChanged.connect(this, this.$updateBinding);
@@ -23,21 +22,20 @@ QmlWeb.registerQmlType({
   }
 
   $updateBinding() {
-    if (!this.when || this.target === null) {
+    if (!this.when || !this.target
+        || !this.target.hasOwnProperty(this.property)
+        || this.value === undefined)
+    {
       this.$property = undefined;
       return;
     }
     this.$property = this.target.$properties[this.property];
-    if (this.$valueAssigned) {
-      this.$onValueChanged(this.value); // trigger value update
-    }
+    this.$onValueChanged(this.value); // trigger value update
   }
 
   $onValueChanged(value) {
-    if (this.$property !== undefined && this.$property.val !== value) {
-      this.$property.val = value;
-      this.$property.changed(value);
+    if (value !== undefined && this.$property) {
+      this.$property.set(value);
     }
-    this.$valueAssigned = true;
   }
 });
