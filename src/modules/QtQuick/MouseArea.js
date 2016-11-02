@@ -61,9 +61,9 @@ QmlWeb.registerQmlType({
     this.dom.addEventListener("mousemove", e => {
       if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
       const mouse = this.$eventToMouse(e);
-      this.positionChanged(mouse);
       this.mouseX = mouse.x;
       this.mouseY = mouse.y;
+      this.positionChanged(mouse);
     });
   }
   $onCursorShapeChanged() {
