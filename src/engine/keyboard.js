@@ -24,9 +24,10 @@ QmlWeb.eventToKeyboard = e => ({
 });
 
 QmlWeb.keyboardSignals = {};
-["asterisk", "back", "backtab", "call", "cancel", "delete", "escape", "flip",
- 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "hangup", "menu", "no", "return", "select",
- "space", "tab", "volumeDown", "volumeUp", "yes", "up", "right", "down", "left"
+[
+  "asterisk", "back", "backtab", "call", "cancel", "delete", "escape", "flip",
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "hangup", "menu", "no", "return", "select",
+  "space", "tab", "volumeDown", "volumeUp", "yes", "up", "right", "down", "left"
 ].forEach(key => {
   const name = key.toString();
   const qtName = `Key_${name[0].toUpperCase()}${name.slice(1)}`;

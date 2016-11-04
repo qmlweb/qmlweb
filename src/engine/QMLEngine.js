@@ -136,13 +136,13 @@ class QMLEngine {
 
   extractBasePath(file) {
     // work both in url ("/") and windows ("\", from file://d:\test\) notation
-    const basePath = file.split(/[\/\\]/);
+    const basePath = file.split(/[/\\]/);
     basePath[basePath.length - 1] = "";
     return basePath.join("/");
   }
 
   extractFileName(file) {
-    return file.split(/[\/\\]/).pop();
+    return file.split(/[/\\]/).pop();
   }
 
   // Load file, parse and construct (.qml or .qml.js)
@@ -583,7 +583,7 @@ class QMLEngine {
 
   // This parses the full URL into scheme, authority and path
   $parseURI(uri) {
-    const match = uri.match(/^([^\/]*?:\/\/)(.*?)(\/.*)$/);
+    const match = uri.match(/^([^/]*?:\/\/)(.*?)(\/.*)$/);
     if (match) {
       return {
         scheme: match[1],
