@@ -36,19 +36,36 @@ QmlWeb.registerQmlType({
 
     this.dom.addEventListener("click", e => this.$handleClick(e));
     this.dom.addEventListener("contextmenu", e => this.$handleClick(e));
+    const handleMouseMove = e => {
+      if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
+      this.$handlePositionChanged(e);
+    };
     const handleMouseUp = () => {
       this.pressed = false;
       this.pressedButtons = 0;
       document.removeEventListener("mouseup", handleMouseUp);
+      this.$clientTransform = undefined;
+      document.removeEventListener("mousemove", handleMouseMove);
     };
     this.dom.addEventListener("mousedown", e => {
       if (!this.enabled) return;
+      // Handle scale and translate transformations
+      const boundingRect = this.dom.getBoundingClientRect();
+      this.$clientTransform = {
+        x: boundingRect.left,
+        y: boundingRect.top,
+        xScale: this.width ?
+          (boundingRect.right - boundingRect.left) / this.width : 1,
+        yScale: this.height ?
+          (boundingRect.bottom - boundingRect.top) / this.height : 1
+      };
       const mouse = this.$eventToMouse(e);
       this.mouseX = mouse.x;
       this.mouseY = mouse.y;
       this.pressed = true;
       this.pressedButtons = mouse.button;
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
     });
     this.dom.addEventListener("mouseover", () => {
       this.containsMouse = true;
@@ -58,16 +75,22 @@ QmlWeb.registerQmlType({
       this.containsMouse = false;
       this.exited();
     });
+    // This is to emit positionChanged for `hoverEnabled` only. When `pressed`,
+    // `positionChanged` is handled by a temporary `mousemove` event listener
+    // on `document`.
     this.dom.addEventListener("mousemove", e => {
-      if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
-      const mouse = this.$eventToMouse(e);
-      this.mouseX = mouse.x;
-      this.mouseY = mouse.y;
-      this.positionChanged(mouse);
+      if (!this.enabled || !this.hoverEnabled || this.pressed) return;
+      this.$handlePositionChanged(e);
     });
   }
   $onCursorShapeChanged() {
     this.dom.style.cursor = this.$cursorShapeToCSS();
+  }
+  $handlePositionChanged(e) {
+    const mouse = this.$eventToMouse(e);
+    this.mouseX = mouse.x;
+    this.mouseY = mouse.y;
+    this.positionChanged(mouse);
   }
   $handleClick(e) {
     const mouse = this.$eventToMouse(e);
@@ -80,7 +103,7 @@ QmlWeb.registerQmlType({
   }
   $eventToMouse(e) {
     const Qt = QmlWeb.Qt;
-    return {
+    const mouse = {
       accepted: true,
       button: e.button === 0 ? Qt.LeftButton :
               e.button === 1 ? Qt.MiddleButton :
@@ -89,10 +112,19 @@ QmlWeb.registerQmlType({
       modifiers: e.ctrlKey * Qt.CtrlModifier
                | e.altKey * Qt.AltModifier
                | e.shiftKey * Qt.ShiftModifier
-               | e.metaKey * Qt.MetaModifier,
-      x: e.offsetX || e.layerX,
-      y: e.offsetY || e.layerY
+               | e.metaKey * Qt.MetaModifier
     };
+    if (this.$clientTransform) {
+      // Handle scale and translate transformations
+      mouse.x = (e.clientX - this.$clientTransform.x)
+        / this.$clientTransform.xScale;
+      mouse.y = (e.clientY - this.$clientTransform.y)
+        / this.$clientTransform.yScale;
+    } else {
+      mouse.x = e.offsetX || e.layerX;
+      mouse.y = e.offsetY || e.layerY;
+    }
+    return mouse;
   }
 
   // eslint-disable-next-line complexity
