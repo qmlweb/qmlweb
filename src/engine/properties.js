@@ -74,15 +74,17 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
     }
 
     // slots
-    if (i.indexOf("on") === 0 && i[2].toUpperCase() === i[2]) {
+    if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
       const signalName = i[2].toLowerCase() + i.slice(3);
       if (!connectSignal(item, signalName, value, objectScope,
                                                   componentScope)) {
         if (item.$setCustomSlot) {
           item.$setCustomSlot(signalName, value, objectScope, componentScope);
+          continue;
         }
+      } else {
+        continue;
       }
-      continue;
     }
 
     if (value instanceof Object) {
