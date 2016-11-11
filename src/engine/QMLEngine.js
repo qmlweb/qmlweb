@@ -568,12 +568,31 @@ class QMLEngine {
       return undefined;
     }
 
+    let jsData;
     if (uri.scheme === "qrc://") {
-      return QmlWeb.qrc[uri.path];
+      jsData = QmlWeb.qrc[uri.path];
+    } else {
+      QmlWeb.loadParser();
+      jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(file));
     }
 
-    QmlWeb.loadParser();
-    return QmlWeb.jsparse(QmlWeb.getUrlContents(file));
+    if (!jsData) {
+      return undefined;
+    }
+
+    // Remove any ".pragma" statements, as they are not valid JavaScript
+    jsData.source = jsData.source.replace(/\.pragma.*(?:\r\n|\r|\n)/, "\n");
+
+    const contextSetter = new Function("$context", `
+      with(QmlWeb) with ($context) {
+        ${jsData.source}
+      }
+      ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join("")}
+    `);
+
+    this.js[file] = contextSetter;
+
+    return contextSetter;
   }
 
   $registerStart(f) {
