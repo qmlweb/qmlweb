@@ -13,6 +13,48 @@ describe("QMLEngine.imports", function() {
     var qml = load("JavascriptInclude", this.div);
     expect(qml.value).toBe(42);
   });
+  it("Javascript scope", function() {
+    var qml = load("JavascriptScope", this.div);
+
+    expect(qml.importedColor()).toBe("magenta");
+    expect(qml.component.importedColor()).toBe("magenta");
+    expect(qml.component2.importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(0).importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(1).importedColor()).toBe("magenta");
+    expect(qml.loader.item.importedColor()).toBe("magenta");
+
+    qml.setImportedColor("black");
+    expect(qml.importedColor()).toBe("black");
+    expect(qml.component.importedColor()).toBe("magenta");
+    expect(qml.component2.importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(0).importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(1).importedColor()).toBe("magenta");
+    expect(qml.loader.item.importedColor()).toBe("magenta");
+
+    qml.component.setImportedColor("white");
+    expect(qml.importedColor()).toBe("black");
+    expect(qml.component.importedColor()).toBe("white");
+    expect(qml.component2.importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(0).importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(1).importedColor()).toBe("magenta");
+    expect(qml.loader.item.importedColor()).toBe("magenta");
+
+    qml.repeater.itemAt(0).setImportedColor("red");
+    expect(qml.importedColor()).toBe("black");
+    expect(qml.component.importedColor()).toBe("white");
+    expect(qml.component2.importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(0).importedColor()).toBe("red");
+    expect(qml.repeater.itemAt(1).importedColor()).toBe("magenta");
+    expect(qml.loader.item.importedColor()).toBe("magenta");
+
+    qml.loader.item.setImportedColor("green");
+    expect(qml.importedColor()).toBe("black");
+    expect(qml.component.importedColor()).toBe("white");
+    expect(qml.component2.importedColor()).toBe("magenta");
+    expect(qml.repeater.itemAt(0).importedColor()).toBe("red");
+    expect(qml.repeater.itemAt(1).importedColor()).toBe("magenta");
+    expect(qml.loader.item.importedColor()).toBe("green");
+  });
   it("Qmldir", function() {
     load("Qmldir", this.div);
     var div = this.div.children[0];

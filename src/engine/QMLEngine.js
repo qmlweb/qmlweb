@@ -228,7 +228,6 @@ class QMLEngine {
     if (this.rootObject.dom) {
       this.domTarget.appendChild(this.rootObject.dom);
     }
-    component.finalizeImports(this.rootContext());
     this.$initializePropertyBindings();
 
     this.start();

@@ -34,9 +34,6 @@ class QMLComponent {
         loadImport(meta.object.$imports[i]);
       }
       QmlWeb.loadImports(this, moduleImports);
-      if (this.$context) {
-        this.finalizeImports(this.$context);
-      }
     }
 
     /* If this Component does not have any imports, it is likely one that was
@@ -86,6 +83,8 @@ class QMLComponent {
       context: newContext,
       isComponentRoot: true
     });
+
+    this.finalizeImports(item.$context);
 
     Object.keys(properties).forEach(propname => {
       item[propname] = properties.propname;
