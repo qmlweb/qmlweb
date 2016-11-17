@@ -9,6 +9,10 @@ describe("QMLEngine.imports", function() {
     expect(div.offsetHeight).toBe(10);
     expect(div.children[0].style.backgroundColor).toBe("rgb(255, 0, 255)");
   });
+  it("Javascript Qt.include", function() {
+    var qml = load("JavascriptInclude", this.div);
+    expect(qml.value).toBe(42);
+  });
   it("Qmldir", function() {
     load("Qmldir", this.div);
     var div = this.div.children[0];

@@ -105,6 +105,32 @@ const Qt = {
     return new QmlWeb.QSizeF(width, height);
   },
 
+  include(path) {
+    const engine = QmlWeb.engine;
+
+    const uri = engine.$resolvePath(path);
+
+    /* Handle recursive includes */
+    if (QmlWeb.executionContext.$qmlJsIncludes === undefined) {
+      QmlWeb.executionContext.$qmlJsIncludes = [];
+    }
+
+    if (QmlWeb.executionContext.$qmlJsIncludes.indexOf(uri) >= 0) {
+      return;
+    }
+
+    QmlWeb.executionContext.$qmlJsIncludes.push(uri);
+
+    const js = engine.loadJS(uri);
+
+    if (!js) {
+      console.error("Unable to load JavaScript module:", uri, path);
+      return;
+    }
+
+    QmlWeb.importJavascriptInContext(js, QmlWeb.executionContext);
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,
