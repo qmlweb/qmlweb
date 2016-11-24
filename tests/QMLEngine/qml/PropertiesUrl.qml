@@ -10,6 +10,11 @@ Item {
   property alias remoteSet: properties_url_import.remoteSet
   property url http: "http://http-url"
   property url absolute: "/absolute-url"
+  property url unset
+  property url setToEmptyString: "will-be-empty-string"
+  Component.onCompleted: {
+    setToEmptyString = ""
+  }
   PropertiesUrlImport {
     id: properties_url_import
     remoteBindingSimple: "remoteBindingSimple.png"

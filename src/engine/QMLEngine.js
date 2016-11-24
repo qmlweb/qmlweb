@@ -597,7 +597,7 @@ class QMLEngine {
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {
     // probably, replace :// with :/ ?
-    if (file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
+    if (!file || file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
       file.indexOf("blob:") === 0) {
       return file;
     }

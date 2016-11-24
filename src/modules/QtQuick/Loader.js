@@ -44,32 +44,41 @@ QmlWeb.registerQmlType({
     if (!this.active) return;
     this.$unload();
 
-    const tree = QmlWeb.engine.loadComponent(fileName);
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const meta = { object: tree, context: this, parent: this };
-    const qmlComponent = new QMLComponent(meta);
-    qmlComponent.$basePath = QmlWeb.engine.extractBasePath(tree.$file);
-    qmlComponent.$imports = tree.$imports;
-    qmlComponent.$file = tree.$file;
-    QmlWeb.engine.loadImports(tree.$imports, qmlComponent.$basePath,
-      qmlComponent.importContextId);
-    const loadedComponent = this.$createComponentObject(qmlComponent, this);
-    this.sourceComponent = loadedComponent;
+    if (fileName) {
+      const tree = QmlWeb.engine.loadComponent(fileName);
+      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+      const meta = { object: tree, context: this, parent: this };
+      const qmlComponent = new QMLComponent(meta);
+      qmlComponent.$basePath = QmlWeb.engine.extractBasePath(tree.$file);
+      qmlComponent.$imports = tree.$imports;
+      qmlComponent.$file = tree.$file;
+      QmlWeb.engine.loadImports(tree.$imports, qmlComponent.$basePath,
+          qmlComponent.importContextId);
+      const loadedComponent = this.$createComponentObject(qmlComponent, this);
+      this.sourceComponent = loadedComponent;
+    } else {
+      this.sourceComponent = null;
+    }
     this.$sourceUrl = fileName;
   }
   $onSourceComponentChanged(newItem) {
     if (!this.active) return;
     this.$unload();
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    let qmlComponent = newItem;
-    if (newItem instanceof QMLComponent) {
-      qmlComponent = newItem.$createObject(this, {}, this);
-    }
-    qmlComponent.parent = this;
-    this.item = qmlComponent;
-    this.$updateGeometry();
-    if (this.item) {
-      this.loaded();
+
+    if (newItem) {
+      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+      let qmlComponent = newItem;
+      if (newItem instanceof QMLComponent) {
+        qmlComponent = newItem.$createObject(this, {}, this);
+      }
+      qmlComponent.parent = this;
+      this.item = qmlComponent;
+      this.$updateGeometry();
+      if (this.item) {
+        this.loaded();
+      }
+    } else {
+      this.item = null;
     }
   }
   setSource(url, options) {

@@ -110,6 +110,8 @@ describe("QMLEngine.properties", function() {
     const a = document.createElement("a");
     a.href = "/";
     expect(qml.absolute).toBe(a.href + "absolute-url");
+    expect(qml.unset).toBe("");
+    expect(qml.setToEmptyString).toBe("");
   });
 
   it("Url exception safe", function() {
