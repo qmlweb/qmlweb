@@ -46,6 +46,16 @@ describe("QMLEngine.basic", function() {
     expect(qml.log).toBe("i12i2");
   });
 
+  it("signal disconnect when QObject deleted", function() {
+    var qml = load("SignalDisconnectOnDelete", this.div);
+    var child = qml.create_object();
+    expect(qml.$tidyupList.indexOf(child.colorChanged)).toBe(-1);
+    child.colorChanged.connect(qml, qml.foo);
+    expect(qml.$tidyupList.indexOf(child.colorChanged)).not.toBeLessThan(0);
+    child.destroy();
+    expect(qml.$tidyupList.indexOf(child.colorChanged)).toBe(-1);
+  });
+
   it("createObject", function() {
     var qml = load("CreateObject", this.div);
     expect(qml.children.length).toBe(1);
