@@ -56,31 +56,27 @@ QmlWeb.registerQmlType({
     if (model instanceof QmlWeb.JSItemModel) {
       const flags = QmlWeb.Signal.UniqueConnection;
       model.dataChanged.connect(this, this.$_onModelDataChanged, flags);
-      model.rowsInserted.connect(this, this.$insertChildren, flags);
+      model.rowsInserted.connect(this, this.$_onRowsInserted, flags);
       model.rowsMoved.connect(this, this.$_onRowsMoved, flags);
       model.rowsRemoved.connect(this, this.$_onRowsRemoved, flags);
       model.modelReset.connect(this, this.$_onModelReset, flags);
 
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.rowCount());
+      this.count = this.$items.length;
     } else if (typeof model === "number") {
-      // must be more elegant here.. do not delete already created models..
-      //this.$removeChildren(0, this.$items.length);
-      //this.$insertChildren(0, model);
-
       if (this.$items.length > model) {
         // have more than we need
         this.$removeChildren(model, this.$items.length);
-        // Normally this is done in $insertChildren, but that won't be called
-        // in this case
-        this.count = this.$items.length;
       } else {
         // need more
         this.$insertChildren(this.$items.length, model);
       }
+      this.count = this.$items.length;
     } else if (model instanceof Array) {
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.length);
+      this.count = this.$items.length;
     }
   }
   $callOnCompleted(child) {
@@ -106,6 +102,10 @@ QmlWeb.registerQmlType({
         );
       }
     }
+  }
+  $_onRowsInserted(startIndex, endIndex) {
+    this.$insertChildren(startIndex, endIndex);
+    this.count = this.$items.length;
   }
   $_onRowsMoved(sourceStartIndex, sourceEndIndex, destinationIndex) {
     const vals = this.$items.splice(
@@ -200,8 +200,6 @@ QmlWeb.registerQmlType({
     for (let i = endIndex; i < this.$items.length; i++) {
       this.$items[i].index = i;
     }
-
-    this.count = this.$items.length;
   }
   $removeChildren(startIndex, endIndex) {
     const removed = this.$items.splice(startIndex, endIndex - startIndex);
