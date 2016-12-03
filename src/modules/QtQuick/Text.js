@@ -49,9 +49,7 @@ QmlWeb.registerQmlType({
     this.color = "black";
     this.text = "";
 
-    this.textChanged.connect(this, this.$onTextChanged);
     this.widthChanged.connect(this, this.$onWidthChanged);
-    this.wrapModeChanged.connect(this, this.$onWrapModeChanged);
 
     this.font.boldChanged.connect(this, this.$onFontChanged);
     this.font.weightChanged.connect(this, this.$onFontChanged);
@@ -127,6 +125,7 @@ QmlWeb.registerQmlType({
   }
   Component$onCompleted() {
     this.$updateImplicit();
+    this.$onWrapModeChanged(this.wrapMode);
   }
   $updateImplicit() {
     if (!this.text || !this.dom) {
