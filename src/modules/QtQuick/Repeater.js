@@ -63,7 +63,6 @@ QmlWeb.registerQmlType({
 
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.rowCount());
-      this.count = this.$items.length;
     } else if (typeof model === "number") {
       if (this.$items.length > model) {
         // have more than we need
@@ -72,12 +71,11 @@ QmlWeb.registerQmlType({
         // need more
         this.$insertChildren(this.$items.length, model);
       }
-      this.count = this.$items.length;
     } else if (model instanceof Array) {
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.length);
-      this.count = this.$items.length;
     }
+    this.count = this.$items.length;
   }
   $callOnCompleted(child) {
     child.Component.completed();
