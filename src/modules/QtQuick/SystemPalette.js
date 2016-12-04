@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   enums: {
     SystemPalette: {
-      Active: "active", Inactive: "inactive", Disabled: "disabled"
+      Active: 0, Inactive: 2, Disabled: 1
     }
   },
   properties: {
@@ -49,9 +49,12 @@ QmlWeb.registerQmlType({
         break;
       }
     }
+
+    this.$onColorGroupChanged(this.colorGroup);
   }
   $onColorGroupChanged(newVal) {
-    const pallete = systemPalettes[this.$platform][newVal];
+    const name = ["active", "disabled", "inactive"][newVal];
+    const pallete = systemPalettes[this.$platform][name];
     this.$canEditReadOnlyProperties = true;
     Object.keys(pallete).forEach(key => {
       this[key] = pallete[key];
