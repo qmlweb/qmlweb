@@ -61,6 +61,9 @@ var modules = {
   "QtMultimedia 5.6": {
     Video: { dom: true }
   },
+  "QtBluetooth 5.2": {
+    BluetoothDiscoveryModel: {}
+  },
   "QtWebSockets 1.0": {
     WebSocket: {}
   },
