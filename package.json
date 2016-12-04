@@ -1,6 +1,6 @@
 {
   "name": "qmlweb",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "QML port to Javascript",
   "license": "MIT",
   "repository": "qmlweb/qmlweb",
