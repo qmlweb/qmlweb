@@ -68,6 +68,9 @@ QmlWeb.registerQmlType({
       if (this.$items.length > model) {
         // have more than we need
         this.$removeChildren(model, this.$items.length);
+        // Normally this is done in $insertChildren, but that won't be called
+        // in this case
+        this.count = this.$items.length;
       } else {
         // need more
         this.$insertChildren(this.$items.length, model);
