@@ -6,18 +6,18 @@ QmlWeb.registerQmlType({
   enums: {
     Text: {
       NoWrap: 0, WordWrap: 1, WrapAnywhere: 2, Wrap: 3,
-      WrapAtWordBoundaryOrAnywhere: 3,
+      WrapAtWordBoundaryOrAnywhere: 4,
       AlignLeft: 1, AlignRight: 2, AlignHCenter: 4, AlignJustify: 8,
       AlignTop: 32, AlignBottom: 64, AlignVCenter: 128,
       Normal: 0, Outline: 1, Raised: 2, Sunken: 3
     }
   },
   properties: {
-    color: "color",
+    color: { type: "color", initialValue: "black" },
     text: "string",
     lineHeight: "real",
-    wrapMode: "enum",
-    horizontalAlignment: "enum",
+    wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
+    horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
     style: "enum",
     styleColor: "color"
   }
@@ -29,6 +29,8 @@ QmlWeb.registerQmlType({
     fc.style.pointerEvents = "none";
     fc.style.width = "100%";
     fc.style.height = "100%";
+    fc.style.whiteSpace = "pre";
+    this.dom.style.textAlign = "left";
     this.dom.appendChild(fc);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
@@ -45,9 +47,6 @@ QmlWeb.registerQmlType({
 
     this.font.family = "sans-serif";
     this.font.pointSize = 10;
-    this.wrapMode = this.Text.NoWrap;
-    this.color = "black";
-    this.text = "";
 
     this.widthChanged.connect(this, this.$onWidthChanged);
 
@@ -84,18 +83,19 @@ QmlWeb.registerQmlType({
   $onWrapModeChanged(newVal) {
     const style = this.impl.style;
     switch (newVal) {
-      case 0:
+      case this.Text.NoWrap:
         style.whiteSpace = "pre";
         break;
-      case 1:
+      case this.Text.WordWrap:
         style.whiteSpace = "pre-wrap";
         style.wordWrap = "normal";
         break;
-      case 2:
+      case this.Text.WrapAnywhere:
         style.whiteSpace = "pre-wrap";
         style.wordBreak = "break-all";
         break;
-      case 3:
+      case this.Text.Wrap:
+      case this.Text.WrapAtWordBoundaryOrAnywhere:
         style.whiteSpace = "pre-wrap";
         style.wordWrap = "break-word";
     }
@@ -125,7 +125,6 @@ QmlWeb.registerQmlType({
   }
   Component$onCompleted() {
     this.$updateImplicit();
-    this.$onWrapModeChanged(this.wrapMode);
   }
   $updateImplicit() {
     if (!this.text || !this.dom) {
