@@ -59,6 +59,9 @@ var modules = {
   "QtMobility 1.2": {
   },
   "QtMultimedia 5.6": {
+    Camera: {},
+    MediaPlayer: {},
+    VideoOutput: { dom: true },
     Video: { dom: true }
   },
   "QtNfc 5.2": {

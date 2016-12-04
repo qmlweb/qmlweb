@@ -5,6 +5,8 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.Item",
   enums: {
     MediaPlayer: {
+      Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,
+
       NoError: 0, ResourceError: 1, FormatError: 2, NetworkError: 4,
       AccessDenied: 8, ServiceMissing: 16,
 
@@ -16,17 +18,26 @@ QmlWeb.registerQmlType({
     VideoOutput: { PreserveAspectFit: 0, PreserveAspectCrop: 1, Stretch: 2 }
   },
   properties: {
-    source: "string",
-    duration: "int",
-    position: "int",
+    audioRole: "enum", // TODO
+    autoLoad: { type: "bool", initialValue: true },
     autoPlay: "bool",
-    muted: "bool",
-    volume: "real",
-    playbackRate: "real",
-    playbackState: "enum", // MediaPlayer.StoppedState
+    availability: "enum", // MediaPlayer.Available
+    bufferProgress: "real",
+    duration: "int",
+    error: "enum", // MediaPlayer.NoError
+    errorString: "string",
     fillMode: "enum", // VideoOutput.PreserveAspectFit
+    hasAudio: "bool",
+    hasVideo: "bool",
+    muted: "bool",
+    orientation: "int",
+    playbackRate: { type: "real", initialValue: 1 },
+    playbackState: "enum", // MediaPlayer.StoppedState
+    position: "int",
+    seekable: "bool",
+    source: "url",
     status: "enum", // MediaPlayer.NoMedia
-    error: "enum" // MediaPlayer.NoError
+    volume: "real"
   },
   signals: {
     paused: [],
