@@ -61,6 +61,9 @@ var modules = {
   "QtMultimedia 5.6": {
     Video: { dom: true }
   },
+  "QtNfc 5.2": {
+    NearField: {}
+  },
   "QtBluetooth 5.2": {
     BluetoothDiscoveryModel: {}
   },
