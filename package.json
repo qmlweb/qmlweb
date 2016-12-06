@@ -56,6 +56,9 @@
     "tests/**/*.js",
     "tests/**/*.png",
     "tests/**/*.qml",
+    "examples/**/*.html",
+    "examples/**/*.js",
+    "examples/**/*.qml",
     "gulpfile.js"
   ]
 }
