@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QML Embed Example</title>
+    <style>
+      #embed {
+        width: 400px;
+        height: 300px;
+        border: 10px dotted red;
+      }
+    </style>
+    <script type="text/javascript" src="../lib/qt.js"></script>
+  </head>
+  <body>
+    <div id="embed">
+    </div>
+    <script>
+      (function() {
+        var div = document.getElementById('embed');
+        var engine = new QmlWeb.QMLEngine(div);
+        engine.loadFile('qml/main.qml'); // see also engine.loadQML
+        engine.start();
+        console.log(engine.rootObject);
+      })();
+    </script>
+  </body>
+</html>
