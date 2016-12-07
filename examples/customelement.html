@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QML Custom Element Example</title>
+    <!-- ES5 compat shim. See https://github.com/webcomponents/custom-elements for details.
+         Don't use this link in production, install a specific release. -->
+    <script src="https://rawgit.com/webcomponents/custom-elements/master/src/native-shim.js"></script>
+    <!-- Custom elements polyfill. See https://github.com/webcomponents/custom-elements for details.
+         Don't use this link in production, install a specific release. -->
+    <script src="https://rawgit.com/webcomponents/custom-elements/master/custom-elements.min.js"></script>
+    <script src="../lib/qt.js"></script>
+    <script>
+      QmlWeb.registerElement('qml-main', 'qml/main.qml');
+    </script>
+  </head>
+  <body>
+    <qml-main height="300" color="red" firstName="World"></qml-main>
+  </body>
+</html>
