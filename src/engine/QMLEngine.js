@@ -14,7 +14,6 @@ class QMLEngine {
     this.fps = 60;
     // Math.floor, causes bugs to timing?
     this.$interval = Math.floor(1000 / this.fps);
-    this.running = false;
     this.rootElement = element;
 
     // Cached component trees (post-QmlWeb.convertToEngine)
