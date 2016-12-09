@@ -14,7 +14,7 @@ class QMLEngine {
     this.fps = 60;
     // Math.floor, causes bugs to timing?
     this.$interval = Math.floor(1000 / this.fps);
-    this.rootElement = element;
+    this.dom = element || document.body;
 
     // Cached component trees (post-QmlWeb.convertToEngine)
     this.components = {};
@@ -70,9 +70,46 @@ class QMLEngine {
                     constructors[i].getAttachedObject);
       }
     }
+
+    // No QML stuff should stand out the root element
+    this.dom.style.overflow = "hidden";
+
+    // Needed to make absolute positioning work
+    if (!this.dom.style.position) {
+      const style = window.getComputedStyle(this.dom);
+      if (style.getPropertyValue("position") === "static") {
+        this.dom.style.position = "relative";
+        this.dom.style.top = "0";
+        this.dom.style.left = "0";
+      }
+    }
+
+    window.addEventListener("resize", () => this.updateGeometry());
   }
 
   //---------- Public Methods ----------
+
+  updateGeometry() {
+    // we have to call `this.implicitHeight =` and `this.implicitWidth =`
+    // each time the root element changes it's geometry
+    // to reposition child elements of qml scene
+    let width;
+    let height;
+    if (this.dom === document.body) {
+      width = window.innerWidth;
+      height = window.innerHeight;
+    } else {
+      const style = window.getComputedStyle(this.dom);
+      width = parseFloat(style.getPropertyValue("width"), 10);
+      height = parseFloat(style.getPropertyValue("height"), 10);
+    }
+    if (width) {
+      this.rootObject.width = width;
+    }
+    if (height) {
+      this.rootObject.height = height;
+    }
+  }
 
   // Start the engine
   start() {
@@ -180,10 +217,15 @@ class QMLEngine {
     component.$file = file; // just for debugging
 
     this.rootObject = component.$createObject(parentComponent);
+    if (this.rootObject.dom) {
+      this.dom.appendChild(this.rootObject.dom);
+    }
     component.finalizeImports(this.rootContext());
     this.$initializePropertyBindings();
 
     this.start();
+
+    this.updateGeometry();
 
     this.callCompletedSignals();
 

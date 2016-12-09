@@ -38,21 +38,10 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    if (this.$parent === null) { // This is the root element. Initialize it.
-      this.dom = QmlWeb.engine.rootElement || document.body;
-      this.dom.innerHTML = "";
-      // Needed to make absolute positioning work
-      this.dom.style.position = "relative";
-      this.dom.style.top = "0";
-      this.dom.style.left = "0";
-      // No QML stuff should stand out the root element
-      this.dom.style.overflow = "hidden";
-    } else {
-      if (!this.dom) { // Create a dom element for this item.
-        this.dom = document.createElement(meta.tagName || "div");
-      }
-      this.dom.style.position = "absolute";
+    if (!this.dom) { // Create a dom element for this item.
+      this.dom = document.createElement(meta.tagName || "div");
     }
+    this.dom.style.position = "absolute";
     this.dom.style.pointerEvents = "none";
     // In case the class is qualified, only use the last part for the css class
     // name.
@@ -141,38 +130,6 @@ QmlWeb.registerQmlType({
     this.$revertActions = [];
     this.css.left = `${this.x}px`;
     this.css.top = `${this.y}px`;
-
-    // Init size of root element
-    if (this.$parent === null) {
-      if (!QmlWeb.engine.rootElement) {
-        // Case 1: Qml scene is placed in body tag
-
-        // event handling by addEventListener is probably better than setting
-        // window.onresize
-        const updateQmlGeometry = () => {
-          this.implicitHeight = window.innerHeight;
-          this.implicitWidth = window.innerWidth;
-        };
-        window.addEventListener("resize", updateQmlGeometry);
-        updateQmlGeometry();
-      } else {
-        // Case 2: Qml scene is placed in some element tag
-
-        // we have to call `this.implicitHeight =` and `this.implicitWidth =`
-        // each time the rootElement changes it's geometry
-        // to reposition child elements of qml scene
-
-        // it is good to have this as named method of dom element, so we can
-        // call it from outside too, whenever element changes it's geometry
-        // (not only on window resize)
-        this.dom.updateQmlGeometry = () => {
-          this.implicitHeight = this.dom.offsetHeight;
-          this.implicitWidth = this.dom.offsetWidth;
-        };
-        window.addEventListener("resize", this.dom.updateQmlGeometry);
-        this.dom.updateQmlGeometry();
-      }
-    }
   }
   $onParentChanged_(newParent, oldParent, propName) {
     if (oldParent) {
