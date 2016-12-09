@@ -4,8 +4,9 @@ describe("QMLEngine.bindings", function() {
 
   it("NoSrc", function() {
     load("NoSrc", this.div);
-    expect(this.div.offsetWidth).toBe(10);
-    expect(this.div.offsetHeight).toBe(12);
+    var div = this.div.children[0];
+    expect(div.offsetWidth).toBe(10);
+    expect(div.offsetHeight).toBe(12);
   });
 
   it("update immediately", function() {
