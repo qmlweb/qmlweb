@@ -8,10 +8,8 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
+    meta.tagName = meta.object.tagName;
     QmlWeb.callSuper(this, meta);
-
-    const tagName = meta.object.tagName || "div";
-    this.dom = document.createElement(tagName);
 
     // TODO: support properties, styles, perhaps changing the tagName
   }

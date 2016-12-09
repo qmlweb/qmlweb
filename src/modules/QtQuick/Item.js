@@ -49,7 +49,7 @@ QmlWeb.registerQmlType({
       this.dom.style.overflow = "hidden";
     } else {
       if (!this.dom) { // Create a dom element for this item.
-        this.dom = document.createElement("div");
+        this.dom = document.createElement(meta.tagName || "div");
       }
       this.dom.style.position = "absolute";
     }
