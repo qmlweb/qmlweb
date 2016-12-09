@@ -1,3 +1,7 @@
+// We need to disable Shadow DOM isolation for tests, as we inspect
+// the DOM contents of QML elements through .children
+QmlWeb.useShadowDom = false;
+
 function loadQmlFile(file, div, opts) {
   var engine = new QmlWeb.QMLEngine(div, opts || {});
   engine.loadFile(file);

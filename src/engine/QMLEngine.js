@@ -2,6 +2,8 @@
 // This variable points to the currently running engine.
 QmlWeb.engine = null;
 
+QmlWeb.useShadowDom = true;
+
 const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
@@ -15,6 +17,12 @@ class QMLEngine {
     // Math.floor, causes bugs to timing?
     this.$interval = Math.floor(1000 / this.fps);
     this.dom = element || document.body;
+
+    // Target for the DOM children
+    this.domTarget = this.dom;
+    if (QmlWeb.useShadowDom && this.dom.attachShadow) {
+      this.domTarget = this.dom.attachShadow({ mode: "open" });
+    }
 
     // Cached component trees (post-QmlWeb.convertToEngine)
     this.components = {};
@@ -218,7 +226,7 @@ class QMLEngine {
 
     this.rootObject = component.$createObject(parentComponent);
     if (this.rootObject.dom) {
-      this.dom.appendChild(this.rootObject.dom);
+      this.domTarget.appendChild(this.rootObject.dom);
     }
     component.finalizeImports(this.rootContext());
     this.$initializePropertyBindings();
