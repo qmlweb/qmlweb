@@ -8,12 +8,12 @@ QmlWeb.registerQmlType({
   },
   properties: {
     autoOrientation: "bool",
-    contentRect: "rectangle",
+    contentRect: "rect",
     fillMode: "enum", // VideoOutput.PreserveAspectFit
     filters: "list",
     orientation: "int",
     source: "variant",
-    sourceRect: "rectangle"
+    sourceRect: "rect"
   }
 }, class {
   constructor(meta) {

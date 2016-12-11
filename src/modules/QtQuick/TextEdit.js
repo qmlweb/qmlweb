@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
     contentWidth: "real",
     cursorDelegate: "Component",
     cursorPosition: "int",
-    cursorRectangle: "rectangle",
+    cursorRectangle: "rect",
     cursorVisible: { type: "bool", initialValue: true },
     effectiveHorizontalAlignment: "enum",
     horizontalAlignment: "enum",
