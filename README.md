@@ -47,22 +47,64 @@ HTML file:
 <script type="text/javascript" src="/lib/qt.js"></script>
 ```
 
+See the [examples](examples) directory for more details and complete usage
+examples.
+
+### API
+
+You can use DOM elements as the base for QML components:
+
+```js
+var div = document.getElementById('embed'); // this is your DOM element
+var engine = new QmlWeb.QMLEngine(div);
+engine.loadFile('qml/main.qml');
+engine.start();
+```
+
+See also
+[`engine.loadQML`](docs/QMLEngine.md#engineloadqmlsrc-parentcomponent--file-)
+for constructing a QML element from a source string.
+
 ### Auto-load
 
-You may then modify the `<body>` element to specify what QML file to load when
-the page is opened.
+You can modify the `<body>` element to specify what QML file to load when
+the page is opened. The loaded QML element will fill the whole page.
 
 ```HTML
 <!DOCTYPE html>
 <html>
   <head>
     <title>QML Auto-load Example</title>
-  </head>
-  <body style="margin: 0;" data-qml="qml/main.qml">
     <script type="text/javascript" src="/lib/qt.js"></script>
+  </head>
+  <body style="margin: 0" data-qml="qml/main.qml">
   </body>
 </html>
-````
+```
+
+### Web Components
+
+You can register QML files as
+[Custom Elements](https://www.w3.org/TR/custom-elements/).
+
+Note: browser support for Custom Elements v1 is limited, and QmlWeb does not
+include a polyfill. You might want to load a
+[polyfill](https://github.com/webcomponents/custom-elements) manually.
+
+Registering the element:
+
+```js
+QmlWeb.registerElement('qml-main', 'qml/main.qml');
+```
+
+Using the element:
+
+```html
+<qml-main height="300" color="red" firstName="World"></qml-main>
+```
+
+Top-level properties get exported as HTML attributes and are binded to them,
+real-time updates are possible.
 
 ## How to use with Gulp
 
