@@ -71,6 +71,9 @@ var modules = {
   "QtNfc 5.2": {
     NearField: {}
   },
+  "QtWebView 1.1": {
+    WebView: { dom: true }
+  },
   "QtBluetooth 5.2": {
     BluetoothDiscoveryModel: {}
   },
