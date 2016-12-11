@@ -106,6 +106,13 @@ Using the element:
 Top-level properties get exported as HTML attributes and are binded to them,
 real-time updates are possible.
 
+## Supported modules and elements
+
+Approximate modules support status for the git version could be viewed on the
+[Projects](https://github.com/qmlweb/qmlweb/projects/1) page.
+
+You can click on the module cards for per-class details.
+
 ## How to use with Gulp
 
 See [gulp-qmlweb](https://github.com/qmlweb/gulp-qmlweb) package.
