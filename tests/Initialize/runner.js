@@ -92,8 +92,9 @@ function testModule(module, element, imports, options) {
       var src = imports + element + " { }\n";
       var qml = loadQml(src, this.div);
       if (options.dom) {
-        expect(this.div.className).toBe(element);
-        expect(this.div.style.boxSizing).toBe("border-box");
+        var div = this.div.children[0];
+        expect(div.className).toBe(element);
+        expect(div.style.boxSizing).toBe("border-box");
       }
       expect(qml.Component).not.toBe(undefined);
     });

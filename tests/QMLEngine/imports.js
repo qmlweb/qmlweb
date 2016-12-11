@@ -4,15 +4,17 @@ describe("QMLEngine.imports", function() {
 
   it("Javascript", function() {
     load("Javascript", this.div);
-    expect(this.div.offsetWidth).toBe(20);
-    expect(this.div.offsetHeight).toBe(10);
-    expect(this.div.children[0].style.backgroundColor).toBe("rgb(255, 0, 255)");
+    var div = this.div.children[0];
+    expect(div.offsetWidth).toBe(20);
+    expect(div.offsetHeight).toBe(10);
+    expect(div.children[0].style.backgroundColor).toBe("rgb(255, 0, 255)");
   });
   it("Qmldir", function() {
     load("Qmldir", this.div);
-    expect(this.div.offsetWidth).toBe(50);
-    expect(this.div.offsetHeight).toBe(100);
-    expect(this.div.children[0].style.backgroundColor).toBe("green");
+    var div = this.div.children[0];
+    expect(div.offsetWidth).toBe(50);
+    expect(div.offsetHeight).toBe(100);
+    expect(div.children[0].style.backgroundColor).toBe("green");
     // #0ff and cyan doesn't work, because PhantomJS converts
     // them to rgb( 0,255,255 ).. how to compare colors?..
   });
