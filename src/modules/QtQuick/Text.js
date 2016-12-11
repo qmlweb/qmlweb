@@ -131,24 +131,27 @@ QmlWeb.registerQmlType({
       this.implicitHeight = this.implicitWidth = 0;
       return;
     }
+
+    if (!this.$isUsingImplicitWidth) {
+      this.implicitWidth = this.impl.offsetWidth;
+      this.implicitHeight = this.impl.offsetHeight;
+      return;
+    }
+
     const fc = this.impl;
+    const engine = QmlWeb.engine;
     // Need to move the child out of it's parent so that it can properly
     // recalculate it's "natural" offsetWidth/offsetHeight
-    if (this.$isUsingImplicitWidth) {
-      const engine = QmlWeb.engine;
-      if (engine.dom === document.body && engine.dom !== engine.domTarget) {
-        // Can't use document.body here, as it could have Shadow DOM inside
-        // The root is document.body, though, so it's probably not hidden
-        engine.domTarget.appendChild(fc);
-      } else {
-        document.body.appendChild(fc);
-      }
+    if (engine.dom === document.body && engine.dom !== engine.domTarget) {
+      // Can't use document.body here, as it could have Shadow DOM inside
+      // The root is document.body, though, so it's probably not hidden
+      engine.domTarget.appendChild(fc);
+    } else {
+      document.body.appendChild(fc);
     }
     const height = fc.offsetHeight;
     const width = fc.offsetWidth;
-    if (this.$isUsingImplicitWidth) {
-      this.dom.appendChild(fc);
-    }
+    this.dom.appendChild(fc);
 
     this.implicitHeight = height;
     this.implicitWidth = width;
