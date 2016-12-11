@@ -71,6 +71,9 @@ var modules = {
   "QtNfc 5.2": {
     NearField: {}
   },
+  "QtWebEngine 5.7": {
+    WebEngineView: { dom: true }
+  },
   "QtWebView 1.1": {
     WebView: { dom: true }
   },
