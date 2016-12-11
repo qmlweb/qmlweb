@@ -58,6 +58,10 @@ var modules = {
   },
   "QtMobility 1.2": {
   },
+  "QtMultimedia 5.0": {
+    // X.0 imports should work
+    Video: { dom: true }
+  },
   "QtMultimedia 5.6": {
     Camera: {},
     MediaPlayer: {},

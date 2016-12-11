@@ -147,7 +147,11 @@ function loadImports(self, imports) {
   }
   for (let i = 0; i < imports.length; ++i) {
     const [, moduleName, moduleVersion, moduleAlias] = imports[i];
-    const moduleConstructors = getModuleConstructors(moduleName, moduleVersion);
+    if (typeof moduleVersion === "undefined") continue;
+    const versionString = moduleVersion % 1 === 0 ?
+                            moduleVersion.toFixed(1) :
+                            moduleVersion.toString();
+    const moduleConstructors = getModuleConstructors(moduleName, versionString);
 
     if (moduleAlias !== "") {
       constructors[moduleAlias] = mergeObjects(
