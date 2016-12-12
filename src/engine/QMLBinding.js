@@ -26,8 +26,12 @@ class QMLBinding {
   }
 
   eval(object, context, basePath) {
+    QmlWeb.executionContext = context;
+    if (basePath) {
+      QmlWeb.engine.$basePath = basePath;
+    }
     // .call is needed for `this` support
-    return this.impl.call(object, object, context, basePath);
+    return this.impl.call(object, object, context);
   }
 
 /**
@@ -40,12 +44,7 @@ class QMLBinding {
   }
 
   static bindSrc(src, isFunction) {
-    return new Function("__executionObject", "__executionContext",
-      "__basePath", `
-      QmlWeb.executionContext = __executionContext;
-      if (__basePath) {
-        QmlWeb.engine.$basePath = __basePath;
-      }
+    return new Function("__executionObject", "__executionContext", `
       with(QmlWeb) with(__executionContext) with(__executionObject) {
         ${isFunction ? "" : "return"} ${src}
       }
