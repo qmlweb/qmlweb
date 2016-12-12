@@ -14,7 +14,7 @@ rules:
   arrow-body-style: 2
   babel/arrow-parens: [2, "as-needed"]
   babel/func-params-comma-dangle: 2
-  brace-style: 0
+  brace-style: 2
   camelcase: 0
   comma-dangle: [2, "only-multiline"]
   comma-spacing: 2

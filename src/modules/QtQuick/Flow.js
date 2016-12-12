@@ -49,8 +49,7 @@ QmlWeb.registerQmlType({
         curHPos += child.width + this.spacing;
       } else { // Flow.TopToBottom
         if (!this.$isUsingImplicitHeight
-          && curVPos + child.height > this.height)
-        {
+            && curVPos + child.height > this.height) {
           curVPos = 0;
           curHPos += rowSize + this.spacing;
           rowSize = 0;

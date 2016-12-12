@@ -346,8 +346,7 @@ class QMLEngine {
   }
 
   loadImports(importsArray, currentFileDir = this.$basePath,
-    importContextId = -1)
-  {
+      importContextId = -1) {
     if (!this.qmldirsContents) {
       this.qmldirsContents = {}; // cache
 

@@ -24,8 +24,7 @@ QmlWeb.registerQmlType({
   $updateBinding() {
     if (!this.when || !this.target
         || !this.target.hasOwnProperty(this.property)
-        || this.value === undefined)
-    {
+        || this.value === undefined) {
       this.$property = undefined;
       return;
     }
