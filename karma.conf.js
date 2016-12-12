@@ -10,8 +10,9 @@ module.exports = function(config) {
       { pattern: "tmp/*.js.map", included: false },
       "tests/common.js",
       "tests/failingTests.js",
-      "tests/*/**/*.js",
+      "tests/*/*.js",
       { pattern: "tests/*/**/qmldir", included: false },
+      { pattern: "tests/*/**/qml/*.js", included: false },
       { pattern: "tests/*/**/*.qml", included: false },
       { pattern: "tests/*/**/*.png", included: false }
     ],
