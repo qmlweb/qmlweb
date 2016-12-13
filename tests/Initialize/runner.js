@@ -45,6 +45,10 @@ var modules = {
     Transition: {},
     Translate: {}
   },
+  "QtQml.Modules 2.2": {
+    ListElement: {},
+    ListModel: {}
+  },
   "QtQuick.Controls 1.4": {
     Button: { dom: true },
     CheckBox: { dom: true },
