@@ -50,12 +50,16 @@ var modules = {
     ListModel: {}
   },
   "QtQuick.Controls 1.4": {
+    ApplicationWindow: { dom: true },
     Button: { dom: true },
     CheckBox: { dom: true },
     ComboBox: { dom: true },
     ScrollView: { dom: true },
     TextArea: { dom: true },
     TextField: { dom: true }
+  },
+  "QtQuick.Controls 2": {
+    ApplicationWindow: { dom: true }
   },
   "QtGraphicalEffects 1.0": {
     FastBlur: { dom: true }
