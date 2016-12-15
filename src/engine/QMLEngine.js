@@ -403,7 +403,8 @@ class QMLEngine {
     // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
     const nameIsQualifiedModuleName = entry[4];
     // local [relative] dir
-    const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl;
+    const nameIsJs = name.slice(-3) === ".js";
+    const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
 
     if (nameIsDir) {
       name = this.$resolvePath(name, currentFileDir);
@@ -425,8 +426,10 @@ class QMLEngine {
         // nameIsUrl => url do not need dirs
         // nameIsDir => already computed full path above
         content = QmlWeb.readQmlDir(name);
+      } else if (nameIsJs) {
+        // 3. Js file, don't need qmldir
       } else {
-        // 3. qt-style lookup for qualified module
+        // 4. qt-style lookup for qualified module
         const probableDirs = [currentFileDir].concat(this.importPathList());
         const diredName = name.replace(/\./g, "/");
 
