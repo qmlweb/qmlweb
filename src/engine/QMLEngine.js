@@ -402,8 +402,9 @@ class QMLEngine {
     const nameIsUrl = name.indexOf("//") === 0 || name.indexOf("://") >= 0;
     // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
     const nameIsQualifiedModuleName = entry[4];
-    // local [relative] dir
+    // is it a js file
     const nameIsJs = name.slice(-3) === ".js";
+    // local [relative] dir
     const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
 
     if (nameIsDir) {
