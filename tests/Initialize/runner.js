@@ -71,6 +71,7 @@ var modules = {
     Video: { dom: true }
   },
   "QtMultimedia 5.6": {
+    Audio: {},
     Camera: {},
     MediaPlayer: {},
     VideoOutput: { dom: true },
