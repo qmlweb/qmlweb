@@ -113,4 +113,10 @@ describe("QMLEngine.imports", function() {
     var qml = load("QualifiedNoQmldir", this.div);
     expect(qml.value).toBe(67);
   });
+  it("reuse cached import from another directory", function() {
+    var f = function() {
+      load("Reuse/main", this.div);
+    };
+    expect(f.bind(this)).not.toThrow();
+  });
 });

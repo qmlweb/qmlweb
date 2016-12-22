@@ -57,7 +57,6 @@ const Qt = {
     engine.loadImports(tree.$imports, component.$basePath,
       component.importContextId);
 
-    engine.components[name] = component;
     return component;
   },
 
