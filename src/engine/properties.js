@@ -170,41 +170,41 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     };
 
     if (value.propertyName) {
-      const con = function(prop) {
+      const con = prop => {
         const obj = prop.componentScope[prop.val.objectName];
         if (!obj) {
           console.error("qtcore: target object ", prop.val.objectName,
                         " not found for alias ", prop);
-        } else {
-          const targetProp = obj.$properties[prop.val.propertyName];
-          if (!targetProp) {
-            console.error(
-              "qtcore: target property [", prop.val.objectName, "].",
-              prop.val.propertyName, " not found for alias ", prop.name
-            );
-          } else {
-            // targetProp.changed.connect( prop.changed );
-            // it is not sufficient to connect to `changed` of source property
-            // we have to propagate own changed to it too
-            // seems the best way to do this is to make them identical?..
-            // prop.changed = targetProp.changed;
-            // obj[`${i}Changed`] = prop.changed;
-            // no. because those object might be destroyed later.
-            let loopWatchdog = false;
-            targetProp.changed.connect(item, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              prop.changed.apply(item, args);
-              loopWatchdog = false;
-            });
-            prop.changed.connect(obj, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              targetProp.changed.apply(obj, args);
-              loopWatchdog = false;
-            });
-          }
+          return;
         }
+        const targetProp = obj.$properties[prop.val.propertyName];
+        if (!targetProp) {
+          console.error(
+            "qtcore: target property [", prop.val.objectName, "].",
+            prop.val.propertyName, " not found for alias ", prop.name
+          );
+          return;
+        }
+        // targetProp.changed.connect( prop.changed );
+        // it is not sufficient to connect to `changed` of source property
+        // we have to propagate own changed to it too
+        // seems the best way to do this is to make them identical?..
+        // prop.changed = targetProp.changed;
+        // obj[`${i}Changed`] = prop.changed;
+        // no. because those object might be destroyed later.
+        let loopWatchdog = false;
+        targetProp.changed.connect(item, (...args) => {
+          if (loopWatchdog) return;
+          loopWatchdog = true;
+          prop.changed.apply(item, args);
+          loopWatchdog = false;
+        });
+        prop.changed.connect(obj, (...args) => {
+          if (loopWatchdog) return;
+          loopWatchdog = true;
+          targetProp.changed.apply(obj, args);
+          loopWatchdog = false;
+        });
       };
       QmlWeb.engine.pendingOperations.push([con, item.$properties[i]]);
     }
