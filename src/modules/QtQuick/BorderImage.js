@@ -23,12 +23,13 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this);
-    createProperty("int", this.border, "left");
-    createProperty("int", this.border, "right");
-    createProperty("int", this.border, "top");
-    createProperty("int", this.border, "bottom");
+    QmlWeb.createProperties(this.border, {
+      left: "int",
+      right: "int",
+      top: "int",
+      bottom: "int"
+    });
 
     const bg = this.impl = document.createElement("div");
     bg.style.pointerEvents = "none";

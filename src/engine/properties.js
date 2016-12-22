@@ -32,6 +32,21 @@ function createProperty(type, obj, propName, options = {}) {
 }
 
 /**
+ * Create property getters and setters for object.
+ * @param {Object} obj Object for which gsetters will be set
+ * @param {Object} properties An object containing properties descriptors
+ */
+function createProperties(obj, properties) {
+  Object.keys(properties).forEach(name => {
+    let desc = properties[name];
+    if (typeof desc === "string") {
+      desc = { type: desc };
+    }
+    createProperty(desc.type, obj, name, desc);
+  });
+}
+
+/**
  * Apply properties from metaObject to item.
  * @param {Object} metaObject Source of properties
  * @param {Object} item Target of property apply
@@ -252,5 +267,6 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
 }
 
 QmlWeb.createProperty = createProperty;
+QmlWeb.createProperties = createProperties;
 QmlWeb.applyProperties = applyProperties;
 QmlWeb.connectSignal = connectSignal;

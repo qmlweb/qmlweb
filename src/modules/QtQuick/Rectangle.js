@@ -11,10 +11,11 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this);
-    createProperty("color", this.border, "color", { initialValue: "black" });
-    createProperty("int", this.border, "width", { initialValue: 1 });
+    QmlWeb.createProperties(this.border, {
+      color: { type: "color", initialValue: "black" },
+      width: { type: "int", initialValue: 1 }
+    });
     this.$borderActive = false;
 
     const bg = this.impl = document.createElement("div");

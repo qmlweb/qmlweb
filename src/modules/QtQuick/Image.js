@@ -25,11 +25,11 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
-
     this.sourceSize = new QmlWeb.QObject(this);
-    createProperty("int", this.sourceSize, "width");
-    createProperty("int", this.sourceSize, "height");
+    QmlWeb.createProperties(this.sourceSize, {
+      width: "int",
+      height: "int"
+    });
 
     const bg = this.impl = document.createElement("div");
     bg.style.pointerEvents = "none";

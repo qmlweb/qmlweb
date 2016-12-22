@@ -53,10 +53,8 @@ QmlWeb.registerQmlType({
 
     this.css.boxSizing = "border-box";
 
-    const createProperty = QmlWeb.createProperty;
-
     if (this.$isComponentRoot) {
-      createProperty("var", this, "activeFocus");
+      QmlWeb.createProperty("var", this, "activeFocus");
     }
 
     this.parentChanged.connect(this, this.$onParentChanged_);
@@ -80,19 +78,21 @@ QmlWeb.registerQmlType({
     this.$isUsingImplicitHeight = true;
 
     this.anchors = new QmlWeb.QObject(this);
-    createProperty("var", this.anchors, "left");
-    createProperty("var", this.anchors, "right");
-    createProperty("var", this.anchors, "top");
-    createProperty("var", this.anchors, "bottom");
-    createProperty("var", this.anchors, "horizontalCenter");
-    createProperty("var", this.anchors, "verticalCenter");
-    createProperty("Item", this.anchors, "fill");
-    createProperty("Item", this.anchors, "centerIn");
-    createProperty("real", this.anchors, "margins");
-    createProperty("real", this.anchors, "leftMargin");
-    createProperty("real", this.anchors, "rightMargin");
-    createProperty("real", this.anchors, "topMargin");
-    createProperty("real", this.anchors, "bottomMargin");
+    QmlWeb.createProperties(this.anchors, {
+      left: "var",
+      right: "var",
+      top: "var",
+      bottom: "var",
+      horizontalCenter: "var",
+      verticalCenter: "var",
+      fill: "Item",
+      centerIn: "Item",
+      margins: "real",
+      leftMargin: "real",
+      rightMargin: "real",
+      topMargin: "real",
+      bottomMargin: "real"
+    });
     this.anchors.leftChanged.connect(this, this.$updateHGeometry);
     this.anchors.rightChanged.connect(this, this.$updateHGeometry);
     this.anchors.topChanged.connect(this, this.$updateVGeometry);
@@ -112,10 +112,12 @@ QmlWeb.registerQmlType({
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this);
-    createProperty("real", this.childrenRect, "x"); // TODO ro
-    createProperty("real", this.childrenRect, "y"); // TODO ro
-    createProperty("real", this.childrenRect, "width"); // TODO ro
-    createProperty("real", this.childrenRect, "height"); // TODO ro
+    QmlWeb.createProperties(this.childrenRect, {
+      x: "real", // TODO ro
+      y: "real", // TODO ro
+      width: "real", // TODO ro
+      height: "real" // TODO ro
+    });
 
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);

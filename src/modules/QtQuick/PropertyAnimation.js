@@ -16,13 +16,13 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
     this.easing = new QmlWeb.QObject(this);
-    createProperty("enum", this.easing, "type",
-      { initialValue: this.Easing.Linear });
-    createProperty("real", this.easing, "amplitude", { initialValue: 1 });
-    createProperty("real", this.easing, "overshoot", { initialValue: 1.70158 });
-    createProperty("real", this.easing, "period", { initialValue: 0.3 });
+    QmlWeb.createProperties(this.easing, {
+      type: { type: "enum", initialValue: this.Easing.Linear },
+      amplitude: { type: "real", initialValue: 1 },
+      overshoot: { type: "real", initialValue: 1.70158 },
+      period: { type: "real", initialValue: 0.3 }
+    });
 
     this.easing.$valueForProgress = function(t) {
       return QmlWeb.$ease(

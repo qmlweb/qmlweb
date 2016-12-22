@@ -11,10 +11,11 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
     this.origin = new QmlWeb.QObject(this);
-    createProperty("real", this.origin, "x");
-    createProperty("real", this.origin, "y");
+    QmlWeb.createProperties(this.origin, {
+      x: "real",
+      y: "real"
+    });
 
     this.xScaleChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yScaleChanged.connect(this.$parent, this.$parent.$updateTransform);

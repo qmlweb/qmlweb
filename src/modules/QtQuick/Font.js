@@ -9,20 +9,20 @@ QmlWeb.registerQmlType({
     this.Font = global.Font; // TODO: make a sane enum
 
     const Font = this.Font;
-    const createProperty = QmlWeb.createProperty;
 
-    createProperty("bool", this, "bold");
-    createProperty("enum", this, "capitalization", { initialValue:
-                                                      Font.MixedCase });
-    createProperty("string", this, "family", { initialValue: "sans-serif" });
-    createProperty("bool", this, "italic");
-    createProperty("real", this, "letterSpacing");
-    createProperty("int", this, "pixelSize", { initialValue: 13 });
-    createProperty("real", this, "pointSize", { initialValue: 10 });
-    createProperty("bool", this, "strikeout");
-    createProperty("bool", this, "underline");
-    createProperty("enum", this, "weight", { initialValue: Font.Normal });
-    createProperty("real", this, "wordSpacing");
+    QmlWeb.createProperties(this, {
+      bold: "bool",
+      capitalization: { type: "enum", initialValue: Font.MixedCase },
+      family: { type: "string", initialValue: "sans-serif" },
+      italic: "bool",
+      letterSpacing: "real",
+      pixelSize: { type: "int", initialValue: 13 },
+      pointSize: { type: "real", initialValue: 10 },
+      strikeout: "bool",
+      underline: "bool",
+      weight: { type: "enum", initialValue: Font.Normal },
+      wordSpacing: "real"
+    });
 
     this.$sizeLock = false;
 

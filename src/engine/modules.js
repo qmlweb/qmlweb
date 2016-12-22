@@ -192,13 +192,7 @@ function callSuper(self, meta) {
     });
   }
   if (info.properties) {
-    Object.keys(info.properties).forEach(name => {
-      let desc = info.properties[name];
-      if (typeof desc === "string") {
-        desc = { type: desc };
-      }
-      QmlWeb.createProperty(desc.type, self, name, desc);
-    });
+    QmlWeb.createProperties(self, info.properties);
   }
   if (info.signals) {
     Object.keys(info.signals).forEach(name => {

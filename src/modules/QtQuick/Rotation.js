@@ -10,16 +10,18 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    const createProperty = QmlWeb.createProperty;
-
     this.axis = new QmlWeb.QObject(this);
-    createProperty("real", this.axis, "x");
-    createProperty("real", this.axis, "y");
-    createProperty("real", this.axis, "z", { initialValue: 1 });
+    QmlWeb.createProperties(this.axis, {
+      x: "real",
+      y: "real",
+      z: { type: "real", initialValue: 1 }
+    });
 
     this.origin = new QmlWeb.QObject(this);
-    createProperty("real", this.origin, "x");
-    createProperty("real", this.origin, "y");
+    QmlWeb.createProperties(this.origin, {
+      x: "real",
+      y: "real"
+    });
 
     this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);
