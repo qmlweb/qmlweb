@@ -6,6 +6,7 @@ QmlWeb.registerQmlType({
   properties: {
     $opacity: { type: "real", initialValue: 1 },
     parent: "Item",
+    antialiasing: "bool",
     state: "string",
     states: "list",
     transitions: "list",
