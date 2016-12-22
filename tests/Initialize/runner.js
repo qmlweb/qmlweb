@@ -68,6 +68,9 @@ var modules = {
   "QtQuick.Controls 2": {
     ApplicationWindow: { dom: true }
   },
+  "QtQuick.Window 2.2": {
+    Screen: { fail: /Screen can only be used via the attached property/ }
+  },
   "QtGraphicalEffects 1.0": {
     FastBlur: { dom: true }
   },
@@ -116,6 +119,13 @@ function testModule(module, element, imports, options) {
 
     it(element, function() {
       var src = imports + element + " { }\n";
+      if (options.fail) {
+        var f = function() {
+          loadQml(src, this.div);
+        };
+        expect(f.bind(this)).toThrowError(options.fail);
+        return;
+      }
       var qml = loadQml(src, this.div);
       if (options.dom) {
         var div = this.div.children[0];
