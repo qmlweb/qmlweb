@@ -9,7 +9,6 @@ window.failingTests = {
       "SignalDisconnect"
     ],
     properties: [
-      "alias to id with same name",
       "ChangedExpressionSignal"
     ],
     scope: [

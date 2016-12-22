@@ -27,7 +27,15 @@ function createProperty(type, obj, propName, options = {}) {
   }
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   if (obj.$isComponentRoot) {
-    QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+    let skip = false;
+    if (options.noContextOverride) {
+      // Don't override context properties if options.noContextOverride is on
+      const descr = Object.getOwnPropertyDescriptor(obj.$context, propName);
+      skip = descr && (descr.get || descr.set);
+    }
+    if (!skip) {
+      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+    }
   }
 }
 
@@ -150,7 +158,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     //    someid: someid
     // 3. Alias proxy (or property proxy) to proxy prop access to selected
     //    incapsulated object. (think twice).
-    createProperty("alias", item, i);
+    createProperty("alias", item, i, { noContextOverride: true });
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;
     item.$properties[i].val = value;
