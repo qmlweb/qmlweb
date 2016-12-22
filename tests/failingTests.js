@@ -8,9 +8,6 @@ window.failingTests = {
     basic: [
       "SignalDisconnect"
     ],
-    properties: [
-      "ChangedExpressionSignal"
-    ],
     scope: [
       "object id should override same-named property of base object"
     ]
