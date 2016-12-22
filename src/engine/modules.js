@@ -109,6 +109,38 @@ function registerQmlType(options, constructor) {
     dependants[id].forEach(opt => registerQmlType(opt));
     dependants[id].length = 0;
   }
+
+  // TODO: Move to module initialization?
+  /*
+    http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers
+
+    Some object treated as Attached. For example, Component.
+    Here, we set property to object `QMLBaseObject.prototype` with name of that
+    object, and with specific getter func.
+    E.g., we create "someitem.Component" here.
+    Later, if somebody will read that property, the getter will be invoked.
+    Here all getters are set to `getAttachedObject` only, which is actually
+    dedicated for Component attached object.
+    The code of `getAttachedObject` checks whether $Component internal
+    variable exist, and creates it if it absent.
+    Then, `getAttachedObject` adds self "completed" signal to global
+    `engine.completedSignals`.
+    That is how completed handlers gathered into global list. This list then
+    is called by `engine.callCompletedSignals`.
+
+    p.s. At the moment, Repeater and Loader manually call
+    `Component.completed` signals on objects they create.
+    At the same time, those signals are still pushed to
+    `engine.completedSignals` by getAttachedObject.
+  */
+  if (descriptor.constructor.getAttachedObject) {
+    const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+    QmlWeb.setupGetter(
+      QMLBaseObject.prototype,
+      descriptor.name,
+      descriptor.constructor.getAttachedObject
+    );
+  }
 }
 
 function getConstructor(moduleName, version, name) {
