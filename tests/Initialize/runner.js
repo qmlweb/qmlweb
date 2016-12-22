@@ -10,6 +10,7 @@ var modules = {
   "QtQuick 2.5": {
     AnimatedImage: { dom: true },
     Animation: {},
+    Animator: {},
     Behavior: {},
     BorderImage: {},
     Canvas: { dom: true },
@@ -27,14 +28,17 @@ var modules = {
     Loader: {},
     MouseArea: { dom: true },
     NumberAnimation: {},
+    OpacityAnimator: {},
     ParallelAnimation: {},
     PropertyAnimation: {},
     Rectangle: { dom: true },
     RegExpValidator: {},
     Repeater: { dom: true },
     Rotation: {},
+    RotationAnimator: {},
     Row: { dom: true },
     Scale: {},
+    ScaleAnimator: {},
     SequentialAnimation: {},
     State: {},
     SystemPalette: {},
@@ -43,7 +47,10 @@ var modules = {
     TextInput: { dom: true },
     Timer: {},
     Transition: {},
-    Translate: {}
+    Translate: {},
+    UniformAnimator: {},
+    XAnimator: {},
+    YAnimator: {}
   },
   "QtQml.Modules 2.2": {
     ListElement: {},
