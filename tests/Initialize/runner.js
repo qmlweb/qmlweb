@@ -69,7 +69,8 @@ var modules = {
     ApplicationWindow: { dom: true }
   },
   "QtQuick.Window 2.2": {
-    Screen: { fail: /Screen can only be used via the attached property/ }
+    Screen: { fail: /Screen can only be used via the attached property/ },
+    Window: { dom: true }
   },
   "QtGraphicalEffects 1.0": {
     FastBlur: { dom: true }
