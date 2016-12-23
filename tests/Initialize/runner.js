@@ -72,6 +72,14 @@ var modules = {
     Screen: { fail: /Screen can only be used via the attached property/ },
     Window: { dom: true }
   },
+  "QtQuick.Particles 2.0": {
+    AngleDirection: {},
+    CustomParticle: { dom: true },
+    Direction: {},
+    Emitter: { dom: true },
+    ParticlePainter: { dom: true },
+    ParticleSystem: { dom: true }
+  },
   "QtGraphicalEffects 1.0": {
     FastBlur: { dom: true }
   },
