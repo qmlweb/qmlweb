@@ -15,7 +15,6 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    this.$domStyle = document.createElement("style");
     this.$lastName = "";
     this.$inTouchName = false;
 
@@ -42,7 +41,7 @@ QmlWeb.registerQmlType({
     this.sourceChanged.connect(this, this.$onSourceChanged);
     this.nameChanged.connect(this, this.$onNameChanged);
   }
-  $loadFont(fontName) {
+  $loadFont(fontName, fontFace) {
     /* global FontLoader */
     if (this.$lastName === fontName || this.$inTouchName) {
       return;
@@ -54,7 +53,27 @@ QmlWeb.registerQmlType({
       return;
     }
     this.status = this.FontLoader.Loading;
-    if (typeof FontLoader === "function") {
+
+    let promise;
+    if (fontFace) {
+      promise = fontFace.loaded;
+    } else if (document.fonts && document.fonts.load) {
+      promise = document.fonts.load(fontName);
+    }
+
+    if (promise) {
+      promise.then(
+        () => {
+          if (this.$lastName !== fontName) return;
+          this.name = fontName;
+          this.status = this.FontLoader.Ready;
+        },
+        () => {
+          if (this.$lastName !== fontName) return;
+          this.status = this.FontLoader.Error;
+        }
+      );
+    } else if (typeof FontLoader === "function") {
       const fontLoader = new FontLoader([fontName], {
         fontsLoaded: error => {
           if (error !== null) {
@@ -106,8 +125,19 @@ Refs: https://github.com/smnh/FontLoader.`);
     }
   }
   $onSourceChanged(font_src) {
+    // Load font by source url
     const rand = Math.round(Math.random() * 1e15);
     const fontName = `font_${Date.now().toString(36)}_${rand.toString(36)}`;
+    if (typeof FontFace !== undefined && document.fonts && document.fonts.add) {
+      const fontFace = new FontFace(fontName, `url('${font_src}')`);
+      document.fonts.add(fontFace);
+      fontFace.load();
+      this.$loadFont(fontName, fontFace);
+      return;
+    }
+    if (!this.$domStyle) {
+      this.$domStyle = document.createElement("style");
+    }
     this.$domStyle.innerHTML = `@font-face {
       font-family: ${fontName};
       src: url('${font_src}');
@@ -116,6 +146,7 @@ Refs: https://github.com/smnh/FontLoader.`);
     this.$loadFont(fontName);
   }
   $onNameChanged(fontName) {
+    // Load font by the name
     this.$loadFont(fontName);
   }
 });
