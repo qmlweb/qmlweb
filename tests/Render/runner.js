@@ -56,7 +56,7 @@
     };
   }
 
-  var regex = new RegExp("^/base/tests/Render/.*\\.qml$");
+  var regex = new RegExp("^/base/tests/Render/[^/]+/[^/]+\\.qml$");
   var tests = Object.keys(window.__karma__.files)
     .filter(function(path) {
       return regex.test(path);
