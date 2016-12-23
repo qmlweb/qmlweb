@@ -7,7 +7,7 @@ module.exports = function(command, options) {
 
   var system = require("system");
   if (options.fileName && system.env.QMLWEB_SAVE_RENDER) {
-    page.render("tmp/render/" + options.fileName);
+    page.render("tmp/Render/" + options.fileName);
   }
 
   return page.renderBase64("PNG");
