@@ -40,6 +40,7 @@ var modules = {
     Scale: {},
     ScaleAnimator: {},
     SequentialAnimation: {},
+    ShaderEffect: { dom: true },
     State: {},
     SystemPalette: {},
     Text: { dom: true },
