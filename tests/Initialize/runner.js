@@ -42,6 +42,7 @@ var modules = {
     ScaleAnimator: {},
     SequentialAnimation: {},
     ShaderEffect: { dom: true },
+    ShaderEffectSource: { dom: true },
     State: {},
     SystemPalette: {},
     Text: { dom: true },
