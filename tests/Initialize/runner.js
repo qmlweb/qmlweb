@@ -30,6 +30,7 @@ var modules = {
     NumberAnimation: {},
     OpacityAnimator: {},
     ParallelAnimation: {},
+    PauseAnimation: {},
     PropertyAnimation: {},
     Rectangle: { dom: true },
     RegExpValidator: {},
