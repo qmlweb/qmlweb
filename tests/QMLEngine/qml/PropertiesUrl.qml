@@ -9,6 +9,7 @@ Item {
   property alias remoteBinding: properties_url_import.remoteBinding
   property alias remoteSet: properties_url_import.remoteSet
   property url http: "http://http-url"
+  property url aboutBlank: "about:blank"
   property url absolute: "/absolute-url"
   property url unset
   property url setToEmptyString: "will-be-empty-string"

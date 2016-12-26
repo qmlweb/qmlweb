@@ -32,6 +32,7 @@ describe("QMLEngine.basic", function() {
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
     expect(qml.absolute).toBe(a.href + "foo/bar");
     expect(qml.full).toBe("http://example.com/bar");
+    expect(qml.aboutBlank).toBe("about:blank");
   });
 
   it("signal parameters", function() {

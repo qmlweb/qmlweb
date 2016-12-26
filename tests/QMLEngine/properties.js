@@ -106,6 +106,7 @@ describe("QMLEngine.properties", function() {
       QmlWeb.engine.$basePath + "remoteBinding.png");
     expect(qml.remoteSet).toBe(QmlWeb.engine.$basePath + "remoteSet.png");
     expect(qml.http).toBe("http://http-url");
+    expect(qml.aboutBlank).toBe("about:blank");
     /* Get the base address of the URL */
     const a = document.createElement("a");
     a.href = "/";

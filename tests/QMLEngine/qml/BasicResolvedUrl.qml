@@ -8,4 +8,5 @@ Item {
   property var outer: Qt.resolvedUrl('../..')
   property var full: Qt.resolvedUrl('http://example.com/bar')
   property var absolute: Qt.resolvedUrl('/foo/bar')
+  property var aboutBlank: Qt.resolvedUrl("about:blank")
 }

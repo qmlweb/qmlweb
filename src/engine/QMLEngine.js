@@ -657,9 +657,15 @@ class QMLEngine {
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {
     // probably, replace :// with :/ ?
-    if (!file || file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
-      file.indexOf("blob:") === 0) {
+    if (!file || file.indexOf("://") !== -1) {
       return file;
+    }
+
+    const schemes = ["data:", "blob:", "about:"];
+    for (let i = 0; i < schemes.length; i++) {
+      if (file.lastIndexOf(schemes[i], 0) === 0) {
+        return file;
+      }
     }
 
     const basePathURI = this.$parseURI(basePath);
