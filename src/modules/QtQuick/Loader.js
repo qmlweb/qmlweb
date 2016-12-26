@@ -52,7 +52,7 @@ QmlWeb.registerQmlType({
 
     const tree = QmlWeb.engine.loadComponent(fileName);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const meta = { object: tree, context: this, parent: this };
+    const meta = { object: tree, context: this.$context, parent: this };
     const qmlComponent = new QMLComponent(meta);
     qmlComponent.$basePath = QmlWeb.engine.extractBasePath(tree.$file);
     qmlComponent.$imports = tree.$imports;
