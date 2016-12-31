@@ -21,7 +21,8 @@ QmlWeb.registerQmlType({
       type: { type: "enum", initialValue: this.Easing.Linear },
       amplitude: { type: "real", initialValue: 1 },
       overshoot: { type: "real", initialValue: 1.70158 },
-      period: { type: "real", initialValue: 0.3 }
+      period: { type: "real", initialValue: 0.3 },
+      bezierCurve: "list"
     });
 
     this.easing.$valueForProgress = function(t) {
