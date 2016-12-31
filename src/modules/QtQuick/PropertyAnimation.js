@@ -42,6 +42,7 @@ QmlWeb.registerQmlType({
     if (meta.object.$on !== undefined) {
       this.property = meta.object.$on;
       this.target = this.$parent;
+      this.running = true;
     }
   }
   $redoActions() {
