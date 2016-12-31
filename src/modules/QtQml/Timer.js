@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtObject",
   properties: {
     interval: { type: "int", initialValue: 1000 },
-    parent: { type: "QtObject", readOnly: true },
+    parent: { type: "QtObject" }, // TODO ro
     repeat: "bool",
     running: "bool",
     triggeredOnStart: "bool"
