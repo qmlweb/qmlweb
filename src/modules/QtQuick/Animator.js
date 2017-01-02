@@ -2,10 +2,7 @@ QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Animator",
   versions: /^2\./,
-  baseClass: "QtQml.QtObject",
-  enums: {
-    Easing: QmlWeb.Easing
-  },
+  baseClass: "Animation",
   properties: {
     duration: { type: "int", initialValue: 250 },
     from: "real",
