@@ -17,6 +17,7 @@ var modules = {
     Column: { dom: true },
     DoubleValidator: {},
     Flow: {},
+    FocusScope: { dom: true },
     Font: {},
     FontLoader: {},
     Grid: { dom: true },
