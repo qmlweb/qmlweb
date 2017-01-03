@@ -3,6 +3,13 @@ QmlWeb.registerQmlType({
   name: "Item",
   versions: /.*/,
   baseClass: "QtQml.QtObject",
+  enums: {
+    Item: {
+      TopLeft: 0, Top: 1, TopRight: 2,
+      Left: 3, Center: 4, Right: 5,
+      BottomLeft: 6, Bottom: 7, BottomRight: 8
+    }
+  },
   properties: {
     $opacity: { type: "real", initialValue: 1 },
     parent: "Item",
@@ -14,6 +21,7 @@ QmlWeb.registerQmlType({
     children: "list",
     resources: "list",
     transform: "list",
+    transformOrigin: { type: "enum", initialValue: 4 }, // Item.Center
     x: "real",
     y: "real",
     z: "real",
@@ -122,6 +130,7 @@ QmlWeb.registerQmlType({
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
     this.transformChanged.connect(this, this.$updateTransform);
+    this.transformOriginChanged.connect(this, this.$onTransformOriginChanged);
 
     this.Component.completed.connect(this, this.Component$onCompleted_);
     this.opacityChanged.connect(this, this.$calculateOpacity);
@@ -373,6 +382,20 @@ QmlWeb.registerQmlType({
     this.dom.style.msTransform = transform;     // IE
     this.dom.style.filter = filter;
     this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
+  }
+  $onTransformOriginChanged(newVal) {
+    const map = [
+      'left top',      // 0 - TopLeft
+      'center top',    // 1 - Top
+      'right top',     // 2 - TopRight
+      'left center',   // 3 - Left
+      '',              // 4 - Center
+      'right center',  // 5 - Right
+      'left bottom',   // 6 - BottomLeft
+      'center bottom', // 7 - Bottom
+      'right bottom',  // 8 - BottomRight
+    ];
+    this.dom.style.transformOrigin = map[newVal];
   }
   Component$onCompleted_() {
     this.$calculateOpacity();
