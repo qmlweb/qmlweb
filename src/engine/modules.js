@@ -179,7 +179,7 @@ function loadImports(self, imports) {
   }
   for (let i = 0; i < imports.length; ++i) {
     const [, moduleName, moduleVersion, moduleAlias] = imports[i];
-    if (typeof moduleVersion === "undefined") continue;
+    if (typeof moduleVersion !== "number") continue;
     const versionString = moduleVersion % 1 === 0 ?
                             moduleVersion.toFixed(1) :
                             moduleVersion.toString();
