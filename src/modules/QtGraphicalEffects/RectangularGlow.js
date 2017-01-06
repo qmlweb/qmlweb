@@ -16,7 +16,6 @@ QmlWeb.registerQmlType({
       type: "real",
       initialValue: 0
     },
-    // This property defines how many pixels outside the item area are reached by the glow.
     glowRadius: {
       type: "real",
       initialValue: 0
@@ -51,9 +50,9 @@ QmlWeb.registerQmlType({
   }
   $onSpreadChanged(newVal) {
     if (newVal > 1) {
-      this.spread = 1
+      this.spread = 1;
     } else if (newVal < 0) {
-      this.spread = 0
+      this.spread = 0;
     }
     this.$updateBoxShadow();
   }
@@ -61,20 +60,20 @@ QmlWeb.registerQmlType({
   $updateBoxShadow() {
 
     function calcBoxShadow(color, glowR, cornerR, spread) {
-      var totle = (glowR + cornerR * (1 - spread));
-      var glow = (1 - spread) * totle;
-      var blur_radius = glow * 0.64;
-      var spread_radius = totle - blur_radius;
-      var glow2 = glowR / 5;
-      var blur_radius_2 = glow2 * 0.8;
-      var spread_radius_2 = glow2 - blur_radius_2;
-      return `${color} 0px 0px ${blur_radius}px ${spread_radius}px,
-            ${color} 0px 0px ${blur_radius_2}px ${spread_radius_2}px`
+      let totle = glowR + cornerR * (1 - spread);
+      let glow = (1 - spread) * totle;
+      let blur_radius = glow * 0.64;
+      let spread_radius = totle - blur_radius;
+      let glow2 = glowR / 5;
+      let blur_radius_2 = glow2 * 0.8;
+      let spread_radius_2 = glow2 - blur_radius_2;
+      return `${color} 0px 0px ${blur_radius}px ${spread_radius}px,` +
+        `${color} 0px 0px ${blur_radius_2}px ${spread_radius_2}px`;
     }
 
     function calcGlowCss(color, glowR, cornerR, spread, width, height) {
-      var spread_cornerR = cornerR * (1 - spread);
-      var rest_cornerR = cornerR - spread_cornerR;
+      let spread_cornerR = cornerR * (1 - spread);
+      let rest_cornerR = cornerR - spread_cornerR;
       return {
         boxShadow: calcBoxShadow(color, glowR, cornerR, spread),
         width: `${width - spread_cornerR}px`,
@@ -82,11 +81,17 @@ QmlWeb.registerQmlType({
         top: `${spread_cornerR / 2}px`,
         left: `${spread_cornerR / 2}px`,
         filter: `blur(${spread_cornerR / 2}px)`,
-        borderRadius: `${cornerR / 2}px`,
-        transform: `scale(${(width - spread_cornerR / 4) / width},${(height - spread_cornerR / 4) / height})`,
-      }
+        borderRadius: `${rest_cornerR / 2}px`,
+        transform: `scale(${(width - spread_cornerR / 4) / width},` +
+          `${(height - spread_cornerR / 4) / height})`,
+      };
     }
 
-    Object.assign(this.impl.style, calcGlowCss(this.color, this.glowRadius, this.cornerRadius, this.spread, this.width, this.height));
+    Object.assign(this.impl.style, calcGlowCss(
+      this.color,
+      this.glowRadius,
+      this.cornerRadius,
+      this.spread,
+      this.width, this.height));
   }
 });
