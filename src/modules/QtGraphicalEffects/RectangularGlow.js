@@ -60,20 +60,20 @@ QmlWeb.registerQmlType({
   $updateBoxShadow() {
 
     function calcBoxShadow(color, glowR, cornerR, spread) {
-      let totle = glowR + cornerR * (1 - spread);
-      let glow = (1 - spread) * totle;
-      let blur_radius = glow * 0.64;
-      let spread_radius = totle - blur_radius;
-      let glow2 = glowR / 5;
-      let blur_radius_2 = glow2 * 0.8;
-      let spread_radius_2 = glow2 - blur_radius_2;
+      const totle = glowR + cornerR * (1 - spread);
+      const glow = (1 - spread) * totle;
+      const blur_radius = glow * 0.64;
+      const spread_radius = totle - blur_radius;
+      const glow2 = glowR / 5;
+      const blur_radius_2 = glow2 * 0.8;
+      const spread_radius_2 = glow2 - blur_radius_2;
       return `${color} 0px 0px ${blur_radius}px ${spread_radius}px,` +
         `${color} 0px 0px ${blur_radius_2}px ${spread_radius_2}px`;
     }
 
     function calcGlowCss(color, glowR, cornerR, spread, width, height) {
-      let spread_cornerR = cornerR * (1 - spread);
-      let rest_cornerR = cornerR - spread_cornerR;
+      const spread_cornerR = cornerR * (1 - spread);
+      const rest_cornerR = cornerR - spread_cornerR;
       return {
         boxShadow: calcBoxShadow(color, glowR, cornerR, spread),
         width: `${width - spread_cornerR}px`,
