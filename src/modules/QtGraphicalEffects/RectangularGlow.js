@@ -56,9 +56,7 @@ QmlWeb.registerQmlType({
     }
     this.$updateBoxShadow();
   }
-
   $updateBoxShadow() {
-
     function calcBoxShadow(color, glowR, cornerR, spread) {
       const totle = glowR + cornerR * (1 - spread);
       const glow = (1 - spread) * totle;
