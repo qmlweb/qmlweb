@@ -5,24 +5,20 @@ QmlWeb.registerQmlType({
   baseClass: "Item",
   properties: {
     cached: {
-      type: "bool",
-      initialValue: false
+      type: "bool"
     },
     color: {
       type: "color",
       initialValue: "white"
     },
     cornerRadius: {
-      type: "real",
-      initialValue: 0
+      type: "real"
     },
     glowRadius: {
-      type: "real",
-      initialValue: 0
+      type: "real"
     },
     spread: {
-      type: "real",
-      initialValue: 0
+      type: "real"
     },
   }
 }, class {
@@ -57,39 +53,40 @@ QmlWeb.registerQmlType({
     this.$updateBoxShadow();
   }
   $updateBoxShadow() {
-    function calcBoxShadow(color, glowR, cornerR, spread) {
-      const totle = glowR + cornerR * (1 - spread);
-      const glow = (1 - spread) * totle;
-      const blur_radius = glow * 0.64;
-      const spread_radius = totle - blur_radius;
-      const glow2 = glowR / 5;
-      const blur_radius_2 = glow2 * 0.8;
-      const spread_radius_2 = glow2 - blur_radius_2;
-      return `${color} 0px 0px ${blur_radius}px ${spread_radius}px,` +
-        `${color} 0px 0px ${blur_radius_2}px ${spread_radius_2}px`;
-    }
+    const {
+      color,
+      glowRadius: glowR,
+      cornerRadius: cornerR,
+      spread,
+      width,
+      height
+    } = this;
+    const currentStyle = this.impl.style;
 
-    function calcGlowCss(color, glowR, cornerR, spread, width, height) {
-      const spread_cornerR = cornerR * (1 - spread);
-      const rest_cornerR = cornerR - spread_cornerR;
-      return {
-        boxShadow: calcBoxShadow(color, glowR, cornerR, spread),
-        width: `${width - spread_cornerR}px`,
-        height: `${height - spread_cornerR}px`,
-        top: `${spread_cornerR / 2}px`,
-        left: `${spread_cornerR / 2}px`,
-        filter: `blur(${spread_cornerR / 2}px)`,
-        borderRadius: `${rest_cornerR / 2}px`,
-        transform: `scale(${(width - spread_cornerR / 4) / width},` +
-          `${(height - spread_cornerR / 4) / height})`,
-      };
-    }
+    //calcBoxShadow
+    const totle = glowR + cornerR * (1 - spread);
+    const glow = (1 - spread) * totle;
+    const blur_radius = glow * 0.64;
+    const spread_radius = totle - blur_radius;
+    const glow2 = glowR / 5;
+    const blur_radius_2 = glow2 * 0.8;
+    const spread_radius_2 = glow2 - blur_radius_2;
 
-    Object.assign(this.impl.style, calcGlowCss(
-      this.color,
-      this.glowRadius,
-      this.cornerRadius,
-      this.spread,
-      this.width, this.height));
+    const boxShadow = `${color} 0px 0px ${blur_radius}px ${spread_radius}px,` +
+      `${color} 0px 0px ${blur_radius_2}px ${spread_radius_2}px`;
+
+    //calcGlowCss
+    const spread_cornerR = cornerR * (1 - spread);
+    const rest_cornerR = cornerR - spread_cornerR;
+
+    currentStyle.boxShadow = boxShadow;
+    currentStyle.width = `${width - spread_cornerR}px`;
+    currentStyle.height = `${height - spread_cornerR}px`;
+    currentStyle.top = `${spread_cornerR / 2}px`;
+    currentStyle.left = `${spread_cornerR / 2}px`;
+    currentStyle.filter = `blur(${spread_cornerR / 2}px)`;
+    currentStyle.borderRadius = `${rest_cornerR / 2}px`;
+    currentStyle.transform = `scale(${(width - spread_cornerR / 4) / width},` +
+      `${(height - spread_cornerR / 4) / height})`;
   }
 });
