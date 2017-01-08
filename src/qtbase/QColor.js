@@ -172,12 +172,12 @@ const COLOR_OUT_HANDLERS = {
   argb: values => {
     const leftpad = num => `0${(num | 0).toString(16)}`.substr(-2);
     const A = leftpad(values[3] * 255);
-    const RGB = values.slice(0, 3).map(v => leftpad(v))
+    const RGB = values.slice(0, 3).map(v => leftpad(v));
     return `#${A}${RGB.join("")}`;
   },
   hex: values => {
     const leftpad = num => `0${(num | 0).toString(16)}`.substr(-2);
-    const RGB = values.slice(0, 3).map(v => leftpad(v))
+    const RGB = values.slice(0, 3).map(v => leftpad(v));
     return `#${RGB.join("")}`;
   },
   rgba: values => `rgba(${values.map((v, i) => i < 3 ? v | 0 : v)})` // eslint-disable-line max-len, newline-per-chained-call, no-confusing-arrow
