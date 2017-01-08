@@ -163,7 +163,7 @@ const parseColorToArray = (function() {
   NAMED_COLORS.forEach(name_and_values => {
     const color_name = name_and_values.substr(0, name_and_values.length - 6)
       .toLowerCase();
-    const color_values = parseColorToArray(`#${name_and_values.substr(3)}`);
+    const color_values = parseColorToArray(`#${name_and_values.substr(-6)}`);
     COLORS[color_name] = color_values;
   });
 }());
@@ -173,10 +173,13 @@ const COLOR_OUT_HANDLERS = {
     const leftpad = num => `0${(num | 0).toString(16)}`.substr(-2);
     const A = leftpad(values[3] * 255);
     const RGB = values.slice(0, 3).map(v => leftpad(v))
-      .join("");
-    return `#${A}${RGB}`;
+    return `#${A}${RGB.join("")}`;
   },
-  hex: values => `#${values.slice(0, 3).map(v => (v | 0).toString(16)).join("")}`, // eslint-disable-line max-len, newline-per-chained-call
+  hex: values => {
+    const leftpad = num => `0${(num | 0).toString(16)}`.substr(-2);
+    const RGB = values.slice(0, 3).map(v => leftpad(v))
+    return `#${RGB.join("")}`;
+  },
   rgba: values => `rgba(${values.map((v, i) => i < 3 ? v | 0 : v)})` // eslint-disable-line max-len, newline-per-chained-call, no-confusing-arrow
 };
 class QColor {
