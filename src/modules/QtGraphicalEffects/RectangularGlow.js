@@ -1,8 +1,8 @@
 QmlWeb.registerQmlType({
-  module: "QtQuick",
+  module: "QtGraphicalEffects",
   name: "RectangularGlow",
   versions: /.*/,
-  baseClass: "Item",
+  baseClass: "QtQuick.Item",
   properties: {
     cached: {
       type: "bool"
