@@ -85,7 +85,8 @@ var modules = {
     ParticleSystem: { dom: true }
   },
   "QtGraphicalEffects 1.0": {
-    FastBlur: { dom: true }
+    FastBlur: { dom: true },
+    RectangularGlow: { dom: true }
   },
   "QtMobility 1.2": {
   },
