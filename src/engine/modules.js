@@ -9,6 +9,7 @@ const modules = {
     bool: QmlWeb.qmlBoolean,
     list: QmlWeb.qmlList,
     color: QmlWeb.QColor,
+    font: QmlWeb.QFont,
     enum: QmlWeb.qmlNumber,
     url: QmlWeb.qmlUrl,
     variant: QmlWeb.qmlVariant,

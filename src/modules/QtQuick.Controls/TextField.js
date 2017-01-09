@@ -20,6 +20,7 @@ QmlWeb.registerQmlType({
   },
   properties: {
     text: "string",
+    font: "font",
     maximumLength: { type: "int", initialValue: -1 },
     readOnly: "bool",
     validator: "var",
@@ -31,9 +32,6 @@ QmlWeb.registerQmlType({
 }, class {
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
-
-    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
-    this.font = new QMLFont(this);
 
     const input = this.impl = document.createElement("input");
     input.type = "text";

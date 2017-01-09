@@ -15,6 +15,7 @@ QmlWeb.registerQmlType({
   properties: {
     color: { type: "color", initialValue: "black" },
     text: "string",
+    font: "font",
     lineHeight: "real",
     wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
     horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
@@ -33,9 +34,6 @@ QmlWeb.registerQmlType({
     this.dom.style.textAlign = "left";
     this.dom.appendChild(fc);
 
-    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
-    this.font = new QMLFont(this);
-
     this.colorChanged.connect(this, this.$onColorChanged);
     this.textChanged.connect(this, this.$onTextChanged);
     this.lineHeightChanged.connect(this, this.$onLineHeightChanged);
@@ -45,18 +43,8 @@ QmlWeb.registerQmlType({
     this.styleChanged.connect(this, this.$onStyleChanged);
     this.styleColorChanged.connect(this, this.$onStyleColorChanged);
 
-    this.font.family = "sans-serif";
-    this.font.pointSize = 10;
-
     this.widthChanged.connect(this, this.$onWidthChanged);
-
-    this.font.boldChanged.connect(this, this.$onFontChanged);
-    this.font.weightChanged.connect(this, this.$onFontChanged);
-    this.font.pixelSizeChanged.connect(this, this.$onFontChanged);
-    this.font.pointSizeChanged.connect(this, this.$onFontChanged);
-    this.font.familyChanged.connect(this, this.$onFontChanged);
-    this.font.letterSpacingChanged.connect(this, this.$onFontChanged);
-    this.font.wordSpacingChanged.connect(this, this.$onFontChanged);
+    this.fontChanged.connect(this, this.$onFontChanged);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
   }

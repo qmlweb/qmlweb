@@ -48,6 +48,10 @@ class QMLProperty {
           context: componentScope
         });
       }
+    } else if (!constructors[this.type]) {
+      this.val = val;
+    } else if (constructors[this.type].requireParent) {
+      this.val = new constructors[this.type](this.obj, val);
     } else if (val instanceof Object || val === undefined || val === null) {
       this.val = val;
     } else if (constructors[this.type].plainType) {
@@ -59,6 +63,13 @@ class QMLProperty {
       this.val.$changed.connect(() => {
         const oldVal = this.val; // TODO
         this.changed(this.val, oldVal, this.name);
+      });
+    } else if (this.val && this.val.$properties) {
+      Object.keys(this.val.$properties).forEach(pname => {
+        const prop = this.val.$properties[pname];
+        if (!prop || !prop.connect) return;
+        // TODO: oldVal
+        prop.connect(() => this.changed(this.val, this.val, this.name));
       });
     }
   }

@@ -5,6 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.Item",
   properties: {
     text: "string",
+    font: "font",
     checked: "bool",
     color: "color"
   }
@@ -27,9 +28,6 @@ QmlWeb.registerQmlType({
     this.impl.appendChild(span);
 
     this.dom.appendChild(this.impl);
-
-    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
-    this.font = new QMLFont(this);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);

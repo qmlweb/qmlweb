@@ -17,6 +17,7 @@ QmlWeb.registerQmlType({
     cursorRectangle: "rect",
     cursorVisible: { type: "bool", initialValue: true },
     effectiveHorizontalAlignment: "enum",
+    font: "font",
     horizontalAlignment: "enum",
     hoveredLink: "string",
     inputMethodComposing: "bool",
@@ -48,9 +49,6 @@ QmlWeb.registerQmlType({
 }, class {
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
-
-    const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
-    this.font = new QMLFont(this);
 
     // Undo / Redo stacks;
     this.undoStack = [];
