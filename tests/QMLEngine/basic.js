@@ -16,7 +16,7 @@ describe("QMLEngine.basic", function() {
     function() {
       var qml = load("CompletedOfDynamicObjects", this.div);
       expect(qml.children.length).toBe(1);
-      expect(qml.color.toString()).toBe("cyan");
+      expect(qml.color.toString()).toBe("#00ffff");
     }
   );
 

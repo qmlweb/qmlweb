@@ -15,11 +15,11 @@ describe("QtQuick.Rectangle", function() {
   it("Color", function() {
     load("Color", this.div);
     var div = this.div.children[0];
-    expect(div.children[0].style.backgroundColor).toBe("red");
+    expect(div.children[0].style.backgroundColor).toBe("rgb(255, 0, 0)");
   });
   it("Transparent", function() {
     load("Transparent", this.div);
     var div = this.div.children[0];
-    expect(div.children[0].style.backgroundColor).toBe("transparent");
+    expect(div.children[0].style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
   });
 });
