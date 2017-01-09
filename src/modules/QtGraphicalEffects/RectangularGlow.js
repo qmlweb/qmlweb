@@ -20,7 +20,7 @@ QmlWeb.registerQmlType({
     style.position = "absolute";
     style.left = style.right = style.top = style.bottom = "0px";
     style.border = "none";
-    style.backgroundColor = this.color;
+    style.backgroundColor = this.color.$css;
     this.dom.appendChild(this.impl);
 
     this.colorChanged.connect(this, this.$onColorChanged);
@@ -31,7 +31,7 @@ QmlWeb.registerQmlType({
     this.spreadChanged.connect(this, this.$onSpreadChanged);
   }
   $onColorChanged(newVal) {
-    this.impl.style.backgroundColor = newVal;
+    this.impl.style.backgroundColor = newVal.$css;
     this.$updateBoxShadow();
   }
   $onSpreadChanged(newVal) {

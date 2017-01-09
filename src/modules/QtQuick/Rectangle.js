@@ -24,8 +24,8 @@ QmlWeb.registerQmlType({
     bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = "0px";
     bg.style.borderWidth = "0px";
     bg.style.borderStyle = "solid";
-    bg.style.borderColor = "black";
-    bg.style.backgroundColor = "white";
+    bg.style.borderColor = this.border.color.$css;
+    bg.style.backgroundColor = this.color.$css;
     this.dom.appendChild(bg);
 
     this.colorChanged.connect(this, this.$onColorChanged);
@@ -36,11 +36,11 @@ QmlWeb.registerQmlType({
     this.heightChanged.connect(this, this.$updateBorder);
   }
   $onColorChanged(newVal) {
-    this.impl.style.backgroundColor = new QmlWeb.QColor(newVal);
+    this.impl.style.backgroundColor = newVal.$css;
   }
   border$onColorChanged(newVal) {
     this.$borderActive = true;
-    this.impl.style.borderColor = new QmlWeb.QColor(newVal);
+    this.impl.style.borderColor = newVal.$css;
     this.$updateBorder();
   }
   border$onWidthChanged() {

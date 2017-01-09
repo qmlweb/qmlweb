@@ -49,7 +49,7 @@ QmlWeb.registerQmlType({
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
   $onColorChanged(newVal) {
-    this.impl.style.color = new QmlWeb.QColor(newVal);
+    this.impl.style.color = newVal.$css;
   }
   $onTextChanged(newVal) {
     this.impl.innerHTML = newVal;
@@ -63,10 +63,10 @@ QmlWeb.registerQmlType({
     this.$updateImplicit();
   }
   $onStyleChanged(newVal) {
-    this.$updateShadow(newVal, this.styleColor);
+    this.$updateShadow(newVal, this.styleColor.$css);
   }
   $onStyleColorChanged(newVal) {
-    this.$updateShadow(this.style, new QmlWeb.QColor(newVal));
+    this.$updateShadow(this.style, newVal.$css);
   }
   $onWrapModeChanged(newVal) {
     const style = this.impl.style;

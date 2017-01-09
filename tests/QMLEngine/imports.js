@@ -60,7 +60,7 @@ describe("QMLEngine.imports", function() {
     var div = this.div.children[0];
     expect(div.offsetWidth).toBe(50);
     expect(div.offsetHeight).toBe(100);
-    expect(div.children[0].style.backgroundColor).toBe("green");
+    expect(div.children[0].style.backgroundColor).toBe("rgb(0, 128, 0)");
     // #0ff and cyan doesn't work, because PhantomJS converts
     // them to rgb( 0,255,255 ).. how to compare colors?..
   });

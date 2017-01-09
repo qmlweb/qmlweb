@@ -153,7 +153,7 @@ QmlWeb.registerQmlType({
     this.impl.value = newVal;
   }
   $onColorChanged(newVal) {
-    this.impl.style.color = newVal;
+    this.impl.style.color = newVal.$css;
   }
   $updateValue() {
     if (this.text !== this.impl.value) {

@@ -42,7 +42,7 @@ QmlWeb.registerQmlType({
                           0;
   }
   $onColorChanged(newVal) {
-    this.impl.children[1].style.color = new QmlWeb.QColor(newVal);
+    this.impl.children[1].style.color = newVal.$css;
   }
   $onCheckedChanged() {
     this.impl.children[0].checked = this.checked;

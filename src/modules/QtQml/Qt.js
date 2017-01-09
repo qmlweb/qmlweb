@@ -1,16 +1,4 @@
 const Qt = {
-  rgba: (r, g, b, a) => {
-    const intr = Math.round(r * 255);
-    const intg = Math.round(g * 255);
-    const intb = Math.round(b * 255);
-    return `rgba(${intr},${intg},${intb},${a})`;
-  },
-  hsla: (h, s, l, a) => {
-    const inth = Math.round(h * 360);
-    const ints = Math.round(s * 100);
-    const intl = Math.round(l * 100);
-    return `hsla(${inth},${ints}%,${intl}%,${a})`;
-  },
   openUrlExternally: url => {
     const page = window.open(url, "_blank");
     page.focus();
@@ -103,6 +91,14 @@ const Qt = {
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);
   },
+
+  // Colors
+  rgba: (...args) => QmlWeb.QColor.rgba(...args),
+  hsla: (...args) => QmlWeb.QColor.hsla(...args),
+  hsva: (...args) => QmlWeb.QColor.hsva(...args),
+  colorEqual: (...args) => QmlWeb.QColor.equal(...args),
+  darker: (...args) => QmlWeb.QColor.darker(...args),
+  lighter: (...args) => QmlWeb.QColor.lighter(...args),
 
   include(path) {
     const engine = QmlWeb.engine;
