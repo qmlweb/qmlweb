@@ -9,6 +9,7 @@ build/
 *.log
 .*.swp
 .*.swo
+*.qmlc
 *.kdev4
 *kate-swp
 .arcconfig
