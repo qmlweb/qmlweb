@@ -55,6 +55,12 @@ class QMLProperty {
     } else {
       this.val = new constructors[this.type](val);
     }
+    if (this.val && this.val.$changed) {
+      this.val.$changed.connect(() => {
+        const oldVal = this.val; // TODO
+        this.changed(this.val, oldVal, this.name);
+      });
+    }
   }
 
   // Updater recalculates the value of a property if one of the dependencies
