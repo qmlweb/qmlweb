@@ -20,7 +20,7 @@ QmlWeb.registerQmlType({
     style.position = "absolute";
     style.left = style.right = style.top = style.bottom = "0px";
     style.border = "none";
-    style.backgroundColor = "black";
+    style.backgroundColor = this.color;
     this.dom.appendChild(this.impl);
 
     this.colorChanged.connect(this, this.$onColorChanged);
