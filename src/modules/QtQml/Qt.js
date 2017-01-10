@@ -130,6 +130,10 @@ const Qt = {
     QmlWeb.importJavascriptInContext(js, QmlWeb.executionContext);
   },
 
+  platform: {
+    os: "qmlweb"
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,
