@@ -104,6 +104,9 @@ var modules = {
   "QtNfc 5.2": {
     NearField: {}
   },
+  "QtTest 1.1": {
+    TestCase: { dom: true }
+  },
   "QtWebEngine 5.7": {
     WebEngineView: { dom: true }
   },
