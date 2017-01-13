@@ -30,6 +30,9 @@
         it(test.name, function() {
           loadQmlFile(test.qml, this.div);
           var t = QmlWeb.engine.tests;
+          if (t.errors.length > 0) {
+            throw new Error(t.errors.join("\n") + "\n");
+          }
           expect(t.total).toBe(1);
           expect(t.completed).toBe(1);
           expect(t.stats.pass + t.stats.skip).toBeGreaterThan(0);

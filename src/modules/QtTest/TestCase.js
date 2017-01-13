@@ -25,6 +25,7 @@ QmlWeb.registerQmlType({
         duration: 0,
         total: 0,
         completed: 0,
+        errors: [],
         stats: {
           pass: 0,
           fail: 0,
@@ -110,6 +111,7 @@ QmlWeb.registerQmlType({
           console.log(`SKIP   : ${this.$testId} ${error.message}`);
         } else if (error) {
           info.stats.fail++;
+          info.errors.push(`${this.$testId} ${error.message}`);
           console.log(`FAIL!  : ${this.$testId} ${error.message}`);
           if ("actual" in error) {
             console.log(`   Actual   (): ${error.actual}`);
