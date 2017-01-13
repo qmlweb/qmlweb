@@ -155,7 +155,7 @@ QmlWeb.registerQmlType({
       throw err;
     }
   }
-  verify(condition, message) {
+  verify(condition, message = "") {
     if (!condition) {
       throw new Error(`'${message}' returned FALSE. ()`);
     }
