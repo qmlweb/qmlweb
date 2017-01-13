@@ -3,6 +3,8 @@ import QtTest 1.0
 
 TestCase {
   name: "color"
+  property color foo: "#abcDEF"
+  property color bar: "#abcdef"
   property color green: 'green'
   property color alpha: '#11aa33CC'
 
@@ -58,5 +60,13 @@ TestCase {
     verify(!Qt.colorEqual(green, "red"))
     verify(!Qt.colorEqual(green, "#008001"))
     verify(!Qt.colorEqual("#aabbcc", "#abe"))
+  }
+  function tests_compare() {
+    verify(foo === bar);
+    verify(foo == bar);
+    verify(foo == "#abcdef");
+    verify(foo !== "#abcDEF");
+    verify(foo != "#abcDEF");
+    verify(foo !== "#abcdef");
   }
 }
