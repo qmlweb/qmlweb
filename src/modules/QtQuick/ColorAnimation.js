@@ -1,4 +1,4 @@
-const EMPTY_ANIMATION_COLOR = new QColor(); // eslint-disable-line no-undef
+const EMPTY_ANIMATION_COLOR = new QmlWeb.QColor();
 
 QmlWeb.registerQmlType({
   module: "QtQuick",
@@ -89,7 +89,7 @@ QmlWeb.registerQmlType({
         to
       } = action;
 
-      const cur_color = new QColor( // eslint-disable-line no-undef
+      const cur_color = new QmlWeb.QColor(
         from.r + (to.r - from.r) * progress,
         from.g + (to.g - from.g) * progress,
         from.b + (to.b - from.b) * progress,
