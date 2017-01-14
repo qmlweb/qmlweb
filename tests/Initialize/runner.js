@@ -28,6 +28,7 @@ var modules = {
     ListView: { dom: true },
     Loader: {},
     MouseArea: { dom: true },
+    ColorAnimation: {},
     NumberAnimation: {},
     OpacityAnimator: {},
     ParallelAnimation: {},
