@@ -12,6 +12,8 @@ QmlWeb.registerQmlType({
     QmlWeb.callSuper(this, meta);
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
+    this.runningChanged.connect(this, this.$onRunningChanged);
+    this.pausedChanged.connect(this, this.$onPausedChanged);
 
     QmlWeb.engine.$registerStart(() => {
       if (!this.running) return;
@@ -25,6 +27,35 @@ QmlWeb.registerQmlType({
     for (let i = 0; i < this.animations.length; i++) {
       const animation = this.animations[i];
       animation.runningChanged.connect(this, this.$nextAnimation, flags);
+    }
+  }
+  $onRunningChanged(newVal) {
+    if (newVal) {
+      this.$curIndex = -1;
+      this.$passedLoops = 0; // Recount
+      this.$nextAnimation();
+    } else {
+      const anim = this.animations[this.$curIndex];
+      // Stop current animation
+      if (anim) {
+        this.animations[this.$curIndex].stop();
+      }
+    }
+  }
+  $onPausedChanged(newVal) {
+    if (!this.running) {
+      // TODO: use class extends Animation
+      // ,super.$onPausedChanged(newVal)
+      console.warn("setPaused() cannot be used when animation isn't running.");
+      return;
+    }
+    const anim = this.animations[this.$curIndex];
+    if (anim) {
+      if (newVal) {
+        anim.pause();
+      } else {
+        anim.resume();
+      }
     }
   }
   $nextAnimation(proceed) {
@@ -55,16 +86,9 @@ QmlWeb.registerQmlType({
   stop() {
     if (!this.running) return;
     this.running = false;
-    if (this.$curIndex < this.animations.length) {
-      this.animations[this.$curIndex].stop();
-    }
   }
   complete() {
     if (!this.running) return;
-    if (this.$curIndex < this.animations.length) {
-      // Stop current animation
-      this.animations[this.$curIndex].stop();
-    }
     this.running = false;
   }
 });
