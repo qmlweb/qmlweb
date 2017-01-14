@@ -25,12 +25,12 @@ QmlWeb.registerQmlType({
       for (const j in this.$props) {
         const target = this.$targets[i];
         const property = this.$props[j];
-        const from_color = this.from || target[property];
+        const from_color = this.from;
         const to_color = this.to;
         // Animations always take time in SequentialAnimation
         // , regardless of the value from and to
         const action = {
-          // from, to, cur_color
+          // from, to
           target,
           property,
           from_color,
@@ -63,7 +63,6 @@ QmlWeb.registerQmlType({
         b: to_color.b,
         a: to_color.a
       };
-      action.cur_color = new QColor(); // eslint-disable-line no-undef, max-len
     }
     this.$at = 0;
   }
@@ -82,20 +81,22 @@ QmlWeb.registerQmlType({
     }
     for (const i in this.$actions) {
       const action = this.$actions[i];
+      const property = action.target.$properties[action.property];
       const progress = this.easing.$valueForProgress(this.$at);
 
       const {
-        cur_color,
         from,
         to
       } = action;
 
-      cur_color.r = from.r + (to.r - from.r) * progress;
-      cur_color.g = from.g + (to.g - from.g) * progress;
-      cur_color.b = from.b + (to.b - from.b) * progress;
-      cur_color.a = from.a + (to.a - from.a) * progress;
+      const cur_color = new QColor( // eslint-disable-line no-undef
+        from.r + (to.r - from.r) * progress,
+        from.g + (to.g - from.g) * progress,
+        from.b + (to.b - from.b) * progress,
+        from.a + (to.a - from.a) * progress
+      );
 
-      const property = action.target.$properties[action.property];
+      // Notification changes
       property.set(cur_color, QmlWeb.QMLProperty.ReasonAnimation);
     }
   }
@@ -116,8 +117,7 @@ QmlWeb.registerQmlType({
       const property = action.target.$properties[action.property];
       const to_color = action.to_color;
       if (to_color) {
-        property.set(to_color,
-          QmlWeb.QMLProperty.ReasonAnimation);
+        property.set(to_color, QmlWeb.QMLProperty.ReasonAnimation);
       }
     }
     this.$loop++;
