@@ -4,8 +4,8 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
-    xScale: "real",
-    yScale: "real"
+    xScale: { type: "real", initialValue: 1 },
+    yScale: { type: "real", initialValue: 1 }
   }
 }, class {
   constructor(meta) {
