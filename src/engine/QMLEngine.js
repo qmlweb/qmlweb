@@ -8,6 +8,43 @@ const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
 
+// use requireAnimationFrame replace setInterval
+const {
+  setAnimationInterval,
+  clearAnimationInterval
+} = (function() {
+  const vendors = "ms,moz,webkit,o".split(",");
+  for (let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    window.requestAnimationFrame = window[`${vendors[x]}RequestAnimationFrame`];
+  }
+  let setAni = setInterval;
+  let clearAni = clearInterval;
+
+  if (window.requestAnimationFrame) {
+    let animationIntervalId = 0;
+    const AnimationIntervalIdMap = {};
+    setAni = function(callback) {
+      const animation_id = animationIntervalId++;
+      AnimationIntervalIdMap[animation_id] = true;
+      requestAnimationFrame(function _() {
+        if (AnimationIntervalIdMap[animation_id]) {
+          callback();
+          requestAnimationFrame(_);
+        }
+      });
+      return animation_id;
+    };
+    clearAni = function(animation_id) {
+      // Do not use the delete keyword, otherwise will generate Slow-Object.
+      AnimationIntervalIdMap[animation_id] = false;
+    };
+  }
+  return {
+    setAnimationInterval: setAni,
+    clearAnimationInterval: clearAni
+  };
+}());
+
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element) {
@@ -115,7 +152,8 @@ class QMLEngine {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
-      this._tickerId = setInterval(this._tick.bind(this), this.$interval);
+      this._tickerId = setAnimationInterval(this._tick.bind(this)
+        , this.$interval);
       this._whenStart.forEach(callback => callback());
     }
   }
@@ -124,7 +162,7 @@ class QMLEngine {
   stop() {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState === QMLOperationState.Running) {
-      clearInterval(this._tickerId);
+      clearAnimationInterval(this._tickerId);
       this.operationState = QMLOperationState.Idle;
       this._whenStop.forEach(callback => callback());
     }
