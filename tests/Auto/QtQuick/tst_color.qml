@@ -84,6 +84,64 @@ TestCase {
     tmp.a = 0.4;
     verify(Qt.colorEqual(tmp, "#66996633"))
   }
+  function test_hsv_set() {
+    // Direct comparison (without toString) fails on Qt: QTBUG-58147
+    tmp = green;
+    verify(Qt.colorEqual(tmp, "#008000"))
+    tmp.hsvSaturation = 0.5;
+    verify(Qt.colorEqual(tmp + "", "#408040"))
+    tmp.hsvSaturation = 0;
+    verify(Qt.colorEqual(tmp + "", "#808080"))
+    tmp = green;
+    tmp.hsvHue = 0;
+    verify(Qt.colorEqual(tmp + "", "#800000"))
+    tmp.hsvValue = 0.4;
+    verify(Qt.colorEqual(tmp + "", "#660000"))
+    tmp = green;
+    tmp.hsvValue = 0.8;
+    verify(Qt.colorEqual(tmp + "", "#00cc00"))
+    tmp.hsvHue = 1/6;
+    verify(Qt.colorEqual(tmp + "", "#cccc00"))
+    tmp.hsvHue = 2/6;
+    verify(Qt.colorEqual(tmp + "", "#00cc00"))
+    tmp.hsvHue = 3/6;
+    verify(Qt.colorEqual(tmp + "", "#00cccc"))
+    tmp.hsvHue = 4/6;
+    verify(Qt.colorEqual(tmp + "", "#0000cc"))
+    tmp.hsvHue = 5/6;
+    verify(Qt.colorEqual(tmp + "", "#cc00cc"))
+    tmp.hsvHue = 0;
+    verify(Qt.colorEqual(tmp + "", "#cc0000"))
+  }
+  function test_hsl_set() {
+    // Direct comparison (without toString) fails on Qt: QTBUG-58147
+    tmp = green;
+    verify(Qt.colorEqual(tmp, "#008000"))
+    tmp.hslSaturation = 0.5;
+    verify(Qt.colorEqual(tmp + "", "#206020"))
+    tmp.hslSaturation = 0;
+    verify(Qt.colorEqual(tmp + "", "#404040"))
+    tmp = green;
+    tmp.hslHue = 0;
+    verify(Qt.colorEqual(tmp + "", "#800000"))
+    tmp.hslLightness = 0.4;
+    verify(Qt.colorEqual(tmp + "", "#cc0000"))
+    tmp = green;
+    tmp.hslLightness = 0.8;
+    verify(Qt.colorEqual(tmp + "", "#99ff99"))
+    tmp.hslHue = 1/6;
+    verify(Qt.colorEqual(tmp + "", "#ffff99"))
+    tmp.hslHue = 2/6;
+    verify(Qt.colorEqual(tmp + "", "#99ff99"))
+    tmp.hslHue = 3/6;
+    verify(Qt.colorEqual(tmp + "", "#99ffff"))
+    tmp.hslHue = 4/6;
+    verify(Qt.colorEqual(tmp + "", "#9999ff"))
+    tmp.hslHue = 5/6;
+    verify(Qt.colorEqual(tmp + "", "#ff99ff"))
+    tmp.hslHue = 0;
+    verify(Qt.colorEqual(tmp + "", "#ff9999"))
+  }
   function test_immut() {
     tmp = foo;
     tmp.r = 1;

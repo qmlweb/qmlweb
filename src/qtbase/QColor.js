@@ -174,7 +174,7 @@ class QColor {
     this.$changed.execute();
   }
   set hslSaturation(s) {
-    const rgb = QColor.$hsl(this.hslSaturation, s, this.hslLightness);
+    const rgb = QColor.$hsl(this.hslHue, s, this.hslLightness);
     this.$r = rgb[0];
     this.$g = rgb[1];
     this.$b = rgb[2];
@@ -182,7 +182,7 @@ class QColor {
     this.$changed.execute();
   }
   set hslLightness(l) {
-    const rgb = QColor.$hsl(this.hslLightness, this.hslSaturation, l);
+    const rgb = QColor.$hsl(this.hslHue, this.hslSaturation, l);
     this.$r = rgb[0];
     this.$g = rgb[1];
     this.$b = rgb[2];
