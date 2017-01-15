@@ -7,6 +7,7 @@ TestCase {
   property color bar: "#abcdef"
   property color green: 'green'
   property color alpha: '#11aa33CC'
+  property color tmp
 
   function test_toString() {
     compare(green.toString(), '#008000')
@@ -62,11 +63,25 @@ TestCase {
     verify(!Qt.colorEqual("#aabbcc", "#abe"))
   }
   function tests_compare() {
+    /* in QmlWeb, comparing colors works only with Qt.colorEqual
     verify(foo === bar);
     verify(foo == bar);
+    */
+    verify(Qt.colorEqual(foo, bar));
     verify(foo == "#abcdef");
     verify(foo !== "#abcDEF");
     verify(foo != "#abcDEF");
     verify(foo !== "#abcdef");
+  }
+  function test_rbga_set() {
+    tmp = 'green';
+    verify(Qt.colorEqual(tmp, "#008000"))
+    tmp.r = 0.6;
+    verify(Qt.colorEqual(tmp, "#998000"))
+    tmp.g = 0.4;
+    tmp.b = 0.2;
+    verify(Qt.colorEqual(tmp, "#996633"))
+    tmp.a = 0.4;
+    verify(Qt.colorEqual(tmp, "#66996633"))
   }
 }
