@@ -189,32 +189,7 @@ class QColor {
     this.$string = this.$cssValue = null;
     this.$changed.execute();
   }
-  $get() {
-    // Returns the same instance for all equivalent colors.
-    // NOTE: the returned value should not be changed using method calls, if
-    // those would be added in the future, the returned value should be wrapped.
-    const id = this.toString();
-    if (!QColor.$colors[id]) {
-      if (QColor.$colorsCount >= QColor.comparableColorsLimit) {
-        // Too many colors created, bail out to avoid memory hit
-        return this;
-      }
-      QColor.$colors[id] = this;
-      QColor.$colorsCount++;
-      if (QColor.$colorsCount === QColor.comparableColorsLimit) {
-        console.warn(
-          "QmlWeb: the number of QColor instances reached the limit set in",
-          "QmlWeb.QColor.comparableColorsLimit. Further created colors would",
-          "not be comparable to avoid memory hit."
-        );
-      }
-    }
-    return QColor.$colors[id];
-  }
 }
-QColor.$colors = {};
-QColor.$colorsCount = 0;
-QColor.comparableColorsLimit = 10000;
 QColor.rgba = (r, g, b, a = 1) => new QColor(r, g, b, a);
 QColor.hsva = (h, s, v, a = 1) => new QColor(...QColor.$hsv(h, s, v), a);
 QColor.hsla = (h, s, l, a = 1) => new QColor(...QColor.$hsl(h, s, l), a);

@@ -135,10 +135,6 @@ class QMLProperty {
       );
     }
 
-    if (this.val && this.val.$get) {
-      return this.val.$get();
-    }
-
     return this.val;
   }
   // Define setter
