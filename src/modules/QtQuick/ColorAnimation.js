@@ -30,7 +30,7 @@ QmlWeb.registerQmlType({
         // Animations always take time in SequentialAnimation
         // , regardless of the value from and to
         const action = {
-          // from, to
+          // from, to, cur_color
           target,
           property,
           from_color,
@@ -50,6 +50,7 @@ QmlWeb.registerQmlType({
       const to_color = action.to_color ||
         action.target[action.property] ||
         EMPTY_ANIMATION_COLOR;
+      const property = action.target.$properties[action.property];
 
       action.from = {
         r: from_color.r,
@@ -63,6 +64,8 @@ QmlWeb.registerQmlType({
         b: to_color.b,
         a: to_color.a
       };
+      action.cur_color = new QmlWeb.QColor(from_color);
+      property.set(action.cur_color, QmlWeb.QMLProperty.ReasonAnimation);
     }
     this.$at = 0;
   }
@@ -81,23 +84,19 @@ QmlWeb.registerQmlType({
     }
     for (const i in this.$actions) {
       const action = this.$actions[i];
-      const property = action.target.$properties[action.property];
       const progress = this.easing.$valueForProgress(this.$at);
 
       const {
         from,
-        to
+        to,
+        cur_color
       } = action;
 
-      const cur_color = new QmlWeb.QColor(
-        from.r + (to.r - from.r) * progress,
-        from.g + (to.g - from.g) * progress,
-        from.b + (to.b - from.b) * progress,
-        from.a + (to.a - from.a) * progress
-      );
-
+      cur_color.$r = from.r + (to.r - from.r) * progress;
+      cur_color.$g = from.g + (to.g - from.g) * progress;
+      cur_color.$b = from.b + (to.b - from.b) * progress;
       // Notification changes
-      property.set(cur_color, QmlWeb.QMLProperty.ReasonAnimation);
+      cur_color.a = from.a + (to.a - from.a) * progress;
     }
   }
   $onRunningChanged(newVal) {
