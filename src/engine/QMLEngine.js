@@ -13,30 +13,31 @@ const {
   setAnimationInterval,
   clearAnimationInterval
 } = (function() {
-  const vendors = "ms,moz,webkit,o".split(",");
-  for (let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-    window.requestAnimationFrame = window[`${vendors[x]}RequestAnimationFrame`];
-  }
+  const {
+    requestAnimationFrame,
+    cancelAnimationFrame
+  } = window;
+  QmlWeb.useAnimationFrames = requestAnimationFrame && cancelAnimationFrame;
+
   let setAni = setInterval;
   let clearAni = clearInterval;
 
-  if (window.requestAnimationFrame) {
-    let animationIntervalId = 0;
-    const AnimationIntervalIdMap = {};
-    setAni = function(callback) {
-      const animation_id = animationIntervalId++;
-      AnimationIntervalIdMap[animation_id] = true;
-      requestAnimationFrame(function _() {
-        if (AnimationIntervalIdMap[animation_id]) {
-          callback();
-          requestAnimationFrame(_);
-        }
-      });
-      return animation_id;
+  if (QmlWeb.useAnimationFrames) {
+    const animations = [];
+    setAni = callback => {
+      const id = animations.length;
+      animations[id] = true;
+      const ticker = () => {
+        callback();
+        animations[id] = requestAnimationFrame(ticker);
+      };
+      // faster then push().
+      animations[id] = requestAnimationFrame(ticker);
+      return id;
     };
-    clearAni = function(animation_id) {
-      // Do not use the delete keyword, otherwise will generate Slow-Object.
-      AnimationIntervalIdMap[animation_id] = false;
+    clearAni = id => {
+      cancelAnimationFrame(animations[id]);
+      animations[id] = null;
     };
   }
   return {
@@ -152,8 +153,10 @@ class QMLEngine {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
-      this._tickerId = setAnimationInterval(this._tick.bind(this)
-        , this.$interval);
+      this.isUseRAF = QmlWeb.useAnimationFrames;
+      this._tickerId = this.isUseRAF ?
+        setAnimationInterval(this._tick.bind(this)) :
+        setInterval(this._tick.bind(this), this.$interval);
       this._whenStart.forEach(callback => callback());
     }
   }
@@ -162,7 +165,11 @@ class QMLEngine {
   stop() {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState === QMLOperationState.Running) {
-      clearAnimationInterval(this._tickerId);
+      if (this.isUseRAF) {
+        clearAnimationInterval(this._tickerId);
+      } else {
+        clearInterval(this._tickerId);
+      }
       this.operationState = QMLOperationState.Idle;
       this._whenStop.forEach(callback => callback());
     }
