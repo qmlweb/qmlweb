@@ -19,7 +19,7 @@ Rectangle {
       x: 25; y: 25
     }
     Rectangle {
-      color: Qt.rgba(1, 0.5, 0.5, 0.9)
+      color: Qt.rgba(1, 0.4, 0.4, 0.9)
       width: 50;
       height: 50
       x: 70; y: 20
