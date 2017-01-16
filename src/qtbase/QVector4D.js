@@ -77,7 +77,9 @@ class QVector4D extends QmlWeb.QObject {
       delta => Math.abs(delta) <= epsilon
     );
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QVector4D.nonNullableType = true;
-QVector4D.requireConstructor = true;
+
 QmlWeb.QVector4D = QVector4D;

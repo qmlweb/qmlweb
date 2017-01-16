@@ -61,7 +61,7 @@ gulp.task("qmlweb-covered", () =>
     .pipe(order(qtcoreSources, { base: __dirname }))
     .pipe(babel({
       presets: ["es2015"],
-      plugins: ["istanbul"]
+      plugins: ["transform-class-properties", "istanbul"]
     }))
     .pipe(concat("qt.covered.js"))
     .pipe(changed("./tmp"))

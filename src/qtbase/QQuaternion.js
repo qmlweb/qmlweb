@@ -23,7 +23,9 @@ class QQuaternion extends QmlWeb.QObject {
   toString() {
     return super.$toString(this.scalar, this.x, this.y, this.z);
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QQuaternion.nonNullableType = true;
-QQuaternion.requireConstructor = true;
+
 QmlWeb.QQuaternion = QQuaternion;

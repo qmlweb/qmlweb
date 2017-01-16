@@ -78,7 +78,9 @@ class QVector3D extends QmlWeb.QObject {
       delta => Math.abs(delta) <= epsilon
     );
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QVector3D.nonNullableType = true;
-QVector3D.requireConstructor = true;
+
 QmlWeb.QVector3D = QVector3D;

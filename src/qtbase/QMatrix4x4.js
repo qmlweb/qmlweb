@@ -184,7 +184,9 @@ class QMatrix4x4 extends QmlWeb.QObject {
     }
     return true;
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QMatrix4x4.nonNullableType = true;
-QMatrix4x4.requireConstructor = true;
+
 QmlWeb.QMatrix4x4 = QMatrix4x4;

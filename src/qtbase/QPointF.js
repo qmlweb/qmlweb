@@ -20,7 +20,9 @@ class QPointF extends QmlWeb.QObject {
   toString() {
     return super.$toString(this.x, this.y);
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QPointF.nonNullableType = true;
-QPointF.requireConstructor = true;
+
 QmlWeb.QPointF = QPointF;

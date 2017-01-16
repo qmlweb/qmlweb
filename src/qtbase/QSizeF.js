@@ -20,7 +20,9 @@ class QSizeF extends QmlWeb.QObject {
   toString() {
     return super.$toString(this.width, this.height);
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QSizeF.nonNullableType = true;
-QSizeF.requireConstructor = true;
+
 QmlWeb.QSizeF = QSizeF;

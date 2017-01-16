@@ -24,7 +24,9 @@ class QRectF extends QmlWeb.QObject {
   toString() {
     return super.$toString(this.x, this.y, this.width, this.height);
   }
+
+  static nonNullableType = true;
+  static requireConstructor = true;
 }
-QRectF.nonNullableType = true;
-QRectF.requireConstructor = true;
+
 QmlWeb.QRectF = QRectF;

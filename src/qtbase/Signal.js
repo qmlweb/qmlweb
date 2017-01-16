@@ -143,13 +143,13 @@ class Signal {
     }
     QmlWeb.QMLProperty.popEvalStack();
   }
+
+  static $queued = [];
+
+  static AutoConnection = 0;
+  static DirectConnection = 1;
+  static QueuedConnection = 2;
+  static UniqueConnection = 128;
 }
-
-Signal.$queued = [];
-
-Signal.AutoConnection = 0;
-Signal.DirectConnection = 1;
-Signal.QueuedConnection = 2;
-Signal.UniqueConnection = 128;
 
 QmlWeb.Signal = Signal;
