@@ -11,7 +11,7 @@ const replace = require("gulp-replace");
 const karma = require("karma");
 const path = require("path");
 
-const qtcoreSources = [
+const sources = [
   "src/QmlWeb.js",
   "src/qtbase/QObject.js",
   "src/qtbase/*.js",
@@ -57,13 +57,13 @@ gulp.task("parser-covered", () =>
 );
 
 gulp.task("qmlweb-covered", () =>
-  gulp.src(qtcoreSources)
-    .pipe(order(qtcoreSources, { base: __dirname }))
+  gulp.src(sources)
+    .pipe(order(sources, { base: __dirname }))
     .pipe(babel({
       presets: ["es2015"],
       plugins: ["transform-class-properties", "istanbul"]
     }))
-    .pipe(concat("qt.covered.js"))
+    .pipe(concat("qmlweb.covered.js"))
     .pipe(changed("./tmp"))
     .pipe(replace(/["']use strict["'];/g, ""))
     .pipe(iife({
@@ -74,11 +74,11 @@ gulp.task("qmlweb-covered", () =>
     .pipe(gulp.dest("./tmp"))
 );
 
-gulp.task("qmlweb-dev", () =>
-  gulp.src(qtcoreSources)
-    .pipe(order(qtcoreSources, { base: __dirname }))
+gulp.task("qmlweb", () =>
+  gulp.src(sources)
+    .pipe(order(sources, { base: __dirname }))
     .pipe(sourcemaps.init())
-    .pipe(concat("qt.js"))
+    .pipe(concat("qmlweb.js"))
     .pipe(changed("./lib"))
     .pipe(babel())
     .pipe(replace(/"use strict";/g, ""))
@@ -91,9 +91,9 @@ gulp.task("qmlweb-dev", () =>
     .pipe(gulp.dest("./lib"))
 );
 
-gulp.task("qmlweb", ["qmlweb-dev"], () =>
-  gulp.src("./lib/qt.js")
-    .pipe(rename("qt.min.js"))
+gulp.task("qmlweb.min", ["qmlweb"], () =>
+  gulp.src("./lib/qmlweb.js")
+    .pipe(rename("qmlweb.min.js"))
     .pipe(changed("./lib"))
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(uglify())
@@ -101,20 +101,40 @@ gulp.task("qmlweb", ["qmlweb-dev"], () =>
     .pipe(gulp.dest("./lib"))
 );
 
+// Legacy library name, TODO: remove
+gulp.task("qt", ["qmlweb"], () =>
+  gulp.src("./lib/qmlweb.js")
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(concat("qt.js"))
+    .pipe(sourcemaps.write("./"))
+    .pipe(gulp.dest("./lib"))
+);
+
+// Legacy library name, TODO: remove
+gulp.task("qt.min", ["qmlweb.min"], () =>
+  gulp.src("./lib/qmlweb.min.js")
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(concat("qt.min.js"))
+    .pipe(sourcemaps.write("./"))
+    .pipe(gulp.dest("./lib"))
+);
+
 gulp.task("build-covered", ["parser-covered", "qmlweb-covered"]);
 
-gulp.task("build-dev", ["qmlweb-dev", "parser", "license"]);
+gulp.task("build-dev", ["qmlweb", "parser", "license"]);
 
-gulp.task("build", ["qmlweb", "parser", "license"]);
+gulp.task("build", [
+  "qmlweb", "parser", "license", "qmlweb.min", "qt", "qt.min"
+]);
 
 gulp.task("watch", ["build"], () => {
-  gulp.watch(qtcoreSources, ["qmlweb"]);
+  gulp.watch(sources, ["qmlweb", "qmlweb.min", "qt", "qt.min"]);
   gulp.watch(parserSources, ["parser"]);
   gulp.watch(licenseSources, ["license"]);
 });
 
 gulp.task("watch-dev", ["build-dev"], () => {
-  gulp.watch(qtcoreSources, ["qmlweb-dev"]);
+  gulp.watch(sources, ["qmlweb", "qt"]);
   gulp.watch(parserSources, ["parser"]);
   gulp.watch(licenseSources, ["license"]);
 });

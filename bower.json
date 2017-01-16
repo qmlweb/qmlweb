@@ -1,7 +1,7 @@
 {
   "name": "qmlweb",
   "description": "QML port to Javascript",
-  "main": "lib/qt.min.js",
+  "main": "lib/qmlweb.min.js",
   "license": "BSD",
   "keywords": [
     "qml",

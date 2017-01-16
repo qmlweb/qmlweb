@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: "",
     frameworks: ["jasmine"],
     files: [
-      config.coverageEnabled ? "tmp/qt.covered.js" : "lib/qt.js",
+      config.coverageEnabled ? "tmp/qmlweb.covered.js" : "lib/qmlweb.js",
       { pattern: "lib/*.js", included: false },
       { pattern: "lib/*.js.map", included: false },
       { pattern: "tmp/qmlweb.*.js", included: false },
