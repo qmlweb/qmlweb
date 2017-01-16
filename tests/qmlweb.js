@@ -9,7 +9,7 @@ function include(file, window) {
 }
 
 require("jsdom").env("", (err, window) => {
-  include("../lib/qt.js", window);
+  include("../lib/qmlweb.js", window);
   include("../lib/qmlweb.parser.js", window);
 
   const document = window.document;

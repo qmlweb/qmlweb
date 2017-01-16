@@ -268,8 +268,11 @@ function loadParser() {
   console.log("Loading parser...");
   const tags = document.getElementsByTagName("script");
   for (const i in tags) {
-    if (tags[i].src && tags[i].src.indexOf("/qt.") !== -1) {
-      const src = tags[i].src.replace("/qt.", "/qmlweb.parser.");
+    if (tags[i].src && tags[i].src.match(/\/(qt|qmlweb)\./)) {
+      const src = tags[i].src.replace(
+        /\/(qt|qmlweb)\.(es201.\.)?/,
+        "/qmlweb.parser."
+      );
       // TODO: rewrite to async loading
       const xhr = new XMLHttpRequest();
       xhr.open("GET", src, false);

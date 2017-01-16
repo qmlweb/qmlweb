@@ -40,11 +40,11 @@ Using one of the methods below, install the qmlweb JavaScript library:
   `tar -xaf v0.2.0.tar.gz`
 * Manually (recommended if you cloned from git) — `npm install && npm run build`
 
-Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's
-HTML file:
+Next, simply add `lib/qmlweb.js` to the list of other JavaScript files in your
+app's HTML file:
 
 ```HTML
-<script type="text/javascript" src="/lib/qt.js"></script>
+<script type="text/javascript" src="/lib/qmlweb.js"></script>
 ```
 
 See the [examples](examples) directory for more details and complete usage
@@ -75,7 +75,7 @@ the page is opened. The loaded QML element will fill the whole page.
 <html>
   <head>
     <title>QML Auto-load Example</title>
-    <script type="text/javascript" src="/lib/qt.js"></script>
+    <script type="text/javascript" src="/lib/qmlweb.js"></script>
   </head>
   <body style="margin: 0" data-qml="qml/main.qml">
   </body>
