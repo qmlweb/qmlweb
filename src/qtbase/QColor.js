@@ -44,13 +44,8 @@ class QColor {
       } else {
         throw new Error(`Can not convert ${val} to color`);
       }
-    } else if (typeof val === "number") {
-      // we assume it is int value and must be converted to css hex with padding
-      const hex = (Math.round(val) + 0x1000000).toString(16).substr(-6);
-      const rgb = hex.match(/.{2}/g).map(x => parseInt(x, 16));
-      this.$r = rgb[0] / 255;
-      this.$g = rgb[1] / 255;
-      this.$b = rgb[2] / 255;
+    } else if (typeof val !== "undefined") {
+      throw new Error(`Can not assign ${typeof val} to QColor`);
     }
   }
   toString() {
