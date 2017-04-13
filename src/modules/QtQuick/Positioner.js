@@ -4,7 +4,8 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "Item",
   properties: {
-    spacing: "int"
+    spacing: "int",
+    padding: "int"
   }
 }, class {
   constructor(meta) {

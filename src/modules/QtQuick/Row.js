@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
     this.layoutChildren();
   }
   layoutChildren() {
-    let curPos = 0;
+    let curPos = this.padding;
     let maxHeight = 0;
     // When layoutDirection is RightToLeft we need oposite order
     let i = this.layoutDirection === 1 ? this.children.length - 1 : 0;
@@ -28,10 +28,12 @@ QmlWeb.registerQmlType({
       maxHeight = child.height > maxHeight ? child.height : maxHeight;
 
       child.x = curPos;
+      if (this.padding > 0) child.y = this.padding;
+
       curPos += child.width + this.spacing;
     }
-    this.implicitHeight = maxHeight;
+    this.implicitHeight = maxHeight + this.padding*2;
     // We want no spacing at the right side
-    this.implicitWidth = curPos - this.spacing;
+    this.implicitWidth = curPos - this.spacing + this.padding;
   }
 });
