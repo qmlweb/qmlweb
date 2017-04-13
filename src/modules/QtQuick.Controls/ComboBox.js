@@ -67,6 +67,13 @@ QmlWeb.registerQmlType({
 
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
+
+    // follow height property of ComboBox for select tag
+    // useful in conjuction with 'size: 2'
+    if (this.height > 0 && this.height != this.impl.offsetHeight) {
+      this.impl.style.height = this.height + "px";
+    }
+
   }
   Component$onCompleted() {
     this.$updateImpl();
