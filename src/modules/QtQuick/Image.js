@@ -96,7 +96,19 @@ QmlWeb.registerQmlType({
     this.progress = 0;
     this.status = this.Image.Loading;
     const imageURL = QmlWeb.engine.$resolveImageURL(source);
-    this.impl.style.backgroundImage = `url("${imageURL}")`;
+
+    ////////////// assign backgroundImage 
+    // For some misterious reason, in some cases, assigning in the form "url('xxx')" 
+    // doesn't work in chrome. At the same time it works when used without qoutes, in form "url(xxx)".
+    // So we omit quoutes. Plus, quoutes are not necessary, according to 
+    // http://stackoverflow.com/questions/2168855/is-quoting-the-value-of-url-really-necessary
+
+    // escape parentheses, white spaces etc 
+    var s = "url(" + imageURL.replace(/[() '"]/g, '\\$0') + ")";
+    
+    this.impl.style.backgroundImage = s;
+    ///////////// 
+
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;
