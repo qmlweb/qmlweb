@@ -6,6 +6,7 @@ QmlWeb.registerQmlType({
   properties: {
     count: "int",
     currentIndex: "int",
+    size: { type: "int", initialValue: 1 }, // non-standard property to qtquick, but useful in dom
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
@@ -24,6 +25,7 @@ QmlWeb.registerQmlType({
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
+    this.sizeChanged.connect(this, this.$onModelChanged);
     this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
 
     this.dom.onclick = () => {
@@ -60,6 +62,9 @@ QmlWeb.registerQmlType({
     // TODO: remove innerHTML, port to DOM
     this.dom.innerHTML = `<select>${entries.join("")}</select>`;
     this.impl = this.dom.firstChild;
+    
+    this.impl.size = this.size;
+
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
   }
