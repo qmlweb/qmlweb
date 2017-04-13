@@ -22,8 +22,15 @@ QmlWeb.registerQmlType({
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
 
+    // TODO change innerHTML to DOM
+    this.dom.innerHTML = "<select></select>";
+    this.impl = this.dom.firstChild;
+
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
+    this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
+    this.heightChanged.connect(this, this.$onHeightChanged);
+    this.widthChanged.connect(this, this.$onWidthChanged);
 
     this.dom.onclick = () => {
       const index = this.dom.firstChild.selectedIndex;
@@ -43,29 +50,59 @@ QmlWeb.registerQmlType({
     return this.model[index];
   }
   $updateImpl() {
-    this.currentIndex = 0;
     this.count = this.model.length;
-    const entries = [];
-    for (let i = 0; i < this.count; i++) {
-      const elt = this.model[i];
-      //if (elt instanceof Array) { // TODO - optgroups? update model !
-      //    var count_i = elt.length;
-      //    for (var j = 0; j < count_i; j++)
-      //        html += "<option>" + elt[j] + "</option>";
-      //}
-      //else
-      entries.push(`<option>${elt}</option>`);
+
+    const k = this.count; const m = this.model;
+
+    this.impl.options.length = k;
+    for (let i = 0; i < k; i++) {
+      this.impl.options[i] = new Option(m[i]);
     }
-    // TODO: remove innerHTML, port to DOM
-    this.dom.innerHTML = `<select>${entries.join("")}</select>`;
-    this.impl = this.dom.firstChild;
+
+    // should call this, because width()/heights() invoke updateV(H)Geometry,
+    // which in turn sets valid $useImplicitHeight flag
+    const h = this.height; const w = this.width;
+
+    this.implicitWidth = this.impl.offsetWidth;
+    this.implicitHeight = this.impl.offsetHeight;
+
+    this.$onHeightChanged(h);
+    this.$onWidthChanged(w);
+
+    this.impl.selectedIndex = this.currentIndex;
+    this.$updateCurrentText();
   }
   Component$onCompleted() {
     this.$updateImpl();
-    this.implicitWidth = this.impl.offsetWidth;
-    this.implicitHeight = this.impl.offsetHeight;
   }
   $onModelChanged() {
     this.$updateImpl();
+  }
+  $onCurrentIndexChanged() {
+    const i = this.currentIndex;
+    if (this.impl.selectedIndex !== i) {
+      this.impl.selectedIndex = i;
+      this.$updateCurrentText();
+      this.activated(i);
+    }
+  }
+  $updateCurrentText() {
+    if (typeof this.currentIndex === "undefined" || !this.model) {
+      this.currentText = undefined;
+    } else if (this.currentIndex >= 0 &&
+              this.currentIndex < this.model.length) {
+      this.currentText = this.model[ this.currentIndex ];
+    }
+  }
+  $onHeightChanged() {
+    if (this.height > 0 && this.impl
+     && this.height !== this.impl.offsetHeight) {
+      this.impl.style.height = `${this.height}px`;
+    }
+  }
+  $onWidthChanged() {
+    if (this.width > 0 && this.impl && this.width !== this.impl.offsetWidth) {
+      this.impl.style.width = `${this.width}px`;
+    }
   }
 });
