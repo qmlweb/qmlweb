@@ -24,6 +24,7 @@ QmlWeb.registerQmlType({
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
+    this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
 
     this.dom.onclick = () => {
       const index = this.dom.firstChild.selectedIndex;
@@ -59,13 +60,21 @@ QmlWeb.registerQmlType({
     // TODO: remove innerHTML, port to DOM
     this.dom.innerHTML = `<select>${entries.join("")}</select>`;
     this.impl = this.dom.firstChild;
-  }
-  Component$onCompleted() {
-    this.$updateImpl();
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
   }
+  Component$onCompleted() {
+    this.$updateImpl();
+  }
   $onModelChanged() {
     this.$updateImpl();
+  }
+  $onCurrentIndexChanged() {
+    var i = this.currentIndex;
+    if (this.dom.firstChild.selectedIndex != i) {
+      this.dom.firstChild.selectedIndex = i;
+      this.currentText = this.model[i];
+      this.activated(i);
+    }
   }
 });
