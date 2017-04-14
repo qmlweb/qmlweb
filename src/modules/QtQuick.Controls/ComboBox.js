@@ -57,7 +57,7 @@ QmlWeb.registerQmlType({
 
     this.impl.options.length = k;
     for(var i = 0; i < k; i++) {
-      this.impl.options[i] = new Option(m[i], i);
+      this.impl.options[i] = new Option(m[i]);
     }    
     
     this.impl.size = this.size;
