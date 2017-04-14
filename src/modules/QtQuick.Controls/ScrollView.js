@@ -45,9 +45,13 @@ QmlWeb.registerQmlType({
     this.viewport = undefined;
     this.frameVisible = false;
     this.highlightOnFocus = false;
+
     this.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.horizontalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.style = undefined;
+
+    this.$onVerticalScrollBarPolicyChanged( this.verticalScrollBarPolicy );
+    this.$onHorizontalScrollBarPolicyChanged( this.horizontalScrollBarPolicy );
   }
   $onContentItemChanged(newItem) {
     if (typeof newItem !== undefined) {
