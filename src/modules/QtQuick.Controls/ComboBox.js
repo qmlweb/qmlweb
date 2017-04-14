@@ -27,6 +27,7 @@ QmlWeb.registerQmlType({
     this.modelChanged.connect(this, this.$onModelChanged);
     this.sizeChanged.connect(this, this.$onModelChanged);
     this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
+    this.heightChanged.connect(this, this.$onHeightChanged);
 
     this.dom.onclick = () => {
       const index = this.dom.firstChild.selectedIndex;
@@ -46,6 +47,7 @@ QmlWeb.registerQmlType({
     return this.model[index];
   }
   $updateImpl() {   
+    this.count = this.model.length;
     
     const entries = [];
     for (let i = 0; i < this.count; i++) {
@@ -67,18 +69,20 @@ QmlWeb.registerQmlType({
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
 
-    // follow height property of ComboBox for select tag
-    // useful in conjuction with 'size: 2'
-    if (this.height > 0 && this.height != this.impl.offsetHeight) {
-      this.impl.style.height = this.height + "px";
-    }
+    this.$onHeightChanged();
 
-    this.count = this.model.length;
-
+    // check wherever currentIndex is in valid range, e.g -1...count
     if (this.currentIndex >= this.count) 
-    	this.currentIndex = this.count-1; 
+    	  this.currentIndex = this.count-1; 
+    else
+    if (this.currentIndex < 0 && this.count > 0)
+        this.currentIndex = 0;
+    
+    // should call this to force selected item in newly created select tag
+    this.impl.selectedIndex = this.currentIndex;
 
-    this.currentText = this.model[ this.currentIndex ];    
+    if (this.currentText !== this.model[ this.currentIndex ])
+        this.currentText = this.model[ this.currentIndex ];        
   }
   Component$onCompleted() {
     this.$updateImpl();
@@ -92,6 +96,13 @@ QmlWeb.registerQmlType({
       this.dom.firstChild.selectedIndex = i;
       this.currentText = this.model[i];
       this.activated(i);
+    }
+  }
+  $onHeightChanged() {
+    // follow height property of ComboBox for select tag
+    // useful in conjuction with 'size: 2'
+    if (this.height > 0 && this.impl && this.height != this.impl.offsetHeight) {
+      this.impl.style.height = this.height + "px";
     }
   }
 });
