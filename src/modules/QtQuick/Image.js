@@ -46,6 +46,9 @@ QmlWeb.registerQmlType({
       this.implicitHeight = h;
       this.progress = 1;
       this.status = this.Image.Ready;
+
+      var s = "url(" + this.$img.src.replace(/[() '"]/g, '\\$0') + ")";
+      this.impl.style.backgroundImage = s;
     });
     this.$img.addEventListener("error", () => {
       this.status = this.Image.Error;
@@ -104,9 +107,11 @@ QmlWeb.registerQmlType({
     // http://stackoverflow.com/questions/2168855/is-quoting-the-value-of-url-really-necessary
 
     // escape parentheses, white spaces etc 
-    var s = "url(" + imageURL.replace(/[() '"]/g, '\\$0') + ")";
-    
-    this.impl.style.backgroundImage = s;
+    // var s = "url(" + imageURL.replace(/[() '"]/g, '\\$0') + ")";
+    // this.impl.style.backgroundImage = s;
+
+    // we move assign from here to this.$img load event
+    // and thus we avoid flicker.
     ///////////// 
 
     this.$img.src = imageURL;
