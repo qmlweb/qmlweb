@@ -38,6 +38,11 @@ QmlWeb.registerQmlType({
 
     this.$img = new Image();
     this.$img.addEventListener("load", () => {
+      // assign image url to dom, see notes in $onSourceChanged
+      // do it before properties assigns, so browser can perform rendering faster
+      var s = "url(" + this.$img.src.replace(/[() '"]/g, '\\$0') + ")";
+      this.impl.style.backgroundImage = s;
+
       const w = this.$img.naturalWidth;
       const h = this.$img.naturalHeight;
       this.sourceSize.width = w;
@@ -46,9 +51,6 @@ QmlWeb.registerQmlType({
       this.implicitHeight = h;
       this.progress = 1;
       this.status = this.Image.Ready;
-
-      var s = "url(" + this.$img.src.replace(/[() '"]/g, '\\$0') + ")";
-      this.impl.style.backgroundImage = s;
     });
     this.$img.addEventListener("error", () => {
       this.status = this.Image.Error;
