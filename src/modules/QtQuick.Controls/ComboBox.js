@@ -49,20 +49,16 @@ QmlWeb.registerQmlType({
   $updateImpl() {   
     this.count = this.model.length;
     
-    const entries = [];
-    for (let i = 0; i < this.count; i++) {
-      const elt = this.model[i];
-      //if (elt instanceof Array) { // TODO - optgroups? update model !
-      //    var count_i = elt.length;
-      //    for (var j = 0; j < count_i; j++)
-      //        html += "<option>" + elt[j] + "</option>";
-      //}
-      //else
-      entries.push(`<option>${elt}</option>`);
-    }
-    // TODO: remove innerHTML, port to DOM
-    this.dom.innerHTML = `<select>${entries.join("")}</select>`;
+    // TODO change innerHTML to DOM
+    this.dom.innerHTML = "<select></select>";
     this.impl = this.dom.firstChild;
+
+    const k = this.count; const m = this.model;
+
+    this.impl.options.length = k;
+    for(var i = 0; i < k; i++) {
+      this.impl.options[i] = new Option(m[i], i);
+    }    
     
     this.impl.size = this.size;
 
