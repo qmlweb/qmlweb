@@ -18,7 +18,8 @@ QmlWeb.registerQmlType({
     clicked: [{ type: "variant", name: "mouse" }],
     entered: [],
     exited: [],
-    positionChanged: [{ type: "variant", name: "mouse" }]
+    positionChanged: [{ type: "variant", name: "mouse" }],
+    wheel: [{ type: "variant", name: "wheel" }]
   }
 }, class {
   constructor(meta) {
@@ -82,6 +83,9 @@ QmlWeb.registerQmlType({
       if (!this.enabled || !this.hoverEnabled || this.pressed) return;
       this.$handlePositionChanged(e);
     });
+    this.dom.addEventListener("wheel", e => {
+      this.$handleWheel(e);
+    });
   }
   $onCursorShapeChanged() {
     this.dom.style.cursor = this.$cursorShapeToCSS();
@@ -91,6 +95,11 @@ QmlWeb.registerQmlType({
     this.mouseX = mouse.x;
     this.mouseY = mouse.y;
     this.positionChanged(mouse);
+  }
+  $handleWheel(e) {
+    const wheel = this.$eventToMouse(e);
+    wheel.angleDelta = { x: e.deltaX, y: e.deltaY }
+    this.wheel(wheel);
   }
   $handleClick(e) {
     const mouse = this.$eventToMouse(e);
