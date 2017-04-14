@@ -365,6 +365,9 @@ QmlWeb.registerQmlType({
     }
     if (typeof this.z === "number") {
       transform += ` translate3d(0, 0, ${this.z}px)`;
+      // should also consider z as zIndex for stacking order behaviour of qml
+      // see http://doc.qt.io/qt-5/qml-qtquick-item.html#z-prop
+      this.dom.style.zIndex = this.z;
     }
     this.dom.style.transform = transform;
     this.dom.style.transformStyle = transformStyle;
