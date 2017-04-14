@@ -45,9 +45,8 @@ QmlWeb.registerQmlType({
   textAt(index) {
     return this.model[index];
   }
-  $updateImpl() {
-    this.currentIndex = 0;
-    this.count = this.model.length;
+  $updateImpl() {   
+    
     const entries = [];
     for (let i = 0; i < this.count; i++) {
       const elt = this.model[i];
@@ -74,6 +73,12 @@ QmlWeb.registerQmlType({
       this.impl.style.height = this.height + "px";
     }
 
+    this.count = this.model.length;
+
+    if (this.currentIndex >= this.count) 
+    	this.currentIndex = this.count-1; 
+
+    this.currentText = this.model[ this.currentIndex ];    
   }
   Component$onCompleted() {
     this.$updateImpl();
