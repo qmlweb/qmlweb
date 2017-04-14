@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
     QmlWeb.callSuper(this, meta);
   }
   layoutChildren() {
-    let curPos = 0;
+    let curPos = this.padding;
     let maxWidth = 0;
     for (let i = 0; i < this.children.length; i++) {
       const child = this.children[i];
@@ -16,11 +16,11 @@ QmlWeb.registerQmlType({
         continue;
       }
       maxWidth = child.width > maxWidth ? child.width : maxWidth;
-      child.y = curPos;
+      child.y = curPos + this.padding;
       curPos += child.height + this.spacing;
     }
-    this.implicitWidth = maxWidth;
-    this.implicitHeight = curPos - this.spacing;
+    this.implicitWidth = maxWidth + this.padding*2;
+    this.implicitHeight = curPos - this.spacing + this.padding;
     // We want no spacing at the bottom side
   }
 });
