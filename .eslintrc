@@ -32,7 +32,7 @@ rules:
   indent: [2, 2, { "SwitchCase": 1 }]
   key-spacing: 2
   keyword-spacing: 2
-  max-len: [2, 80, { "ignoreUrls": true }]
+  max-len: [2, 120, { "ignoreUrls": true }]
   new-cap: 2
   newline-per-chained-call: [2, { "ignoreChainWithDepth": 3 }]
   new-parens: 2

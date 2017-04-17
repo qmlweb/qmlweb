@@ -23,7 +23,7 @@
       "list-item-indent": "space",
       "list-item-spacing": false,
       "maximum-heading-length": 60,
-      "maximum-line-length": 80,
+      "maximum-line-length": 120,
       "no-auto-link-without-protocol": true,
       "no-blockquote-without-caret": true,
       "no-consecutive-blank-lines": true,
