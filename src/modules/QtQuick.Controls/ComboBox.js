@@ -6,7 +6,8 @@ QmlWeb.registerQmlType({
   properties: {
     count: "int",
     currentIndex: "int",
-    size: { type: "int", initialValue: 1 }, // non-standard property to qtquick, but useful in dom
+    size: { type: "int", initialValue: 1 },
+    // size is non-standard property to qtquick, but useful in dom
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
@@ -47,9 +48,9 @@ QmlWeb.registerQmlType({
   textAt(index) {
     return this.model[index];
   }
-  $updateImpl() {   
+  $updateImpl() {
     this.count = this.model.length;
-    
+
     // TODO change innerHTML to DOM
     this.dom.innerHTML = "<select></select>";
     this.impl = this.dom.firstChild;
@@ -57,34 +58,34 @@ QmlWeb.registerQmlType({
     const k = this.count; const m = this.model;
 
     this.impl.options.length = k;
-    for(var i = 0; i < k; i++) {
+    for (let i = 0; i < k; i++) {
       this.impl.options[i] = new Option(m[i]);
-    }    
-    
+    }
+
     this.$onSizeChanged();
 
-    // should call this, because width/heights calls updateV(H)Geometry 
-    // which sets valid $useImplicitHeight flag    
-    var h = this.height; var w = this.width;
+    // should call this, because width/heights calls updateV(H)Geometry
+    // which sets valid $useImplicitHeight flag
+    const h = this.height; const w = this.width;
 
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
 
-    this.$onHeightChanged();
-    this.$onWidthChanged();
+    this.$onHeightChanged(h);
+    this.$onWidthChanged(w);
 
     // check wherever currentIndex is in valid range, e.g -1...count
-    if (this.currentIndex >= this.count) 
-    	  this.currentIndex = this.count-1; 
-    else
-    if (this.currentIndex < 0 && this.count > 0)
-        this.currentIndex = 0;
-    
+    if (this.currentIndex >= this.count) {
+      this.currentIndex = this.count - 1;
+    } else
+    if (this.currentIndex < 0 && this.count > 0) {
+      this.currentIndex = 0;
+    }
+
     // should call this to force selected item in newly created select tag
     this.impl.selectedIndex = this.currentIndex;
 
-    if (this.currentText !== this.model[ this.currentIndex ])
-        this.currentText = this.model[ this.currentIndex ];        
+    this.currentText = this.model[ this.currentIndex ];
   }
   Component$onCompleted() {
     this.$updateImpl();
@@ -93,8 +94,8 @@ QmlWeb.registerQmlType({
     this.$updateImpl();
   }
   $onCurrentIndexChanged() {
-    var i = this.currentIndex;
-    if (this.dom.firstChild.selectedIndex != i) {
+    const i = this.currentIndex;
+    if (this.dom.firstChild.selectedIndex !== i) {
       this.dom.firstChild.selectedIndex = i;
       this.currentText = this.model[i];
       this.activated(i);
@@ -103,13 +104,14 @@ QmlWeb.registerQmlType({
   $onHeightChanged() {
     // follow height property of ComboBox for select tag
     // useful in conjuction with 'size: 2'
-    if (this.height > 0 && this.impl && this.height != this.impl.offsetHeight) {
-      this.impl.style.height = this.height + "px";
+    if (this.height > 0 && this.impl
+        && this.height !== this.impl.offsetHeight) {
+      this.impl.style.height = `${this.height}px`;
     }
   }
   $onWidthChanged() {
-    if (this.width > 0 && this.impl && this.width != this.impl.offsetWidth) {
-      this.impl.style.width = this.width + "px";
+    if (this.width > 0 && this.impl && this.width !== this.impl.offsetWidth) {
+      this.impl.style.width = `${this.width}px`;
     }
   }
   $onSizeChanged() {

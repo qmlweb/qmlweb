@@ -50,8 +50,8 @@ QmlWeb.registerQmlType({
     this.horizontalScrollBarPolicy = Qt.ScrollBarAsNeeded;
     this.style = undefined;
 
-    this.$onVerticalScrollBarPolicyChanged( this.verticalScrollBarPolicy );
-    this.$onHorizontalScrollBarPolicyChanged( this.horizontalScrollBarPolicy );
+    this.$onVerticalScrollBarPolicyChanged(this.verticalScrollBarPolicy);
+    this.$onHorizontalScrollBarPolicyChanged(this.horizontalScrollBarPolicy);
   }
   $onContentItemChanged(newItem) {
     if (typeof newItem !== undefined) {

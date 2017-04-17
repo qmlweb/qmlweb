@@ -32,7 +32,7 @@ QmlWeb.registerQmlType({
 
       curPos += child.width + this.spacing;
     }
-    this.implicitHeight = maxHeight + this.padding*2;
+    this.implicitHeight = maxHeight + this.padding * 2;
     // We want no spacing at the right side
     this.implicitWidth = curPos - this.spacing + this.padding;
   }

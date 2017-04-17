@@ -19,7 +19,7 @@ QmlWeb.registerQmlType({
       child.y = curPos + this.padding;
       curPos += child.height + this.spacing;
     }
-    this.implicitWidth = maxWidth + this.padding*2;
+    this.implicitWidth = maxWidth + this.padding * 2;
     this.implicitHeight = curPos - this.spacing + this.padding;
     // We want no spacing at the bottom side
   }

@@ -98,13 +98,13 @@ QmlWeb.registerQmlType({
   }
   $handleWheel(e) {
     const wheel = this.$eventToMouse(e);
-    wheel.angleDelta = { x: e.deltaX, y: e.deltaY }
+    wheel.angleDelta = { x: e.deltaX, y: e.deltaY };
     wheel.accepted = false;
 
     this.wheel(wheel);
 
-    if (wheel.accepted) {      
-      e.stopPropagation(); 
+    if (wheel.accepted) {
+      e.stopPropagation();
       e.preventDefault();
     }
   }
