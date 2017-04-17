@@ -15,6 +15,7 @@ QmlWeb.registerQmlType({
     asynchronous: { type: "bool", initialValue: true },
     cache: { type: "bool", initialValue: true },
     smooth: { type: "bool", initialValue: true },
+    noFlicker: { type: "bool", initialValue: false },
     fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
     mirror: "bool",
     progress: "real",
@@ -38,10 +39,10 @@ QmlWeb.registerQmlType({
 
     this.$img = new Image();
     this.$img.addEventListener("load", () => {
-      // assign image url to dom, see notes in $onSourceChanged
-      // do it before properties assigns, so browser can perform rendering faster
-      var s = "url(" + this.$img.src.replace(/[() '"]/g, '\\$0') + ")";
-      this.impl.style.backgroundImage = s;
+      if (this.noFlicker) {
+        var s = "url(" + this.$img.src.replace(/[() '"]/g, '\\$0') + ")";
+        this.impl.style.backgroundImage = s;
+      }
 
       const w = this.$img.naturalWidth;
       const h = this.$img.naturalHeight;
@@ -109,11 +110,9 @@ QmlWeb.registerQmlType({
     // http://stackoverflow.com/questions/2168855/is-quoting-the-value-of-url-really-necessary
 
     // escape parentheses, white spaces etc 
-    // var s = "url(" + imageURL.replace(/[() '"]/g, '\\$0') + ")";
-    // this.impl.style.backgroundImage = s;
+    var s = "url(" + imageURL.replace(/[() '"]/g, '\\$0') + ")";
+    if (!this.noFlicker) this.impl.style.backgroundImage = s;
 
-    // we move assign from here to this.$img load event
-    // and thus we avoid flicker.
     ///////////// 
 
     this.$img.src = imageURL;
