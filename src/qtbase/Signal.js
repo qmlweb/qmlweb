@@ -117,7 +117,7 @@ class Signal {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       console.error("Signal slot error:", err.message, err,
-        Function.prototype.toString.call(desc.slot)
+        desc.slot ? Function.prototype.toString.call(desc.slot) : "desc.slot is undefined!"
       );
     }
   }
