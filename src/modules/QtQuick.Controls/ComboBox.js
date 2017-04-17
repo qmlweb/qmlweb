@@ -25,9 +25,10 @@ QmlWeb.registerQmlType({
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
-    this.sizeChanged.connect(this, this.$onModelChanged);
+    this.sizeChanged.connect(this, this.$onSizeChanged);
     this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
     this.heightChanged.connect(this, this.$onHeightChanged);
+    this.widthChanged.connect(this, this.$onWidthChanged);
 
     this.dom.onclick = () => {
       const index = this.dom.firstChild.selectedIndex;
@@ -60,12 +61,17 @@ QmlWeb.registerQmlType({
       this.impl.options[i] = new Option(m[i]);
     }    
     
-    this.impl.size = this.size;
+    this.$onSizeChanged();
+
+    // should call this, because width/heights calls updateV(H)Geometry 
+    // which sets valid $useImplicitHeight flag    
+    var h = this.height; var w = this.width;
 
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
 
     this.$onHeightChanged();
+    this.$onWidthChanged();
 
     // check wherever currentIndex is in valid range, e.g -1...count
     if (this.currentIndex >= this.count) 
@@ -100,5 +106,13 @@ QmlWeb.registerQmlType({
     if (this.height > 0 && this.impl && this.height != this.impl.offsetHeight) {
       this.impl.style.height = this.height + "px";
     }
+  }
+  $onWidthChanged() {
+    if (this.width > 0 && this.impl && this.width != this.impl.offsetWidth) {
+      this.impl.style.width = this.width + "px";
+    }
+  }
+  $onSizeChanged() {
+    if (this.impl) this.impl.size = this.size;
   }
 });
