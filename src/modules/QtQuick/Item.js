@@ -314,7 +314,7 @@ QmlWeb.registerQmlType({
   $onHeightChanged_(newVal) {
     this.css.height = newVal ? `${newVal}px` : "auto";
   }
-  $onFocusChanged(newVal) {
+  $onFocusChanged_(newVal) {
     if (newVal) {
       if (this.dom.firstChild) {
         this.dom.firstChild.focus();
