@@ -17,6 +17,7 @@ QmlWeb.registerQmlType({
       }
       maxWidth = child.width > maxWidth ? child.width : maxWidth;
       child.y = curPos + this.padding;
+      if (this.padding > 0) child.x = this.padding;
       curPos += child.height + this.spacing;
     }
     this.implicitWidth = maxWidth + this.padding * 2;
