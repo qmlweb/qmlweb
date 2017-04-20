@@ -11,6 +11,7 @@ module.exports = function(config) {
       "tests/common.js",
       "tests/failingTests.js",
       "tests/*/*.js",
+      "tests/*/**/test*.js",
       { pattern: "tests/*/**/qmldir", included: false },
       { pattern: "tests/*/**/qml/*.js", included: false },
       { pattern: "tests/*/**/*.qml", included: false },
@@ -22,6 +23,8 @@ module.exports = function(config) {
       type: "lcov",
       dir: "coverage/"
     },
+    browserDisconnectTolerance: 5,
+    browserNoActivityTimeout: 100000,
     customLaunchers: {
       PhantomJSCustom: {
         base: "PhantomJS",
