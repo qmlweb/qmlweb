@@ -128,3 +128,28 @@ See [Extending](docs/Extending.md).
 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb),
 4. [@labsin/qmlweb](https://github.com/labsin/qmlweb),
 5. [@arnopaehler/qmlweb](https://github.com/arnopaehler/qmlweb).
+
+## Related efforts
+
+### [Qt Quick WebGL streaming](http://blog.qt.io/blog/2017/02/22/qt-quick-webgl-streaming/)
+
+That will allow users to run the main Qt process on the server and render on
+HTML clients through WebGL.
+
+The usecase differs significantly from QmlWeb, as QmlWeb runs all code on the
+clients, attempting to reuse browser APIs as much as possible to provide
+better integration.
+
+### [PureQml framework](https://github.com/pureqml/qmlcore)
+
+PureQml aims to implement a language close to original QML, but it does not
+target 100% compatibility with Qt QML, unlike QmlWeb.
+They also provide a framework based on their language and target support for a
+great variety of platforms.
+
+### [Qt/QML + Emscripten](https://dragly.org/2016/04/27/experimental-qt-and-qml-in-the-browser/)
+
+Transplitting all the required Qt/QML libraries to JS/WebAssembley and rendering
+everything to Canvas provides the best possible compatibility with upstream Qt.
+That comes at a price, though — the runtime is pretty big, and that approach
+does not allow to reuse many existing browser APIs and components.
