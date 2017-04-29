@@ -145,6 +145,7 @@ QmlWeb.registerQmlType({
   }
   Component$onCompleted() {
     this.selectByKeyboard = !this.readOnly;
+    this.impl.readOnly = this.readOnly;
     this.$updateValue();
     this.implicitWidth = this.offsetWidth;
     this.implicitHeight = this.offsetHeight;
