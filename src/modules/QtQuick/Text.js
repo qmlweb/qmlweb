@@ -9,12 +9,14 @@ QmlWeb.registerQmlType({
       WrapAtWordBoundaryOrAnywhere: 4,
       AlignLeft: 1, AlignRight: 2, AlignHCenter: 4, AlignJustify: 8,
       AlignTop: 32, AlignBottom: 64, AlignVCenter: 128,
+      AutoText: 2, PlainText: 0, StyledText: 4, RichText: 1,
       Normal: 0, Outline: 1, Raised: 2, Sunken: 3
     }
   },
   properties: {
     color: { type: "color", initialValue: "black" },
     text: "string",
+    textFormat: { type: "enum", initialValue: 2 }, // Text.AutoText
     font: "font",
     lineHeight: "real",
     wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
@@ -36,6 +38,7 @@ QmlWeb.registerQmlType({
 
     this.colorChanged.connect(this, this.$onColorChanged);
     this.textChanged.connect(this, this.$onTextChanged);
+    this.textFormatChanged.connect(this, this.$onTextFormatChanged);
     this.lineHeightChanged.connect(this, this.$onLineHeightChanged);
     this.wrapModeChanged.connect(this, this.$onWrapModeChanged);
     this.horizontalAlignmentChanged.connect(this,
@@ -48,12 +51,34 @@ QmlWeb.registerQmlType({
 
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
+  $redrawText() {
+    const text = this.text;
+    let format = this.textFormat;
+    if (format === this.Text.AutoText) {
+      // NOTE: this is not the exact same heuristics that Qt uses
+      if (/<[a-zA-Z]+(\s[^>]*)?\/?>/.test(text)) {
+        format = this.Text.StyledText;
+      } else {
+        format = this.Text.PlainText;
+      }
+    }
+    if (format === this.Text.PlainText) {
+      this.impl.innerHTML = "";
+      this.impl.appendChild(document.createTextNode(text));
+    } else {
+      // TODO: sanitize StyledText/RichText
+      this.impl.innerHTML = text;
+    }
+    this.$updateImplicit();
+  }
   $onColorChanged(newVal) {
     this.impl.style.color = newVal.$css;
   }
-  $onTextChanged(newVal) {
-    this.impl.innerHTML = newVal;
-    this.$updateImplicit();
+  $onTextChanged() {
+    this.$redrawText();
+  }
+  $onTextFormatChanged() {
+    this.$redrawText();
   }
   $onWidthChanged() {
     this.$updateImplicit();
