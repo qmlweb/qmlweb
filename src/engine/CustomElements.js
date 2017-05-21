@@ -56,95 +56,99 @@ function registerElement(name, file) {
     return map;
   }, {});
 
-  const QmlElement = class extends HTMLElement {
-    connectedCallback() {
-      // Default wrapper display is inline-block to support native width/height
-      const computedStyle = window.getComputedStyle(this);
-      if (computedStyle.display === "inline") {
-        this.style.display = "inline-block";
+  const qmlElementProto = Object.create(HTMLElement.prototype);
+
+  qmlElementProto.createdCallback = function() {
+    // Default wrapper display is inline-block to support native width/height
+    const computedStyle = window.getComputedStyle(this);
+    if (computedStyle.display === "inline") {
+      this.style.display = "inline-block";
+    }
+
+    const engine = this.engine = new QmlWeb.QMLEngine(this);
+    engine.loadFile(file);
+    engine.start();
+    const qml = this.qml = engine.rootObject;
+
+    // Bind attributes
+    attributes.forEach(attr => {
+      const pname = attr2prop[attr] || attr;
+      const val = this.getAttribute(attr);
+      if (typeof val === "string") {
+        qml[pname] = val;
       }
-
-      const engine = this.engine = new QmlWeb.QMLEngine(this);
-      engine.loadFile(file);
-      engine.start();
-      const qml = this.qml = engine.rootObject;
-
-      // Bind attributes
-      attributes.forEach(attr => {
-        const pname = attr2prop[attr] || attr;
-        const val = this.getAttribute(attr);
-        if (typeof val === "string") {
-          qml[pname] = val;
+      this.applyAttribute(attr);
+      Object.defineProperty(
+        this,
+        attr, {
+          get() {
+            return this.qml[pname];
+          },
+          set(value) {
+            this.qml[pname] = value;
+            this.applyAttribute(attr);
+          }
         }
-        this.applyAttribute(attr);
-        Object.defineProperty(
-          this,
-          attr,
-          {
-            get() {
-              return this.qml[pname];
-            },
-            set(value) {
-              this.qml[pname] = value;
-              this.applyAttribute(attr);
-            }
-          }
-        );
-        qml.$properties[pname].changed.connect(() => this.applyAttribute(attr));
-      });
+      );
+      qml.$properties[pname].changed.connect(() => this.applyAttribute(attr));
+    });
 
-      // Set and update wrapper width/height
-      this.style.width = `${qml.width}px`;
-      this.style.height = `${qml.height}px`;
-      qml.$properties.width.changed.connect(width => {
-        this.style.width = `${width}px`;
-      });
-      qml.$properties.height.changed.connect(height => {
-        this.style.height = `${height}px`;
-      });
-    }
+    // Set and update wrapper width/height
+    this.style.width = `${qml.width}px`;
+    this.style.height = `${qml.height}px`;
+    qml.$properties.width.changed.connect(width => {
+      this.style.width = `${width}px`;
+    });
+    qml.$properties.height.changed.connect(height => {
+      this.style.height = `${height}px`;
+    });
+  };
 
-    static get observedAttributes() {
-      return attributes;
-    }
-
-    attributeChangedCallback(attr, oldValue, newValue) {
-      if (!this.qml) return;
-      const pname = attr2prop[attr] || attr;
-      const prop = this.qml.$properties[pname];
-      if (!prop) return;
-      switch (prop.type) {
-        case "bool":
-          this.qml[pname] = typeof newValue === "string";
-          break;
-        default:
-          this.qml[pname] = newValue;
-      }
-    }
-
-    applyAttribute(attr) {
-      const pname = attr2prop[attr] || attr;
-      const prop = this.qml.$properties[pname];
-      if (!prop) {
-        this.deleteAttribute(attr);
-        return;
-      }
-      const value = this.qml[pname];
-      switch (prop.type) {
-        case "bool":
-          if (value) {
-            this.setAttribute(attr, "");
-          } else {
-            this.removeAttribute(attr);
-          }
-          break;
-        default:
-          this.setAttribute(attr, this.qml[pname]);
-      }
+  qmlElementProto.attributeChangedCallback = function(attr, oldValue, newValue) {
+    if (!this.qml) return;
+    const pname = attr2prop[attr] || attr;
+    const prop = this.qml.$properties[pname];
+    if (!prop) return;
+    switch (prop.type) {
+      case "bool":
+        this.qml[pname] = typeof newValue === "string";
+        break;
+      default:
+        this.qml[pname] = newValue;
     }
   };
 
-  window.customElements.define(name, QmlElement);
+  qmlElementProto.applyAttribute = function(attr) {
+    const pname = attr2prop[attr] || attr;
+    const prop = this.qml.$properties[pname];
+    if (!prop) {
+      this.deleteAttribute(attr);
+      return;
+    }
+    const value = this.qml[pname];
+    switch (prop.type) {
+      case "bool":
+        if (value) {
+          this.setAttribute(attr, "");
+        } else {
+          this.removeAttribute(attr);
+        }
+        break;
+      default:
+        this.setAttribute(attr, this.qml[pname]);
+    }
+  };
+  const QmlElement = document.registerElement(name, {
+    prototype: qmlElementProto
+  });
+
+
+
+  Object.defineProperty(QmlElement, "observedAttributes", {
+    get() {
+      return attributes;
+    }
+  });
 }
 
 QmlWeb.registerElement = registerElement;
