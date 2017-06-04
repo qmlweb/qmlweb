@@ -29,5 +29,5 @@ methods from the `signal`.
 
 ## Class Method: Signal.signal(\[params\[, options\]\])
 
-Constructs a `Signal` instance with the given `params` and `options` and returns
-its `.signal` property.
+Constructs a `Signal` instance with the given `params` and `options` and 
+returns its `.signal` property.

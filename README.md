@@ -38,10 +38,11 @@ Using one of the methods below, install the qmlweb JavaScript library:
 * [Bower](http://bower.io/search/?q=qmlweb) — `bower install qmlweb`
 * GitHub [releases](https://github.com/qmlweb/qmlweb/releases) —
   `tar -xaf v0.2.0.tar.gz`
-* Manually (recommended if you cloned from git) — `npm install && npm run build`
+* Manually (recommended if you cloned from git) —
+`npm install && npm run build`
 
-Next, simply add `lib/qt.js` to the list of other JavaScript files in your app's
-HTML file:
+Next, simply add `lib/qt.js` to the list of other JavaScript files in 
+your app's HTML file:
 
 ```HTML
 <script type="text/javascript" src="/lib/qt.js"></script>

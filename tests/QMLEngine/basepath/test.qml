@@ -3,8 +3,8 @@ import QtQuick.Controls 1.2
 import "import"
 
 Item {
-  A {
-    a:1
+  A { 
+    a:1 
   }
   B {
   }
