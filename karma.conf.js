@@ -23,8 +23,8 @@ module.exports = function(config) {
       type: "lcov",
       dir: "coverage/"
     },
-    browserDisconnectTolerance: 5,
-    browserNoActivityTimeout: 100000,
+    browserDisconnectTolerance: 5,    // required for phantomjs in windows
+    browserNoActivityTimeout: 100000, // required for phantomjs in windows
     customLaunchers: {
       PhantomJSCustom: {
         base: "PhantomJS",

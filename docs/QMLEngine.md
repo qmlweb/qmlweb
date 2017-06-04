@@ -66,8 +66,8 @@ base path extracted from the initially loaded file path.
 
 ### Implicit input
 
-* engine object function `importPathList()` - list of urls bases used for qmldir
-  files lookup
+* engine object function `importPathList()` - list of urls bases used for 
+  qmldir files lookup
 
 ### Additional implicit input/output
 
@@ -115,8 +115,8 @@ This hash then used by `qml.js::construct` method for computing component urls.
 #### TODO
 
 * We have to keep output in component scope, not in engine scope.
-* We have to add module "as"-names to component's names (which is possible after
-  keeping imports in component scope).
+* We have to add module "as"-names to component's names (which is possible 
+  after keeping imports in component scope).
 * Determine how this stuff is related to `QmlWeb.loadImports`
 * Check A1
 * Make a complete picture of what going in with imports, including Component.js

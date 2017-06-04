@@ -6,8 +6,6 @@ QmlWeb.registerQmlType({
   properties: {
     count: "int",
     currentIndex: "int",
-    size: { type: "int", initialValue: 1 },
-    // size is non-standard property to qtquick, but useful in dom
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
@@ -26,7 +24,6 @@ QmlWeb.registerQmlType({
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
-    this.sizeChanged.connect(this, this.$onSizeChanged);
     this.currentIndexChanged.connect(this, this.$onCurrentIndexChanged);
     this.heightChanged.connect(this, this.$onHeightChanged);
     this.widthChanged.connect(this, this.$onWidthChanged);
@@ -61,8 +58,6 @@ QmlWeb.registerQmlType({
     for (let i = 0; i < k; i++) {
       this.impl.options[i] = new Option(m[i]);
     }
-
-    this.$onSizeChanged();
 
     // should call this, because width/heights calls updateV(H)Geometry
     // which sets valid $useImplicitHeight flag
@@ -102,10 +97,8 @@ QmlWeb.registerQmlType({
     }
   }
   $onHeightChanged() {
-    // follow height property of ComboBox for select tag
-    // useful in conjuction with 'size: 2'
     if (this.height > 0 && this.impl
-        && this.height !== this.impl.offsetHeight) {
+     && this.height !== this.impl.offsetHeight) {
       this.impl.style.height = `${this.height}px`;
     }
   }
@@ -113,8 +106,5 @@ QmlWeb.registerQmlType({
     if (this.width > 0 && this.impl && this.width !== this.impl.offsetWidth) {
       this.impl.style.width = `${this.width}px`;
     }
-  }
-  $onSizeChanged() {
-    if (this.impl) this.impl.size = this.size;
   }
 });
