@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.Item",
   properties: {
     count: "int",
-    currentIndex: "int",
+    currentIndex: { type: "int", initialValue: 0 }, // same in QtQuick.Controls
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
