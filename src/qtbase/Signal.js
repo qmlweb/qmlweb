@@ -113,6 +113,7 @@ class Signal {
   }
 
   static $execute(desc, args) {
+    // TODO: remove this try/catch in test env
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
