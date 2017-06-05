@@ -253,14 +253,14 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     value.src = `(
       function(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
-        QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
+        const bp = QmlWeb.engine.$basePath;
         QmlWeb.engine.$basePath = "${componentScope.$basePath}";
         try {
           (function() {
             ${value.src}
           })();
         } finally {
-          QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
+          QmlWeb.engine.$basePath = bp;
         }
       }
     )`;
