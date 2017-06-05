@@ -42,4 +42,19 @@ describe("QtQuick.ComboBox", function() {
     qml.currentIndex = 1;
     expect(qml.currentText).toBe("b");
   });
+
+  it("default value of currentIndex should be 0", function() {
+    var qml = loadQmlFile(webroot + "test.qml", this.div);
+
+    qml.model = ["a", "b", "c"];
+    expect(qml.currentText).toBe("a");
+    expect(qml.currentIndex).toBe(0);
+  });
+
+  it("initial value of currentIndex should be considered", function() {
+    var qml = loadQmlFile(webroot + "test_populated.qml", this.div);
+
+    expect(qml.currentText).toBe("b");
+    expect(qml.currentIndex).toBe(1);
+  });
 });

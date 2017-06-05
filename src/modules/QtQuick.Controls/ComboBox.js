@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.Item",
   properties: {
     count: "int",
-    currentIndex: "int",
+    currentIndex: { type: "int", initialValue: 0 }, // same in QtQuick.Controls
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
@@ -21,6 +21,10 @@ QmlWeb.registerQmlType({
 
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
+
+    // TODO change innerHTML to DOM
+    this.dom.innerHTML = "<select></select>";
+    this.impl = this.dom.firstChild;
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.modelChanged.connect(this, this.$onModelChanged);
@@ -48,10 +52,6 @@ QmlWeb.registerQmlType({
   $updateImpl() {
     this.count = this.model.length;
 
-    // TODO change innerHTML to DOM
-    this.dom.innerHTML = "<select></select>";
-    this.impl = this.dom.firstChild;
-
     const k = this.count; const m = this.model;
 
     this.impl.options.length = k;
@@ -59,8 +59,8 @@ QmlWeb.registerQmlType({
       this.impl.options[i] = new Option(m[i]);
     }
 
-    // should call this, because width/heights calls updateV(H)Geometry
-    // which sets valid $useImplicitHeight flag
+    // should call this, because width()/heights() invoke updateV(H)Geometry,
+    // which in turn sets valid $useImplicitHeight flag
     const h = this.height; const w = this.width;
 
     this.implicitWidth = this.impl.offsetWidth;
@@ -69,18 +69,8 @@ QmlWeb.registerQmlType({
     this.$onHeightChanged(h);
     this.$onWidthChanged(w);
 
-    // check wherever currentIndex is in valid range, e.g -1...count
-    if (this.currentIndex >= this.count) {
-      this.currentIndex = this.count - 1;
-    } else
-    if (this.currentIndex < 0 && this.count > 0) {
-      this.currentIndex = 0;
-    }
-
-    // should call this to force selected item in newly created select tag
     this.impl.selectedIndex = this.currentIndex;
-
-    this.currentText = this.model[ this.currentIndex ];
+    this.$updateCurrentText();
   }
   Component$onCompleted() {
     this.$updateImpl();
@@ -90,10 +80,18 @@ QmlWeb.registerQmlType({
   }
   $onCurrentIndexChanged() {
     const i = this.currentIndex;
-    if (this.dom.firstChild.selectedIndex !== i) {
-      this.dom.firstChild.selectedIndex = i;
-      this.currentText = this.model[i];
+    if (this.impl.selectedIndex !== i) {
+      this.impl.selectedIndex = i;
+      this.$updateCurrentText();
       this.activated(i);
+    }
+  }
+  $updateCurrentText() {
+    if (typeof this.currentIndex === "undefined" || !this.model) {
+      this.currentText = undefined;
+    } else if (this.currentIndex >= 0 &&
+              this.currentIndex < this.model.length) {
+      this.currentText = this.model[ this.currentIndex ];
     }
   }
   $onHeightChanged() {
