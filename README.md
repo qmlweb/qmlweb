@@ -134,11 +134,12 @@ See [Extending](docs/Extending.md).
 ### [Qt Quick WebGL streaming](http://blog.qt.io/blog/2017/02/22/qt-quick-webgl-streaming/)
 
 That will allow users to run the main Qt process on the server and render on
-HTML clients through WebGL.
+HTML clients through WebGL. Qt WebGL streaming requires one application process
+on server per each client — only the painting is delegated to the client.
 
 The usecase differs significantly from QmlWeb, as QmlWeb runs all code on the
 clients, attempting to reuse browser APIs as much as possible to provide
-better integration.
+better integration. No server-side code is needed, server provides static files.
 
 ### [PureQml framework](https://github.com/pureqml/qmlcore)
 
