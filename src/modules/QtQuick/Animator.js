@@ -1,15 +1,14 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Animator",
-  versions: /^2\./,
-  baseClass: "Animation",
-  properties: {
+QmlWeb.registerQmlType(class Animator {
+  static module = "QtQuick";
+  static versions = /^2\./;
+  static baseClass = "Animation";
+  static properties = {
     duration: { type: "int", initialValue: 250 },
     from: "real",
     target: "Item",
     to: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 

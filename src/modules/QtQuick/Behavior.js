@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Behavior",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
+QmlWeb.registerQmlType(class Behavior {
+  static module = "QtQuick";
+  static versions = /.*/;
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     animation: "Animation",
     enabled: { type: "bool", initialValue: true }
-  },
-  defaultProperty: "animation"
-}, class {
+  };
+  static defaultProperty = "animation";
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
     this.$on = meta.object.$on;

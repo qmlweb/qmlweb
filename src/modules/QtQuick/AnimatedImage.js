@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "AnimatedImage",
-  versions: /.*/,
-  baseClass: "Image"
-}, class {
+QmlWeb.registerQmlType(class AnimatedImage {
+  static module = "QtQuick";
+  static versions = /.*/;
+  static baseClass = "Image";
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
   }
