@@ -75,4 +75,9 @@ QmlWeb.registerQmlType({
       this.$socket.send(message);
     }
   }
+  sendBinaryMessage(message) {
+    if (this.status === this.WebSocket.Open) {
+      this.$socket.send(message);
+    }
+  }
 });
