@@ -11,6 +11,7 @@ QmlWeb.registerQmlType({
     mouseY: "real",
     pressed: "bool",
     containsMouse: "bool",
+    containsPress: "bool",
     pressedButtons: { type: "variant", initialValue: 0 },
     cursorShape: "enum" // Qt.ArrowCursor
   },
@@ -43,6 +44,7 @@ QmlWeb.registerQmlType({
     };
     const handleMouseUp = () => {
       this.pressed = false;
+      this.containsPress = false;
       this.pressedButtons = 0;
       document.removeEventListener("mouseup", handleMouseUp);
       this.$clientTransform = undefined;
@@ -64,16 +66,19 @@ QmlWeb.registerQmlType({
       this.mouseX = mouse.x;
       this.mouseY = mouse.y;
       this.pressed = true;
+      this.containsPress = true;
       this.pressedButtons = mouse.button;
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("mousemove", handleMouseMove);
     });
     this.dom.addEventListener("mouseover", () => {
       this.containsMouse = true;
+      this.containsPress = this.pressed;
       this.entered();
     });
     this.dom.addEventListener("mouseout", () => {
       this.containsMouse = false;
+      this.containsPress = false;
       this.exited();
     });
     // This is to emit positionChanged for `hoverEnabled` only. When `pressed`,
