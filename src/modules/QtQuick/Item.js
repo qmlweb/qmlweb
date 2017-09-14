@@ -101,8 +101,10 @@ QmlWeb.registerQmlType({
     this.anchors.bottomChanged.connect(this, this.$updateVGeometry);
     this.anchors.horizontalCenterChanged.connect(this, this.$updateHGeometry);
     this.anchors.verticalCenterChanged.connect(this, this.$updateVGeometry);
-    this.anchors.horizontalCenterOffsetChanged.connect(this, this.$updateHGeometry);
-    this.anchors.verticalCenterOffsetChanged.connect(this, this.$updateVGeometry);
+    this.anchors.horizontalCenterOffsetChanged.connect(this,
+      this.$updateHGeometry);
+    this.anchors.verticalCenterOffsetChanged.connect(this,
+      this.$updateVGeometry);
     this.anchors.fillChanged.connect(this, this.$updateHGeometry);
     this.anchors.fillChanged.connect(this, this.$updateVGeometry);
     this.anchors.centerInChanged.connect(this, this.$updateHGeometry);

@@ -43,8 +43,8 @@ QmlWeb.registerQmlType({
     for (const i in this.$actions) {
       const action = this.$actions[i];
 
-      var colorFrom = new QColor(action.from);
-      var colorTo = new QColor(action.to);
+      const colorFrom = new QColor(action.from); // eslint-disable-line no-undef, max-len
+      const colorTo = new QColor(action.to); // eslint-disable-line no-undef, max-len
 
       action.from = {
         r: colorFrom.r,

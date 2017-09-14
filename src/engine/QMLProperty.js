@@ -88,17 +88,19 @@ class QMLProperty {
     }
 
     const oldVal = this.val;
-    var val = oldVal;
+    let val = oldVal;
 
     try {
       QMLProperty.pushEvaluatingProperty(this);
       if (!this.binding.compiled) {
         this.binding.compile();
       }
-      val = this.binding.eval(this.objectScope, this.componentScope, this.componentScopeBasePath);
+      val = this.binding.eval(this.objectScope, this.componentScope,
+        this.componentScopeBasePath);
       if (!this.animation) this.$setVal(val, this.componentScope);
     } catch (e) {
-      console.log("QMLProperty.update binding error:", e, Function.prototype.toString.call(this.binding.eval));
+      console.log("QMLProperty.update binding error:", e,
+        Function.prototype.toString.call(this.binding.eval));
     } finally {
       QMLProperty.popEvaluatingProperty();
     }
@@ -185,7 +187,9 @@ class QMLProperty {
       }
     }
 
-    if(!this.animation || reason !== QMLProperty.ReasonUser) this.$setVal(val, componentScope);
+    if (!this.animation || reason !== QMLProperty.ReasonUser) {
+      this.$setVal(val, componentScope);
+    }
 
     if (val !== oldVal) {
       if (this.animation && reason === QMLProperty.ReasonUser) {
@@ -198,7 +202,8 @@ class QMLProperty {
         }];
         this.animation.running = true;
       }
-      if (this.obj.$syncPropertyToRemote instanceof Function && reason === QMLProperty.ReasonUser) {
+      if (this.obj.$syncPropertyToRemote instanceof Function &&
+        reason === QMLProperty.ReasonUser) {
         // is a remote object from e.g. a QWebChannel
         this.obj.$syncPropertyToRemote(this.name, val);
       } else {

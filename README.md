@@ -38,7 +38,8 @@ Using one of the methods below, install the qmlweb JavaScript library:
 * [Bower](http://bower.io/search/?q=qmlweb) — `bower install qmlweb`
 * GitHub [releases](https://github.com/qmlweb/qmlweb/releases) —
   `tar -xaf v0.2.0.tar.gz`
-* Manually (recommended if you cloned from git) — `npm install && npm run build`
+* Manually (recommended if you cloned from git) —
+  `npm install && npm run build`
 
 Next, simply add `lib/qmlweb.js` to the list of other JavaScript files in your
 app's HTML file:
@@ -139,7 +140,8 @@ on server per each client — only the painting is delegated to the client.
 
 The usecase differs significantly from QmlWeb, as QmlWeb runs all code on the
 clients, attempting to reuse browser APIs as much as possible to provide
-better integration. No server-side code is needed, server provides static files.
+better integration. No server-side code is needed, server provides static
+files.
 
 ### [PureQml framework](https://github.com/pureqml/qmlcore)
 
@@ -150,7 +152,8 @@ great variety of platforms.
 
 ### [Qt/QML + Emscripten](https://dragly.org/2016/04/27/experimental-qt-and-qml-in-the-browser/)
 
-Transplitting all the required Qt/QML libraries to JS/WebAssembley and rendering
-everything to Canvas provides the best possible compatibility with upstream Qt.
-That comes at a price, though — the runtime is pretty big, and that approach
-does not allow to reuse many existing browser APIs and components.
+Transplitting all the required Qt/QML libraries to JS/WebAssembley and
+rendering everything to Canvas provides the best possible compatibility with
+upstream Qt. That comes at a price, though — the runtime is pretty big, and
+that approach does not allow to reuse many existing browser APIs and
+components.
