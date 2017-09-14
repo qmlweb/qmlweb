@@ -88,29 +88,30 @@ class QMLProperty {
     }
 
     const oldVal = this.val;
+    let val = oldVal;
 
     try {
       QMLProperty.pushEvaluatingProperty(this);
       if (!this.binding.compiled) {
         this.binding.compile();
       }
-      this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
-        this.componentScopeBasePath), this.componentScope);
+      val = this.binding.eval(this.objectScope, this.componentScope,
+        this.componentScopeBasePath);
+      if (!this.animation) this.$setVal(val, this.componentScope);
     } catch (e) {
-      console.log("QMLProperty.update binding error:",
-        e,
-        Function.prototype.toString.call(this.binding.eval)
-      );
+      console.log("QMLProperty.update binding error:", e,
+        Function.prototype.toString.call(this.binding.eval));
     } finally {
       QMLProperty.popEvaluatingProperty();
     }
 
-    if (this.animation) {
+    if (this.animation && val !== oldVal) {
+      this.animation.running = false;
       this.animation.$actions = [{
         target: this.animation.target || this.obj,
         property: this.animation.property || this.name,
-        from: this.animation.from || oldVal,
-        to: this.animation.to || this.val
+        from: oldVal || this.animation.from,
+        to: val || this.animation.to
       }];
       this.animation.restart();
     }
@@ -186,21 +187,23 @@ class QMLProperty {
       }
     }
 
-    this.$setVal(val, componentScope);
+    if (!this.animation || reason !== QMLProperty.ReasonUser) {
+      this.$setVal(val, componentScope);
+    }
 
-    if (this.val !== oldVal) {
+    if (val !== oldVal) {
       if (this.animation && reason === QMLProperty.ReasonUser) {
         this.animation.running = false;
         this.animation.$actions = [{
           target: this.animation.target || this.obj,
           property: this.animation.property || this.name,
-          from: this.animation.from || oldVal,
-          to: this.animation.to || this.val
+          from: oldVal || this.animation.from,
+          to: val || this.animation.to
         }];
         this.animation.running = true;
       }
       if (this.obj.$syncPropertyToRemote instanceof Function &&
-          reason === QMLProperty.ReasonUser) {
+        reason === QMLProperty.ReasonUser) {
         // is a remote object from e.g. a QWebChannel
         this.obj.$syncPropertyToRemote(this.name, val);
       } else {

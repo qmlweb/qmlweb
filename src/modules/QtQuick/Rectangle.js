@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
     });
     this.$borderActive = false;
 
-    const bg = this.impl = document.createElement("div");
+    const bg = this.impl = this.dom;
     bg.style.pointerEvents = "none";
     bg.style.position = "absolute";
     bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = "0px";
@@ -26,7 +26,6 @@ QmlWeb.registerQmlType({
     bg.style.borderStyle = "solid";
     bg.style.borderColor = this.border.color.$css;
     bg.style.backgroundColor = this.color.$css;
-    this.dom.appendChild(bg);
 
     this.colorChanged.connect(this, this.$onColorChanged);
     this.radiusChanged.connect(this, this.$onRadiusChanged);

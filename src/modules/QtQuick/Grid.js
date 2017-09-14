@@ -9,6 +9,8 @@ QmlWeb.registerQmlType({
   properties: {
     columns: "int",
     rows: "int",
+    columnSpacing: "real",
+    rowSpacing: "real",
     flow: "enum",
     layoutDirection: "enum"
   }
@@ -18,6 +20,8 @@ QmlWeb.registerQmlType({
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
+    this.columnSpacingChanged.connect(this, this.layoutChildren);
+    this.rowSpacingChanged.connect(this, this.layoutChildren);
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
@@ -49,9 +53,9 @@ QmlWeb.registerQmlType({
           item.x = curHPos;
           item.y = curVPos;
 
-          curHPos += colWidth[j] + this.spacing;
+          curHPos += colWidth[j] + this.columnSpacing;
         }
-        curVPos += rowHeight[i] + this.spacing;
+        curVPos += rowHeight[i] + this.rowSpacing;
         curHPos = 0;
       }
     } else {
@@ -64,9 +68,9 @@ QmlWeb.registerQmlType({
           item.x = curHPos;
           item.y = curVPos;
 
-          curVPos += rowHeight[j] + this.spacing;
+          curVPos += rowHeight[j] + this.rowSpacing;
         }
-        curHPos += colWidth[i] + this.spacing;
+        curHPos += colWidth[i] + this.columnSpacing;
         curVPos = 0;
       }
     }

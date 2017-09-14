@@ -85,6 +85,8 @@ QmlWeb.registerQmlType({
       bottom: "var",
       horizontalCenter: "var",
       verticalCenter: "var",
+      horizontalCenterOffset: "real",
+      verticalCenterOffset: "real",
       fill: "Item",
       centerIn: "Item",
       margins: "real",
@@ -99,6 +101,10 @@ QmlWeb.registerQmlType({
     this.anchors.bottomChanged.connect(this, this.$updateVGeometry);
     this.anchors.horizontalCenterChanged.connect(this, this.$updateHGeometry);
     this.anchors.verticalCenterChanged.connect(this, this.$updateVGeometry);
+    this.anchors.horizontalCenterOffsetChanged.connect(this,
+      this.$updateHGeometry);
+    this.anchors.verticalCenterOffsetChanged.connect(this,
+      this.$updateVGeometry);
     this.anchors.fillChanged.connect(this, this.$updateHGeometry);
     this.anchors.fillChanged.connect(this, this.$updateVGeometry);
     this.anchors.centerInChanged.connect(this, this.$updateHGeometry);
@@ -415,6 +421,7 @@ QmlWeb.registerQmlType({
     const flags = QmlWeb.Signal.UniqueConnection;
     const lM = anchors.leftMargin || anchors.margins;
     const rM = anchors.rightMargin || anchors.margins;
+    const hM = anchors.horizontalCenterOffset;
     const w = this.width;
     const left = this.parent ? this.parent.left : 0;
 
@@ -482,7 +489,7 @@ QmlWeb.registerQmlType({
       }
     } else if (anchors.horizontalCenter !== undefined) {
       u.horizontalCenter = anchors.horizontalCenter;
-      u.x = u.horizontalCenter - w / 2 - left;
+      u.x = u.horizontalCenter - w / 2 - left + hM;
       u.left = u.horizontalCenter - w / 2;
       u.right = u.horizontalCenter + w / 2;
     } else {
@@ -514,6 +521,7 @@ QmlWeb.registerQmlType({
     const flags = QmlWeb.Signal.UniqueConnection;
     const tM = anchors.topMargin || anchors.margins;
     const bM = anchors.bottomMargin || anchors.margins;
+    const vM = anchors.verticalCenterOffset;
     const h = this.height;
     const top = this.parent ? this.parent.top : 0;
 
@@ -579,7 +587,7 @@ QmlWeb.registerQmlType({
       }
     } else if (anchors.verticalCenter !== undefined) {
       u.verticalCenter = anchors.verticalCenter;
-      u.y = u.verticalCenter - h / 2 - top;
+      u.y = u.verticalCenter - h / 2 - top + vM;
       u.top = u.verticalCenter - h / 2;
       u.bottom = u.verticalCenter + h / 2;
     } else {

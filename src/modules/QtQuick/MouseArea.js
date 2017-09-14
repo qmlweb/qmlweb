@@ -9,13 +9,15 @@ QmlWeb.registerQmlType({
     hoverEnabled: "bool",
     mouseX: "real",
     mouseY: "real",
-    pressed: "bool",
+    isPressed: "bool",
     containsMouse: "bool",
     pressedButtons: { type: "variant", initialValue: 0 },
     cursorShape: "enum" // Qt.ArrowCursor
   },
   signals: {
     clicked: [{ type: "variant", name: "mouse" }],
+    pressed: [{ type: "variant", name: "mouse" }],
+    released: [{ type: "variant", name: "mouse" }],
     entered: [],
     exited: [],
     positionChanged: [{ type: "variant", name: "mouse" }],
@@ -38,12 +40,14 @@ QmlWeb.registerQmlType({
     this.dom.addEventListener("click", e => this.$handleClick(e));
     this.dom.addEventListener("contextmenu", e => this.$handleClick(e));
     const handleMouseMove = e => {
-      if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
+      if (!this.enabled || !this.hoverEnabled && !this.isPressed) return;
       this.$handlePositionChanged(e);
     };
-    const handleMouseUp = () => {
-      this.pressed = false;
+    const handleMouseUp = e => {
+      const mouse = this.$eventToMouse(e);
+      this.isPressed = false;
       this.pressedButtons = 0;
+      this.released(mouse);
       document.removeEventListener("mouseup", handleMouseUp);
       this.$clientTransform = undefined;
       document.removeEventListener("mousemove", handleMouseMove);
@@ -63,8 +67,9 @@ QmlWeb.registerQmlType({
       const mouse = this.$eventToMouse(e);
       this.mouseX = mouse.x;
       this.mouseY = mouse.y;
-      this.pressed = true;
+      this.isPressed = true;
       this.pressedButtons = mouse.button;
+      this.pressed(mouse);
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("mousemove", handleMouseMove);
     });
@@ -80,7 +85,7 @@ QmlWeb.registerQmlType({
     // `positionChanged` is handled by a temporary `mousemove` event listener
     // on `document`.
     this.dom.addEventListener("mousemove", e => {
-      if (!this.enabled || !this.hoverEnabled || this.pressed) return;
+      if (!this.enabled || !this.hoverEnabled || this.isPressed) return;
       this.$handlePositionChanged(e);
     });
     this.dom.addEventListener("wheel", e => {
