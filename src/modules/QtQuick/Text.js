@@ -47,9 +47,19 @@ QmlWeb.registerQmlType({
     this.styleColorChanged.connect(this, this.$onStyleColorChanged);
 
     this.widthChanged.connect(this, this.$onWidthChanged);
+    
     this.fontChanged.connect(this, this.$onFontChanged);
+    this.font.boldChanged.connect(this, this.$onFontChanged);
+    this.font.weightChanged.connect(this, this.$onFontChanged);
+    this.font.pixelSizeChanged.connect(this, this.$onFontChanged);
+    this.font.pointSizeChanged.connect(this, this.$onFontChanged);
+    this.font.familyChanged.connect(this, this.$onFontChanged);
+    this.font.letterSpacingChanged.connect(this, this.$onFontChanged);
+    this.font.wordSpacingChanged.connect(this, this.$onFontChanged);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
+
+    setTimeout(this.$updateImplicit.bind(this), 0);
   }
   $redrawText() {
     const text = this.text;

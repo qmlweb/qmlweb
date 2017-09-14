@@ -9,6 +9,7 @@ QmlWeb.registerQmlType({
   properties: {
     text: "string",
     font: "font",
+    color: { type: "color", initialValue: "black" },
     maximumLength: { type: "int", initialValue: -1 },
     readOnly: "bool",
     validator: "var",
@@ -31,22 +32,29 @@ QmlWeb.registerQmlType({
     input.style.padding = "0";
     input.style.width = "100%";
     input.style.height = "100%";
+    input.style.borderColor = "transparent";
+    input.style.backgroundColor = "transparent";
+    input.style.outline = "none";
     this.dom.appendChild(input);
     this.setupFocusOnDom(input);
     input.disabled = false;
 
-    this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);
+    this.colorChanged.connect(this, this.$onColorChanged);
     this.echoModeChanged.connect(this, this.$onEchoModeChanged);
     this.maximumLengthChanged.connect(this, this.$onMaximumLengthChanged);
     this.readOnlyChanged.connect(this, this.$onReadOnlyChanged);
     this.Keys.pressed.connect(this, this.Keys$onPressed);
+    this.Component.completed.connect(this, this.Component$onCompleted);
 
     this.impl.addEventListener("input", () => this.$updateValue());
   }
   Component$onCompleted() {
     this.implicitWidth = this.impl.offsetWidth;
     this.implicitHeight = this.impl.offsetHeight;
+  }
+  $onColorChanged(newVal) {
+    this.impl.style.color = newVal.$css;
   }
   $onTextChanged(newVal) {
     // We have to check if value actually changes.
