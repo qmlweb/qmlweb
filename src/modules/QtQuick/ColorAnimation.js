@@ -42,24 +42,21 @@ QmlWeb.registerQmlType({
   $startLoop() {
     for (const i in this.$actions) {
       const action = this.$actions[i];
-      const from_color = action.from_color ||
-        action.target[action.property] ||
-        EMPTY_ANIMATION_COLOR;
-      const to_color = action.to_color ||
-        action.target[action.property] ||
-        EMPTY_ANIMATION_COLOR;
+
+      var colorFrom = new QColor(action.from);
+      var colorTo = new QColor(action.to);
 
       action.from = {
-        r: from_color.r,
-        g: from_color.g,
-        b: from_color.b,
-        a: from_color.a
+        r: colorFrom.r,
+        g: colorFrom.g,
+        b: colorFrom.b,
+        a: colorFrom.a
       };
       action.to = {
-        r: to_color.r,
-        g: to_color.g,
-        b: to_color.b,
-        a: to_color.a
+        r: colorTo.r,
+        g: colorTo.g,
+        b: colorTo.b,
+        a: colorTo.a
       };
       action.cur_color = new QColor(); // eslint-disable-line no-undef, max-len
     }
