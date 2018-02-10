@@ -113,6 +113,9 @@ var modules = {
   "QtWebView 1.1": {
     WebView: { dom: true }
   },
+  "QtWebKit 3.0": {
+    WebView: { dom: true }
+  },
   "QtBluetooth 5.2": {
     BluetoothDiscoveryModel: {}
   },
