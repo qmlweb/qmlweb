@@ -154,3 +154,10 @@ Transplitting all the required Qt/QML libraries to JS/WebAssembley and rendering
 everything to Canvas provides the best possible compatibility with upstream Qt.
 That comes at a price, though — the runtime is pretty big, and that approach
 does not allow to reuse many existing browser APIs and components.
+
+### [Qt for WebAssembly port](https://github.com/msorvig/qt-webassembly-examples/)
+
+Similar as the above «Qt/QML + Emscripten», but more up to date.
+Upstream issue: [QTBUG-63917](https://bugreports.qt.io/browse/QTBUG-63917).
+
+Examples at <https://msorvig.github.io/qt-webassembly-examples/>.
