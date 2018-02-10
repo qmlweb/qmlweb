@@ -49,6 +49,16 @@ app's HTML file:
 See the [examples](examples) directory for more details and complete usage
 examples.
 
+### Testing from a local folder
+
+Note that due to security restrictions (which are there to protect you!)
+browsers do not allow loading arbitrary local files, which includes `*.qml`.
+
+Because of that, to test the goodness of QmlWeb on your own machine, you
+have to spin up a local http server, e.g. by running `npx http-server`.
+
+Or try out [qmlweb-viewer](https://github.com/qmlweb/qmlweb-viewer).
+
 ### API
 
 You can use DOM elements as the base for QML components:
