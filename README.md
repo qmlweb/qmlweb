@@ -35,7 +35,6 @@ Rectangle {
 Using one of the methods below, install the qmlweb JavaScript library:
 
 * [npm](https://www.npmjs.com/package/qmlweb) — `npm install qmlweb`
-* [Bower](http://bower.io/search/?q=qmlweb) — `bower install qmlweb`
 * GitHub [releases](https://github.com/qmlweb/qmlweb/releases) —
   `tar -xaf v0.2.0.tar.gz`
 * Manually (recommended if you cloned from git) — `npm install && npm run build`
