@@ -9,9 +9,15 @@ class QMLContext {
   }
 }
 
-class QMLComponent {
+// eslint-disable-next-line no-undef
+class QtQml_Component extends QtQml_QtObject {
+  static global = true;
+  static baseClass = "QtObject";
+
   constructor(meta) {
-    if (QmlWeb.constructors[meta.object.$class] === QMLComponent) {
+    super(meta);
+
+    if (QmlWeb.constructors[meta.object.$class] === QtQml_Component) {
       this.$metaObject = meta.object.$children[0];
     } else {
       this.$metaObject = meta.object;
@@ -119,11 +125,3 @@ class QMLComponent {
     return this.$Component;
   }
 }
-
-QmlWeb.registerQmlType({
-  global: true,
-  module: "QtQml",
-  name: "Component",
-  baseClass: "QtObject",
-  constructor: QMLComponent
-});

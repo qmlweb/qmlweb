@@ -81,6 +81,7 @@ function registerQmlType(options, constructor) {
     enums: options.hasOwnProperty("enums") ? options.enums : {},
     signals: options.hasOwnProperty("signals") ? options.signals : {},
     properties: options.hasOwnProperty("properties") ? options.properties : {},
+    global: options.hasOwnProperty("global") ? options.global : false,
     defaultProperty: options.defaultProperty,
     constructor: options
   } : options;
