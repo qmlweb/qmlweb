@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Image",
-  versions: /.*/,
-  baseClass: "Item",
-  enums: {
+class QtQuick_Image {
+  static module = "QtQuick";
+  static versions = /.*/;
+  static baseClass = "Item";
+  static enums = {
     Image: {
       Stretch: 1, PreserveAspectFit: 2, PreserveAspectCrop: 3,
       Tile: 4, TileVertically: 5, TileHorizontally: 6,
 
       Null: 1, Ready: 2, Loading: 3, Error: 4
     }
-  },
-  properties: {
+  };
+  static properties = {
     asynchronous: { type: "bool", initialValue: true },
     cache: { type: "bool", initialValue: true },
     smooth: { type: "bool", initialValue: true },
@@ -20,8 +19,8 @@ QmlWeb.registerQmlType({
     progress: "real",
     source: "url",
     status: { type: "enum", initialValue: 1 } // Image.Null
-  }
-}, class {
+  };
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
@@ -130,4 +129,4 @@ QmlWeb.registerQmlType({
       style.imageRendering = "pixelated";
     }
   }
-});
+}
