@@ -15,6 +15,15 @@ const QtGlobal = "src/modules/QtQml/Qt.js";
 
 function baseClass(file) {
   const buffer = file.contents;
+
+  // Specified as real class inheritance
+  const extendsPos = buffer.indexOf(" extends ");
+  if (extendsPos >= 0) {
+    const text = buffer.slice(extendsPos, extendsPos + 200).toString("utf-8");
+    const match = text.match(/ extends\s+([A-Za-z]+_[A-Za-z_]+)\s+{/);
+    if (match) return match[1].replace(/_/g, ".");
+  }
+
   if (!buffer.includes("baseClass")) return null;
 
   // Specified as static class property
