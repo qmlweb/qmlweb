@@ -39,70 +39,38 @@ function registerGlobalQmlType(name, type) {
 }
 
 // Helper. Register a type to a module
-function registerQmlType(options) {
-  const base = Object.getPrototypeOf(options);
-
-  // Automatically deduce module names from class names
-  if (options.name && options.name.indexOf("_") > 0) {
-    options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
-  }
-  const fullmodule = options.module;
-  options.module = fullmodule.replace(/\.[0-9]+$/, "");
-
-  if (!options.hasOwnProperty("versions")) {
-    options.versions = /.*/;
+function registerQmlType(spec) {
+  if (!/.*_.*/.test(spec.name)) {
+    throw new Error(`Invalid class name: ${spec.name}`);
   }
 
-  if (/[A-Za-z]+_[A-Za-z_]+/.test(base.name)) {
-    options.baseClass = base;
-  } else {
-    options.baseClass = undefined;
-  }
+  const name = spec.name.replace(/.*_/, "");
+  const module = spec.name.replace(/(_[0-9]+)?_[^_]+$/, "").replace(/_/g, ".");
 
-  const descriptor = typeof options === "function" ? {
-    module: options.module,
-    name: options.element || options.name,
-    versions: options.versions,
-    baseClass: options.baseClass,
-    enums: options.hasOwnProperty("enums") ? options.enums : {},
-    signals: options.hasOwnProperty("signals") ? options.signals : {},
-    properties: options.hasOwnProperty("properties") ? options.properties : {},
-    global: options.hasOwnProperty("global") ? options.global : false,
-    defaultProperty: options.defaultProperty,
-    constructor: options
-  } : options;
-
-  // Cut off module prefix from class names
-  const prefix = `${fullmodule.replace(/\./g, "_")}_`;
-  if (descriptor.name.indexOf(prefix) === 0) {
-    descriptor.name = descriptor.name.slice(prefix.length);
-  }
-
-  descriptor.constructor.$qmlTypeInfo = {
-    enums: descriptor.enums,
-    signals: descriptor.signals,
-    defaultProperty: descriptor.defaultProperty,
-    properties: descriptor.properties
+  spec.$qmlTypeInfo = {
+    enums: spec.hasOwnProperty("enums") ? spec.enums : {},
+    signals: spec.hasOwnProperty("signals") ? spec.signals : {},
+    properties: spec.hasOwnProperty("properties") ? spec.properties : {},
+    defaultProperty: spec.defaultProperty
   };
 
-  if (descriptor.global) {
-    registerGlobalQmlType(descriptor.name, descriptor.constructor);
+  if (spec.hasOwnProperty("global") && spec.global) {
+    registerGlobalQmlType(name, spec);
   }
 
   const moduleDescriptor = {
-    name: descriptor.name,
-    versions: descriptor.versions,
-    constructor: descriptor.constructor
+    name,
+    versions: spec.hasOwnProperty("versions") ? spec.versions : /.*/,
+    constructor: spec
   };
-
-  if (typeof modules[descriptor.module] === "undefined") {
-    modules[descriptor.module] = [];
+  if (!modules.hasOwnProperty(module)) {
+    modules[module] = [];
   }
-  modules[descriptor.module].push(moduleDescriptor);
+  modules[module].push(moduleDescriptor);
 
-
-  if (typeof descriptor.baseClass !== "undefined") {
-    inherit(descriptor.constructor, descriptor.baseClass);
+  const base = Object.getPrototypeOf(spec);
+  if (/[A-Za-z]+_[A-Za-z_]+/.test(base.name)) {
+    inherit(spec, base);
   }
 
   // TODO: Move to module initialization?
@@ -128,12 +96,12 @@ function registerQmlType(options) {
     At the same time, those signals are still pushed to
     `engine.completedSignals` by getAttachedObject.
   */
-  if (descriptor.constructor.getAttachedObject) {
+  if (spec.getAttachedObject) {
     const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
     QmlWeb.setupGetter(
       QMLBaseObject.prototype,
-      descriptor.name,
-      descriptor.constructor.getAttachedObject
+      name,
+      spec.getAttachedObject
     );
   }
 }
