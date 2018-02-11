@@ -1,8 +1,5 @@
-class QtQuick_AnimatedImage {
+// eslint-disable-next-line no-undef
+class QtQuick_AnimatedImage extends QtQuick_Image {
   static versions = /.*/;
   static baseClass = "Image";
-
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
 }

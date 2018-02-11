@@ -1,4 +1,5 @@
-class QtQuick_Item {
+// eslint-disable-next-line no-undef
+class QtQuick_Item extends QtQml_QtObject {
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static properties = {
@@ -35,7 +36,7 @@ class QtQuick_Item {
   static defaultProperty = "data";
 
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");

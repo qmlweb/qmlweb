@@ -1,4 +1,5 @@
-class QtQuick_Image {
+// eslint-disable-next-line no-undef
+class QtQuick_Image extends QtQuick_Item {
   static versions = /.*/;
   static baseClass = "Item";
   static enums = {
@@ -21,7 +22,7 @@ class QtQuick_Image {
   };
 
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.sourceSize = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.sourceSize, {

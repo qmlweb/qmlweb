@@ -1,4 +1,5 @@
-class QtQuick_Behavior {
+// eslint-disable-next-line no-undef
+class QtQuick_Behavior extends QtQml_QtObject {
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static properties = {
@@ -8,7 +9,7 @@ class QtQuick_Behavior {
   static defaultProperty = "animation";
 
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     this.$on = meta.object.$on;
 
     this.animationChanged.connect(this, this.$onAnimationChanged);
