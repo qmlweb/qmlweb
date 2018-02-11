@@ -58,12 +58,10 @@ function registerQmlType(options, constructor) {
     }
     const found = (modules[baseModule] || [])
                     .filter(descr => descr.name === baseName);
-    if (found.length > 0) {
-      // Ok, we found our base class
-      options.baseClass = found[0].constructor;
-    } else {
+    if (found.length === 0) {
       throw new Error(`baseClass not found: ${baseName}`);
     }
+    options.baseClass = found[0].constructor;
   }
 
   const descriptor = typeof options === "function" ? {
