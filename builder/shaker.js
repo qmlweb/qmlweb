@@ -20,7 +20,7 @@ function baseClass(file) {
   const extendsPos = buffer.indexOf(" extends ");
   if (extendsPos >= 0) {
     const text = buffer.slice(extendsPos, extendsPos + 200).toString("utf-8");
-    const match = text.match(/ extends\s+([A-Za-z]+_[A-Za-z_]+)\s+{/);
+    const match = text.match(/ extends\s+([A-Za-z0-9]+_[A-Za-z0-9_]+)\s+{/);
     if (match) return match[1].replace(/_/g, ".");
   }
 
