@@ -1,5 +1,5 @@
 QmlWeb.registerQmlType({
-  module: "QtQml.Modules",
+  module: "QtQml.Models",
   name: "ListModel",
   versions: /^2\./,
   baseClass: "QtQuick.ListModel",

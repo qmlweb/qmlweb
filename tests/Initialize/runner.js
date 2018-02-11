@@ -56,7 +56,7 @@ var modules = {
     XAnimator: {},
     YAnimator: {}
   },
-  "QtQml.Modules 2.2": {
+  "QtQml.Models 2.2": {
     ListElement: {},
     ListModel: {}
   },
