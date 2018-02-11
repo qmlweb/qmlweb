@@ -1,10 +1,5 @@
 // Base object for all qml elements
-
-QmlWeb.registerQmlType({
-  module: "QtQml",
-  name: "QtObject",
-  versions: /.*/,
-}, class extends QmlWeb.QObject {
+class QtQml_QtObject extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent);
 
@@ -56,4 +51,4 @@ QmlWeb.registerQmlType({
   getAttributes() {
     return this.$attributes;
   }
-});
+}
