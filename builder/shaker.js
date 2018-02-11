@@ -24,32 +24,7 @@ function baseClass(file) {
     if (match) return match[1].replace(/_/g, ".");
   }
 
-  if (!buffer.includes("baseClass")) return null;
-
-  // Specified as static class property
-  const propPos = buffer.indexOf("static baseClass ");
-  if (propPos >= 0) {
-    const text = buffer.slice(propPos, propPos + 200).toString("utf-8");
-    const match = text.match(/static baseClass\s*=\s*"([^"]+)"/);
-    if (match) return match[1];
-  }
-
-  // Specified in js spec object
-  const specPos = buffer.indexOf("baseClass:");
-  if (specPos >= 0) {
-    const text = buffer.slice(specPos, specPos + 200).toString("utf-8");
-    const match = text.match(/baseClass:\s*"([^"]+)"/);
-    if (match) return match[1];
-  }
-  throw new Error(`Could not determine baseClass for file ${file.path}`);
-}
-
-// fullName("C", "A.B") === "A.B.C"
-// fullName("C.D.E", "A.B") === "C.D.E"
-function fullName(relative, module) {
-  if (!relative) return relative;
-  if (relative.includes(".")) return relative;
-  return `${module}.${relative}`;
+  return null;
 }
 
 // Preprocesses file
@@ -77,7 +52,7 @@ module.exports = function(options = {}) {
       const name = filename.replace(".js", "").split("/").join(".");
       const module = name.replace(/.[^.]+$/, ""); // "A.B.C" -> "A.B"
       try {
-        const base = fullName(baseClass(file), module);
+        const base = baseClass(file);
         shake.push({ file, name, module, base });
       } catch (e) {
         this.emit("error", e);
