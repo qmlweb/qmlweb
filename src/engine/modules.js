@@ -68,11 +68,6 @@ function registerQmlType(spec) {
   }
   modules[module].push(moduleDescriptor);
 
-  const base = Object.getPrototypeOf(spec);
-  if (/[A-Za-z]+_[A-Za-z_]+/.test(base.name)) {
-    inherit(spec, base);
-  }
-
   // TODO: Move to module initialization?
   /*
     http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers
@@ -156,15 +151,6 @@ function loadImports(self, imports) {
   self.importContextId = importContextIds++;
   perImportContextConstructors[self.importContextId] = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
-}
-
-function inherit(constructor, baseClass) {
-  const oldProto = constructor.prototype;
-  constructor.prototype = Object.create(baseClass.prototype);
-  Object.getOwnPropertyNames(oldProto).forEach(prop => {
-    constructor.prototype[prop] = oldProto[prop];
-  });
-  constructor.prototype.constructor = baseClass;
 }
 
 /**

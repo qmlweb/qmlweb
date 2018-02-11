@@ -53,8 +53,7 @@ class QtQml_QtObject extends QmlWeb.QObject {
     let type = meta.super;
     while (type) {
       types.unshift(type);
-      if (type === type.prototype.constructor) break;
-      type = type.prototype.constructor;
+      type = Object.getPrototypeOf(type);
     }
     types.forEach(entry => {
       if (!entry.hasOwnProperty("$qmlTypeInfo")) return;
