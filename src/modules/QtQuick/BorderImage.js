@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "BorderImage",
-  baseClass: "Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_BorderImage extends QtQuick_Item {
+  static baseClass = "Item";
+  static enums = {
     BorderImage: {
       Stretch: "stretch", Repeat: "repeat", Round: "round",
       Null: 1, Ready: 2, Loading: 3, Error: 4
     }
-  },
-  properties: {
+  };
+  static properties = {
     source: "url",
     smooth: { type: "bool", initialValue: true },
     // BorderImage.Stretch
@@ -17,10 +16,10 @@ QmlWeb.registerQmlType({
     verticalTileMode: { type: "enum", initialValue: "stretch" },
     progress: "real",
     status: { type: "enum", initialValue: 1 } // BorderImage.Null
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.border = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.border, {
@@ -91,4 +90,4 @@ QmlWeb.registerQmlType({
       style.imageRendering = "pixelated";
     }
   }
-});
+}

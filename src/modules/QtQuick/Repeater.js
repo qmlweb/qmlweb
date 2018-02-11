@@ -1,19 +1,18 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Repeater",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Repeater extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     delegate: "Component",
     model: { type: "variant", initialValue: 0 },
     count: "int"
-  },
-  signals: {
+  };
+  static signals = {
     _childrenInserted: []
-  },
-  defaultProperty: "delegate"
-}, class {
+  };
+  static defaultProperty = "delegate";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own
@@ -231,4 +230,4 @@ QmlWeb.registerQmlType({
       this.$removeChildProperties(child.children[i]);
     }
   }
-});
+}

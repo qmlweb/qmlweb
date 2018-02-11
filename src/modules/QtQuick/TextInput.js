@@ -1,24 +1,23 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "TextInput",
-  baseClass: "Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_TextInput extends QtQuick_Item {
+  static baseClass = "Item";
+  static enums = {
     TextInput: { Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3 }
-  },
-  properties: {
+  };
+  static properties = {
     text: "string",
     font: "font",
     maximumLength: { type: "int", initialValue: -1 },
     readOnly: "bool",
     validator: "var",
     echoMode: "enum" // TextInput.Normal
-  },
-  signals: {
+  };
+  static signals = {
     accepted: []
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     const input = this.impl = document.createElement("input");
     input.type = "text";
@@ -104,4 +103,4 @@ QmlWeb.registerQmlType({
       this.$canEditReadOnlyProperties = false;
     }
   }
-});
+}

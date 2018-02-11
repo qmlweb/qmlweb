@@ -1,11 +1,6 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "FocusScope",
-  baseClass: "Item",
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+// eslint-disable-next-line no-undef
+class QtQuick_FocusScope extends QtQuick_Item {
+  static baseClass = "Item";
 
-    // TODO
-  }
-});
+  // TODO
+}

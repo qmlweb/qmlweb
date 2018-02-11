@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "ScrollView",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_ScrollView extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     contentItem: "Item",
     flickableItem: "Item", // TODO  0) implement it  1) make it read-only
     viewport: "Item", // TODO
@@ -11,11 +10,11 @@ QmlWeb.registerQmlType({
     verticalScrollBarPolicy: "enum",
     horizontalScrollBarPolicy: "enum",
     style: "Component" // TODO
-  },
-  defaultProperty: "contentItem"
-}, class {
+  };
+  static defaultProperty = "contentItem";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.css.pointerEvents = "auto";
     this.setupFocusOnDom(this.dom);
@@ -96,4 +95,4 @@ QmlWeb.registerQmlType({
     }
     return "auto";
   }
-});
+}

@@ -1,16 +1,15 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Translate",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Translate extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     x: "real",
     y: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yChanged.connect(this.$parent, this.$parent.$updateTransform);
   }
-});
+}

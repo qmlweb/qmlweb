@@ -1,20 +1,19 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "DoubleValidator",
-  baseClass: "Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_DoubleValidator extends QtQuick_Item {
+  static baseClass = "Item";
+  static enums = {
     DoubleValidator: { StandardNotation: 1, ScientificNotation: 2 }
-  },
-  properties: {
+  };
+  static properties = {
     bottom: { type: "real", initialValue: -Infinity },
     top: { type: "real", initialValue: Infinity },
     decimals: { type: "int", initialValue: 1000 },
     // DoubleValidator.ScientificNotation
     notation: { type: "enum", initialValue: 2 }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     this.$standardRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
     this.$scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
   }
@@ -43,4 +42,4 @@ QmlWeb.registerQmlType({
     return this.bottom <= value && this.top >= value &&
            this.$getDecimalsForNumber(value) <= this.decimals;
   }
-});
+}

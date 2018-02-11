@@ -1,16 +1,15 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "CheckBox",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_CheckBox extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     text: "string",
     font: "font",
     checked: "bool",
     color: "color"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.impl = document.createElement("label");
     this.impl.style.pointerEvents = "auto";
@@ -52,4 +51,4 @@ QmlWeb.registerQmlType({
                           this.impl.offsetWidth + 4 :
                           0;
   }
-});
+}

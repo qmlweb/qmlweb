@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "MouseArea",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_MouseArea extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     acceptedButtons: { type: "variant", initialValue: 1 }, // Qt.LeftButton
     enabled: { type: "bool", initialValue: true },
     hoverEnabled: "bool",
@@ -13,17 +12,17 @@ QmlWeb.registerQmlType({
     containsPress: "bool",
     pressedButtons: { type: "variant", initialValue: 0 },
     cursorShape: "enum" // Qt.ArrowCursor
-  },
-  signals: {
+  };
+  static signals = {
     clicked: [{ type: "variant", name: "mouse" }],
     entered: [],
     exited: [],
     positionChanged: [{ type: "variant", name: "mouse" }],
     wheel: [{ type: "variant", name: "wheel" }]
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.dom.style.pointerEvents = "all";
 
@@ -178,4 +177,4 @@ QmlWeb.registerQmlType({
     }
     return "auto";
   }
-});
+}

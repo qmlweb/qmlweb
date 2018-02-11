@@ -1,11 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Column",
-  baseClass: "Positioner"
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
+// eslint-disable-next-line no-undef
+class QtQuick_Column extends QtQuick_Positioner {
+  static baseClass = "Positioner";
+
   layoutChildren() {
     let curPos = this.padding;
     let maxWidth = 0;
@@ -23,4 +19,4 @@ QmlWeb.registerQmlType({
     this.implicitHeight = curPos - this.spacing + this.padding;
     // We want no spacing at the bottom side
   }
-});
+}

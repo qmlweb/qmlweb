@@ -1,10 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Particles",
-  name: "Direction",
-  versions: /^2\./,
-  baseClass: "QtQml.QtObject"
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+// eslint-disable-next-line no-undef
+class QtQuick_Particles_Direction extends QtQml_QtObject {
+  static versions = /^2\./;
+  static baseClass = "QtQml.QtObject";
+
+  // TODO
+}

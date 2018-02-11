@@ -1,10 +1,5 @@
-QmlWeb.registerQmlType({
-  module: "QtQml.Models",
-  name: "ListElement",
-  versions: /^2\./,
-  baseClass: "QtQuick.ListElement"
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+// eslint-disable-next-line no-undef
+class QtQml_Models_ListElement extends QtQuick_ListElement {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.ListElement"
+}

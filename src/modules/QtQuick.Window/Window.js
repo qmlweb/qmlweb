@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Window",
-  name: "Window",
-  versions: /^2\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Window_Window extends QtQuick_Item {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     active: "bool",
     activeFocusItem: "Item",
     color: { type: "color", initialValue: "#ffffff" },
@@ -17,17 +16,17 @@ QmlWeb.registerQmlType({
     modality: "enum",
     title: "string",
     visibility: "enum"
-  },
-  signals: {
+  };
+  static signals = {
     closing: [{ type: "CloseEvent", name: "close" }]
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.colorChanged.connect(this, this.$onColorChanged);
   }
   $onColorChanged(newVal) {
     this.dom.style.backgroundColor = newVal.$css;
   }
-});
+}

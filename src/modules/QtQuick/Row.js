@@ -1,13 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Row",
-  baseClass: "Positioner",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Row extends QtQuick_Positioner {
+  static baseClass = "Positioner";
+  static properties = {
     layoutDirection: "enum"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
@@ -35,4 +34,4 @@ QmlWeb.registerQmlType({
     // We want no spacing at the right side
     this.implicitWidth = curPos - this.spacing + this.padding;
   }
-});
+}

@@ -1,15 +1,11 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "IntValidator",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_IntValidator extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     bottom: { type: "int", initialValue: -2147483647 },
     top: { type: "int", initialValue: 2147483647 }
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
+  };
+
   validate(string) {
     const regExp = /^(-|\+)?\s*[0-9]+$/;
     let acceptable = regExp.test(string.trim());
@@ -20,4 +16,4 @@ QmlWeb.registerQmlType({
     }
     return acceptable;
   }
-});
+}

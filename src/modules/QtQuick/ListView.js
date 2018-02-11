@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ListView",
-  baseClass: "Repeater",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_ListView extends QtQuick_Repeater {
+  static baseClass = "Repeater";
+  static properties = {
     orientation: "enum",
     spacing: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     this.modelChanged.connect(this, this.$styleChanged);
     this.delegateChanged.connect(this, this.$styleChanged);
     this.orientationChanged.connect(this, this.$styleChanged);
@@ -38,4 +37,4 @@ QmlWeb.registerQmlType({
       this.$applyStyleOnItem(this.$items[i]);
     }
   }
-});
+}

@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Positioner",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Positioner extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     spacing: "int",
     padding: "int"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);
@@ -24,4 +23,4 @@ QmlWeb.registerQmlType({
       child.visibleChanged.connect(this, this.layoutChildren, flags);
     }
   }
-});
+}

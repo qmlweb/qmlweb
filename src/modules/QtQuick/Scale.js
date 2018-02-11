@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Scale",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Scale extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     xScale: { type: "real", initialValue: 1 },
     yScale: { type: "real", initialValue: 1 }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.origin = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.origin, {
@@ -30,4 +29,4 @@ QmlWeb.registerQmlType({
     style.transformOrigin = `${this.origin.x}px ${this.origin.y}px`;
     style.webkitTransformOrigin = `${this.origin.x}px ${this.origin.y}px`;
   }
-});
+}

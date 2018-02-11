@@ -1,11 +1,10 @@
 // TODO
 // Currently only a skeleton implementation
 
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Canvas",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Canvas extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     available: { type: "bool", initialValue: true },
     canvasSize: { type: "var", initialValue: [0, 0] },
     canvasWindow: { type: "var", initialValue: [0, 0, 0, 0] },
@@ -14,16 +13,13 @@ QmlWeb.registerQmlType({
     renderStrategy: "enum",
     renderTarget: "enum",
     tileSize: { type: "var", initialValue: [0, 0] }
-  },
-  signals: {
+  };
+  static signals = {
     imageLoaded: [],
     paint: [{ type: "var", name: "region" }],
     painted: []
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
+  };
+
   cancelRequestAnimationFrame(/*handle*/) {
     return false;
   }
@@ -62,4 +58,4 @@ QmlWeb.registerQmlType({
   }
   unloadImage(/*image*/) {
   }
-});
+}

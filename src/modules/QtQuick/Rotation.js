@@ -1,13 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Rotation",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Rotation extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     angle: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.axis = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.axis, {
@@ -35,4 +34,4 @@ QmlWeb.registerQmlType({
     style.transformOrigin = `${this.origin.x}px ${this.origin.y}px`;
     style.webkitTransformOrigin = `${this.origin.x}px ${this.origin.y}px`;
   }
-});
+}

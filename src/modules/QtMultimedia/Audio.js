@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtMultimedia",
-  name: "Audio",
-  versions: /^5\./,
-  baseClass: "QtQml.QtObject",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtMultimedia_Audio extends QtQml_QtObject {
+  static versions = /^5\./;
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     Audio: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,
 
@@ -15,8 +14,8 @@ QmlWeb.registerQmlType({
       NoMedia: 0, Loading: 1, Loaded: 2, Buffering: 4, Stalled: 8,
       EndOfMedia: 16, InvalidMedia: 32, UnknownStatus: 64
     }
-  },
-  properties: {
+  };
+  static properties = {
     audioRole: "enum", // TODO
     autoLoad: { type: "bool", initialValue: true },
     autoPlay: "bool",
@@ -38,8 +37,8 @@ QmlWeb.registerQmlType({
     source: "url",
     status: "enum", // Audio.NoMedia
     volume: { type: "real", initialValue: 1 }
-  },
-  signals: {
+  };
+  static signals = {
     error: [
       { type: "enum", name: "error" },
       { type: "string", name: "errorString" }
@@ -47,13 +46,8 @@ QmlWeb.registerQmlType({
     paused: [],
     playing: [],
     stopped: []
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO
-  }
   pause() {
     // TODO
   }
@@ -69,4 +63,4 @@ QmlWeb.registerQmlType({
   supportedAudioRoles() {
     // TODO
   }
-});
+}

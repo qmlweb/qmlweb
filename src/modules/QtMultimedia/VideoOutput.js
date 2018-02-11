@@ -1,12 +1,11 @@
-QmlWeb.registerQmlType({
-  module: "QtMultimedia",
-  name: "VideoOutput",
-  versions: /^5\./,
-  baseClass: "QtQuick.Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtMultimedia_VideoOutput extends QtQuick_Item {
+  static versions = /^5\./;
+  static baseClass = "QtQuick.Item";
+  static enums = {
     VideoOutput: { PreserveAspectFit: 0, PreserveAspectCrop: 1, Stretch: 2 }
-  },
-  properties: {
+  };
+  static properties = {
     autoOrientation: "bool",
     contentRect: "rect",
     fillMode: "enum", // VideoOutput.PreserveAspectFit
@@ -14,11 +13,7 @@ QmlWeb.registerQmlType({
     orientation: "int",
     source: "variant",
     sourceRect: "rect"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO: impl
-  }
-});
+  // TODO: impl
+}

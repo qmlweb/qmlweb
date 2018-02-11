@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "TextEdit",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_TextEdit extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     activeFocusOnPress: { type: "bool", initialValue: true },
     baseUrl: "url",
     canPaste: "bool",
@@ -40,14 +39,14 @@ QmlWeb.registerQmlType({
     textMargin: "real",
     verticalAlignment: "enum",
     wrapMode: "enum"
-  },
-  signals: {
+  };
+  static signals = {
     linkActivated: [{ type: "string", name: "link" }],
     linkHovered: [{ type: "string", name: "link" }]
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     // Undo / Redo stacks;
     this.undoStack = [];
@@ -186,4 +185,4 @@ QmlWeb.registerQmlType({
   $getLineCount() {
     return this.text.split(/\n/).length;
   }
-});
+}

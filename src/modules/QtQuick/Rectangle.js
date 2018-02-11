@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Rectangle",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Rectangle extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     color: { type: "color", initialValue: "white" },
     radius: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.border = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.border, {
@@ -60,4 +59,4 @@ QmlWeb.registerQmlType({
       style.borderWidth = `${border}px`;
     }
   }
-});
+}

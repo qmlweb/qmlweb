@@ -1,19 +1,18 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "PropertyChanges",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_PropertyChanges extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     target: "QtObject",
     explicit: "bool",
     restoreEntryValues: { type: "bool", initialValue: true }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$actions = [];
   }
   $setCustomData(property, value) {
     this.$actions.push({ property, value });
   }
-});
+}

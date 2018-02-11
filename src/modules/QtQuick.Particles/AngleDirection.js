@@ -1,16 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Particles",
-  name: "AngleDirection",
-  versions: /^2\./,
-  baseClass: "Direction",
-  properties: {
+// eslint-disable-next-line no-undef, max-len
+class QtQuick_Particles_AngleDirection extends QtQuick_Particles_Direction {
+  static versions = /^2\./;
+  static baseClass = "Direction";
+  static properties = {
     angle: "real",
     angleVariation: "real",
     magnitude: "real",
     magnitudeVariation: "real"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+  };
+
+  // TODO
+}

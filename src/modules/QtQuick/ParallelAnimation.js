@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ParallelAnimation",
-  baseClass: "Animation",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_ParallelAnimation extends QtQuick_Animation {
+  static baseClass = "Animation";
+  static enums = {
     Animation: { Infinite: Math.Infinite }
-  },
-  properties: {
+  };
+  static properties = {
     animations: "list"
-  },
-  defaultProperty: "animations"
-}, class {
+  };
+  static defaultProperty = "animations";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$runningAnimations = 0;
 
@@ -54,4 +53,4 @@ QmlWeb.registerQmlType({
   complete() {
     this.stop();
   }
-});
+}

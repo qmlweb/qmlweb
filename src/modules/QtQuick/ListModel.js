@@ -1,15 +1,14 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ListModel",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_ListModel extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     count: "int",
     $items: "list"
-  },
-  defaultProperty: "$items"
-}, class {
+  };
+  static defaultProperty = "$items";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$firstItem = true;
     this.$itemsChanged.connect(this, this.$on$itemsChanged);
@@ -87,4 +86,4 @@ QmlWeb.registerQmlType({
     this.$items[index][property] = value;
     this.$model.dataChanged(index, index);
   }
-});
+}

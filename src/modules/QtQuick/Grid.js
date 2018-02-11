@@ -1,19 +1,18 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Grid",
-  baseClass: "Positioner",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_Grid extends QtQuick_Positioner {
+  static baseClass = "Positioner";
+  static enums = {
     Grid: { LeftToRight: 0, TopToBottom: 1 }
-  },
-  properties: {
+  };
+  static properties = {
     columns: "int",
     rows: "int",
     flow: "enum",
     layoutDirection: "enum"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);
@@ -140,4 +139,4 @@ QmlWeb.registerQmlType({
 
     return [colWidth, rowHeight];
   }
-});
+}

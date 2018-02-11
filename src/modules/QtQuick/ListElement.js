@@ -1,10 +1,9 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ListElement",
-  baseClass: "QtQml.QtObject"
-}, class {
+// eslint-disable-next-line no-undef
+class QtQuick_ListElement extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     for (const i in meta.object) {
       if (i[0] !== "$") {
@@ -13,4 +12,4 @@ QmlWeb.registerQmlType({
     }
     QmlWeb.applyProperties(meta.object, this, this, this.$context);
   }
-});
+}

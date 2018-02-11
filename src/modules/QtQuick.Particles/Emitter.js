@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Particles",
-  name: "Emitter",
-  versions: /^2\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Particles_Emitter extends QtQuick_Item {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     acceleration: "StochasticDirection",
     emitRate: { type: "real", initialValue: 10 },
     enabled: { type: "bool", initialValue: true },
@@ -19,16 +18,13 @@ QmlWeb.registerQmlType({
     system: "ParticleSystem",
     velocity: "StochasticDirection",
     velocityFromMovement: "real"
-  },
-  signals: {
+  };
+  static signals = {
     emitParticles: [{ type: "Array", name: "particles" }]
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO
-  }
+  // TODO
+
   burst(/*count, x, y*/) {
     // TODO
   }
@@ -39,4 +35,4 @@ QmlWeb.registerQmlType({
       this.enabled = false;
     }, duration);
   }
-});
+}

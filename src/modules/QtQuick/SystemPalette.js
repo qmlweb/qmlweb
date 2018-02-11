@@ -7,16 +7,15 @@ const platformsDetectors = [
 
 const systemPalettes = {};
 
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "SystemPalette",
-  baseClass: "QtQml.QtObject",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_SystemPalette extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     SystemPalette: {
       Active: 0, Inactive: 2, Disabled: 1
     }
-  },
-  properties: {
+  };
+  static properties = {
     alternateBase: { type: "color", readOnly: true },
     base: { type: "color", readOnly: true },
     button: { type: "color", readOnly: true },
@@ -33,10 +32,10 @@ QmlWeb.registerQmlType({
     windowText: { type: "color", readOnly: true },
 
     colorGroup: "enum"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.colorGroupChanged.connect(this, this.$onColorGroupChanged);
 
@@ -60,7 +59,7 @@ QmlWeb.registerQmlType({
     });
     delete this.$canEditReadOnlyProperties;
   }
-});
+}
 
 systemPalettes.OSX = {
   active: {

@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Flow",
-  baseClass: "Positioner",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_Flow extends QtQuick_Positioner {
+  static baseClass = "Positioner";
+  static enums = {
     Flow: { LeftToRight: 0, TopToBottom: 1 }
-  },
-  properties: {
+  };
+  static properties = {
     flow: "enum", // Flow.LeftToRight
     layoutDirection: "enum" // Flow.LeftToRight
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
@@ -69,4 +68,4 @@ QmlWeb.registerQmlType({
       this.implicitHeight = curVPos - this.spacing;
     }
   }
-});
+}

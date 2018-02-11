@@ -1,10 +1,9 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "NumberAnimation",
-  baseClass: "PropertyAnimation"
-}, class {
+// eslint-disable-next-line no-undef
+class QtQuick_NumberAnimation extends QtQuick_PropertyAnimation {
+  static baseClass = "PropertyAnimation";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$at = 0;
     this.$loop = 0;
@@ -68,4 +67,4 @@ QmlWeb.registerQmlType({
       this.$startLoop(this);
     }
   }
-});
+}

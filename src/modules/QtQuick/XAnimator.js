@@ -1,10 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "XAnimator",
-  versions: /^2\./,
-  baseClass: "Animator"
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+// eslint-disable-next-line no-undef
+class QtQuick_XAnimator extends QtQuick_Animator {
+  static versions = /^2\./;
+  static baseClass = "Animator";
+
+  // TODO
+}

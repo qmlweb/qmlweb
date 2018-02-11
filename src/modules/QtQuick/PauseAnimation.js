@@ -1,13 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "PauseAnimation",
-  baseClass: "Animation",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_PauseAnimation extends QtQuick_Animation {
+  static baseClass = "Animation";
+  static properties = {
     duration: { type: "int", initialValue: 250 }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$at = 0;
 
@@ -32,4 +31,4 @@ QmlWeb.registerQmlType({
   complete() {
     this.running = false;
   }
-});
+}

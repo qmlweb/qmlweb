@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "SequentialAnimation",
-  baseClass: "Animation",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_SequentialAnimation extends QtQuick_Animation {
+  static baseClass = "Animation";
+  static properties = {
     animations: "list"
-  },
-  defaultProperty: "animations"
-}, class {
+  };
+  static defaultProperty = "animations";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
@@ -66,4 +65,4 @@ QmlWeb.registerQmlType({
     }
     this.running = false;
   }
-});
+}

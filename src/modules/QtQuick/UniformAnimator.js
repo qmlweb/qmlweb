@@ -1,13 +1,10 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "UniformAnimator",
-  versions: /^2\./,
-  baseClass: "Animator",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_UniformAnimator extends QtQuick_Animator {
+  static versions = /^2\./;
+  static baseClass = "Animator";
+  static properties = {
     uniform: "string"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+  };
+
+  // TODO
+}

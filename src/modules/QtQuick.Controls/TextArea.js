@@ -1,13 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "TextArea",
-  baseClass: "QtQuick.TextEdit"
-}, class {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_TextArea extends QtQuick_TextEdit {
+  static baseClass = "QtQuick.TextEdit";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     const textarea = this.impl;
     textarea.style.padding = "5px";
     textarea.style.borderWidth = "1px";
     textarea.style.backgroundColor = "#fff";
   }
-});
+}

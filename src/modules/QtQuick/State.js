@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "State",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_State extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     name: "string",
     changes: "list",
     extend: "string",
     when: "bool"
-  },
-  defaultProperty: "changes"
-}, class {
+  };
+  static defaultProperty = "changes";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$item = this.$parent;
 
@@ -38,4 +37,4 @@ QmlWeb.registerQmlType({
       this.$item.state = "";
     }
   }
-});
+}

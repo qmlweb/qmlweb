@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Loader",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Loader extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     active: { type: "bool", initialValue: true },
     asynchronous: "bool",
     item: "var",
@@ -10,13 +9,13 @@ QmlWeb.registerQmlType({
     source: "url",
     sourceComponent: "Component",
     status: { type: "enum", initialValue: 1 }
-  },
-  signals: {
+  };
+  static signals = {
     loaded: []
-  },
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$sourceUrl = "";
 
@@ -129,4 +128,4 @@ QmlWeb.registerQmlType({
       this.item.height = this.height;
     }
   }
-});
+}

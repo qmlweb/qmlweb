@@ -1,22 +1,21 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "ComboBox",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_ComboBox extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     count: "int",
     currentIndex: "int",
     currentText: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
     pressed: "bool"
-  },
-  signals: {
+  };
+  static signals = {
     accepted: [],
     activated: [{ type: "int", name: "index" }]
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.dom.style.pointerEvents = "auto";
     this.name = "QMLComboBox";
@@ -104,4 +103,4 @@ QmlWeb.registerQmlType({
       this.impl.style.width = `${this.width}px`;
     }
   }
-});
+}

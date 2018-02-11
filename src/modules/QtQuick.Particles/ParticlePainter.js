@@ -1,14 +1,11 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Particles",
-  name: "ParticlePainter",
-  versions: /^2\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Particles_ParticlePainter extends QtQuick_Item {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     groups: "list",
     system: "ParticleSystem"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
-});
+  };
+
+  // TODO
+}

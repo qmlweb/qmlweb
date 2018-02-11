@@ -1,16 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "RegExpValidator",
-  baseClass: "Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_RegExpValidator extends QtQuick_Item {
+  static baseClass = "Item";
+  static properties = {
     regExp: "var"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
+  };
+
   validate(string) {
     if (!this.regExp) return true;
     return this.regExp.test(string);
   }
-});
+}

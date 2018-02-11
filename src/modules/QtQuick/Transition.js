@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Transition",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Transition extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     animations: "list",
     from: { type: "string", initialValue: "*" },
     to: { type: "string", initialValue: "*" },
     reversible: "bool"
-  },
-  defaultProperty: "animations"
-}, class {
+  };
+  static defaultProperty = "animations";
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$item = this.$parent;
   }
@@ -35,4 +34,4 @@ QmlWeb.registerQmlType({
       this.animations[i].stop();
     }
   }
-});
+}

@@ -1,20 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Particles",
-  name: "ParticleSystem",
-  versions: /^2\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Particles_ParticleSystem extends QtQuick_Item {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     empty: "bool",
     particleStates: "list",
     paused: "bool",
     running: { type: "bool", initialValue: true }
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO
-  }
+  // TODO
+
   pause() {
     this.paused = true;
   }
@@ -34,4 +30,4 @@ QmlWeb.registerQmlType({
   stop() {
     this.running = false;
   }
-});
+}

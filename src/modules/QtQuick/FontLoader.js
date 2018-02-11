@@ -1,18 +1,17 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "FontLoader",
-  baseClass: "QtQml.QtObject",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_FontLoader extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     FontLoader: { Null: 0, Ready: 1, Loading: 2, Error: 3 }
-  },
-  properties: {
+  };
+  static properties = {
     name: "string",
     source: "url",
     status: "enum" // FontLoader.Null
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$lastName = "";
     this.$inTouchName = false;
@@ -148,4 +147,4 @@ Refs: https://github.com/smnh/FontLoader.`);
     // Load font by the name
     this.$loadFont(fontName);
   }
-});
+}

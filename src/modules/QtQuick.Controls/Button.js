@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "Button",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_Button extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     text: "string",
     enabled: { type: "bool", initialValue: true }
-  },
-  signals: {
+  };
+  static signals = {
     clicked: []
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);
@@ -39,4 +38,4 @@ QmlWeb.registerQmlType({
     this.impl.disabled = !newVal;
   }
 
-});
+}

@@ -1,16 +1,15 @@
-QmlWeb.registerQmlType({
-  module: "QtMultimedia",
-  name: "Camera",
-  versions: /^5\./,
-  baseClass: "QtQml.QtObject",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtMultimedia_Camera extends QtQml_QtObject {
+  static versions = /^5\./;
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     Camera: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,
 
       UnloadedState: 0, LoadedState: 1, ActiveState: 2
     }
-  },
-  properties: {
+  };
+  static properties = {
     availability: "enum", // Camera.Available
     cameraState: { type: "enum", initialValue: 2 }, // Camera.ActiveState
     cameraStatus: "enum", // TODO
@@ -26,17 +25,13 @@ QmlWeb.registerQmlType({
     opticalZoom: { type: "real", initialValue: 1 },
     orientation: "int",
     position: "enum", // TODO
-  },
-  signals: {
+  };
+  static signals = {
     error: [
       { type: "enum", name: "errorCode" },
       { type: "string", name: "errorString" }
     ]
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO: impl
-  }
-});
+  // TODO: impl
+}
