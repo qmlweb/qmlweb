@@ -98,11 +98,7 @@ function registerQmlType(spec) {
   */
   if (spec.getAttachedObject) {
     const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
-    QmlWeb.setupGetter(
-      QMLBaseObject.prototype,
-      name,
-      spec.getAttachedObject
-    );
+    QmlWeb.setupGetter(QMLBaseObject.prototype, name, spec.getAttachedObject);
   }
 }
 
