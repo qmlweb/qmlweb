@@ -213,32 +213,9 @@ function inherit(constructor, baseClass) {
 }
 
 function callSuper(self, meta) {
-  const info = meta.super.$qmlTypeInfo || {};
+  if (!meta.root) meta.root = meta.super;
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
-
-  if (info.enums) {
-    // TODO: not exported to the whole file scope yet
-    Object.keys(info.enums).forEach(name => {
-      self[name] = info.enums[name];
-
-      if (!global[name]) {
-        global[name] = self[name]; // HACK
-      }
-    });
-  }
-  if (info.properties) {
-    QmlWeb.createProperties(self, info.properties);
-  }
-  if (info.signals) {
-    Object.keys(info.signals).forEach(name => {
-      const params = info.signals[name];
-      self[name] = QmlWeb.Signal.signal(params);
-    });
-  }
-  if (info.defaultProperty) {
-    self.$defaultProperty = info.defaultProperty;
-  }
 }
 
 /**

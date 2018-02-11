@@ -47,6 +47,41 @@ class QtQml_QtObject extends QmlWeb.QObject {
     this.Keys.volumeDownPressed = Signal.signal();
     this.Keys.volumeUpPressed = Signal.signal();
     this.Keys.yesPressed = Signal.signal();
+
+    // Initialize properties, signals, etc.
+    const types = [];
+    let type = meta.root || meta.super;
+    while (type) {
+      types.push(type);
+      if (type === type.prototype.constructor) break;
+      type = type.prototype.constructor;
+    }
+    types.reverse().forEach(entry => {
+      const info = entry.$qmlTypeInfo || {};
+      if (info.enums) {
+        // TODO: not exported to the whole file scope yet
+        Object.keys(info.enums).forEach(name => {
+          this[name] = info.enums[name];
+
+          if (!global[name]) {
+            global[name] = this[name]; // HACK
+          }
+        });
+      }
+      if (info.properties) {
+        QmlWeb.createProperties(this, info.properties);
+      }
+      if (info.signals) {
+        Object.keys(info.signals).forEach(name => {
+          const params = info.signals[name];
+          this[name] = QmlWeb.Signal.signal(params);
+        });
+      }
+      if (info.defaultProperty) {
+        this.$defaultProperty = info.defaultProperty;
+      }
+    });
+    meta.initialized = true;
   }
   getAttributes() {
     return this.$attributes;
