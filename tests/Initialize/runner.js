@@ -70,7 +70,15 @@ var modules = {
     TextField: { dom: true }
   },
   "QtQuick.Controls 2": {
-    ApplicationWindow: { dom: true }
+    AbstractButton: { dom: true },
+    ApplicationWindow: { dom: true },
+    Container: { dom: true },
+    Control: { dom: true },
+    Label: { dom: true },
+    Page: { dom: true },
+    SwipeView: { dom: true },
+    TabBar: { dom: true },
+    TabButton: { dom: true }
   },
   "QtQuick.Window 2.2": {
     Screen: { fail: /Screen can only be used via the attached property/ },
