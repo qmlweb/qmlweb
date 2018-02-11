@@ -1,15 +1,14 @@
-QmlWeb.registerQmlType({
-  module: "QmlWeb.Dom",
-  name: "DomElement",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QmlWeb_Dom_DomElement extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     tagName: { type: "string", initialValue: "div" }
-  }
-}, class {
+  };
+
   constructor(meta) {
     meta.tagName = meta.object.tagName;
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     // TODO: support properties, styles, perhaps changing the tagName
   }
-});
+}
