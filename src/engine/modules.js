@@ -45,7 +45,7 @@ function registerQmlType(options, constructor) {
   }
 
   // Automatically deduce module names from class names
-  if (!options.module && options.name && options.name.indexOf("_") !== -1) {
+  if (options.name && options.name.indexOf("_") > 0) {
     options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
   }
 
