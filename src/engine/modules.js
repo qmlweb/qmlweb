@@ -49,6 +49,10 @@ function registerQmlType(options, constructor) {
     options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
   }
 
+  if (!options.hasOwnProperty("versions")) {
+    options.versions = /.*/;
+  }
+
   if (typeof options.baseClass === "string") {
     // TODO: Does not support version specification (yet?)
     let baseModule;
@@ -72,12 +76,12 @@ function registerQmlType(options, constructor) {
   const descriptor = typeof options === "function" ? {
     module: options.module,
     name: options.element || options.name,
-    versions: options.versions || /.*/,
+    versions: options.versions,
     baseClass: options.baseClass,
-    enums: options.enums,
-    signals: options.signals,
+    enums: options.hasOwnProperty("enums") ? options.enums : {},
+    signals: options.hasOwnProperty("signals") ? options.signals : {},
+    properties: options.hasOwnProperty("properties") ? options.properties : {},
     defaultProperty: options.defaultProperty,
-    properties: options.properties,
     constructor: options
   } : options;
 
