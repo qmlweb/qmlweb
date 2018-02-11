@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtWebKit",
-  name: "WebView",
-  versions: /^3\./,
-  baseClass: "QtWebView.WebView", // It"s easier this way
-  enums: {
+// eslint-disable-next-line no-undef
+class QtWebKit_WebView extends QtWebView_WebView {
+  static versions = /^3\./;
+  static baseClass = "QtWebView.WebView"; // It"s easier this way
+  static enums = {
     ErrorDomain: {
       NoErrorDomain: 0, InternalErrorDomain: 1, NetworkErrorDomain: 2,
       HttpErrorDomain: 3, DownloadErrorDomain: 4
@@ -17,11 +16,11 @@ QmlWeb.registerQmlType({
       BackForwardNavigation: 2, ReloadNavigation: 3,
       FormResubmittedNavigation: 4, OtherNavigation: 5
     }
-  },
-  properties: {
+  };
+  static properties = {
     icon: "url"
-  },
-  signals: {
+  };
+  static signals = {
     navigationRequested: [
       { type: "var", name: "request" }
     ],
@@ -29,11 +28,7 @@ QmlWeb.registerQmlType({
       { type: "url", name: "hoveredUrl" },
       { type: "string", name: "hoveredTitle" }
     ]
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO: implement more features on top of WebView
-  }
-});
+  // TODO: implement more features on top of WebView
+}

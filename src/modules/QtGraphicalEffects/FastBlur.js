@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtGraphicalEffects",
-  name: "FastBlur",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtGraphicalEffects_FastBlur extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     radius: "real",
     source: { type: "var", initialValue: null }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$previousSource = null;
     this.$filterObject = undefined;
@@ -46,4 +45,4 @@ QmlWeb.registerQmlType({
       this.$previousSource = null;
     }
   }
-});
+}

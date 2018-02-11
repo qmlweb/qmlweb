@@ -1,16 +1,15 @@
-QmlWeb.registerQmlType({
-  module: "QtQml",
-  name: "Binding",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQml_Binding extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     target: { type: "QtObject", initialValue: null },
     property: { type: "string", initialValue: "" },
     value: { type: "var", initialValue: undefined },
     when: { type: "bool", initialValue: true }
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$property = undefined;
 
@@ -36,4 +35,4 @@ QmlWeb.registerQmlType({
       this.$property.set(value);
     }
   }
-});
+}

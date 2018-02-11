@@ -1,21 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtNfc",
-  name: "NearField",
-  baseClass: "QtQml.QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtNfc_NearField extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     filter: "list",
     messageRecords: "list",
     orderMatch: "bool",
     polling: "bool"
-  },
-  signals: {
+  };
+  static signals = {
     tagFound: [],
     tagRemoved: []
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO: implementation based on Web NFC API
-  }
-});
+  // TODO: implementation based on Web NFC API
+}

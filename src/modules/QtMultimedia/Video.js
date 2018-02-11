@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtMultimedia",
-  name: "Video",
-  versions: /^5\./,
-  baseClass: "QtQuick.Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtMultimedia_Video extends QtQuick_Item {
+  static versions = /^5\./;
+  static baseClass = "QtQuick.Item";
+  static enums = {
     MediaPlayer: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,
 
@@ -16,8 +15,8 @@ QmlWeb.registerQmlType({
       EndOfMedia: 16, InvalidMedia: 32, UnknownStatus: 64
     },
     VideoOutput: { PreserveAspectFit: 0, PreserveAspectCrop: 1, Stretch: 2 }
-  },
-  properties: {
+  };
+  static properties = {
     audioRole: "enum", // TODO
     autoLoad: { type: "bool", initialValue: true },
     autoPlay: "bool",
@@ -38,15 +37,15 @@ QmlWeb.registerQmlType({
     source: "url",
     status: "enum", // MediaPlayer.NoMedia
     volume: "real"
-  },
-  signals: {
+  };
+  static signals = {
     paused: [],
     playing: [],
     stopped: []
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$runningEventListener = 0;
 
@@ -198,4 +197,4 @@ QmlWeb.registerQmlType({
     };
     return mimetypes[extension] || "";
   }
-});
+}

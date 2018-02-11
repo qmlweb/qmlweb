@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "PropertyAnimation",
-  baseClass: "Animation",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_PropertyAnimation extends QtQuick_Animation {
+  static baseClass = "Animation";
+  static properties = {
     duration: { type: "int", initialValue: 250 },
     from: "real",
     to: "real",
@@ -10,10 +9,10 @@ QmlWeb.registerQmlType({
     property: "string",
     target: "QtObject",
     targets: "list"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.easing = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.easing, {
@@ -82,4 +81,4 @@ QmlWeb.registerQmlType({
       this.$targets.push(this.target);
     }
   }
-});
+}

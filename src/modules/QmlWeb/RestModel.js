@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QmlWeb",
-  name: "RestModel",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QmlWeb_RestModel extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     url: "string",
     isLoading: "bool",
     mimeType: { type: "string", initialValue: "application/json" },
@@ -10,14 +9,14 @@ QmlWeb.registerQmlType({
       type: "string",
       initialValue: "application/x-www-urlencoded"
     }
-  },
-  signals: {
+  };
+  static signals = {
     fetched: [],
     saved: []
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.attributes = this.getAttributes();
     this.runningRequests = 0;
@@ -140,4 +139,4 @@ QmlWeb.registerQmlType({
   $hasProperty(name) {
     return typeof this.$properties[name] !== "undefined";
   }
-});
+}

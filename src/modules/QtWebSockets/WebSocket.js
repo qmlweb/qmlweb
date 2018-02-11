@@ -2,25 +2,24 @@
 // Connecting state.
 // TODO: Recheck everything.
 
-QmlWeb.registerQmlType({
-  module: "QtWebSockets",
-  name: "WebSocket",
-  baseClass: "QtQml.QtObject",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtWebSockets_WebSocket extends QtQml_QtObject {
+  static baseClass = "QtQml.QtObject";
+  static enums = {
     WebSocket: { Connecting: 0, Open: 1, Closing: 2, Closed: 3, Error: 4 }
-  },
-  properties: {
+  };
+  static properties = {
     active: "bool",
     status: { type: "enum", initialValue: 3 }, // WebSocket.Closed
     errorString: "string",
     url: "url"
-  },
-  signals: {
+  };
+  static signals = {
     textMessageReceived: [{ type: "string", name: "message" }]
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$socket = undefined;
     this.$reconnect = false;
@@ -79,4 +78,4 @@ QmlWeb.registerQmlType({
       this.$socket.send(message);
     }
   }
-});
+}

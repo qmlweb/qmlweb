@@ -1,18 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtWebEngine",
-  name: "WebEngineView",
-  versions: /^5\./,
-  baseClass: "QtWebView.WebView", // It's easier this way
-  properties: {
+// eslint-disable-next-line no-undef
+class QtWebEngine_WebEngineView extends QtWebView_WebView {
+  static versions = /^5\./;
+  static baseClass = "QtWebView.WebView"; // It's easier this way
+  static properties = {
     // TODO
-  },
-  signals: {
+  };
+  static signals = {
     // TODO
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO: implement more features on top of WebView
-  }
-});
+  // TODO: implement more features on top of WebView
+}

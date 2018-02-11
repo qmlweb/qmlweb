@@ -1,19 +1,18 @@
-QmlWeb.registerQmlType({
-  module: "QtTest",
-  name: "TestCase",
-  versions: /^1\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtTest_TestCase extends QtQuick_Item {
+  static versions = /^1\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     completed: "bool",
     name: "string",
     optional: "bool",
     running: "bool",
     when: "bool",
     windowShown: "bool"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     this.Component.completed.connect(this, this.Component$onCompleted);
 
     const engine = QmlWeb.engine;
@@ -256,4 +255,4 @@ QmlWeb.registerQmlType({
     // TODO
   }
   */
-});
+}

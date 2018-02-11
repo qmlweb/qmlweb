@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Text",
-  baseClass: "Item",
-  enums: {
+// eslint-disable-next-line no-undef
+class QtQuick_Text extends QtQuick_Item {
+  static baseClass = "Item";
+  static enums = {
     Text: {
       NoWrap: 0, WordWrap: 1, WrapAnywhere: 2, Wrap: 3,
       WrapAtWordBoundaryOrAnywhere: 4,
@@ -11,8 +10,8 @@ QmlWeb.registerQmlType({
       AutoText: 2, PlainText: 0, StyledText: 4, RichText: 1,
       Normal: 0, Outline: 1, Raised: 2, Sunken: 3
     }
-  },
-  properties: {
+  };
+  static properties = {
     color: { type: "color", initialValue: "black" },
     text: "string",
     textFormat: { type: "enum", initialValue: 2 }, // Text.AutoText
@@ -22,10 +21,10 @@ QmlWeb.registerQmlType({
     horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
     style: "enum",
     styleColor: "color"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     const fc = this.impl = document.createElement("span");
     fc.style.pointerEvents = "none";
@@ -199,4 +198,4 @@ QmlWeb.registerQmlType({
     }
     this.$updateImplicit();
   }
-});
+}

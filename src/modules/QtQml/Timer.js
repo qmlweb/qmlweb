@@ -1,20 +1,19 @@
-QmlWeb.registerQmlType({
-  module: "QtQml",
-  name: "Timer",
-  baseClass: "QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQml_Timer extends QtQml_QtObject {
+  static baseClass = "QtObject";
+  static properties = {
     interval: { type: "int", initialValue: 1000 },
     parent: { type: "QtObject", readOnly: true },
     repeat: "bool",
     running: "bool",
     triggeredOnStart: "bool"
-  },
-  signals: {
+  };
+  static signals = {
     triggered: []
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.$properties.parent.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
 
@@ -72,4 +71,4 @@ QmlWeb.registerQmlType({
       this.runningChanged();
     }
   }
-});
+}

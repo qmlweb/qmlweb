@@ -1,8 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtMobility",
-  name: "GeoLocation",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtMobility_GeoLocation extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     accuracy: "double",
     altitude: "double",
     altitudeAccuracy: "double",
@@ -12,10 +11,10 @@ QmlWeb.registerQmlType({
     speed: "double",
     timestamp: "date",
     label: "string"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     if (!navigator.geolocation) {
       return;
@@ -34,4 +33,4 @@ QmlWeb.registerQmlType({
     this.speed = position.coords.speed;
     this.timestamp = position.timestamp;
   }
-});
+}

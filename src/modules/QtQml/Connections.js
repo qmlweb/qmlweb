@@ -1,14 +1,13 @@
-QmlWeb.registerQmlType({
-  module: "QtQml",
-  name: "Connections",
-  baseClass: "QtObject",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQml_Connections extends QtQml_QtObject {
+  static baseClass = "QtObject";
+  static properties = {
     target: "QtObject",
     ignoreUnknownSignals: "bool"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     this.target = this.$parent;
     this.$connections = {};
 
@@ -40,4 +39,4 @@ QmlWeb.registerQmlType({
   $setCustomSlot(propName, value, objectScope, componentScope) {
     this.$connections[propName] = { value, objectScope, componentScope };
   }
-});
+}

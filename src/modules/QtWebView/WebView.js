@@ -1,26 +1,25 @@
-QmlWeb.registerQmlType({
-  module: "QtWebView",
-  name: "WebView",
-  versions: /^1\./,
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtWebView_WebView extends QtQuick_Item {
+  static versions = /^1\./;
+  static baseClass = "QtQuick.Item";
+  static properties = {
     canGoBack: "bool", // TODO
     canGoForward: "bool", // TODO
     loadProgress: "int",
     loading: "bool",
     title: "string",
     url: "url"
-  },
-  signals: {
+  };
+  static signals = {
     /* // TODO
     loadingChanged: [
       { type: "WebViewLoadRequest", name: "loadRequest" }
     ]
     */
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.urlChanged.connect(this, this.$onUrlChanged);
 
@@ -54,4 +53,4 @@ QmlWeb.registerQmlType({
     this.loading = true;
     this.impl.src = newVal;
   }
-});
+}

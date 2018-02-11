@@ -1,17 +1,16 @@
-QmlWeb.registerQmlType({
-  module: "QtGraphicalEffects",
-  name: "RectangularGlow",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtGraphicalEffects_RectangularGlow extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     cached: "bool",
     color: { type: "color", initialValue: "white" },
     cornerRadius: "real",
     glowRadius: "real",
     spread: "real"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.impl = document.createElement("div");
     const style = this.impl.style;
@@ -71,4 +70,4 @@ QmlWeb.registerQmlType({
     style.borderRadius = `${rest_cornerR / 2}px`;
     style.transform = `scale(${xScale},${yScale})`;
   }
-});
+}

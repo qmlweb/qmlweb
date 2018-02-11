@@ -1,13 +1,12 @@
-QmlWeb.registerQmlType({
-  module: "Qt.labs.settings",
-  name: "Settings",
-  baseClass: "QtQuick.Item",
-  properties: {
+// eslint-disable-next-line no-undef
+class Qt_labs_settings_Settings extends QtQuick_Item {
+  static baseClass = "QtQuick.Item";
+  static properties = {
     category: "string"
-  }
-}, class {
+  };
+
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     if (typeof window.localStorage === "undefined") {
       return;
@@ -47,4 +46,4 @@ QmlWeb.registerQmlType({
       });
     });
   }
-});
+}
