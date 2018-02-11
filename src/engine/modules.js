@@ -44,6 +44,11 @@ function registerQmlType(options, constructor) {
     options.constructor = constructor;
   }
 
+  // Automatically deduce module names from class names
+  if (!options.module && options.name && options.name.indexOf("_") !== -1) {
+    options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
+  }
+
   if (typeof options.baseClass === "string") {
     // TODO: Does not support version specification (yet?)
     let baseModule;

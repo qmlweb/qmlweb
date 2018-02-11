@@ -1,5 +1,4 @@
 class QtQuick_Image {
-  static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "Item";
   static enums = {

@@ -1,5 +1,4 @@
 class QtQuick_Animator {
-  static module = "QtQuick";
   static versions = /^2\./;
   static baseClass = "Animation";
   static properties = {

@@ -1,5 +1,4 @@
 class QtQuick_Animation {
-  static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static enums = {
