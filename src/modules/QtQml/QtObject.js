@@ -52,31 +52,30 @@ class QtQml_QtObject extends QmlWeb.QObject {
     const types = [];
     let type = meta.super;
     while (type) {
-      types.push(type);
+      types.unshift(type);
       if (type === type.prototype.constructor) break;
       type = type.prototype.constructor;
     }
-    types.reverse().forEach(entry => {
+    types.forEach(entry => {
+      if (!entry.hasOwnProperty("$qmlTypeInfo")) return;
       const info = entry.$qmlTypeInfo || {};
-      if (info.hasOwnProperty("enums") && info.enums) {
-        // TODO: not exported to the whole file scope yet
-        Object.keys(info.enums).forEach(name => {
-          this[name] = info.enums[name];
 
-          if (!global[name]) {
-            global[name] = this[name]; // HACK
-          }
-        });
-      }
-      if (info.hasOwnProperty("properties") && info.properties) {
-        QmlWeb.createProperties(this, info.properties);
-      }
-      if (info.hasOwnProperty("signals") && info.signals) {
-        Object.keys(info.signals).forEach(name => {
-          const params = info.signals[name];
-          this[name] = QmlWeb.Signal.signal(params);
-        });
-      }
+      Object.keys(info.enums).forEach(name => {
+        // TODO: not exported to the whole file scope yet
+        this[name] = info.enums[name];
+
+        if (!global[name]) {
+          global[name] = this[name]; // HACK
+        }
+      });
+
+      QmlWeb.createProperties(this, info.properties);
+
+      Object.keys(info.signals).forEach(name => {
+        const params = info.signals[name];
+        this[name] = QmlWeb.Signal.signal(params);
+      });
+
       if (info.defaultProperty) {
         this.$defaultProperty = info.defaultProperty;
       }
