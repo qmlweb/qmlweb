@@ -12,7 +12,6 @@
 
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_TextField extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static enums = {
     TextInput: { Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3 }
   };

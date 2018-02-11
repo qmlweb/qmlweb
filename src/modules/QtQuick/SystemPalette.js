@@ -9,7 +9,6 @@ const systemPalettes = {};
 
 // eslint-disable-next-line no-undef
 class QtQuick_SystemPalette extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static enums = {
     SystemPalette: {
       Active: 0, Inactive: 2, Disabled: 1

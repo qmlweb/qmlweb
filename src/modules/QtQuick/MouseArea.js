@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_MouseArea extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     acceptedButtons: { type: "variant", initialValue: 1 }, // Qt.LeftButton
     enabled: { type: "bool", initialValue: true },

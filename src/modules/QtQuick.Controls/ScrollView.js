@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_ScrollView extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     contentItem: "Item",
     flickableItem: "Item", // TODO  0) implement it  1) make it read-only

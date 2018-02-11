@@ -3,7 +3,6 @@
 
 // eslint-disable-next-line no-undef
 class QtQuick_Canvas extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     available: { type: "bool", initialValue: true },
     canvasSize: { type: "var", initialValue: [0, 0] },

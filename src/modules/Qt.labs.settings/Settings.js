@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class Qt_labs_settings_Settings extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     category: "string"
   };

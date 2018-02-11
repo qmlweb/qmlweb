@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtBluetooth_BluetoothDiscoveryModel extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static enums = {
     BluetoothDiscoveryModel: {
       FullServiceDiscovery: 1, MinimalServiceDiscovery: 0, DeviceDiscovery: 2,

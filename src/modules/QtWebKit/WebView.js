@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtWebKit_WebView extends QtWebView_WebView {
   static versions = /^3\./;
-  static baseClass = "QtWebView.WebView"; // It"s easier this way
   static enums = {
     ErrorDomain: {
       NoErrorDomain: 0, InternalErrorDomain: 1, NetworkErrorDomain: 2,

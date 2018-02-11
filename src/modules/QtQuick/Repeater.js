@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Repeater extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     delegate: "Component",
     model: { type: "variant", initialValue: 0 },

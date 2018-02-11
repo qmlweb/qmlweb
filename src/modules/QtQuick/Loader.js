@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Loader extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     active: { type: "bool", initialValue: true },
     asynchronous: "bool",

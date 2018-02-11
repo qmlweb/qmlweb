@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_DoubleValidator extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     DoubleValidator: { StandardNotation: 1, ScientificNotation: 2 }
   };

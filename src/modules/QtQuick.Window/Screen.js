@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Window_Screen extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   constructor(meta) {
     super(meta);
     throw new Error("Screen can only be used via the attached property.");

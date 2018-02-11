@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQml_Binding extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static properties = {
     target: { type: "QtObject", initialValue: null },
     property: { type: "string", initialValue: "" },

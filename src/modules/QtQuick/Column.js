@@ -1,7 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Column extends QtQuick_Positioner {
-  static baseClass = "Positioner";
-
   layoutChildren() {
     let curPos = this.padding;
     let maxWidth = 0;

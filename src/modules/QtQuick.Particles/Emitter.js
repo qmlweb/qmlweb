@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Particles_Emitter extends QtQuick_Item {
   static versions = /^2\./;
-  static baseClass = "QtQuick.Item";
   static properties = {
     acceleration: "StochasticDirection",
     emitRate: { type: "real", initialValue: 10 },

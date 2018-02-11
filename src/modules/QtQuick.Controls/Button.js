@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_Button extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     text: "string",
     enabled: { type: "bool", initialValue: true }

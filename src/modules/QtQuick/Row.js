@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Row extends QtQuick_Positioner {
-  static baseClass = "Positioner";
   static properties = {
     layoutDirection: "enum"
   };

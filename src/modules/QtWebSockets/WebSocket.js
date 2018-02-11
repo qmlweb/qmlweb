@@ -4,7 +4,6 @@
 
 // eslint-disable-next-line no-undef
 class QtWebSockets_WebSocket extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static enums = {
     WebSocket: { Connecting: 0, Open: 1, Closing: 2, Closed: 3, Error: 4 }
   };

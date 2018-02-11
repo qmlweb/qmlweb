@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_SequentialAnimation extends QtQuick_Animation {
-  static baseClass = "Animation";
   static properties = {
     animations: "list"
   };

@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtMultimedia_Camera extends QtQml_QtObject {
   static versions = /^5\./;
-  static baseClass = "QtQml.QtObject";
   static enums = {
     Camera: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,

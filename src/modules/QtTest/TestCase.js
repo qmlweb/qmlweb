@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtTest_TestCase extends QtQuick_Item {
   static versions = /^1\./;
-  static baseClass = "QtQuick.Item";
   static properties = {
     completed: "bool",
     name: "string",

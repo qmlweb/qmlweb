@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtMultimedia_Video extends QtQuick_Item {
   static versions = /^5\./;
-  static baseClass = "QtQuick.Item";
   static enums = {
     MediaPlayer: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,

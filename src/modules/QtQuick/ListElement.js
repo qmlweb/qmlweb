@@ -1,7 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_ListElement extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
-
   constructor(meta) {
     super(meta);
 

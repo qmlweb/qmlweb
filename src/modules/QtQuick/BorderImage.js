@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_BorderImage extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     BorderImage: {
       Stretch: "stretch", Repeat: "repeat", Round: "round",

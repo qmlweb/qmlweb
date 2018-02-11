@@ -12,7 +12,6 @@ class QMLContext {
 // eslint-disable-next-line no-undef
 class QtQml_Component extends QtQml_QtObject {
   static global = true;
-  static baseClass = "QtObject";
 
   constructor(meta) {
     super(meta);

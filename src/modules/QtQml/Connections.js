@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQml_Connections extends QtQml_QtObject {
-  static baseClass = "QtObject";
   static properties = {
     target: "QtObject",
     ignoreUnknownSignals: "bool"

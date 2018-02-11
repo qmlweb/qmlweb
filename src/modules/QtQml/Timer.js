@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQml_Timer extends QtQml_QtObject {
-  static baseClass = "QtObject";
   static properties = {
     interval: { type: "int", initialValue: 1000 },
     parent: { type: "QtObject", readOnly: true },

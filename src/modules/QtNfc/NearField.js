@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtNfc_NearField extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static properties = {
     filter: "list",
     messageRecords: "list",

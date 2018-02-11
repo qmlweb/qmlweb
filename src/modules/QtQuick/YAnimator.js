@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtQuick_YAnimator extends QtQuick_Animator {
   static versions = /^2\./;
-  static baseClass = "Animator";
 
   // TODO
 }

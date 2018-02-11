@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_TextEdit extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     activeFocusOnPress: { type: "bool", initialValue: true },
     baseUrl: "url",

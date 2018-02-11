@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_ShaderEffectSource extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     ShaderEffectSource: {
       Alpha: 0x6406, RGB: 0x6407, RGBA: 0x6408,

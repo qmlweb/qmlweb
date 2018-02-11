@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_ShaderEffect extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     ShaderEffect: {
       NoCulling: 0, BackFaceCulling: 1, FrontFaceCulling: 2,

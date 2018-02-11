@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QmlWeb_RestModel extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     url: "string",
     isLoading: "bool",

@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_ComboBox extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     count: "int",
     currentIndex: "int",

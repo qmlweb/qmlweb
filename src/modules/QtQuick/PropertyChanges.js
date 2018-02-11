@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_PropertyChanges extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static properties = {
     target: "QtObject",
     explicit: "bool",

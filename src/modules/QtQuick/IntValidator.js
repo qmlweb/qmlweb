@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_IntValidator extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     bottom: { type: "int", initialValue: -2147483647 },
     top: { type: "int", initialValue: 2147483647 }

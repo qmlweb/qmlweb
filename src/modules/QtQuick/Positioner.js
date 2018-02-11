@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Positioner extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     spacing: "int",
     padding: "int"

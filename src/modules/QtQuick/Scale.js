@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Scale extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static properties = {
     xScale: { type: "real", initialValue: 1 },
     yScale: { type: "real", initialValue: 1 }

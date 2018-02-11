@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Translate extends QtQml_QtObject {
-  static baseClass = "QtQml.QtObject";
   static properties = {
     x: "real",
     y: "real"

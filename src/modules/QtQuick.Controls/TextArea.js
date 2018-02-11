@@ -1,7 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_TextArea extends QtQuick_TextEdit {
-  static baseClass = "QtQuick.TextEdit";
-
   constructor(meta) {
     super(meta);
     const textarea = this.impl;

@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Particles_ParticleSystem extends QtQuick_Item {
   static versions = /^2\./;
-  static baseClass = "QtQuick.Item";
   static properties = {
     empty: "bool",
     particleStates: "list",

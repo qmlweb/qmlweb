@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_PropertyAnimation extends QtQuick_Animation {
-  static baseClass = "Animation";
   static properties = {
     duration: { type: "int", initialValue: 250 },
     from: "real",

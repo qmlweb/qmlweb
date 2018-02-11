@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtGraphicalEffects_FastBlur extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     radius: "real",
     source: { type: "var", initialValue: null }

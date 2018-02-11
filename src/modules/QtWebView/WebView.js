@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtWebView_WebView extends QtQuick_Item {
   static versions = /^1\./;
-  static baseClass = "QtQuick.Item";
   static properties = {
     canGoBack: "bool", // TODO
     canGoForward: "bool", // TODO

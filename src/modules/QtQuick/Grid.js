@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Grid extends QtQuick_Positioner {
-  static baseClass = "Positioner";
   static enums = {
     Grid: { LeftToRight: 0, TopToBottom: 1 }
   };

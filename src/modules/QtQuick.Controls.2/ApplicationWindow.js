@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_2_ApplicationWindow extends QtQuick_Window_Window {
   static versions = /^2\./;
-  static baseClass = "QtQuick.Window.Window";
   static properties = {
     font: "font",
     activeFocusControl: "Control",

@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Image extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     Image: {
       Stretch: 1, PreserveAspectFit: 2, PreserveAspectCrop: 3,

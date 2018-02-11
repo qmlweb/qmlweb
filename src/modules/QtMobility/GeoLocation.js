@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtMobility_GeoLocation extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     accuracy: "double",
     altitude: "double",

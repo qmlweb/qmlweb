@@ -1,7 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_NumberAnimation extends QtQuick_PropertyAnimation {
-  static baseClass = "PropertyAnimation";
-
   constructor(meta) {
     super(meta);
 

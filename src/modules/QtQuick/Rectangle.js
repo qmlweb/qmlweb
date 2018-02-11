@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Rectangle extends QtQuick_Item {
-  static baseClass = "Item";
   static properties = {
     color: { type: "color", initialValue: "white" },
     radius: "real"

@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtGraphicalEffects_RectangularGlow extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     cached: "bool",
     color: { type: "color", initialValue: "white" },

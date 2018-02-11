@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_ParallelAnimation extends QtQuick_Animation {
-  static baseClass = "Animation";
   static enums = {
     Animation: { Infinite: Math.Infinite }
   };

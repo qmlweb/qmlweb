@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Text extends QtQuick_Item {
-  static baseClass = "Item";
   static enums = {
     Text: {
       NoWrap: 0, WordWrap: 1, WrapAnywhere: 2, Wrap: 3,

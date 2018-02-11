@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtMultimedia_Audio extends QtQml_QtObject {
   static versions = /^5\./;
-  static baseClass = "QtQml.QtObject";
   static enums = {
     Audio: {
       Available: 0, Busy: 2, Unavailable: 1, ResourceMissing: 3,

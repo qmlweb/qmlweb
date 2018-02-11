@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Controls_CheckBox extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     text: "string",
     font: "font",

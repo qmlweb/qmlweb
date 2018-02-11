@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QmlWeb_Dom_DomElement extends QtQuick_Item {
-  static baseClass = "QtQuick.Item";
   static properties = {
     tagName: { type: "string", initialValue: "div" }
   };

@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_ListView extends QtQuick_Repeater {
-  static baseClass = "Repeater";
   static properties = {
     orientation: "enum",
     spacing: "real"

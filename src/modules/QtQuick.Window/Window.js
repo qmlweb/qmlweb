@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Window_Window extends QtQuick_Item {
   static versions = /^2\./;
-  static baseClass = "QtQuick.Item";
   static properties = {
     active: "bool",
     activeFocusItem: "Item",
