@@ -10,6 +10,7 @@ const babel = require("gulp-babel");
 const replace = require("gulp-replace");
 const karma = require("karma");
 const path = require("path");
+const shaker = require("./builder/shaker");
 
 const sources = [
   "src/QmlWeb.js",
@@ -59,6 +60,7 @@ gulp.task("parser-covered", () =>
 gulp.task("qmlweb-covered", () =>
   gulp.src(sources)
     .pipe(order(sources, { base: __dirname }))
+    .pipe(shaker())
     .pipe(babel({
       presets: ["es2015"],
       plugins: ["transform-class-properties", "istanbul"]
@@ -77,6 +79,7 @@ gulp.task("qmlweb-covered", () =>
 gulp.task("qmlweb", () =>
   gulp.src(sources)
     .pipe(order(sources, { base: __dirname }))
+    .pipe(shaker())
     .pipe(sourcemaps.init())
     .pipe(concat("qmlweb.js"))
     .pipe(changed("./lib"))

@@ -32,10 +32,11 @@
     "phantomjs-prebuilt": "^2.1.4",
     "qmlweb-parser": "^0.3.2",
     "remark-cli": "^2.0.0",
-    "remark-lint": "^5.0.0"
+    "remark-lint": "^5.0.0",
+    "through": "^2.3.8"
   },
   "scripts": {
-    "eslint": "eslint --cache *.js src tests",
+    "eslint": "eslint --cache *.js src tests builder",
     "mdlint": "remark -qf *.md docs",
     "lint": "npm run eslint && npm run mdlint",
     "test": "npm run lint && gulp test",
@@ -58,6 +59,7 @@
     "tests/**/*.js",
     "tests/**/*.png",
     "tests/**/*.qml",
+    "builder/**/*.js",
     "examples/**/*.html",
     "examples/**/*.js",
     "examples/**/*.qml",
