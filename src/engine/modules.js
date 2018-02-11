@@ -39,11 +39,7 @@ function registerGlobalQmlType(name, type) {
 }
 
 // Helper. Register a type to a module
-function registerQmlType(options, constructor) {
-  if (constructor !== undefined) {
-    options.constructor = constructor;
-  }
-
+function registerQmlType(options) {
   // Automatically deduce module names from class names
   if (options.name && options.name.indexOf("_") > 0) {
     options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
