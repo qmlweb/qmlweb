@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtBluetooth",
   name: "BluetoothDiscoveryModel",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {
     BluetoothDiscoveryModel: {

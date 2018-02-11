@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ListElement",
-  versions: /.*/,
   baseClass: "QtQml.QtObject"
 }, class {
   constructor(meta) {

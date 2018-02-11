@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ListModel",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     count: "int",

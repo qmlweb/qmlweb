@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "IntValidator",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     bottom: { type: "int", initialValue: -2147483647 },

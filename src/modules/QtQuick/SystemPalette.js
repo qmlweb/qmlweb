@@ -10,7 +10,6 @@ const systemPalettes = {};
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "SystemPalette",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {
     SystemPalette: {

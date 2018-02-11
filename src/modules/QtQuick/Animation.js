@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Animation extends QtQml_QtObject {
-  static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static enums = {
     Animation: { Infinite: -1 },

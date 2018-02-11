@@ -124,7 +124,6 @@ QmlWeb.registerQmlType({
   global: true,
   module: "QtQml",
   name: "Component",
-  versions: /.*/,
   baseClass: "QtObject",
   constructor: QMLComponent
 });

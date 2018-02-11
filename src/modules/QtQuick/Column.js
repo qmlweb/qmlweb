@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Column",
-  versions: /.*/,
   baseClass: "Positioner"
 }, class {
   constructor(meta) {

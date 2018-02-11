@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ListView",
-  versions: /.*/,
   baseClass: "Repeater",
   properties: {
     orientation: "enum",

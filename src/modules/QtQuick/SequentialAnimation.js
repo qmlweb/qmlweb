@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "SequentialAnimation",
-  versions: /.*/,
   baseClass: "Animation",
   properties: {
     animations: "list"

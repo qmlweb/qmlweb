@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QmlWeb.Dom",
   name: "DomElement",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     tagName: { type: "string", initialValue: "div" }

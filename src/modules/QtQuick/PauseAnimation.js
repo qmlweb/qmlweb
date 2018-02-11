@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "PauseAnimation",
-  versions: /.*/,
   baseClass: "Animation",
   properties: {
     duration: { type: "int", initialValue: 250 }

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Flow",
-  versions: /.*/,
   baseClass: "Positioner",
   enums: {
     Flow: { LeftToRight: 0, TopToBottom: 1 }

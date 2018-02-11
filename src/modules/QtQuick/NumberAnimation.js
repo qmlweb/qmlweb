@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "NumberAnimation",
-  versions: /.*/,
   baseClass: "PropertyAnimation"
 }, class {
   constructor(meta) {

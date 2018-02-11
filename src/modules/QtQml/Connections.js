@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Connections",
-  versions: /.*/,
   baseClass: "QtObject",
   properties: {
     target: "QtObject",

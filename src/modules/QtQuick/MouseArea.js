@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "MouseArea",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     acceptedButtons: { type: "variant", initialValue: 1 }, // Qt.LeftButton

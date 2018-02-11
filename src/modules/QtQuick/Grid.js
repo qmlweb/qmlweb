@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Grid",
-  versions: /.*/,
   baseClass: "Positioner",
   enums: {
     Grid: { LeftToRight: 0, TopToBottom: 1 }

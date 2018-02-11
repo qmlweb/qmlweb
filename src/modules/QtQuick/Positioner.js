@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Positioner",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     spacing: "int",

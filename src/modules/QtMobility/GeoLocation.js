@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtMobility",
   name: "GeoLocation",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     accuracy: "double",

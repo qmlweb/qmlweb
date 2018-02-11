@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "TextEdit",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     activeFocusOnPress: { type: "bool", initialValue: true },

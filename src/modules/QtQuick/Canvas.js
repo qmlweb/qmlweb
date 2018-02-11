@@ -4,7 +4,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Canvas",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     available: { type: "bool", initialValue: true },

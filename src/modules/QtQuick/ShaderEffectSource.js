@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ShaderEffectSource",
-  versions: /.*/,
   baseClass: "Item",
   enums: {
     ShaderEffectSource: {

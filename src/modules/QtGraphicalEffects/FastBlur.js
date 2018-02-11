@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtGraphicalEffects",
   name: "FastBlur",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     radius: "real",

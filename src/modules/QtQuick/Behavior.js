@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Behavior extends QtQml_QtObject {
-  static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static properties = {
     animation: "Animation",

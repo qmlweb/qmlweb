@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QmlWeb",
   name: "RestModel",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     url: "string",

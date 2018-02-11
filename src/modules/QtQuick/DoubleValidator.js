@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "DoubleValidator",
-  versions: /.*/,
   baseClass: "Item",
   enums: {
     DoubleValidator: { StandardNotation: 1, ScientificNotation: 2 }

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick.Controls",
   name: "Button",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     text: "string",

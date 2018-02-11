@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Timer",
-  versions: /.*/,
   baseClass: "QtObject",
   properties: {
     interval: { type: "int", initialValue: 1000 },

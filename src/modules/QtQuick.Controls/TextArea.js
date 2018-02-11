@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick.Controls",
   name: "TextArea",
-  versions: /.*/,
   baseClass: "QtQuick.TextEdit"
 }, class {
   constructor(meta) {

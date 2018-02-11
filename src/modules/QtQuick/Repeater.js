@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Repeater",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     delegate: "Component",

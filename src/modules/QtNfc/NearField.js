@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtNfc",
   name: "NearField",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     filter: "list",

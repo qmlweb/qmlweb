@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Rotation",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     angle: "real"

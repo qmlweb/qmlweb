@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "FocusScope",
-  versions: /.*/,
   baseClass: "Item",
 }, class {
   constructor(meta) {

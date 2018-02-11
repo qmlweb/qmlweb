@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "PropertyChanges",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     target: "QtObject",

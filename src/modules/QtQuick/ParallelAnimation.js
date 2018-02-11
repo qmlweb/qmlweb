@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "ParallelAnimation",
-  versions: /.*/,
   baseClass: "Animation",
   enums: {
     Animation: { Infinite: Math.Infinite }

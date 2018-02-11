@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "RegExpValidator",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     regExp: "var"

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Row",
-  versions: /.*/,
   baseClass: "Positioner",
   properties: {
     layoutDirection: "enum"

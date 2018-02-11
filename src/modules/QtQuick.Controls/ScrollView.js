@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick.Controls",
   name: "ScrollView",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     contentItem: "Item",

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Binding",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     target: { type: "QtObject", initialValue: null },

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "Qt.labs.settings",
   name: "Settings",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
     category: "string"

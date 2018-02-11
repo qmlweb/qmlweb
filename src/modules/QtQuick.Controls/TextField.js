@@ -13,7 +13,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick.Controls",
   name: "TextField",
-  versions: /.*/,
   baseClass: "QtQuick.Item",
   enums: {
     TextInput: { Normal: 0, Password: 1, NoEcho: 2, PasswordEchoOnEdit: 3 }

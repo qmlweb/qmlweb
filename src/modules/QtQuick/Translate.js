@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Translate",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     x: "real",

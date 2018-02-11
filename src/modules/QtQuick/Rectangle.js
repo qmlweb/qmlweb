@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Rectangle",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     color: { type: "color", initialValue: "white" },

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Scale",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     xScale: { type: "real", initialValue: 1 },

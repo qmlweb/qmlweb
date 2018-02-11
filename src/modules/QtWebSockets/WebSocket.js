@@ -5,7 +5,6 @@
 QmlWeb.registerQmlType({
   module: "QtWebSockets",
   name: "WebSocket",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {
     WebSocket: { Connecting: 0, Open: 1, Closing: 2, Closed: 3, Error: 4 }

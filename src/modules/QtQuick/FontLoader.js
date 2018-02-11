@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "FontLoader",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   enums: {
     FontLoader: { Null: 0, Ready: 1, Loading: 2, Error: 3 }

@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "State",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     name: "string",

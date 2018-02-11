@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Loader",
-  versions: /.*/,
   baseClass: "Item",
   properties: {
     active: { type: "bool", initialValue: true },

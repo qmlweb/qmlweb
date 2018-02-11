@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Transition",
-  versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
     animations: "list",

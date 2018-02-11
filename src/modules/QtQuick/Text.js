@@ -1,7 +1,6 @@
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Text",
-  versions: /.*/,
   baseClass: "Item",
   enums: {
     Text: {
