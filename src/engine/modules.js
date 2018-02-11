@@ -76,6 +76,12 @@ function registerQmlType(options, constructor) {
     constructor: options
   } : options;
 
+  // Cut off module prefix from class names
+  const prefix = `${options.module.replace(/\./g, "_")}_`;
+  if (descriptor.name.indexOf(prefix) === 0) {
+    descriptor.name = descriptor.name.slice(prefix.length);
+  }
+
   descriptor.constructor.$qmlTypeInfo = {
     enums: descriptor.enums,
     signals: descriptor.signals,

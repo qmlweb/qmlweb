@@ -1,4 +1,4 @@
-QmlWeb.registerQmlType(class Animation {
+QmlWeb.registerQmlType(class QtQuick_Animation {
   static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";

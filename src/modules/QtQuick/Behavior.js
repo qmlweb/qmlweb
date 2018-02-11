@@ -1,4 +1,4 @@
-QmlWeb.registerQmlType(class Behavior {
+QmlWeb.registerQmlType(class QtQuick_Behavior {
   static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";

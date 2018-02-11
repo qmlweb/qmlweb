@@ -3,14 +3,14 @@ QmlWeb.registerQmlType({
   name: "Screen",
   versions: /.*/,
   baseClass: "QtQml.QtObject"
-}, class Screen {
+}, class QtQuick_Window_Screen {
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
     throw new Error("Screen can only be used via the attached property.");
   }
   static getAttachedObject() {
-    if (!Screen.$Screen) {
-      const screen = Screen.$Screen = new QmlWeb.QObject();
+    if (!QtQuick_Window_Screen.$Screen) {
+      const screen = QtQuick_Window_Screen.$Screen = new QmlWeb.QObject();
       // TODO: read-only
       QmlWeb.createProperties(screen, {
         name: "string",
@@ -27,8 +27,10 @@ QmlWeb.registerQmlType({
       screen.name = window.navigator.appName;
       screen.devicePixelRatio = window.devicePixelRatio;
       screen.pixelDensity = window.devicePixelRatio * 96 / 25.4; // per mm
-      Screen.$populateScreen();
-      window.addEventListener("resize", () => Screen.$populateScreen());
+      QtQuick_Window_Screen.$populateScreen();
+      window.addEventListener("resize", () =>
+        QtQuick_Window_Screen.$populateScreen()
+      );
 
       // TODO: orientation
       const Qt = QmlWeb.Qt;
@@ -36,10 +38,10 @@ QmlWeb.registerQmlType({
       screen.orientation = Qt.PrimaryOrientation;
       screen.primaryOrientation = Qt.PrimaryOrientation;
     }
-    return Screen.$Screen;
+    return QtQuick_Window_Screen.$Screen;
   }
   static $populateScreen() {
-    const screen = Screen.$Screen;
+    const screen = QtQuick_Window_Screen.$Screen;
     screen.desktopAvailableHeight = window.outerHeight;
     screen.desktopAvailableWidth = window.outerWidth;
     screen.height = window.innerHeight;
