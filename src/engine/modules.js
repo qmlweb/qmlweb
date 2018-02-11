@@ -28,8 +28,6 @@ const modules = {
 // All object constructors
 QmlWeb.constructors = modules.Main;
 
-const dependants = {};
-
 const perImportContextConstructors = {};
 let importContextIds = 0;
 
@@ -64,13 +62,7 @@ function registerQmlType(options, constructor) {
       // Ok, we found our base class
       options.baseClass = found[0].constructor;
     } else {
-      // Base class not found, delay the loading
-      const baseId = [baseModule, baseName].join(".");
-      if (!dependants.hasOwnProperty(baseId)) {
-        dependants[baseId] = [];
-      }
-      dependants[baseId].push(options);
-      return;
+      throw new Error(`baseClass not found: ${baseName}`);
     }
   }
 
@@ -111,12 +103,6 @@ function registerQmlType(options, constructor) {
 
   if (typeof descriptor.baseClass !== "undefined") {
     inherit(descriptor.constructor, descriptor.baseClass);
-  }
-
-  const id = [descriptor.module, descriptor.name].join(".");
-  if (dependants.hasOwnProperty(id)) {
-    dependants[id].forEach(opt => registerQmlType(opt));
-    dependants[id].length = 0;
   }
 
   // TODO: Move to module initialization?
