@@ -1,4 +1,4 @@
-QmlWeb.registerQmlType(class QtQuick_Animation {
+class QtQuick_Animation {
   static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
@@ -36,4 +36,4 @@ QmlWeb.registerQmlType(class QtQuick_Animation {
     // To be overridden
     console.log("Unbound method for", this);
   }
-});
+}

@@ -1,4 +1,4 @@
-QmlWeb.registerQmlType(class QtQuick_Behavior {
+class QtQuick_Behavior {
   static module = "QtQuick";
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
@@ -25,4 +25,4 @@ QmlWeb.registerQmlType(class QtQuick_Behavior {
       ? this.animation
       : null;
   }
-});
+}

@@ -43,6 +43,19 @@ function fullName(relative, module) {
   return `${module}.${relative}`;
 }
 
+// Preprocesses file
+// Automatically adds `QmlWeb.registerQmlType` to classes
+function process(file, name) {
+  if (!file.contents.includes("QmlWeb.registerQmlType(")) {
+    const className = name.replace(/\./g, "_");
+    file.contents = Buffer.concat([
+      file.contents,
+      Buffer.from(`QmlWeb.registerQmlType(${className});\n`)
+    ]);
+  }
+  return file;
+}
+
 // Supports specifying modules or individual classes in options.modules
 // e.g. options = { modules: ["QtQuick", "QtMultimedia.Video"] }
 module.exports = function(options = {}) {
@@ -81,7 +94,7 @@ module.exports = function(options = {}) {
         if (ready.has(name) || !wanted.has(name)) continue;
         if (!base || ready.has(base)) {
           ok = true;
-          this.emit("data", file);
+          this.emit("data", process(file, name));
           ready.add(name);
           wanted.delete(name);
           break;
