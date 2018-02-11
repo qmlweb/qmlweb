@@ -1,11 +1,9 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Window",
-  name: "Screen",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject"
-}, class QtQuick_Window_Screen {
+// eslint-disable-next-line no-undef
+class QtQuick_Window_Screen extends QtQml_QtObject {
+  static versions = /.*/;
+  static baseClass = "QtQml.QtObject";
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
     throw new Error("Screen can only be used via the attached property.");
   }
   static getAttachedObject() {
@@ -47,4 +45,4 @@ QmlWeb.registerQmlType({
     screen.height = window.innerHeight;
     screen.width = window.innerWidth;
   }
-});
+}

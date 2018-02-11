@@ -1,4 +1,5 @@
-class QtQuick_Animator {
+// eslint-disable-next-line no-undef
+class QtQuick_Animator extends QtQuick_Animation {
   static versions = /^2\./;
   static baseClass = "Animation";
   static properties = {
@@ -9,7 +10,7 @@ class QtQuick_Animator {
   };
 
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    super(meta);
 
     this.easing = new QmlWeb.QObject(this);
     QmlWeb.createProperties(this.easing, {

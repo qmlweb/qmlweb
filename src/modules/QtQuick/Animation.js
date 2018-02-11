@@ -1,4 +1,5 @@
-class QtQuick_Animation {
+// eslint-disable-next-line no-undef
+class QtQuick_Animation extends QtQml_QtObject {
   static versions = /.*/;
   static baseClass = "QtQml.QtObject";
   static enums = {
@@ -12,9 +13,6 @@ class QtQuick_Animation {
     running: "bool"
   };
 
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
-  }
   restart() {
     this.stop();
     this.start();
