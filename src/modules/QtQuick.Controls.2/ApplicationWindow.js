@@ -1,9 +1,8 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "ApplicationWindow",
-  versions: /^2\./,
-  baseClass: "QtQuick.Window.Window",
-  properties: {
+// eslint-disable-next-line no-undef
+class QtQuick_Controls_2_ApplicationWindow extends QtQuick_Window_Window {
+  static versions = /^2\./;
+  static baseClass = "QtQuick.Window.Window";
+  static properties = {
     font: "font",
     activeFocusControl: "Control",
     background: "Item",
@@ -12,11 +11,7 @@ QmlWeb.registerQmlType({
     footer: "Item",
     header: "Item",
     overlay: "Item"
-  }
-}, class {
-  constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+  };
 
-    // TODO
-  }
-});
+  // TODO
+}

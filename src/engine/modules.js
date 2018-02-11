@@ -48,6 +48,8 @@ function registerQmlType(options, constructor) {
   if (options.name && options.name.indexOf("_") > 0) {
     options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
   }
+  const fullmodule = options.module;
+  options.module = fullmodule.replace(/\.[0-9]+$/, "");
 
   if (!options.hasOwnProperty("versions")) {
     options.versions = /.*/;
@@ -87,7 +89,7 @@ function registerQmlType(options, constructor) {
   } : options;
 
   // Cut off module prefix from class names
-  const prefix = `${options.module.replace(/\./g, "_")}_`;
+  const prefix = `${fullmodule.replace(/\./g, "_")}_`;
   if (descriptor.name.indexOf(prefix) === 0) {
     descriptor.name = descriptor.name.slice(prefix.length);
   }
