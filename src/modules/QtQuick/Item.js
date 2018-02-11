@@ -1,9 +1,7 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Item",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
+class QtQuick_Item {
+  static versions = /.*/;
+  static baseClass = "QtQml.QtObject";
+  static properties = {
     $opacity: { type: "real", initialValue: 1 },
     parent: "Item",
     antialiasing: "bool",
@@ -33,9 +31,9 @@ QmlWeb.registerQmlType({
     visible: { type: "bool", initialValue: true },
     clip: "bool",
     focus: "bool"
-  },
-  defaultProperty: "data"
-}, class {
+  };
+  static defaultProperty = "data";
+
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
@@ -625,4 +623,4 @@ QmlWeb.registerQmlType({
     component.childrenRect.width = maxWidth;
     component.childrenRect.height = maxHeight;
   }
-});
+}
