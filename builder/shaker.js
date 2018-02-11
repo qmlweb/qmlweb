@@ -17,7 +17,7 @@ function baseClass(file) {
   const buffer = file.contents;
   if (!buffer.includes("baseClass")) return null;
 
-  // Specificed as static class property
+  // Specified as static class property
   const propPos = buffer.indexOf("static baseClass ");
   if (propPos >= 0) {
     const text = buffer.slice(propPos, propPos + 200).toString("utf-8");
@@ -25,7 +25,7 @@ function baseClass(file) {
     if (match) return match[1];
   }
 
-  // Specificed in js spec object
+  // Specified in js spec object
   const specPos = buffer.indexOf("baseClass:");
   if (specPos >= 0) {
     const text = buffer.slice(specPos, specPos + 200).toString("utf-8");
