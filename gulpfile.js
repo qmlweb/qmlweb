@@ -96,6 +96,28 @@ gulp.task("qmlweb", () =>
     .pipe(gulp.dest("./lib"))
 );
 
+gulp.task("qmlweb.es2015", () =>
+  gulp.src(sources)
+    .pipe(order(sources, { base: __dirname }))
+    .pipe(shaker())
+    .pipe(sourcemaps.init())
+    .pipe(concat("qmlweb.es2015.js"))
+    .pipe(changed("./lib"))
+    .pipe(babel({
+      babelrc: false,
+      plugins: ["transform-class-properties"],
+      compact: false
+    }))
+    .pipe(replace(/"use strict";/g, ""))
+    .pipe(iife({
+      useStrict: false,
+      params: ["global"],
+      args: ["typeof global != \"undefined\" ? global : window"]
+    }))
+    .pipe(sourcemaps.write("./"))
+    .pipe(gulp.dest("./lib"))
+);
+
 gulp.task("qmlweb.min", ["qmlweb"], () =>
   gulp.src("./lib/qmlweb.js")
     .pipe(rename("qmlweb.min.js"))
@@ -129,11 +151,13 @@ gulp.task("build-covered", ["parser-covered", "qmlweb-covered"]);
 gulp.task("build-dev", ["qmlweb", "parser", "license"]);
 
 gulp.task("build", [
-  "qmlweb", "parser", "license", "qmlweb.min", "qt", "qt.min"
+  "qmlweb", "parser", "license", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
 ]);
 
 gulp.task("watch", ["build"], () => {
-  gulp.watch(sources, ["qmlweb", "qmlweb.min", "qt", "qt.min"]);
+  gulp.watch(sources, [
+    "qmlweb", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
+  ]);
   gulp.watch(parserSources, ["parser"]);
   gulp.watch(licenseSources, ["license"]);
 });
