@@ -40,6 +40,8 @@ function registerGlobalQmlType(name, type) {
 
 // Helper. Register a type to a module
 function registerQmlType(options) {
+  const base = Object.getPrototypeOf(options);
+
   // Automatically deduce module names from class names
   if (options.name && options.name.indexOf("_") > 0) {
     options.module = options.name.replace(/_[^_]+$/, "").replace(/_/g, ".");
@@ -51,24 +53,10 @@ function registerQmlType(options) {
     options.versions = /.*/;
   }
 
-  if (typeof options.baseClass === "string") {
-    // TODO: Does not support version specification (yet?)
-    let baseModule;
-    let baseName;
-    const dot = options.baseClass.lastIndexOf(".");
-    if (dot === -1) {
-      baseModule = options.module;
-      baseName = options.baseClass;
-    } else {
-      baseModule = options.baseClass.substring(0, dot);
-      baseName = options.baseClass.substring(dot + 1);
-    }
-    const found = (modules[baseModule] || [])
-                    .filter(descr => descr.name === baseName);
-    if (found.length === 0) {
-      throw new Error(`baseClass not found: ${baseName} for ${options.name}`);
-    }
-    options.baseClass = found[0].constructor;
+  if (/[A-Za-z]+_[A-Za-z_]+/.test(base.name)) {
+    options.baseClass = base;
+  } else {
+    options.baseClass = undefined;
   }
 
   const descriptor = typeof options === "function" ? {
