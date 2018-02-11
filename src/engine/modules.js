@@ -219,12 +219,6 @@ function inherit(constructor, baseClass) {
   constructor.prototype.constructor = baseClass;
 }
 
-function callSuper(self, meta) {
-  if (!meta.root) meta.root = meta.super;
-  meta.super = meta.super.prototype.constructor;
-  meta.super.call(self, meta);
-}
-
 /**
  * QML Object constructor.
  * @param {Object} meta Meta information about the object and the creation
@@ -321,5 +315,4 @@ QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
-QmlWeb.callSuper = callSuper;
 QmlWeb.construct = construct;

@@ -50,7 +50,7 @@ class QtQml_QtObject extends QmlWeb.QObject {
 
     // Initialize properties, signals, etc.
     const types = [];
-    let type = meta.root || meta.super;
+    let type = meta.super;
     while (type) {
       types.push(type);
       if (type === type.prototype.constructor) break;
