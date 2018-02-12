@@ -22,4 +22,7 @@ class QtQuick_Positioner extends QtQuick_Item {
       child.visibleChanged.connect(this, this.layoutChildren, flags);
     }
   }
+  layoutChildren() {
+    // noop, defined in individual positioners
+  }
 }
