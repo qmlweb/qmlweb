@@ -12,9 +12,9 @@ class QtTest_SignalSpy extends QtQuick_Item {
   // TODO
 
   clear() {
-    count = 0;
-    signalArguments.length = 0;
-    //valid = false;
+    this.count = 0;
+    this.signalArguments.length = 0;
+    //this.valid = false;
   }
 
   /*
