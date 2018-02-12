@@ -9,4 +9,16 @@ class QtQuick_Controls_2_SwipeView extends QtQuick_Controls_2_Container {
   };
 
   // TODO
+
+  layoutChildren() {
+    let pos = 0;
+    for (let i = 0; i < this.children.length; i++) {
+      const child = this.children[i];
+      if (!child.visible) continue;
+      child.height = this.height;
+      child.width = this.width;
+      child.x = pos;
+      pos += child.width;
+    }
+  }
 }
