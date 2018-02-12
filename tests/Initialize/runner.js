@@ -80,6 +80,12 @@ var modules = {
     TabBar: { dom: true },
     TabButton: { dom: true }
   },
+  "QtQuick.Layouts 1.3": {
+    ColumnLayout: { dom: true },
+    GridLayout: { dom: true },
+    RowLayout: { dom: true },
+    StackLayout: { dom: true }
+  },
   "QtQuick.Window 2.2": {
     Screen: { fail: /Screen can only be used via the attached property/ },
     Window: { dom: true }
