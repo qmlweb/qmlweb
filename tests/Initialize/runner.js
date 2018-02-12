@@ -83,6 +83,7 @@ var modules = {
   "QtQuick.Layouts 1.3": {
     ColumnLayout: { dom: true },
     GridLayout: { dom: true },
+    Layout: { fail: /Do not create objects of type Layout/ },
     RowLayout: { dom: true },
     StackLayout: { dom: true }
   },
