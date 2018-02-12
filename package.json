@@ -40,6 +40,7 @@
     "mdlint": "remark -qf *.md docs",
     "lint": "npm run eslint && npm run mdlint",
     "test": "npm run lint && gulp test",
+    "qmltestrunner": "cd tests/Auto && qmltestrunner",
     "coverage": "gulp coverage",
     "build": "gulp build",
     "watch": "gulp watch"
