@@ -67,10 +67,14 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   const objectScope = objectScopeIn || item;
   QmlWeb.executionContext = componentScope;
 
-  if (metaObject.$children && metaObject.$children.length !== 0) {
+  const children = metaObject.$children;
+  if (children && children.length > 0) {
     if (item.$defaultProperty) {
+      // TODO: detect based on property type, not children count?
+      const value = children.length === 1 ? children[0] : children;
       item.$properties[item.$defaultProperty].set(
-        metaObject.$children, QMLProperty.ReasonInit,
+        value,
+        QMLProperty.ReasonInit,
         objectScope, componentScope
       );
     } else {

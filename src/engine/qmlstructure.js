@@ -151,10 +151,6 @@ convertToEngine.walkers = {
           console.log("Unknown statement", statement);
       }
     }
-    // Make $children be either a single item or an array, if it's more than one
-    if (item.$children.length === 1) {
-      item.$children = item.$children[0];
-    }
 
     return item;
   },
