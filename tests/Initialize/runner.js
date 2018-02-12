@@ -119,6 +119,7 @@ var modules = {
     NearField: {}
   },
   "QtTest 1.1": {
+    SignalSpy: { dom: true },
     TestCase: { dom: true }
   },
   "QtWebEngine 5.7": {
