@@ -40,7 +40,7 @@
     "mdlint": "remark -qf *.md docs",
     "lint": "npm run eslint && npm run mdlint",
     "test": "npm run lint && gulp test",
-    "qmltestrunner": "cd tests/Auto && qmltestrunner",
+    "qmltestrunner": "QT_SCREEN_SCALE_FACTORS=1 QT_AUTO_SCREEN_SCALE_FACTOR=0 qmltestrunner -input tests",
     "coverage": "gulp coverage",
     "build": "gulp build",
     "watch": "gulp watch"
