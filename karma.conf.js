@@ -1,3 +1,7 @@
+process.env.CHROMIUM_BIN = require("puppeteer").executablePath();
+
+require("./tests/chromium.callback.js");
+
 module.exports = function(config) {
   config.set({
     basePath: "",
@@ -17,7 +21,7 @@ module.exports = function(config) {
       { pattern: "tests/*/**/*.qml", included: false },
       { pattern: "tests/*/**/*.png", included: false }
     ],
-    browsers: ["PhantomJSCustom"],
+    browsers: ["ChromiumHeadlessCustom"],
     reporters: ["spec", "coverage"],
     coverageReporter: {
       type: "lcov",
@@ -26,11 +30,13 @@ module.exports = function(config) {
     browserDisconnectTolerance: 5,    // required for phantomjs in windows
     browserNoActivityTimeout: 100000, // required for phantomjs in windows
     customLaunchers: {
-      PhantomJSCustom: {
-        base: "PhantomJS",
-        options: {
-          onCallback: require("./tests/phantom.callback.js")
-        }
+      ChromiumHeadlessCustom: {
+        base: process.env.NOT_HEADLESS ? "Chromium" : "ChromiumHeadless",
+        flags: [
+          "--no-sandbox", // FIXME
+          "--force-device-scale-factor=1",
+          "--remote-debugging-port=9222"
+        ]
       }
     }
   });

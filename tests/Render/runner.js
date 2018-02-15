@@ -1,16 +1,12 @@
 (function() {
-  if (!window.top.callPhantom) {
-    console.log("Render tests require PhantomJS");
+  if (!window.top.callPhantom && !window.top.chromeScreenshot) {
+    console.log("Render tests require Puppeteer or PhantomJS");
     return;
   }
 
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
   function screenshot(div, options) {
-    if (!window.top.callPhantom) {
-      return undefined;
-    }
-
     var rect0 = div.getBoundingClientRect();
     var rect1 = window.parent.document.getElementById("context")
                                       .getBoundingClientRect();
@@ -21,13 +17,26 @@
       left: rect0.left + rect1.left
     };
 
-    var base64 = window.top.callPhantom("render", {
-      offset: offset,
-      fileName: options && options.fileName || undefined
-    });
-    var image = document.createElement("img");
-    image.src = "data:image/png;base64," + base64;
-    return image;
+    var image;
+    if (window.top.callPhantom) {
+      var base64 = window.top.callPhantom("render", {
+        offset: offset,
+        fileName: options && options.fileName || undefined
+      });
+      image = document.createElement("img");
+      image.src = "data:image/png;base64," + base64;
+      return image;
+    } else if (window.top.chromeScreenshot) {
+      image = document.createElement("img");
+      window.top.chromeScreenshot({
+        offset: offset,
+        fileName: options && options.fileName || undefined
+      }).then(function(data) {
+        image.src = "data:image/png;base64," + data;
+      });
+      return image;
+    }
+    throw new Error("Screenshots are not supported on this platform");
   }
 
   function image2canvas(img) {
