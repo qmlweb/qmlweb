@@ -96,8 +96,10 @@ class QtQuick_Image extends QtQuick_Item {
     this.impl.style.backgroundImage = `url("${imageURL}")`;
     this.$img.src = imageURL;
     if (this.$img.complete) {
-      this.progress = 1;
-      this.status = this.Image.Ready;
+      setTimeout(() => {
+        this.progress = 1;
+        this.status = this.Image.Ready;
+      }, 0);
     }
     this.$updateFillMode();
   }
