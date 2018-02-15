@@ -7,15 +7,18 @@
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
   function screenshot(div, options) {
-    var rect0 = div.getBoundingClientRect();
-    var rect1 = window.parent.document.getElementById("context")
-                                      .getBoundingClientRect();
+    var rect = div.getBoundingClientRect();
     var offset = {
       width: div.offsetWidth,
       height: div.offsetHeight,
-      top: rect0.top + rect1.top,
-      left: rect0.left + rect1.left
+      top: rect.top,
+      left: rect.left
     };
+    for (var win = window; win !== window.top; win = win.parent) {
+      var rectframe = win.frameElement.getBoundingClientRect();
+      offset.top += rectframe.top;
+      offset.left += rectframe.left;
+    }
 
     var image;
     if (window.top.callPhantom) {
