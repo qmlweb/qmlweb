@@ -1,25 +1,26 @@
 import QtQuick 2.0
 
+// Fuzzy because opacity color rounding could differ between implementations
+
 Rectangle {
   width: 100
   height: 100
   color: '#fff'
   Item {
-    opacity: 0.9
+    opacity: 0.5
     Rectangle {
-      color: '#6000ff00'
+      color: '#0f0'
       width: 50
       height: 50
-      opacity: 0.5
     }
     Rectangle {
-      color: '#9000ff'
+      color: '#ff0000'
       width: 50;
       height: 50
       x: 25; y: 25
     }
     Rectangle {
-      color: Qt.rgba(1, 0.4, 0.4, 0.9)
+      color: '#00f'
       width: 50;
       height: 50
       x: 70; y: 20
