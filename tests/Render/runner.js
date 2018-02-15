@@ -9,71 +9,11 @@
     setTimeout(done, 200);
   });
 
-  function screenshot(div, options) {
-    var rect = div.getBoundingClientRect();
-    var offset = {
-      width: div.offsetWidth,
-      height: div.offsetHeight,
-      top: rect.top,
-      left: rect.left
-    };
-    for (var win = window; win !== window.top; win = win.parent) {
-      var rectframe = win.frameElement.getBoundingClientRect();
-      offset.top += rectframe.top;
-      offset.left += rectframe.left;
-    }
-
-    var image;
-    if (window.top.callPhantom) {
-      var base64 = window.top.callPhantom("render", {
-        offset: offset,
-        fileName: options && options.fileName || undefined
-      });
-      image = document.createElement("img");
-      image.src = "data:image/png;base64," + base64;
-      return image;
-    } else if (window.top.chromeScreenshot) {
-      image = document.createElement("img");
-      window.top.chromeScreenshot({
-        offset: offset,
-        fileName: options && options.fileName || undefined
-      }).then(function(data) {
-        image.src = "data:image/png;base64," + data;
-      });
-      return image;
-    }
-    throw new Error("Screenshots are not supported on this platform");
-  }
-
-  function image2canvas(img) {
-    var canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
-    canvas.height = img.height;
-    canvas.width = img.width;
-    ctx.drawImage(img, 0, 0);
-    return { canvas: canvas, ctx: ctx };
-  }
-
-  function image2data(img) {
-    return image2canvas(img).canvas.toDataURL("image/png", 1);
-  }
-
-  function image2pixels(img) {
-    return image2canvas(img).ctx.getImageData(0, 0, img.width, img.height).data;
-  }
-
-  function imagesEqual(a, b) {
-    if (a.width !== b.width || a.height !== b.height) {
-      return false;
-    }
-    return image2data(a) === image2data(b);
-  }
-
   function imagesFuzzyEqual(a, b, delta) {
-    if (!delta) return imagesEqual(a, b);
+    if (!delta) return QmlWeb.imagesEqual(a, b);
 
-    var A = image2pixels(a);
-    var B = image2pixels(b);
+    var A = QmlWeb.image2pixels(a);
+    var B = QmlWeb.image2pixels(b);
     if (A.length !== B.length) return false;
     for (var i = 0; i < A.length; i++) {
       var diff = A[i] - B[i];
@@ -137,7 +77,7 @@
           expected.onload = process;
 
           var onTestLoad = function() {
-            result = screenshot(div, {
+            result = QmlWeb.screenshot(div, {
               fileName: test.group + "/" + test.name + ".png"
             });
             result.onload = process;
