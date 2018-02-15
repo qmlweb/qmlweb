@@ -5,6 +5,9 @@
   }
 
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  beforeAll(function(done) {
+    setTimeout(done, 200);
+  });
 
   function screenshot(div, options) {
     var rect = div.getBoundingClientRect();
