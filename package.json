@@ -51,6 +51,7 @@
     "AUTHORS",
     "LICENSE",
     "README.md",
+    "CONTRIBUTING.md",
     "docs/**/*.md",
     "misc/**/*.svg",
     "misc/**/*.png",
