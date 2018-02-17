@@ -8,7 +8,7 @@ const querystring = require("querystring");
 const crypto = require("crypto");
 const path = require("path");
 const puppeteer = require("puppeteer");
-const bhttp = require("bhttp");
+const r2 = require("r2");
 const mkdirp = require("mkdirp");
 
 const secret = crypto.randomBytes(64).toString("base64");
@@ -25,8 +25,8 @@ function mkdirpAsync(dir) {
 async function attempt() {
   await sleep(100);
   try {
-    const res = await bhttp.get("http://localhost:9222/json");
-    for (const item of res.body) {
+    const res = await r2.get("http://localhost:9222/json").json;
+    for (const item of res) {
       if (item.title === "Karma") return item;
     }
   } catch (e) {
