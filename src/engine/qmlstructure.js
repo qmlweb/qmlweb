@@ -83,7 +83,7 @@ function convertToEngine(tree) {
   return convertToEngine.walk(tree);
 }
 
-function stringifyDots(elem) {
+convertToEngine.stringifyDots = function(elem) {
   let sub = elem;
   const path = [];
   while (sub[0] === "dot") {
@@ -92,9 +92,9 @@ function stringifyDots(elem) {
   }
   path.push(sub);
   return path.join(".");
-}
+};
 
-function applyProp(item, name, val) {
+convertToEngine.applyProp = function(item, name, val) {
   let curr = item; // output structure
   let sub = name; // input structure
   while (sub[0] === "dot") {
@@ -105,7 +105,7 @@ function applyProp(item, name, val) {
     sub = sub[2];
   }
   curr[sub] = val;
-}
+};
 
 convertToEngine.walkers = {
   toplevel: (imports, statement) => {
@@ -115,7 +115,10 @@ convertToEngine.walkers = {
     return item;
   },
   qmlelem: (elem, onProp, statements) => {
-    const item = new QMLMetaElement(stringifyDots(elem), onProp);
+    const item = new QMLMetaElement(
+      convertToEngine.stringifyDots(elem),
+      onProp
+    );
 
     for (const i in statements) {
       const statement = statements[i];
@@ -131,7 +134,7 @@ convertToEngine.walkers = {
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          applyProp(item, name, val);
+          convertToEngine.applyProp(item, name, val);
           break;
         case "qmlelem":
           item.$children.push(val);
@@ -170,7 +173,7 @@ convertToEngine.walkers = {
       const name = statement[1];
       const val = convertToEngine.walk(statement);
       if (statement[0] === "qmlprop") {
-        applyProp(item, name, val);
+        convertToEngine.applyProp(item, name, val);
       }
     }
     return item;
