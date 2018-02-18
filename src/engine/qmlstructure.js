@@ -80,7 +80,13 @@ class QMLMetaElement {
 
 // Convert parser tree to the format understood by engine
 function convertToEngine(tree) {
-  return convertToEngine.walk(tree);
+  const type = tree[0];
+  const walker = convertToEngine.walkers[type];
+  if (!walker) {
+    console.log(`No walker for ${type}`);
+    return undefined;
+  }
+  return walker(...tree.slice(1));
 }
 
 convertToEngine.stringifyDots = function(elem) {
@@ -111,7 +117,7 @@ convertToEngine.walkers = {
   toplevel: (imports, statement) => {
     const item = { $class: "Component" };
     item.$imports = imports;
-    item.$children = [convertToEngine.walk(statement)];
+    item.$children = [convertToEngine(statement)];
     return item;
   },
   qmlelem: (elem, onProp, statements) => {
@@ -123,7 +129,7 @@ convertToEngine.walkers = {
     for (const i in statements) {
       const statement = statements[i];
       const name = statement[1];
-      const val = convertToEngine.walk(statement);
+      const val = convertToEngine(statement);
       switch (statement[0]) {
         case "qmldefaultprop":
           item.$defaultProperty = name;
@@ -171,7 +177,7 @@ convertToEngine.walkers = {
     for (const i in statements) {
       const statement = statements[i];
       const name = statement[1];
-      const val = convertToEngine.walk(statement);
+      const val = convertToEngine(statement);
       if (statement[0] === "qmlprop") {
         convertToEngine.applyProp(item, name, val);
       }
@@ -189,7 +195,7 @@ convertToEngine.walkers = {
     new QMLAliasDefinition(objName, propName),
   qmlsignaldef: (name, params) =>
     new QMLSignalDefinition(params),
-  qmldefaultprop: tree => convertToEngine.walk(tree),
+  qmldefaultprop: tree => convertToEngine(tree),
   name: src => {
     if (src === "true" || src === "false") {
       return src === "true";
@@ -229,16 +235,6 @@ convertToEngine.walkers = {
   }
 };
 
-convertToEngine.walk = function(tree) {
-  const type = tree[0];
-  const walker = convertToEngine.walkers[type];
-  if (!walker) {
-    console.log(`No walker for ${type}`);
-    return undefined;
-  }
-  return walker.apply(type, tree.slice(1));
-};
-
 // Try to bind out tree and return static variable instead of binding
 convertToEngine.bindout = function(statement, binding) {
   // We want to process the content of the statement
@@ -248,15 +244,9 @@ convertToEngine.bindout = function(statement, binding) {
   const type = tree[0];
   const walker = convertToEngine.walkers[type];
   if (walker) {
-    return walker.apply(type, tree.slice(1));
+    return walker(...tree.slice(1));
   }
   return new QmlWeb.QMLBinding(binding, tree);
-};
-
-// Help logger
-convertToEngine.amIn = function(str, tree) {
-  console.log(str);
-  if (tree) console.log(JSON.stringify(tree, null, "  "));
 };
 
 function loadParser() {
