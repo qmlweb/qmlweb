@@ -271,8 +271,6 @@ function loadParser() {
         throw new Error("Could not load QmlWeb parser!");
       }
       new Function(xhr.responseText)();
-      QmlWeb.parse = QmlWeb.parse;
-      QmlWeb.jsparse = QmlWeb.jsparse;
       return;
     }
   }
