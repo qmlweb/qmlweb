@@ -125,7 +125,8 @@ Refs: https://github.com/smnh/FontLoader.`);
     // Load font by source url
     const rand = Math.round(Math.random() * 1e15);
     const fontName = `font_${Date.now().toString(36)}_${rand.toString(36)}`;
-    if (typeof FontFace !== undefined && document.fonts && document.fonts.add) {
+    if (typeof FontFace !== "undefined"
+        && document.fonts && document.fonts.add) {
       const fontFace = new FontFace(fontName, `url('${font_src}')`);
       document.fonts.add(fontFace);
       fontFace.load();

@@ -51,7 +51,7 @@ class QtQuick_Controls_ScrollView extends QtQuick_Item {
     this.$onHorizontalScrollBarPolicyChanged(this.horizontalScrollBarPolicy);
   }
   $onContentItemChanged(newItem) {
-    if (typeof newItem !== undefined) {
+    if (newItem) {
       newItem.parent = this;
     }
   }
