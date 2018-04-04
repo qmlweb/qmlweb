@@ -12,14 +12,13 @@ rules:
   array-bracket-spacing: 2
   array-callback-return: 2
   arrow-body-style: 2
-  babel/arrow-parens: [2, "as-needed"]
-  babel/func-params-comma-dangle: 2
+  arrow-parens: [2, "as-needed"]
   brace-style: 2
   camelcase: 0
   comma-dangle: [2, "only-multiline"]
   comma-spacing: 2
   comma-style: [2, "last"]
-  complexity: ["error", 20]
+  complexity: ["error", 23]
   consistent-return: 2
   curly: [2, "multi-line"]
   default-case: 0
@@ -29,7 +28,14 @@ rules:
   eqeqeq: 2
   func-call-spacing: 2
   guard-for-in: 0
-  indent: [2, 2, { "SwitchCase": 1 }]
+  indent: [2, 2, {
+    "SwitchCase": 1,
+    "MemberExpression": "off",
+    "FunctionExpression": { "parameters": "off" },
+    "CallExpression": { "arguments": "off" },
+    "ignoredNodes": ["ConditionalExpression"],
+    "flatTernaryExpressions": true
+  }]
   key-spacing: 2
   keyword-spacing: 2
   max-len: [2, 80, { "ignoreUrls": true }]
@@ -70,7 +76,7 @@ rules:
   no-magic-numbers: 0
   no-mixed-spaces-and-tabs: 2
   no-multiple-empty-lines: 2
-  no-multi-spaces: 2
+  no-multi-spaces: [2, { "ignoreEOLComments": true }]
   no-multi-str: 2
   no-native-reassign: 2
   no-nested-ternary: 0
