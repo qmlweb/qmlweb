@@ -58,7 +58,7 @@ async function main() {
     };
   `);
   http.createServer((req, res) => {
-    (async () => {
+    (async() => {
       const parsed = url.parse(req.url);
       if (parsed.pathname !== "/screenshot") throw new Error(404);
       const query = querystring.parse(parsed.query);

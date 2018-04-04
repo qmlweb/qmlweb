@@ -34,9 +34,9 @@ class QMLBinding {
     return this.impl.call(object, object, context);
   }
 
-/**
- * Compile binding. Afterwards you may call binding.eval to evaluate.
- */
+  /**
+  * Compile binding. Afterwards you may call binding.eval to evaluate.
+  */
   compile() {
     this.src = this.src.trim();
     this.impl = QMLBinding.bindSrc(this.src, this.isFunction);

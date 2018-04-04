@@ -36,5 +36,4 @@ class QtQuick_Controls_Button extends QtQuick_Item {
   $onEnabledChanged(newVal) {
     this.impl.disabled = !newVal;
   }
-
 }
