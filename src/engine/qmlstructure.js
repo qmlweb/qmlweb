@@ -188,8 +188,8 @@ convertToEngine.walkers = {
     new QMLMethod(src),
   qmlpropdef: (name, type, tree, src) =>
     new QMLPropertyDefinition(
-        type,
-        tree ? convertToEngine.bindout(tree, src) : undefined
+      type,
+      tree ? convertToEngine.bindout(tree, src) : undefined
     ),
   qmlaliasdef: (name, objName, propName) =>
     new QMLAliasDefinition(objName, propName),

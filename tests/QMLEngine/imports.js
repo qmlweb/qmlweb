@@ -101,10 +101,11 @@ describe("QMLEngine.imports", function() {
     expect(f.bind(this)).toThrowError("No constructor found for ImportMe");
   });
   it("can find local Component assigned to property when in another directory",
-  function() {
-    var qml = load("LocalComponentAsPropertyInAnotherDir", this.div);
-    expect(qml.value).toBe(67);
-  });
+    function() {
+      var qml = load("LocalComponentAsPropertyInAnotherDir", this.div);
+      expect(qml.value).toBe(67);
+    }
+  );
   it("qualified imports from module", function() {
     var qml = load("QualifiedModule", this.div);
     expect(qml.value).toBe(67);
