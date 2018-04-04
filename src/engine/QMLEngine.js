@@ -98,8 +98,8 @@ class QMLEngine {
       height = window.innerHeight;
     } else {
       const style = window.getComputedStyle(this.dom);
-      width = parseFloat(style.getPropertyValue("width"), 10);
-      height = parseFloat(style.getPropertyValue("height"), 10);
+      width = parseFloat(style.getPropertyValue("width"));
+      height = parseFloat(style.getPropertyValue("height"));
     }
     if (width) {
       this.rootObject.width = width;

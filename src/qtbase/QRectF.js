@@ -8,7 +8,7 @@ class QRectF extends QmlWeb.QObject {
       const mask = /^\s*[-\d.]+\s*,\s*[-\d.]+\s*,\s*[-\d.]+\s*x\s*[-\d.]+\s*$/;
       if (!args[0].match(mask)) throw new Error("rect expected");
       data = args[0].replace("x", ",").split(",")
-                    .map(x => parseFloat(x.trim(), 10));
+                    .map(x => parseFloat(x.trim()));
     } else if (args.length === 1 && args[0] instanceof QRectF) {
       data = [args[0].x, args[0].y, args[0].z, args[0].width];
     } else if (args.length !== 4) {

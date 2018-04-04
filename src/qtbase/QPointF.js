@@ -5,7 +5,7 @@ class QPointF extends QmlWeb.QObject {
     if (args.length === 0) {
       data = [0, 0];
     } else if (args.length === 1 && typeof args[0] === "string") {
-      data = args[0].split(",").map(x => parseFloat(x.trim(), 10));
+      data = args[0].split(",").map(x => parseFloat(x.trim()));
       if (data.length !== 2) throw new Error("point expected");
     } else if (args.length === 1 && args[0] instanceof QPointF) {
       data = [args[0].x, args[0].y];

@@ -5,7 +5,7 @@ class QSizeF extends QmlWeb.QObject {
     if (args.length === 0) {
       data = [-1, -1];
     } else if (args.length === 1 && typeof args[0] === "string") {
-      data = args[0].split("x").map(x => parseFloat(x.trim(), 10));
+      data = args[0].split("x").map(x => parseFloat(x.trim()));
       if (data.length !== 2) throw new Error("size expected");
     } else if (args.length === 1 && args[0] instanceof QSizeF) {
       data = [args[0].width, args[0].height];
