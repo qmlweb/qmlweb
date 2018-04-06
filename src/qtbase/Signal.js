@@ -1,6 +1,8 @@
 class Signal {
+  connectedSlots = [];
+  signal = null;
+
   constructor(params = [], options = {}) {
-    this.connectedSlots = [];
     this.obj = options.obj;
     this.options = options;
 
