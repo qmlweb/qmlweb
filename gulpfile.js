@@ -118,7 +118,7 @@ gulp.task("qmlweb.es2015", () =>
     .pipe(gulp.dest("./lib"))
 );
 
-gulp.task("qmlweb.min", ["qmlweb"], () =>
+gulp.task("qmlweb.min", gulp.series("qmlweb", () =>
   gulp.src("./lib/qmlweb.js")
     .pipe(rename("qmlweb.min.js"))
     .pipe(changed("./lib"))
@@ -126,71 +126,73 @@ gulp.task("qmlweb.min", ["qmlweb"], () =>
     .pipe(uglify())
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
-);
+));
 
 // Legacy library name, TODO: remove
-gulp.task("qt", ["qmlweb"], () =>
+gulp.task("qt", gulp.series("qmlweb", () =>
   gulp.src("./lib/qmlweb.js")
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(concat("qt.js"))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
-);
+));
 
 // Legacy library name, TODO: remove
-gulp.task("qt.min", ["qmlweb.min"], () =>
+gulp.task("qt.min", gulp.series("qmlweb.min", () =>
   gulp.src("./lib/qmlweb.min.js")
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(concat("qt.min.js"))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
-);
+));
 
-gulp.task("build-covered", ["parser-covered", "qmlweb-covered"]);
+gulp.task("build-covered", gulp.parallel("parser-covered", "qmlweb-covered"));
 
-gulp.task("build-dev", ["qmlweb", "parser", "license"]);
+gulp.task("build-dev", gulp.parallel("qmlweb", "parser", "license"));
 
-gulp.task("build", [
-  "qmlweb", "parser", "license", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
-]);
+gulp.task("build", gulp.series(
+  "build-dev", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
+));
 
-gulp.task("watch", ["build"], () => {
+gulp.task("watch", gulp.series("build", () => {
   gulp.watch(sources, [
     "qmlweb", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
   ]);
   gulp.watch(parserSources, ["parser"]);
   gulp.watch(licenseSources, ["license"]);
-});
+}));
 
-gulp.task("watch-dev", ["build-dev"], () => {
+gulp.task("watch-dev", gulp.series("build-dev", () => {
   gulp.watch(sources, ["qmlweb", "qt"]);
   gulp.watch(parserSources, ["parser"]);
   gulp.watch(licenseSources, ["license"]);
-});
+}));
 
-gulp.task("test", ["build-dev"], () => {
+gulp.task("test", gulp.series("build-dev", done => {
   new karma.Server({
     singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js")
   }, code => {
+    done(code);
     process.exit(code);
   }).start();
-});
+}));
 
-gulp.task("coverage", ["build-covered"], () => {
+gulp.task("coverage", gulp.series("build-covered", done => {
   new karma.Server({
     singleRun: true,
     coverageEnabled: true,
     configFile: path.join(__dirname, "karma.conf.js")
   }, code => {
+    done(code);
     process.exit(code);
   }).start();
-});
+}));
 
-gulp.task("test-watch", ["watch-dev"], done => {
+gulp.task("test-watch", gulp.series("watch-dev", done => {
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js")
   }, done).start();
-});
+}));
 
-gulp.task("default", ["watch"]);
+gulp.task("default", gulp.series("watch"));
