@@ -33,10 +33,6 @@ const licenseSources = [
   "node_modules/qmlweb-parser/LICENSE"
 ];
 
-// This is required because other values confuse PhantomJS, and are sometimes
-// set by default by the system.
-process.env.QT_QPA_PLATFORM = "";
-
 gulp.task("license", () =>
   gulp.src(licenseSources)
     .pipe(order(licenseSources, { base: __dirname }))
