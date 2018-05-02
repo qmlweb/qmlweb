@@ -11,7 +11,7 @@ const path = require("path");
 
 const root = path.dirname(__dirname);
 const prefix = "src/modules/";
-const QtGlobal = "src/modules/QtQml/Qt.js";
+const QtGlobal = path.normalize("QtQml/Qt.js");
 
 function baseClass(file) {
   const buffer = file.contents;
@@ -46,10 +46,10 @@ module.exports = function(options = {}) {
   const shake = [];
 
   function onFile(file) {
-    const relative = path.relative(root, file.path);
-    if (relative.startsWith(prefix) && relative !== QtGlobal) {
-      const filename = path.relative(path.join(root, prefix), file.path);
-      const name = filename.replace(".js", "").split("/").join(".");
+    const filename = path.relative(path.join(root, prefix), file.path);
+    if (!filename.includes("..") && filename !== QtGlobal) {
+      // Process all files inside the `prefix`, except for the Qt.js file
+      const name = filename.replace(".js", "").split(/[\\/]/).join(".");
       const module = name.replace(/.[^.]+$/, ""); // "A.B.C" -> "A.B"
       try {
         const base = baseClass(file);
