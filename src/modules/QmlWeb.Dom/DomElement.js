@@ -7,7 +7,7 @@ class QmlWeb_Dom_DomElement extends QtQuick_Item {
   };
 
   constructor(meta) {
-    meta.tagName = meta.object.tagName;
+    meta.tagName = meta.object.tagName || meta.tagName;
     super(meta);
 
     for (const key in meta.object.attrs) {
