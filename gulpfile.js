@@ -151,17 +151,17 @@ gulp.task("build", gulp.series(
 ));
 
 gulp.task("watch", gulp.series("build", () => {
-  gulp.watch(sources, [
+  gulp.watch(sources, gulp.series(
     "qmlweb", "qmlweb.min", "qmlweb.es2015", "qt", "qt.min"
-  ]);
-  gulp.watch(parserSources, ["parser"]);
-  gulp.watch(licenseSources, ["license"]);
+  ));
+  gulp.watch(parserSources, gulp.series("parser"));
+  gulp.watch(licenseSources, gulp.series("license"));
 }));
 
 gulp.task("watch-dev", gulp.series("build-dev", () => {
-  gulp.watch(sources, ["qmlweb", "qt"]);
-  gulp.watch(parserSources, ["parser"]);
-  gulp.watch(licenseSources, ["license"]);
+  gulp.watch(sources, gulp.series("qmlweb", "qt"));
+  gulp.watch(parserSources, gulp.series("parser"));
+  gulp.watch(licenseSources, gulp.series("license"));
 }));
 
 gulp.task("test", gulp.series("build-dev", done => {
