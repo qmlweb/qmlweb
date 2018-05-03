@@ -41,6 +41,13 @@ class QtQuick_Item extends QtQml_QtObject {
     }
     this.dom.style.position = "absolute";
     this.dom.style.pointerEvents = "none";
+    if (meta.style) {
+      for (const key in meta.style) {
+        if (!meta.style.hasOwnProperty(key)) continue;
+        this.dom.style[key] = meta.style[key];
+      }
+    }
+
     // In case the class is qualified, only use the last part for the css class
     // name.
     const classComponent = meta.object.$class.split(".").pop();
