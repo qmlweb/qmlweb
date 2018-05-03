@@ -145,6 +145,8 @@ var modules = {
     RestModel: {}
   },
   "QmlWeb.Dom 1.0": {
+    DomDiv: { dom: true },
+    DomParagraph: { dom: true },
     DomElement: { dom: true }
   }
 };
