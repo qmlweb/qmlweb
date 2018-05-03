@@ -3,6 +3,8 @@ class QmlWeb_Dom_DomElement extends QtQuick_Item {
   static properties = {
     attrs: { type: "var", initialValue: {} },
     style: { type: "var", initialValue: {} },
+    html: { type: "string", initialValue: "" },
+    text: { type: "string", initialValue: "" },
     tagName: { type: "string", initialValue: "div" }
   };
 
@@ -18,5 +20,12 @@ class QmlWeb_Dom_DomElement extends QtQuick_Item {
       if (!meta.object.style.hasOwnProperty(key)) continue;
       this.dom.style[key] = meta.object.style[key];
     }
+
+    this.htmlChanged.connect(() => {
+      this.dom.innerHTML = this.html;
+    });
+    this.textChanged.connect(() => {
+      this.dom.innerText = this.text;
+    });
   }
 }
