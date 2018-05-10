@@ -30,7 +30,7 @@
     "karma-jasmine": "^1.0.2",
     "karma-spec-reporter": "~0.0.26",
     "mkdirp": "^0.5.1",
-    "nyc": "^10.0.0",
+    "nyc": "^11.7.3",
     "puppeteer": "^1.1.0",
     "qmlweb-parser": "^0.3.2",
     "r2": "^2.0.0",
