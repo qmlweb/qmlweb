@@ -8,6 +8,9 @@ window.failingTests = {
     basic: [
       "SignalDisconnect"
     ],
+    imports: [
+      "Qmldir singleton"
+    ],
     scope: [
       "object id should override same-named property of base object"
     ]

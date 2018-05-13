@@ -64,6 +64,13 @@ describe("QMLEngine.imports", function() {
     // #0ff and cyan doesn't work, because PhantomJS converts
     // them to rgb( 0,255,255 ).. how to compare colors?..
   });
+  it("Qmldir singleton", function() {
+    load("QmldirSingleton", this.div);
+    var div = this.div.children[0];
+    expect(div.offsetWidth).toBe(10);
+    expect(div.offsetHeight).toBe(20);
+    expect(div.children[0].style.backgroundColor).toBe("rgb(0, 128, 0)");
+  });
   it("can import from sibling directory", function() {
     var qml = load("From/SiblingDir", this.div);
     expect(qml.text).toBe("I'm simple");
