@@ -122,25 +122,22 @@ function readQmlDir(url) {
 
   const lines = qmldir.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
-    // trim
-    const line = lines[i].replace(/^\s+|\s+$/g, "");
+    const line = lines[i].trim();
     if (!line.length || line[0] === "#") {
       // Empty line or comment
       continue;
     }
     const match = line.split(/\s+/);
-    if (match.length === 2 || match.length === 3) {
-      if (match[0] === "plugin") {
-        console.log(`${url}: qmldir plugins are not supported!`);
-      } else if (match[0] === "internal") {
-        internals[match[1]] = { url: makeurl(match[2]) };
-      } else if (match.length === 2) {
-        externals[match[0]] = { url: makeurl(match[1]) };
-      } else {
-        externals[match[0]] = { url: makeurl(match[2]), version: match[1] };
-      }
-    } else {
+    if (match.length < 2 || match.length > 3) {
       console.log(`${url}: unmatched: ${line}`);
+    } else if (match[0] === "plugin") {
+      console.log(`${url}: qmldir plugins are not supported!`);
+    } else if (match[0] === "internal") {
+      internals[match[1]] = { url: makeurl(match[2]) };
+    } else if (match.length === 2) {
+      externals[match[0]] = { url: makeurl(match[1]) };
+    } else {
+      externals[match[0]] = { url: makeurl(match[2]), version: match[1] };
     }
   }
   return { internals, externals };
