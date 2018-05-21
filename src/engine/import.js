@@ -123,21 +123,32 @@ function readQmlDir(url) {
   const lines = qmldir.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line.length || line[0] === "#") {
-      // Empty line or comment
-      continue;
-    }
-    const match = line.split(/\s+/);
-    if (match.length < 2 || match.length > 3) {
-      console.log(`${url}: unmatched: ${line}`);
-    } else if (match[0] === "plugin") {
-      console.log(`${url}: qmldir plugins are not supported!`);
-    } else if (match[0] === "internal") {
-      internals[match[1]] = { url: makeurl(match[2]) };
-    } else if (match.length === 2) {
-      externals[match[0]] = { url: makeurl(match[1]) };
-    } else {
-      externals[match[0]] = { url: makeurl(match[2]), version: match[1] };
+    if (!line.length || line[0] === "#") continue; // Empty line or comment
+    const parts = line.split(/\s+/);
+    const res = {};
+    switch (parts[0]) {
+      case "designersupported": // Just a flag for IDE
+      case "typeinfo": // For IDE code completion etc
+        break;
+      case "plugin":
+      case "classname":
+      case "depends":
+      case "module":
+        console.log(`${url}: qmldir "${parts[0]}" entries are not supported`);
+        break;
+      case "internal":
+      case "singleton":
+        res[parts[0]] = true;
+        parts.shift();
+        // fall through
+      default:
+        if (parts.length === 2) {
+          res.url = makeurl(parts[1]);
+        } else {
+          res.version = parts[1];
+          res.url = makeurl(parts[2]);
+        }
+        externals[parts[0]] = res;
     }
   }
   return { internals, externals };
