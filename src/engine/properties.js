@@ -240,18 +240,19 @@ function applyProperty(item, i, value, objectScope, componentScope) {
 }
 
 function connectSignal(item, signalName, value, objectScope, componentScope) {
-  if (!item[signalName]) {
+  const signal = item[signalName];
+  if (!signal) {
     console.warn(`No signal called ${signalName} found!`);
     return undefined;
-  } else if (typeof item[signalName].connect !== "function") {
+  } else if (typeof signal.connect !== "function") {
     console.warn(`${signalName} is not a signal!`);
     return undefined;
   }
 
   if (!value.compiled) {
     const params = [];
-    for (const j in item[signalName].parameters) {
-      params.push(item[signalName].parameters[j].name);
+    for (const j in signal.parameters) {
+      params.push(signal.parameters[j].name);
     }
     // Wrap value.src in IIFE in case it includes a "return"
     value.src = `(
@@ -274,7 +275,7 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(objectScope, componentScope);
-  item[signalName].connect(item, slot);
+  signal.connect(item, slot);
   return slot;
 }
 
