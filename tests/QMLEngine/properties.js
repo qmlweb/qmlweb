@@ -132,7 +132,7 @@ describe("QMLEngine.properties", function() {
 
   it("Property and signal can have the same names", function() {
     var qml = load("AndSignalsWithTheSameNames", this.div);
-    //expect(qml.pressed).toBe(false);
+    expect(qml.pressed).toBe(false);
     expect(qml.signalCaught).toBe(false);
     sendEvent(qml.area.dom, "click");
     expect(qml.signalCaught).toBe(true);

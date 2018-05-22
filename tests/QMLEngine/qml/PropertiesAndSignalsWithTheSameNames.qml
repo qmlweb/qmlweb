@@ -4,17 +4,16 @@ Item {
   property bool signalCaught: false
   property Item area: mouse_area
   signal pressed()
-  MouseArea
-  {
+
+  MouseArea {
     id: mouse_area
     anchors.fill: parent
-    onClicked:
-    {
+    onClicked: {
       parent.pressed()
     }
   }
-  onPressed:
-  {
+
+  onPressed: {
     signalCaught = true;
   }
 }
