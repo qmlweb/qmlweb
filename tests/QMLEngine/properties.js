@@ -129,4 +129,20 @@ describe("QMLEngine.properties", function() {
       QmlWeb.engine.$basePath + "remoteBinding.png");
     expect(qml.remoteSet).toBe(QmlWeb.engine.$basePath + "remoteSet.png");
   });
+
+  it("Property and signal can have the same names", function() {
+    var qml = load("AndSignalsWithTheSameNames", this.div);
+    //expect(qml.pressed).toBe(false);
+    expect(qml.signalCaught).toBe(false);
+    sendEvent(qml.area.dom, "click");
+    expect(qml.signalCaught).toBe(true);
+  });
+
+  it("Property and signal can have the same names(reverse order)", function() {
+    var qml = load("AndSignalsWithTheSameNames2", this.div);
+    expect(qml.pressed).toBe(false);
+    expect(qml.signalCaught).toBe(false);
+    sendEvent(qml.area.dom, "click");
+    expect(qml.signalCaught).toBe(true);
+  });
 });
