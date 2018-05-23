@@ -11,10 +11,6 @@ window.failingTests = {
     imports: [
       "Qmldir singleton"
     ],
-    properties: [
-      "Property and signal can have the same names",
-      "Property and signal can have the same names(reverse order)"
-    ],
     scope: [
       "object id should override same-named property of base object"
     ]
