@@ -13,10 +13,15 @@ class QtQuick_MouseArea extends QtQuick_Item {
     cursorShape: "enum" // Qt.ArrowCursor
   };
   static signals = {
+    canceled: [],
     clicked: [{ type: "variant", name: "mouse" }],
+    doubleClicked: [{ type: "variant", name: "mouse" }],
     entered: [],
     exited: [],
     positionChanged: [{ type: "variant", name: "mouse" }],
+    pressAndHold: [{ type: "variant", name: "mouse" }],
+    pressed: [{ type: "variant", name: "mouse" }],
+    released: [{ type: "variant", name: "mouse" }],
     wheel: [{ type: "variant", name: "wheel" }]
   };
 
