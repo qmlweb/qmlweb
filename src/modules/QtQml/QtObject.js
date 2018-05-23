@@ -1,5 +1,7 @@
 // Base object for all qml elements
 class QtQml_QtObject extends QmlWeb.QObject {
+  $Signals = {};
+
   constructor(meta) {
     super(meta.parent);
 
@@ -72,7 +74,8 @@ class QtQml_QtObject extends QmlWeb.QObject {
 
       Object.keys(info.signals).forEach(name => {
         const params = info.signals[name];
-        this[name] = QmlWeb.Signal.signal(params);
+        this.$Signals[name] = QmlWeb.Signal.signal(params);
+        if (!(name in this)) this[name] = this.$Signals[name];
       });
 
       if (info.defaultProperty) {

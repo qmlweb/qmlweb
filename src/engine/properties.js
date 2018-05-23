@@ -137,9 +137,12 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   const QMLProperty = QmlWeb.QMLProperty;
 
   if (value instanceof QmlWeb.QMLSignalDefinition) {
-    item[i] = QmlWeb.Signal.signal(value.parameters);
-    if (item.$isComponentRoot) {
-      componentScope[i] = item[i];
+    item.$Signals[i] = QmlWeb.Signal.signal(value.parameters);
+    if (!(i in item)) {
+      item[i] = item.$Signals[i];
+      if (item.$isComponentRoot) {
+        componentScope[i] = item[i];
+      }
     }
     return true;
   }
@@ -240,7 +243,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
 }
 
 function connectSignal(item, signalName, value, objectScope, componentScope) {
-  const signal = item[signalName];
+  const signal = item.$Signals && item.$Signals[signalName] || item[signalName];
   if (!signal) {
     console.warn(`No signal called ${signalName} found!`);
     return undefined;
