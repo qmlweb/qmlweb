@@ -44,10 +44,12 @@ class QtQuick_MouseArea extends QtQuick_Item {
       if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
       this.$handlePositionChanged(e);
     };
-    const handleMouseUp = () => {
+    const handleMouseUp = e => {
+      const mouse = this.$eventToMouse(e);
       this.pressed = false;
       this.containsPress = false;
       this.pressedButtons = 0;
+      this.released(mouse);
       document.removeEventListener("mouseup", handleMouseUp);
       this.$clientTransform = undefined;
       document.removeEventListener("mousemove", handleMouseMove);
@@ -70,6 +72,7 @@ class QtQuick_MouseArea extends QtQuick_Item {
       this.pressed = true;
       this.containsPress = true;
       this.pressedButtons = mouse.button;
+      this.$Signals.pressed(mouse);
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("mousemove", handleMouseMove);
     });
