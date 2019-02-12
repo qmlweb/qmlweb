@@ -18,6 +18,7 @@ class QtQuick_Text extends QtQuick_Item {
     lineHeight: "real",
     wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
     horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
+    verticalAlignment: { type: "enum", initialValue: 32 }, // Text.AlignTop
     style: "enum",
     styleColor: "color"
   };
@@ -30,6 +31,9 @@ class QtQuick_Text extends QtQuick_Item {
     fc.style.width = "100%";
     fc.style.height = "100%";
     fc.style.whiteSpace = "pre";
+    fc.style.display = "table-cell";
+    fc.style.verticalAlign = "top";
+    this.dom.style.display = "table";
     this.dom.style.textAlign = "left";
     this.dom.appendChild(fc);
 
@@ -40,6 +44,8 @@ class QtQuick_Text extends QtQuick_Item {
     this.wrapModeChanged.connect(this, this.$onWrapModeChanged);
     this.horizontalAlignmentChanged.connect(this,
                                             this.$onHorizontalAlignmentChanged);
+    this.verticalAlignmentChanged.connect(this,
+                                            this.$onVerticalAlignmentChanged);
     this.styleChanged.connect(this, this.$onStyleChanged);
     this.styleColorChanged.connect(this, this.$onStyleColorChanged);
 
@@ -128,6 +134,22 @@ class QtQuick_Text extends QtQuick_Item {
         break;
     }
     this.dom.style.textAlign = textAlign;
+    this.$updateJustifyWhiteSpace();
+  }
+  $onVerticalAlignmentChanged(newVal) {
+    let verticalAlign = null;
+    switch (newVal) {
+      case this.Text.AlignTop:
+        verticalAlign = "top";
+        break;
+      case this.Text.AlignVCenter:
+        verticalAlign = "middle";
+        break;
+      case this.Text.AlignBottom:
+        verticalAlign = "bottom";
+        break;
+    }
+    this.impl.style.verticalAlign = verticalAlign;
     this.$updateJustifyWhiteSpace();
   }
   $onFontChanged() {
