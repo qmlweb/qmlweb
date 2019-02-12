@@ -82,8 +82,8 @@ class QtQuick_FontLoader extends QtQml_QtObject {
             }
           }
         },
-        fontLoaded: fontFamily => {
-          if (this.$lastName === fontName && fontFamily === fontName) {
+        fontLoaded: font => {
+          if (this.$lastName === fontName && font.family === fontName) {
             this.name = fontName;
             this.status = this.FontLoader.Ready;
           }
