@@ -643,21 +643,31 @@ class QMLEngine {
 
   // This parses the full URL into scheme, authority and path
   $parseURI(uri) {
-    const match = uri.match(/^([^/]*?:\/\/)(.*?)(\/.*)$/);
-    if (match) {
-      return {
-        scheme: match[1],
-        authority: match[2],
-        path: match[3]
-      };
+    if (!uri.startsWith("qrc:/")) {
+      const match = uri.match(/^([^/]*?:\/\/)(.*?)(\/.*)$/);
+      if (match) {
+        return {
+          scheme: match[1],
+          authority: match[2],
+          path: match[3]
+        };
+      }
+    } else {
+      const match = uri.match(/^([^/]*?:\/\/?)(.*?)$/);
+      if (match) {
+        return {
+          scheme: "qrc://",
+          authority: "",
+          path: match[2]
+        };
+      }
     }
     return undefined;
   }
 
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {
-    // probably, replace :// with :/ ?
-    if (!file || file.indexOf("://") !== -1) {
+    if (!file || file.indexOf(":/") !== -1) {
       return file;
     }
 

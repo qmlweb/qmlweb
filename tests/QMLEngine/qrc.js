@@ -7,7 +7,7 @@ describe("QMLEngine.qrc", function() {
 
   /* Put some stuff into QmlWeb.qrc, this is what gulp-qmlweb does */
   var qrc_files = [
-    ["/Basic.qml",
+    ["Basic.qml",
       "import QtQuick 2.0\n Item { property int value: 42 }"
     ],
     ["/SomeDir/SomeFile.qml",
@@ -72,7 +72,7 @@ describe("QMLEngine.qrc", function() {
   }
 
   it("basic", function() {
-    var qml = loadQmlFile("qrc:///Basic.qml", this.div);
+    var qml = loadQmlFile("qrc:/Basic.qml", this.div);
     expect(qml.value).toBe(42);
   });
 
