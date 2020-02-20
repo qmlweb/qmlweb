@@ -8,6 +8,44 @@ const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
 
+// use requireAnimationFrame replace setInterval
+const {
+  setAnimationInterval,
+  clearAnimationInterval
+} = (function() {
+  const {
+    requestAnimationFrame,
+    cancelAnimationFrame
+  } = window;
+  QmlWeb.useAnimationFrames = requestAnimationFrame && cancelAnimationFrame;
+
+  let setAni = setInterval;
+  let clearAni = clearInterval;
+
+  if (QmlWeb.useAnimationFrames) {
+    const animations = [];
+    setAni = callback => {
+      const id = animations.length;
+      animations[id] = true;
+      const ticker = () => {
+        callback();
+        animations[id] = requestAnimationFrame(ticker);
+      };
+      // faster then push().
+      animations[id] = requestAnimationFrame(ticker);
+      return id;
+    };
+    clearAni = id => {
+      cancelAnimationFrame(animations[id]);
+      animations[id] = null;
+    };
+  }
+  return {
+    setAnimationInterval: setAni,
+    clearAnimationInterval: clearAni
+  };
+}());
+
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element) {
@@ -115,7 +153,10 @@ class QMLEngine {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
-      this._tickerId = setInterval(this._tick.bind(this), this.$interval);
+      this.isUseRAF = QmlWeb.useAnimationFrames;
+      this._tickerId = this.isUseRAF ?
+        setAnimationInterval(this._tick.bind(this)) :
+        setInterval(this._tick.bind(this), this.$interval);
       this._whenStart.forEach(callback => callback());
     }
   }
@@ -124,7 +165,11 @@ class QMLEngine {
   stop() {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState === QMLOperationState.Running) {
-      clearInterval(this._tickerId);
+      if (this.isUseRAF) {
+        clearAnimationInterval(this._tickerId);
+      } else {
+        clearInterval(this._tickerId);
+      }
       this.operationState = QMLOperationState.Idle;
       this._whenStop.forEach(callback => callback());
     }
