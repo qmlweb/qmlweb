@@ -63,5 +63,6 @@ class QtQuick_SequentialAnimation extends QtQuick_Animation {
       this.animations[this.$curIndex].stop();
     }
     this.running = false;
+    this.$Signals.finished();
   }
 }

@@ -11,15 +11,23 @@ class QtQuick_Animation extends QtQml_QtObject {
     running: "bool"
   };
 
+  static signals = {
+    finished: [],
+    started: [],
+    stopped: []
+  };
+
   restart() {
     this.stop();
     this.start();
   }
   start() {
     this.running = true;
+    this.$Signals.started();
   }
   stop() {
     this.running = false;
+    this.$Signals.stopped();
   }
   pause() {
     this.paused = true;
