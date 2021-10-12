@@ -55,6 +55,9 @@ class QtQuick_Text extends QtQuick_Item {
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
   $redrawText() {
+    if (this.clip) {
+      this.dom.style.display = "block";
+    }
     const text = this.text;
     let format = this.textFormat;
     if (format === this.Text.AutoText) {
