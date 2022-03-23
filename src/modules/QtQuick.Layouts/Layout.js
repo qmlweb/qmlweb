@@ -11,12 +11,12 @@ class QtQuick_Layouts_Layout extends QtQml_QtObject {
       this.$Layout = new QmlWeb.QObject(this);
       QmlWeb.createProperties(this.$Layout, {
         alignment: "enum",
-        bottomMargin: "real",
+        bottomMargin: { type: "real", initialValue: null },
         column: "int",
-        columnSpan: "int",
+        columnSpan: { type: "int", initialValue: 1 },
         fillHeight: "bool",
         fillWidth: "bool",
-        leftMargin: "real",
+        leftMargin: { type: "real", initialValue: null },
         margins: "real",
         maximumHeight: "real",
         maximumWidth: "real",
@@ -24,10 +24,10 @@ class QtQuick_Layouts_Layout extends QtQml_QtObject {
         minimumWidth: "real",
         preferredHeight: "real",
         preferredWidth: "real",
-        rightMargin: "real",
+        rightMargin: { type: "real", initialValue: null },
         row: "int",
-        rowSpan: "int",
-        topMargin: "real"
+        rowSpan: { type: "int", initialValue: 1 },
+        topMargin: { type: "real", initialValue: null }
       });
     }
     return this.$Layout;
