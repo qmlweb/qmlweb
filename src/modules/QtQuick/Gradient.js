@@ -21,16 +21,17 @@ class QtQuick_Gradient extends QtQml_QtObject {
   }
   $onGradientStopChanged() {
     const style = this.$parent.impl.style;
-    var linearGradient = '';
+    let linearGradient = "";
     for (let i = 0; i < this.stops.length; i++) {
       const stop = this.stops[i];
-      linearGradient += ',' + stop.color + ' ' + (stop.position * 100) + '%';
+      linearGradient += `,${stop.color} ${stop.position * 100}%`;
     }
     if (this.stops.length > 0) {
-      style.backgroundColor = 'transparent';
+      style.backgroundColor = "transparent";
 
-      var direction = (this.orientation == Orientation.Vertical ? 'to bottom' : 'to right');
-      style.backgroundImage = 'linear-gradient(' + direction + linearGradient + ')';
+      const direction = this.orientation === this.Orientation.Vertical
+        ? "to bottom" : "to right";
+      style.backgroundImage = `linear-gradient(${direction}${linearGradient})`;
     }
   }
 }
