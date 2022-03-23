@@ -2,7 +2,8 @@
 class QtQuick_Rectangle extends QtQuick_Item {
   static properties = {
     color: { type: "color", initialValue: "white" },
-    radius: "real"
+    radius: "real",
+    gradient: "gradient"
   };
 
   constructor(meta) {
