@@ -1,14 +1,9 @@
 // eslint-disable-next-line no-undef
-class QtQuick_Layouts_Positioner extends QtQuick_Item {
+class QtQuick_Layouts_Positioner extends QtQuick_Layouts_AbstractLayout {
   constructor(meta) {
     super(meta);
     this.spacingChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, this.$onChildrenChanged);
-    this.childrenChanged.connect(this, this.layoutChildren);
-    this.widthChanged.connect(this, this.$onWidthChanged);
-    this.heightChanged.connect(this, this.$onHeightChanged);
-    this.layoutChildren();
   }
 
   layoutChildren() {
@@ -27,48 +22,8 @@ class QtQuick_Layouts_Positioner extends QtQuick_Item {
     }
   }
 
-  $applyLayout(layout) {
-    for (let i = 0; i < layout.cells.length; ++i) {
-      const cell = layout.cells[i];
-
-      cell.item.x = cell.x;
-      cell.item.y = cell.y;
-      cell.item.width = cell.width;
-      cell.item.height = cell.height;
-    }
-  }
-
   $plugChildrenSignals(children, action) {
-    const Layout = QmlWeb.getConstructor("QtQuick.Layouts", "1.0", "Layout");
-    const flags = QmlWeb.Signal.UniqueConnection;
-    for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i];
-      child.$Layout = Layout.getAttachedObject.bind(child)();
-      for (const property in child.$Layout.$properties) {
-        const signal = child.$Layout.$properties[property].changed;
-        signal[action](this, this.layoutChildren, flags);
-      }
-      child.implicitWidthChanged[action](this, this.layoutChildren, flags);
-      child.implicitHeightChanged[action](this, this.layoutChildren, flags);
-      child.visibleChanged[action](this, this.layoutChildren, flags);
-    }
-  }
-
-  $onChildrenChanged(newVal, oldVal) {
-    this.$plugChildrenSignals(oldVal, "disconnect");
-    this.$plugChildrenSignals(newVal, "connect");
-  }
-
-  $onWidthChanged() {
-    if (!this.$isUsingImplicitWidth) {
-      this.layoutChildren();
-    }
-  }
-
-  $onHeightChanged() {
-    if (!this.$isUsingImplicitHeight) {
-      this.layoutChildren();
-    }
+    super.$plugChildrenSignals(children, action, ["visible"]);
   }
 
   $createLayoutDescriptor() {
@@ -83,25 +38,14 @@ class QtQuick_Layouts_Positioner extends QtQuick_Item {
     };
   }
 
-  $inferCellSize(child, direction) {
-    let size = child[`implicit${direction}`];
+  $applyLayout(layout) {
+    for (let i = 0; i < layout.cells.length; ++i) {
+      const cell = layout.cells[i];
 
-    if (child.$Layout[`preferred${direction}`]) {
-      size = child.$Layout[`preferred${direction}`];
+      cell.item.x = cell.x;
+      cell.item.y = cell.y;
+      cell.item.width = cell.width;
+      cell.item.height = cell.height;
     }
-    if (child.$Layout[`minimum${direction}`]) {
-      size = Math.max(child.$Layout[`minimum${direction}`], size);
-    }
-    if (child.$Layout[`maximum${direction}`]) {
-      size = Math.min(child.$Layout[`maximum${direction}`], size);
-    }
-    return size;
-  }
-
-  $inferCellMargin(child, direction) {
-    const directionMargin = child.$Layout[`${direction}Margin`];
-    const generalMargin = child.$Layout.margins;
-
-    return directionMargin === null ? generalMargin : directionMargin;
   }
 }
