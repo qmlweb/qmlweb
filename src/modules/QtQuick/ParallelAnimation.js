@@ -51,5 +51,6 @@ class QtQuick_ParallelAnimation extends QtQuick_Animation {
   }
   complete() {
     this.stop();
+    this.$Signals.finished();
   }
 }

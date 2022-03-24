@@ -87,5 +87,6 @@ class QtQuick_SequentialAnimation extends QtQuick_Animation {
   complete() {
     if (!this.running) return;
     this.running = false;
+    this.$Signals.finished();
   }
 }

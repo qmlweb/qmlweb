@@ -29,5 +29,6 @@ class QtQuick_PauseAnimation extends QtQuick_Animation {
   }
   complete() {
     this.running = false;
+    this.$Signals.finished();
   }
 }
