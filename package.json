@@ -34,8 +34,8 @@
     "puppeteer": "^1.1.0",
     "qmlweb-parser": "^0.3.2",
     "r2": "^2.0.0",
-    "remark-cli": "^2.0.0",
-    "remark-lint": "^5.0.0",
+    "remark-cli": "^10.0.0",
+    "remark-lint": "^9.1.0",
     "through": "^2.3.8"
   },
   "scripts": {
