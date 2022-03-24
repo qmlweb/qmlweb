@@ -8,10 +8,12 @@ class QtQuick_GradientStop extends QtQml_QtObject {
   constructor(meta) {
     super(meta);
 
-    this.$item = this.$parent;
+    this.$item = this.$parent.$item;
+    this.colorChanged.connect(this, this.onUpdate);
+    this.positionChanged.connect(this, this.onUpdate);
   }
 
   onUpdate() {
-    this.$parent.onGradientStopChanged();
+    this.$parent.$onGradientStopChanged();
   }
 }
