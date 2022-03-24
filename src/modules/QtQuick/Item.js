@@ -7,7 +7,6 @@ class QtQuick_Item extends QtQml_QtObject {
     state: "string",
     states: "list",
     transitions: "list",
-    data: "list",
     children: "list",
     resources: "list",
     transform: "list",
@@ -31,7 +30,6 @@ class QtQuick_Item extends QtQml_QtObject {
     clip: "bool",
     focus: "bool"
   };
-  static defaultProperty = "data";
 
   constructor(meta) {
     super(meta);

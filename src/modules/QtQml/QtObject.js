@@ -2,6 +2,11 @@
 class QtQml_QtObject extends QmlWeb.QObject {
   $Signals = {};
 
+  static properties = {
+    data: "list"
+  };
+  static defaultProperty = "data";
+
   constructor(meta) {
     super(meta.parent);
 
