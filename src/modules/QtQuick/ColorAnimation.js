@@ -106,6 +106,7 @@ class QtQuick_ColorAnimation extends QtQuick_PropertyAnimation {
     this.$loop++;
     if (this.$loop === this.loops) {
       this.running = false;
+      this.$Signals.finished();
     } else if (!this.running) {
       this.$actions = [];
     } else {
