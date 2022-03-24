@@ -30,4 +30,8 @@ describe("QtQuick.Loader", function() {
     const qml = load("EmptySource", this.div);
     expect(qml.sourceComponent).toBe(null);
   });
+  it("SourceComponentFromComponent", function() {
+    const qml = load("SourceComponentFromComponent", this.div);
+    expect(qml.item.color.toString()).toBe("#ffff00");
+  });
 });
