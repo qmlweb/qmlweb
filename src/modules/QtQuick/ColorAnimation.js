@@ -20,16 +20,15 @@ class QtQuick_ColorAnimation extends QtQuick_PropertyAnimation {
       for (const j in this.$props) {
         const target = this.$targets[i];
         const property = this.$props[j];
-        const from_color = this.from || target[property];
-        const to_color = this.to;
+        const from = this.from || target[property];
+        const to = this.to;
         // Animations always take time in SequentialAnimation
         // , regardless of the value from and to
         const action = {
-          // from, to, cur_color
           target,
           property,
-          from_color,
-          to_color
+          from,
+          to
         };
         this.$actions.push(action);
       }
@@ -39,15 +38,15 @@ class QtQuick_ColorAnimation extends QtQuick_PropertyAnimation {
   $startLoop() {
     for (const i in this.$actions) {
       const action = this.$actions[i];
-      const from_color = action.from_color ||
+      const from = action.from ||
         action.target[action.property] ||
         EMPTY_ANIMATION_COLOR;
-      const to_color = action.to_color ||
+      const to = action.to ||
         action.target[action.property] ||
         EMPTY_ANIMATION_COLOR;
 
-      action.from = new QmlWeb.QColor(from_color);
-      action.to = new QmlWeb.QColor(to_color);
+      action.from = new QmlWeb.QColor(from);
+      action.to = new QmlWeb.QColor(to);
       action.cur_color = new QmlWeb.QColor(action.from);
     }
     this.$at = 0;
@@ -98,7 +97,7 @@ class QtQuick_ColorAnimation extends QtQuick_PropertyAnimation {
     for (const i in this.$actions) {
       const action = this.$actions[i];
       const property = action.target.$properties[action.property];
-      const to_color = action.to_color;
+      const to_color = action.to;
       if (to_color) {
         property.set(to_color,
           QmlWeb.QMLProperty.ReasonAnimation);
