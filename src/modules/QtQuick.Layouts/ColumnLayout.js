@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-class QtQuick_Layouts_ColumnLayout extends QtQuick_Layouts_Positioner {
+class QtQuick_Layouts_ColumnLayout extends QtQuick_Layouts_DirectionalLayout {
   static versions = /^1\./;
   static properties = {
     layoutDirection: "enum",

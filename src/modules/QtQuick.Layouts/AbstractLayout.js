@@ -66,4 +66,14 @@ class QtQuick_Layouts_AbstractLayout extends QtQuick_Item {
 
     return directionMargin === null ? generalMargin : directionMargin;
   }
+
+  $inferCellHMargin(child) {
+    return this.$inferCellMargin(child, "left")
+      + this.$inferCellMargin(child, "right");
+  }
+
+  $inferCellVMargin(child) {
+    return this.$inferCellMargin(child, "top")
+      + this.$inferCellMargin(child, "bottom");
+  }
 }

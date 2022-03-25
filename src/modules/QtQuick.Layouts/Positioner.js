@@ -1,11 +1,5 @@
 // eslint-disable-next-line no-undef
 class QtQuick_Layouts_Positioner extends QtQuick_Layouts_AbstractLayout {
-  constructor(meta) {
-    super(meta);
-    this.spacingChanged.connect(this, this.layoutChildren);
-    this.layoutDirectionChanged.connect(this, this.layoutChildren);
-  }
-
   layoutChildren() {
     if (this.children.length > 0) {
       const layout = this.$bareLayout();
@@ -36,6 +30,9 @@ class QtQuick_Layouts_Positioner extends QtQuick_Layouts_AbstractLayout {
       fillColumnCount: 0,
       fillRowCount: 0
     };
+  }
+
+  $applyDirection() {
   }
 
   $applyLayout(layout) {
