@@ -92,24 +92,24 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
     }
   }
 
-  $onTopToBottomNextIndex(index, span, mode) {
+  $onTopToBottomNextIndex(index, span) {
     const nextIndex = index.row + span.row;
 
     if (this.rows && nextIndex >= this.rows) {
       index.row = 0;
       index.column++;
-    } else if (mode !== "lookup") {
+    } else {
       index.row = nextIndex;
     }
   }
 
-  $onLeftToRightNextIndex(index, span, mode) {
+  $onLeftToRightNextIndex(index, span) {
     const nextIndex = index.column + span.column;
 
     if (this.columns && nextIndex >= this.columns) {
       index.column = 0;
       index.row++;
-    } else if (mode !== "lookup") {
+    } else {
       index.column = nextIndex;
     }
   }
@@ -126,10 +126,10 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
           layout, index.column, index.row, span.column, span.row
         );
         if (!spaceAvailable) {
-          onNextIndex(index, { column: 1, row: 1 }, "lookup");
+          onNextIndex(index, { column: 1, row: 1 });
         }
-        this.$pushItemToCell(layout, child, index.column, index.row);
       }
+      this.$pushItemToCell(layout, child, index.column, index.row);
       onNextIndex(index, span);
     }
   }
@@ -207,9 +207,9 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
   //
   $getCellWeight(cell, size, words) {
     const child = cell ? cell.occupant : null;
-    const { direction, margins } = words;
+    const { direction, margins, span } = words;
 
-    if (child && child.$Layout[`fill${direction}`]) {
+    if (child && child.$Layout[`fill${direction}`] && child.$Layout[span] < 2) {
       let cellSize = this.$inferCellSize(child, direction);
       margins.forEach(margin => {
         cellSize += this.$inferCellMargin(child, margin);
@@ -230,7 +230,8 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
 
         size = this.$getCellWeight(cell, size, {
           direction: "Width",
-          margins: ["left", "right"]
+          margins: ["left", "right"],
+          span: "columnSpan"
         });
       }
       weights.push(size);
@@ -250,7 +251,8 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
 
         size = this.$getCellWeight(cell, size, {
           direction: "Height",
-          margins: ["top", "bottom"]
+          margins: ["top", "bottom"],
+          span: "rowSpan"
         });
       }
       weights.push(size);
@@ -324,7 +326,6 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
         const bonus = margin / totalWeight * weight;
 
         if (!cell) {
-          // TODO this shouldn't happen: something is wrong with TopToBottom
           continue;
         }
         // Determine cell size
@@ -363,7 +364,6 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
           const max = child.$Layout[`maximum${direction}`];
           const min = child.$Layout[`minimum${direction}`];
 
-          // Determine item size
           if (child.$Layout[`fill${direction}`]) {
             const cellMargin = cellMarginGetter(child);
             const cellOuter = cell[`outer${direction}`] || cell[propertyName];
@@ -575,11 +575,20 @@ class QtQuick_Layouts_GridLayout extends QtQuick_Layouts_Positioner {
   }
 
   $checkSpanAvailability(layout, column, row, width, height) {
-    if (width > this.columns) {
-      return true;
-    }
-    if (column + width > this.columns) {
-      return false;
+    if (this.flow === this.GridLayout.LeftToRight) {
+      if (width > this.columns) {
+        return true; // too big to ever fit
+      }
+      if (column + width > this.columns) {
+        return false; // too big for current row
+      }
+    } else if (this.flow === this.GridLayout.TopToBottom) {
+      if (height > this.rows) {
+        return true; // too big to ever fit
+      }
+      if (row + height > this.rows) {
+        return false; // too big for current column
+      }
     }
     for (let x = column; x < column + width; ++x) {
       for (let y = row; y < row + height; ++y) {
