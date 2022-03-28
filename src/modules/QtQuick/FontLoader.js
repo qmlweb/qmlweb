@@ -123,11 +123,13 @@ Refs: https://github.com/smnh/FontLoader.`);
   }
   $onSourceChanged(font_src) {
     // Load font by source url
+    const uri = QmlWeb.engine.$parseURI(font_src);
+    const url = uri.scheme === "qrc://" ? QmlWeb.qrc[uri.path] : font_src;
     const rand = Math.round(Math.random() * 1e15);
     const fontName = `font_${Date.now().toString(36)}_${rand.toString(36)}`;
     if (typeof FontFace !== "undefined"
         && document.fonts && document.fonts.add) {
-      const fontFace = new FontFace(fontName, `url('${font_src}')`);
+      const fontFace = new FontFace(fontName, `url('${url}')`);
       document.fonts.add(fontFace);
       fontFace.load();
       this.$loadFont(fontName, fontFace);
