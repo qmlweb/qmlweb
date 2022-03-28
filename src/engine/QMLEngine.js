@@ -651,7 +651,7 @@ class QMLEngine {
 
   // This parses the full URL into scheme, authority and path
   $parseURI(uri) {
-    if (!uri.startsWith("qrc:/")) {
+    if (!uri.match(/^qrc:\//i)) {
       const match = uri.match(/^([^/]*?:\/\/)(.*?)(\/.*)$/);
       if (match) {
         return {
