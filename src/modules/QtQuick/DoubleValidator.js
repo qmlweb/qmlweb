@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-class QtQuick_DoubleValidator extends QtQuick_Item {
+class QtQuick_DoubleValidator extends QtQml_QValidator {
   static enums = {
     DoubleValidator: { StandardNotation: 1, ScientificNotation: 2 }
   };
@@ -38,7 +38,10 @@ class QtQuick_DoubleValidator extends QtQuick_Item {
       return false;
     }
     const value = parseFloat(string);
-    return this.bottom <= value && this.top >= value &&
+    const acceptable = this.bottom <= value && this.top >= value &&
            this.$getDecimalsForNumber(value) <= this.decimals;
+    return acceptable
+      ? this.QValidator.Acceptable
+      : this.QValidator.Invalid;
   }
 }
