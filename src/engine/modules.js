@@ -10,6 +10,7 @@ const modules = {
     list: QmlWeb.qmlList,
     color: QmlWeb.QColor,
     font: QmlWeb.QFont,
+    keysequence: QmlWeb.QKeySequence,
     size: QmlWeb.QSizeF,
     point: QmlWeb.QPointF,
     rect: QmlWeb.QRectF,

@@ -153,6 +153,9 @@ const Qt = {
   // Orientations
   Vertical: 0,
   Horizontal: 1,
+  // Shortcut
+  WindowShortcut: 0,
+  ApplicationShortcut: 1,
   // Keys
   Key_Escape: 27,
   Key_Tab: 9,

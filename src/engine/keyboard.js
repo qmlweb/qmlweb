@@ -15,12 +15,12 @@ QmlWeb.eventToKeyboard = e => ({
   count: 1,
   isAutoRepeat: false,
   key: QmlWeb.keyCodeToQt(e),
-  modifiers: e.ctrlKey * QmlWeb.Qt.CtrlModifier
+  modifiers: e.ctrlKey * QmlWeb.Qt.ControlModifier
            | e.altKey * QmlWeb.Qt.AltModifier
            | e.shiftKey * QmlWeb.Qt.ShiftModifier
            | e.metaKey * QmlWeb.Qt.MetaModifier
            | e.keypad * QmlWeb.Qt.KeypadModifier,
-  text: String.fromCharCode(e.charCode)
+  text: e.key || String.fromCharCode(e.charCode || e.keyCode)
 });
 
 QmlWeb.keyboardSignals = {};

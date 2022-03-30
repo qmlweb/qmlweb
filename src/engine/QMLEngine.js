@@ -458,16 +458,24 @@ class QMLEngine {
   //---------- Private Methods ----------
 
   $initKeyboard() {
-    document.onkeypress = e => {
+    document.onkeydown = e => {
       let focusedElement = this.focusedElement();
       const event = QmlWeb.eventToKeyboard(e || window.event);
       const eventName = QmlWeb.keyboardSignals[event.key];
 
+      if (this.rootObject.$shortcuts) {
+        for (const shortcut of this.rootObject.$shortcuts) {
+          shortcut.Keys.pressed(event);
+          if (event.accepted) {
+            break;
+          }
+        }
+      }
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;
         focusedElement.$context.event = event;
         focusedElement.Keys.pressed(event);
-        if (eventName) {
+        if (eventName && focusedElement.Keys[eventName]) {
           focusedElement.Keys[eventName](event);
         }
         focusedElement.$context.event = backup;
