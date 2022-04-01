@@ -36,23 +36,28 @@ class QFont extends QmlWeb.QObject {
   $onBoldChanged(newVal) {
     const Font = this.Font;
     this.weight = newVal ? Font.Bold : Font.Normal;
+    this.$parent.$Component.completed();
   }
   $onCapitalizationChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.fontVariant = newVal === this.Font.SmallCaps ? "small-caps" : "none";
     style.textTransform = this.$capitalizationToTextTransform(newVal);
+    this.$parent.$Component.completed();
   }
   $onFamilyChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.fontFamily = newVal;
+    this.$parent.$Component.completed();
   }
   $onItalicChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.fontStyle = newVal ? "italic" : "normal";
+    this.$parent.$Component.completed();
   }
   $onLetterSpacingChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.letterSpacing = newVal !== undefined ? `${newVal}px` : "";
+    this.$parent.$Component.completed();
   }
   $onPixelSizeChanged(newVal) {
     if (!this.$sizeLock) {
@@ -61,11 +66,13 @@ class QFont extends QmlWeb.QObject {
     const val = `${newVal}px`;
     this.$parent.dom.style.fontSize = val;
     this.$parent.dom.firstChild.style.fontSize = val;
+    this.$parent.$Component.completed();
   }
   $onPointSizeChanged(newVal) {
     this.$sizeLock = true;
     this.pixelSize = Math.round(newVal / 0.75);
     this.$sizeLock = false;
+    this.$parent.$Component.completed();
   }
   $onStrikeoutChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
@@ -74,6 +81,7 @@ class QFont extends QmlWeb.QObject {
       : this.$parent.font.underline
         ? "underline"
         : "none";
+    this.$parent.$Component.completed();
   }
   $onUnderlineChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
@@ -82,14 +90,17 @@ class QFont extends QmlWeb.QObject {
       : newVal
         ? "underline"
         : "none";
+    this.$parent.$Component.completed();
   }
   $onWidthChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.fontWeight = this.$weightToCss(newVal);
+    this.$parent.$Component.completed();
   }
   $onWordSpacingChanged(newVal) {
     const style = this.$parent.dom.firstChild.style;
     style.wordSpacing = newVal !== undefined ? `${newVal}px` : "";
+    this.$parent.$Component.completed();
   }
 
   $weightToCss(weight) {
