@@ -27,4 +27,14 @@ stored within the resource system from outside of the resource system, a full
 More details here: http://doc.qt.io/qt-5/qml-url.html
 
 */
+
+class QResource {
+  static registerResource(resources, prefix = "") {
+    for (const key in resources) {
+      QmlWeb.qrc[`${prefix}${key}`] = resources[key];
+    }
+  }
+}
+
+QmlWeb.QResource = QResource;
 QmlWeb.qrc = {};
