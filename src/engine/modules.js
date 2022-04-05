@@ -125,6 +125,47 @@ function getModuleConstructors(moduleName, version) {
   return constructors;
 }
 
+function getDirectoryConstructorsAt(path) {
+  const keys = Object.keys(QmlWeb.qrc).filter(key => key.startsWith(path)
+    && key.match(/\.qml$/i));
+  const constructors = [];
+  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+
+  keys.forEach(key => {
+    const parts = key.split("/");
+    const name = parts[parts.length - 1].replace(/\.qml/i, "");
+    // eslint-disable-next-line no-undef
+    const engine = convertToEngine(QmlWeb.qrc[key]);
+    constructors[name] = meta => {
+      const delegate = new QMLComponent({
+        context: meta.$context,
+        parent: meta.parent,
+        object: engine,
+        super: meta.super
+      });
+      return delegate.createObject(meta.parent);
+    };
+  });
+  return constructors;
+}
+
+function getDirectoryConstructors(moduleName, object) {
+  const schemeRegex = /^qrc:\/+/i;
+  if (moduleName.match(schemeRegex)) {
+    return getDirectoryConstructorsAt(
+      QmlWeb.helpers.reduceUri(moduleName.replace(schemeRegex, ""))
+    );
+  } else if (object.$context && object.$context.$basePath &&
+    object.$context.$basePath.match(schemeRegex)) {
+    const tmp = object.$context.$basePath.replace(schemeRegex, "");
+    const path = `${tmp}/${moduleName}`;
+
+    return getDirectoryConstructorsAt(QmlWeb.helpers.reduceUri(path));
+  }
+  console.warn("Directory import only supported with qrc scheme");
+  return null;
+}
+
 function loadImports(self, imports) {
   const mergeObjects = QmlWeb.helpers.mergeObjects;
   let constructors = mergeObjects(modules.Main);
@@ -134,19 +175,24 @@ function loadImports(self, imports) {
   }
   for (let i = 0; i < imports.length; ++i) {
     const [, moduleName, moduleVersion, moduleAlias] = imports[i];
-    if (typeof moduleVersion !== "number") continue;
-    const versionString = moduleVersion % 1 === 0 ?
-                            moduleVersion.toFixed(1) :
-                            moduleVersion.toString();
-    const moduleConstructors = getModuleConstructors(moduleName, versionString);
+    let addedConstructors;
+    if (typeof moduleVersion === "number") {
+      const versionString = moduleVersion % 1 === 0 ?
+                              moduleVersion.toFixed(1) :
+                              moduleVersion.toString();
+      addedConstructors = getModuleConstructors(moduleName, versionString);
+    } else {
+      addedConstructors = getDirectoryConstructors(moduleName, self);
+    }
+    if (!addedConstructors) continue;
 
     if (moduleAlias !== "") {
       constructors[moduleAlias] = mergeObjects(
         constructors[moduleAlias],
-        moduleConstructors
+        addedConstructors
       );
     } else {
-      constructors = mergeObjects(constructors, moduleConstructors);
+      constructors = mergeObjects(constructors, addedConstructors);
     }
   }
   self.importContextId = importContextIds++;

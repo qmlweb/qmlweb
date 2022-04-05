@@ -24,6 +24,23 @@ class QmlWebHelpers {
     }
     return merged;
   }
+  static reduceUri(uri) {
+    let reducedUri = uri;
+    let match;
+    // eslint-disable-next-line no-cond-assign
+    while (match = reducedUri.match(/\/?\.\//)) {
+      const part1 = reducedUri.slice(0, match.index);
+      const part2 = reducedUri.slice(match.index + match[0].length);
+      reducedUri = `${part1}/${part2}`;
+    }
+    // eslint-disable-next-line no-cond-assign
+    while (match = reducedUri.match(/([^/]+)(\/\.\.)\/?/)) {
+      const part1 = reducedUri.slice(0, match.index);
+      const part2 = reducedUri.slice(match.index + match[0].length);
+      reducedUri = `${part1}/${part2}`;
+    }
+    return reducedUri;
+  }
 }
 
 QmlWeb.helpers = QmlWebHelpers;
