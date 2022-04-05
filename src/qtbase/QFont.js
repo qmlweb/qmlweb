@@ -33,25 +33,28 @@ class QFont extends QmlWeb.QObject {
     this.weightChanged.connect(this, this.$onWidthChanged);
     this.wordSpacingChanged.connect(this, this.$onWordSpacingChanged);
   }
+  $style() {
+    return this.$parent.dom.firstChild.style;
+  }
   $onBoldChanged(newVal) {
     const Font = this.Font;
     this.weight = newVal ? Font.Bold : Font.Normal;
   }
   $onCapitalizationChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.fontVariant = newVal === this.Font.SmallCaps ? "small-caps" : "none";
     style.textTransform = this.$capitalizationToTextTransform(newVal);
   }
   $onFamilyChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.fontFamily = newVal;
   }
   $onItalicChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.fontStyle = newVal ? "italic" : "normal";
   }
   $onLetterSpacingChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.letterSpacing = newVal !== undefined ? `${newVal}px` : "";
   }
   $onPixelSizeChanged(newVal) {
@@ -60,7 +63,7 @@ class QFont extends QmlWeb.QObject {
     }
     const val = `${newVal}px`;
     this.$parent.dom.style.fontSize = val;
-    this.$parent.dom.firstChild.style.fontSize = val;
+    this.$style().fontSize = val;
   }
   $onPointSizeChanged(newVal) {
     this.$sizeLock = true;
@@ -68,7 +71,7 @@ class QFont extends QmlWeb.QObject {
     this.$sizeLock = false;
   }
   $onStrikeoutChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.textDecoration = newVal
       ? "line-through"
       : this.$parent.font.underline
@@ -76,7 +79,7 @@ class QFont extends QmlWeb.QObject {
         : "none";
   }
   $onUnderlineChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.textDecoration = this.$parent.font.strikeout
       ? "line-through"
       : newVal
@@ -84,11 +87,11 @@ class QFont extends QmlWeb.QObject {
         : "none";
   }
   $onWidthChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.fontWeight = this.$weightToCss(newVal);
   }
   $onWordSpacingChanged(newVal) {
-    const style = this.$parent.dom.firstChild.style;
+    const style = this.$style();
     style.wordSpacing = newVal !== undefined ? `${newVal}px` : "";
   }
 
