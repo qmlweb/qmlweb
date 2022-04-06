@@ -657,7 +657,7 @@ class QMLEngine {
         return {
           scheme: match[1],
           authority: match[2],
-          path: match[3]
+          path: QmlWeb.helpers.reduceUri(match[3])
         };
       }
     } else {
@@ -666,7 +666,7 @@ class QMLEngine {
         return {
           scheme: "qrc://",
           authority: "",
-          path: match[2]
+          path: QmlWeb.helpers.reduceUri(match[2])
         };
       }
     }
