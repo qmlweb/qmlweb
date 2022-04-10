@@ -13,10 +13,22 @@ class QtQuick_Item extends QtQml_QtObject {
     x: "real",
     y: "real",
     z: "real",
-    width: { type: "real", initialValue: null },
-    height: { type: "real", initialValue: null },
-    implicitWidth: "real",
-    implicitHeight: "real",
+    width: {
+      type: "real", initialValue: null,
+      get: QtQuick_Item.prototype.$getWidth
+    },
+    height: {
+      type: "real", initialValue: null,
+      get: QtQuick_Item.prototype.$getHeight
+    },
+    implicitWidth: {
+      type: "real",
+      set: QtQuick_Item.prototype.$setImplicitWidth
+    },
+    implicitHeight: {
+      type: "real",
+      set: QtQuick_Item.prototype.$setImplicitHeight
+    },
     left: "real",
     right: "real",
     top: "real",
@@ -73,8 +85,6 @@ class QtQuick_Item extends QtQml_QtObject {
 
     this.widthChanged.connect(this, this.$updateHGeometry);
     this.heightChanged.connect(this, this.$updateVGeometry);
-    this.implicitWidthChanged.connect(this, this.$onImplicitWidthChanged);
-    this.implicitHeightChanged.connect(this, this.$onImplicitHeightChanged);
 
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
@@ -395,16 +405,26 @@ class QtQuick_Item extends QtQml_QtObject {
       this.impl.style.opacity = this.$opacity;
     }
   }
-  $onImplicitWidthChanged() {
-    if (this.$isUsingImplicitWidth) {
-      this.width = this.implicitWidth;
-      this.$isUsingImplicitWidth = true;
+  $getWidth() {
+    return this.$properties.width.get() || this.implicitWidth;
+  }
+  $getHeight() {
+    return this.$properties.height.get() || this.implicitHeight;
+  }
+  $setImplicitWidth(newVal) {
+    if (newVal !== this.$properties.implicitWidth.get()) {
+      this.$properties.implicitWidth.set(newVal);
+      if (this.$isUsingImplicitWidth) {
+        this.widthChanged();
+      }
     }
   }
-  $onImplicitHeightChanged() {
-    if (this.$isUsingImplicitHeight) {
-      this.height = this.implicitHeight;
-      this.$isUsingImplicitHeight = true;
+  $setImplicitHeight(newVal) {
+    if (newVal !== this.$properties.implicitHeight.get()) {
+      this.$properties.implicitHeight.set(newVal);
+      if (this.$isUsingImplicitHeight) {
+        this.heightChanged();
+      }
     }
   }
   $updateHGeometry(newVal, oldVal, propName) {
