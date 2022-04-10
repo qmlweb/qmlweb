@@ -89,38 +89,7 @@ class QtQuick_Item extends QtQml_QtObject {
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
-    this.anchors = new QmlWeb.QObject(this);
-    QmlWeb.createProperties(this.anchors, {
-      left: "var",
-      right: "var",
-      top: "var",
-      bottom: "var",
-      horizontalCenter: "var",
-      verticalCenter: "var",
-      fill: "Item",
-      centerIn: "Item",
-      margins: "real",
-      leftMargin: "real",
-      rightMargin: "real",
-      topMargin: "real",
-      bottomMargin: "real"
-    });
-    this.anchors.leftChanged.connect(this, this.$updateHGeometry);
-    this.anchors.rightChanged.connect(this, this.$updateHGeometry);
-    this.anchors.topChanged.connect(this, this.$updateVGeometry);
-    this.anchors.bottomChanged.connect(this, this.$updateVGeometry);
-    this.anchors.horizontalCenterChanged.connect(this, this.$updateHGeometry);
-    this.anchors.verticalCenterChanged.connect(this, this.$updateVGeometry);
-    this.anchors.fillChanged.connect(this, this.$updateHGeometry);
-    this.anchors.fillChanged.connect(this, this.$updateVGeometry);
-    this.anchors.centerInChanged.connect(this, this.$updateHGeometry);
-    this.anchors.centerInChanged.connect(this, this.$updateVGeometry);
-    this.anchors.leftMarginChanged.connect(this, this.$updateHGeometry);
-    this.anchors.rightMarginChanged.connect(this, this.$updateHGeometry);
-    this.anchors.topMarginChanged.connect(this, this.$updateVGeometry);
-    this.anchors.bottomMarginChanged.connect(this, this.$updateVGeometry);
-    this.anchors.marginsChanged.connect(this, this.$updateHGeometry);
-    this.anchors.marginsChanged.connect(this, this.$updateVGeometry);
+    this.anchors = new QmlWeb.QMLAnchors(this);
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this);
