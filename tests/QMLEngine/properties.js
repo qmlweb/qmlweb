@@ -129,4 +129,9 @@ describe("QMLEngine.properties", function() {
       QmlWeb.engine.$basePath + "remoteBinding.png");
     expect(qml.remoteSet).toBe(QmlWeb.engine.$basePath + "remoteSet.png");
   });
+
+  xit("supports default properties", function() {
+    var qml = load("Default", this.div);
+    expect(qml.text).toBe("Hello, world!");
+  });
 });

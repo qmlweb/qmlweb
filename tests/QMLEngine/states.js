@@ -37,4 +37,24 @@ describe("QMLEngine.states", function() {
     };
     qml.start();
   });
+
+  it("works with bound properties", function(done) {
+    var qml = load("Binding", this.div);
+    var count = 0;
+    qml.yield = function() {
+      if (count === 0) {
+        expect(qml.value).toBe(15);
+      } else if (count === 1) {
+        expect(qml.value).toBe(25);
+        qml.variable = 3;
+      } else if (count === 2) {
+        expect(qml.value).toBe(33);
+      } else {
+        expect(qml.value).toBe(13);
+        done();
+      }
+      count += 1;
+    };
+    qml.start();
+  });
 });
