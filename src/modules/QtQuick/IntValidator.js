@@ -7,9 +7,8 @@ class QtQuick_IntValidator extends QtQml_QValidator {
 
   validate(string) {
     const regExp = /^(-|\+)?\s*[0-9]+$/;
-    let acceptable = regExp.test(string.trim());
 
-    if (acceptable) {
+    if (regExp.test(string.trim())) {
       const value = parseInt(string, 10);
       if (this.bottom <= value && this.top >= value) {
         return this.QValidator.Acceptable;

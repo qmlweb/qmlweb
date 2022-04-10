@@ -20,7 +20,8 @@ class QtQuick_Transition extends QtQml_QtObject {
       const animation = this.animations[i];
       animation.runningChanged.connect(this, this.$updateRunning, flags);
       if (animation.target === this || !animation.target) {
-        animation.$properties.target.set(this.$parent, QMLProperty.ReasonInit);
+        animation.$properties.target.set(this.$parent,
+          QmlWeb.QMLProperty.ReasonInit);
       }
     }
   }
