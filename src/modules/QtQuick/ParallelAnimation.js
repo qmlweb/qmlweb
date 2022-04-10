@@ -14,6 +14,8 @@ class QtQuick_ParallelAnimation extends QtQuick_Animation {
     this.$runningAnimations = 0;
 
     this.animationsChanged.connect(this, this.$onAnimationsChanged);
+    this.runningChanged.connect(this, this.$onRunningChanged);
+    this.pausedChanged.connect(this, this.$onPausedChanged);
 
     QmlWeb.engine.$registerStart(() => {
       if (!this.running) return;
@@ -30,23 +32,39 @@ class QtQuick_ParallelAnimation extends QtQuick_Animation {
     }
   }
   $animationFinished(newVal) {
-    this.$runningAnimations += newVal ? 1 : -1;
-    if (this.$runningAnimations === 0) {
+    if (!newVal && this.$runningAnimations === 0) {
       this.running = false;
+    }
+  }
+  get $runningAnimations() {
+    let count = 0;
+    for (let i = 0; i < this.animations.length; i++) {
+      count += this.animations[i].running ? 1 : 0;
+    }
+    return count;
+  }
+  $onRunningChanged(newVal) {
+    if (newVal) {
+      for (let i = 0; i < this.animations.length; i++) {
+        this.animations[i].start();
+      }
+    } else {
+      for (let i = 0; i < this.animations.length; i++) {
+        this.animations[i].stop();
+      }
+    }
+  }
+  $onPausedChanged(newVal) {
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].paused = newVal;
     }
   }
   start() {
     if (this.running) return;
     this.running = true;
-    for (let i = 0; i < this.animations.length; i++) {
-      this.animations[i].start();
-    }
   }
   stop() {
     if (!this.running) return;
-    for (let i = 0; i < this.animations.length; i++) {
-      this.animations[i].stop();
-    }
     this.running = false;
   }
   complete() {
