@@ -26,10 +26,9 @@ class QtQuick_Text extends QtQuick_Item {
   constructor(meta) {
     super(meta);
 
-    const fc = this.impl = document.createElement("span");
+    const fc = this.impl = document.createElement("p");
     fc.style.pointerEvents = "none";
-    fc.style.width = "100%";
-    fc.style.height = "100%";
+    fc.style.margin = "0";
     fc.style.whiteSpace = "pre";
     fc.style.display = "table-cell";
     fc.style.verticalAlign = "top";
