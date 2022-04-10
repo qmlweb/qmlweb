@@ -27,10 +27,24 @@ class QmlWeb_Dom_DomElement extends QtQuick_Item {
     this.textChanged.connect(() => {
       this.dom.innerText = this.text;
     });
-    this.style.updated.connect(() => {
-      const rect = this.dom.getBoundingClientRect();
+    this.htmlChanged.connect(this, this.$updateSize);
+    this.textChanged.connect(this, this.$updateSize);
+    this.style.updated.connect(this, this.$updateSize);
+  }
+
+  $updateSize() {
+    const rect = this.dom.getBoundingClientRect();
+    if (this.style.width === "auto" || !this.style.width) {
+      this.$isUsingImplicitWidth = true;
       this.implicitWidth = rect.width;
+    } else {
+      this.width = rect.width;
+    }
+    if (this.style.height === "auto" || !this.style.height) {
+      this.$isUsingImplicitHeight = true;
       this.implicitHeight = rect.height;
-    });
+    } else {
+      this.height = rect.height;
+    }
   }
 }
