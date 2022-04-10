@@ -11,7 +11,12 @@ function createProperty(type, obj, propName, options = {}) {
   obj.$properties[propName] = prop;
   obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
 
-  const getter = () => obj.$properties[propName].get();
+  let getter;
+  if (options.get) {
+    getter = options.get.bind(obj);
+  } else {
+    getter = () => obj.$properties[propName].get();
+  }
   let setter;
   if (options.readOnly) {
     setter = function(newVal) {
@@ -20,6 +25,8 @@ function createProperty(type, obj, propName, options = {}) {
       }
       obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
     };
+  } else if (options.set) {
+    setter = options.set.bind(obj);
   } else {
     setter = function(newVal) {
       obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
