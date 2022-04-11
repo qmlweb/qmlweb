@@ -465,7 +465,7 @@ class QMLEngine {
 
       if (this.rootObject.$shortcuts) {
         for (const shortcut of this.rootObject.$shortcuts) {
-          shortcut.Keys.pressed(event);
+          shortcut.Keys.$onPress(event);
           if (event.accepted) {
             break;
           }
@@ -474,7 +474,7 @@ class QMLEngine {
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;
         focusedElement.$context.event = event;
-        focusedElement.Keys.pressed(event);
+        focusedElement.Keys.$onPress(event);
         if (eventName && focusedElement.Keys[eventName]) {
           focusedElement.Keys[eventName](event);
         }
