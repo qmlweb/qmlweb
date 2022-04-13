@@ -70,6 +70,13 @@ class QtQuick_Text extends QtQuick_Item {
     } else {
       // TODO: sanitize StyledText/RichText
       this.impl.innerHTML = text;
+      const nodes = this.impl.children;
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].nodeName.toLowerCase() === "p") {
+          nodes[i].style.marginBlockStart = "0em";
+          nodes[i].style.marginBlockEnd = "0.5em";
+        }
+      }
     }
     this.$updateImplicit();
   }
