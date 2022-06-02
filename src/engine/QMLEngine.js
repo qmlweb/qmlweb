@@ -591,9 +591,24 @@ class QMLEngine {
       ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join("")}
     `);
 
-    this.js[file] = contextSetter;
+    if (jsData.pragma && jsData.pragma.indexOf("library") !== -1) {
+      // For .pragma library, execute the code once in a clean context and
+      // return a function that imports getters/setters to other contexts
+      const jsContext = {};
+      contextSetter(jsContext);
+      this.js[file] = context => {
+        jsData.exports.forEach(sym => QmlWeb.setupGetterSetter(context, sym,
+          () => jsContext[sym],
+          val => {
+            jsContext[sym] = val;
+          }
+        ));
+      };
+    } else {
+      this.js[file] = contextSetter;
+    }
 
-    return contextSetter;
+    return this.js[file];
   }
 
   $registerStart(f) {
